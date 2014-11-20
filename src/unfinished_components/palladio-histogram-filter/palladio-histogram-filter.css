@@ -1,0 +1,13 @@
+[data-palladio-histogram-filter] path {
+	fill: #dddddd;
+}
+
+[data-palladio-histogram-filter] .axis path, [data-palladio-histogram-filter] .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-histogram-filter] .axis text {
+	font: 10px Helvetica, Arial, sans-serif;
+}

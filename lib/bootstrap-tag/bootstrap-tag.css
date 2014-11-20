@@ -1,0 +1,91 @@
+.tags {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: #555555;
+  vertical-align: middle;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  background-color: #ffffff;
+  -webkit-transition: border linear .2s, box-shadow linear .2s;
+  -moz-transition: border linear .2s, box-shadow linear .2s;
+  -o-transition: border linear .2s, box-shadow linear .2s;
+  transition: border linear .2s, box-shadow linear .2s;
+  width: 100%;
+}
+
+.tags-hover {
+  border-color: rgba(82, 168, 236, 0.8);
+  outline: 0;
+  outline: thin dotted \9;
+  /* IE6-9 */
+
+  -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);
+  -moz-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);
+}
+.tags[class*="span"] {
+  float: none;
+  margin-left: 0;
+}
+.tags input[type="text"],
+.tags input[type="text"]:focus {
+  border: none;
+  display: inline;
+  margin: 0;
+  padding: 0px 8px;
+  line-height: 14px;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+  width: 100%;
+    background-color: #fff;
+  font-weight: 300;
+  font-size: 12px;
+  border: 1px solid #ddd;
+  border-top: 1px solid #ccc;
+}
+
+.tag {
+  display: inline-block;
+  padding: 2px 4px;
+  font-size: 12px;
+  line-height: 20px;
+  color: #ffffff;
+  vertical-align: baseline;
+  white-space: nowrap;
+  background-color: #999999;
+  padding-left: 9px;
+  padding-right: 9px;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  margin-bottom: 5px;
+  margin-right: 5px;
+  -webkit-transition: all 0.2s;
+  -moz-transition: all 0.2s;
+  -o-transition: all 0.2s;
+  transition: all 0.2s;
+}
+.tag:empty {
+  display: none;
+}
+.tag-important {
+  background-color: #F33158;
+}
+.tag-warning {
+  background-color: #ECD316;
+}
+.tag-success {
+  background-color: #356635;
+}
+.tag-info {
+  background-color: #2d6987;
+}
+.tag-inverse {
+  background-color: #1a1a1a;
+}
+.tag .close {
+  font-size: 14px;
+  line-height: 20px;
+  margin-left: 7px;
+}

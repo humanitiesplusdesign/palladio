@@ -1,0 +1,61 @@
+[data-palladio-selection-view] {
+	display: inline-block;
+}
+
+[data-palladio-selection-view] .selection-title {
+	text-transform: uppercase;
+	margin-top: 7px;
+	margin-bottom: 7px;
+	margin-right: 5px;
+	display: inline-block;
+}
+
+[data-palladio-selection-view] .selection-display {
+	list-style-type: none;
+	display: inline-block;
+	margin-left: 0px;
+	margin: 0px;
+}
+
+[data-palladio-selection-view] .selection-pill {
+	display: inline-block;
+	margin-right: 5px;
+	background-color: #eeeeee;
+	border-radius: 2px;
+	padding-right: 10px;
+	margin-bottom: 2px;
+	line-height: 1.6;
+}
+
+[data-palladio-selection-view] i {
+	margin-left: 7px;
+}
+
+[data-palladio-selection-view] .selection-label {
+	padding: 5px;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin: 0px;
+	background-color: #e5e5e5;
+	border-bottom-left-radius: 2px;
+	border-top-left-radius: 2px;
+	display: inline-block;
+	font-size: 12px;
+}
+
+[data-palladio-selection-view] .selection-text {
+	padding: 5px;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin: 0px;
+	background-color: #eeeeee;
+	border-bottom-right-radius: 2px;
+	border-top-right-radius: 2px;
+	display: inline-block;
+	font-size: 12px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 300px;
+	vertical-align: top;
+}

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html ng-app="refineApp" xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta charset="utf-8">
+        <title>Palladio-based standalone example</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <!-- Palladio -->
+        <link type="text/css" href="css/refine.css" rel="stylesheet" />
+        <link type="text/css" href="../../palladio.css" rel="stylesheet" />
+
+        <!-- Font Awesome -->
+        <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    </head>
+
+    <body data-ng-controller="WorkflowCtrl">
+        <div>
+            <ul id="gn-menu" class="gn-menu-main">
+                
+                <li data-toggle="tooltip"
+                    data-original-title="Visit Palladio website"
+                    data-placement="right"
+                    data-container="#gn-menu">
+                    <a href="http://palladio.designhumanities.org" target="_blank" class="short muted"><i class="fa fa-info"></i></a>
+                </li>
+                
+                <li class="title"><span>Palladio Load and Refine</span></li>
+
+                <li data-ng-show="!files.length">
+                    <a data-ng-click="triggerDataModelSelector()" class="short grey"><i class="fa fa-upload"></i> Import a Palladio data model</a>
+                    <input type="file" id="dataModelSelector" style="display:none" onchange="angular.element(this).scope().loadDataModel(this)" />
+                </li>
+                <li data-ng-show="files.length"><a data-ng-click="exportDataModel()" class="short grey"><i class="fa fa-download"></i> Export Palladio data model</a></li>
+
+            </ul>
+
+        </div>
+        <div id="main" class="ng-view"></div>
+
+        <script src="../../palladio.js"></script>
+        <script src="../../templates.js"></script>
+
+        <script src="js/app.js"></script>
+
+    </body>
+</html>

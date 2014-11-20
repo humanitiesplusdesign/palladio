@@ -1,0 +1,59 @@
+[data-palladio-lifetime-filter] .list-title {
+	height: 1.4em;
+	font-weight: bold;
+	margin-top: 1.5em;
+	margin-left: 1.5em;
+	margin-bottom: 0.25em;
+}
+
+[data-palladio-lifetime-filter] .axis path, [data-palladio-lifetime-filter] .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-lifetime-filter] .axis text {
+	font: 10px sans-serif;
+}
+
+[data-palladio-lifetime-filter] .resize path {
+  fill: #eee;
+  stroke: #666;
+}
+
+[data-palladio-lifetime-filter-with-settings] .selection-title {
+	text-transform: uppercase;
+	margin-top: 7px;
+	margin-bottom: 7px;
+	margin-right: 5px;
+	display: inline-block;
+}
+
+[data-palladio-lifetime-filter-with-settings] .selection-display {
+	list-style-type: none;
+	display: inline-block;
+	margin-left: 0px;
+}
+
+[data-palladio-lifetime-filter-with-settings] .selection-pill {
+	padding: 5px;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin: 2px;
+	background-color: lightgray;
+	border-radius: 2px;
+	display: inline-block;
+	font-size: 12px;
+}
+
+[data-palladio-lifetime-filter-with-settings] .selection-pill i {
+	margin-left: 7px;
+}
+
+[data-palladio-lifetime-filter-with-settings] .selection-label {
+	font-weight: bold;
+}
+
+[data-palladio-lifetime-filter] rect {
+	shape-rendering: crispEdges;
+}

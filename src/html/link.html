@@ -1,0 +1,110 @@
+<div class="container-fluid">
+	<div class="row-fluid" data-ng-controller="LinkCtrl">
+		
+		<div id="linking-files" class="span8 step">
+			<div class="header">
+				<h4>Tables <span class="muted small">({{files.length}}) &middot; Drag a dimension over another to create a link</span></h4> 
+			</div>
+			
+			<!--<div data-ng-repeat="file in files" class="file-info">
+				<p>This data set contains <b>{{file.data.length}}</b> valid lines</p>
+				<h3>{{file.label}}</h3>
+				<ul class="unstyled inline row-fluid fields-row" group every="4" watch="file.fields">
+					<li data-ng-repeat="field in file.fields" class="span3 field" 
+						data-ng-class="{confirmed: field.confirmed, unique: field.uniqueKey}" 
+						data-draggable data-droppable data-droppable-callback="onDrop" >
+						<span class="">{{field.description}}</span>
+						<span class="type" ng-show="field.type" data-toggle="tooltip" data-original-title="{{types[field.type]}}">{{types[field.type][0].toUpperCase()}}</span>
+						<span class="notification">
+							<span data-ng-show="field.special.length" data-toggle="tooltip" data-original-title="Special chars found">
+								<i data-ng-class="field.confirmed ? 'icon-ok-sign' : 'icon-exclamation-sign'"></i>
+							</span>
+							<span data-ng-show="field.countBy" data-toggle="tooltip" data-original-title="Count records by this field">
+								<i class="icon-star"></i>
+							</span>
+						</span>
+						<span class="link-notification" data-ng-show="hasLinks(field)" data-toggle="tooltip" data-original-title="Linked"><i class="icon-magnet"></i></span>
+					</li>
+				</ul>
+			</div>-->
+
+			<ul class="unstyled row-fluid">
+				<!-- Each file -->
+				<li data-ng-repeat="file in files" class="file-info span4">
+					<p class="pull-left small muted"><strong>{{file.data.length}}</strong> rows</p>
+					<!--<a class="pull-right danger" ng-click="deleteFile(file, $index)">Delete</a>-->
+					<input type="text" class="editable span12" ng-model="file.label"></input>
+
+					<ul class="unstyled inline row-fluid fields-row" group every="1" watch="file.fields">
+
+						<li data-ng-repeat="field in file.fields" class="span12 field"
+							data-ng-class="{confirmed: field.confirmed, unique: field.uniqueKey}"
+							data-draggable data-droppable data-droppable-callback="onDrop">
+							<span class="">{{field.description}}</span>
+
+							<p class="type">
+								<span ng-show="field.type">{{types[field.type]}}</span>
+								<span ng-show="!field.type">No type assigned</span>
+								<span> &middot; {{field.cardinality}} unique values</span>
+								<span ng-show="field.errors.length" class="error"> &middot; {{field.errors.length}} errors</span>
+							</p>
+
+							<span class="notification">
+								<span data-ng-show="field.special.length" data-toggle="tooltip" data-original-title="Special chars found">*</span>
+								<!--<span data-ng-show="field.countBy" data-toggle="tooltip" data-original-title="Count records by this field">
+									<i class="icon-star"></i>
+								</span>-->
+							</span>
+
+						</li>
+					</ul>
+
+					<div class="with-border">
+						<!---<div class="">
+							<input type="checkbox" data-ng-model="selectedFieldMetadata.countBy"
+							data-ng-change="selectedFieldMetadata.countBy ? setCountBy(selectedFieldMetadata) : false">
+							<label>Primary</label>
+						</div>-->
+
+						<!--<p class="pull-left small muted"><i class="icon-exclamation-sign"></i> Review for special characters</p>-->
+						<span data-ng-show="hasSpecial(file)" class="small muted">* Special characters found, please review</span>
+						<a data-ng-show="file.fields != file.autoFields" data-ng-click="autoRecognize(file)">Auto-recognize types and values</a>
+
+					</div>	</li>
+			</ul>
+		</div>
+
+		<div id="linking-links" class="span4">
+			<div class="header">
+				<h4>Links <span class="muted small">({{links.length}})</span></h4> 
+			</div>
+
+			<ul class="unstyled panel" data-ng-hide="!links.length">
+				<li data-ng-repeat="link in links">
+					<div class="row-fluid">
+						<a class="pull-right danger small" 
+						   ng-click="deleteLink(link, $index)">Delete</a>
+						<div class="clearfix"></div>
+					</div>
+					<div class="link">
+						<div class="link-info">
+							<div class="row-fluid">
+								<span class="span10">{{link.source.field.description}}<span class="small"> in {{link.source.file.label}}</span></span>
+								<!--<span class="span2 text-right">{{link.source.file.data.length}}</span>-->
+							</div>
+						</div>
+						<div class="link-info">
+							<div class="row-fluid">
+								<span class="span10">{{link.lookup.field.description}}<span class="small"> in {{link.lookup.file.label}}</span></span>
+								<!--<span class="span2 text-right">{{link.lookup.file.data.length}}</span>-->
+							</div>
+						</div>
+						<div class="last-link-info text-right" ng-style="{ 'background-color': link.metadata.background }">
+							<span class="">{{link.metadata.matches}} / {{link.metadata.total}} matches</span>
+						</div>
+					</div>
+				</li>
+			</ul>	
+		</div>
+	</div>
+</div>

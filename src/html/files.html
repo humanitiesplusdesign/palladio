@@ -1,0 +1,227 @@
+<!-- Files -->
+<div class="row-fluid" data-ng-show="!files.length">
+	<div class="span10 offset1">
+		<h4>Create a New Palladio project</h4>
+		<div class="row-fluid">
+			<div class="span4">
+				<div class="row-fluid">
+					<div class="span12">
+						<p class="small">You can load an existing Palladio project (.json format), load from a spreadsheet or flat-file, or load data from a SPARQL endpoint by choosing from options to the right.</p>
+						<p class="small">Your primary table is the main entity you want to visualize. It could be either an object, like a person or a letter, or a more abstract concept, like a relationship. Once you have loaded your primary table, you will be able to extend fields in the primary table with additional information.</p>
+						<p class="small">We recommend that your primary table include a unique key, which can be used to uniquely identify the different entities in the table.</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="span8">
+				<div class="data-loader" data-ng-init="loadFrom='palladio'">
+			        <ul class="nav nav-tabs front-page-nav-tabs" role="tablist" id="uploadTab">
+			        	<li data-ng-class="{'active' : loadFrom =='palladio'}"><a ng-click="loadFrom='palladio'" role="tab" data-toggle="tab">Open a Palladio project</a></li>
+				        <li data-ng-class="{'active' : loadFrom =='csv'}"><a ng-click="loadFrom='csv'" role="tab" data-toggle="tab">Load Spreadsheet or CSV</a></li>
+				        <li data-ng-class="{'active' : loadFrom =='sparql'}"><a ng-click="loadFrom='sparql'" role="tab" data-toggle="tab">Load from SPARQL endpoint</a></li>
+			        </ul>
+	                <div class="tab-content front-page-tab-content">
+						<div class="tab-pane" data-ng-class="{'active' : loadFrom =='csv'}" id="csv">
+							<p>Copy and paste out of your spreadsheets, drag-and-drop to upload tabular data (e.g. .csv, .tab, .tsv), or link to a public Google spreadsheet to create a new Palladio project.</p>
+							<div class="alert alert-warning" ng-show="parseError">{{parseError}}</div>
+							<textarea ui-codemirror="{ mode : 'text',  lineNumbers : true, lineWrapping: true, onDrop : onDrop }" placeholder="Paste your data or drop a file here" ng-model="text"></textarea>
+							<div class="">
+								<button class="btn" ng-click="parseExtendTable()" ng-disabled="!text">Load</button>
+							</div>
+						</div>
+						<div class="tab-pane" data-ng-class="{'active' : loadFrom =='sparql'}" id="sparql">
+							<p>You can load data from a SPARQL endpoint by providing both the endpoint URL and a valid SPARQL query. After you run the SPARQL query you will have the opportunity to validate your data and re-run the query if necessary before loading the data into Palladio.</p>
+							<yasgui data="text" endpoint="sparqlEndpoint"></yasgui>
+							<div class="">
+								<button class="btn" ng-click="parseExtendTable()" ng-show="text">Load data</button>
+							</div>
+							<div class="alert alert-warning" ng-show="parseError">{{parseError}}</div>
+						</div>
+						<div class="tab-pane" data-ng-class="{'active' : loadFrom == 'palladio'}" id="palladio">
+							<p>If you have already created and saved a Palladio project and would like to revisit your previous work, please upload your .json file by clicking here.</p>
+							<button class="btn"
+								palladio-data-upload
+					            on-load="onLoad()">
+					            Select a file
+					        </button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!--<div class="row-fluid" ng-show="files.length">
+	<div class="span12">
+		<p>
+			<button palladio-data-download class="btn">Save this project</button>
+		</p>
+	</div>
+</div>-->
+
+<div class="row-fluid" ng-show="files.length">
+	<div class="span12 muted small">
+		<ul class="unstyled row-fluid files-list" group every="4" watch="files.length">
+			<!-- Each file -->
+			<li id="file-info-{{file.id}}" data-ng-repeat="file in files" class="file-info span3">
+
+				<!-- Table Header -->
+				<div class="file-info-header">
+					<input 	data-toggle="tooltip"
+		                    data-original-title="Rename"
+		                    type="text" class="editable span12 left" ng-class="{strong:$index==0}" ng-model="file.label" placeholder="Untitled"></input>
+					<p class="tiny small" style="cursor:pointer">
+						<span class="" ng-show="$index==0">Primary table</span>
+						<span class="" ng-show="$index!=0">Secondary table</span>
+						<span class="pull-right">
+							<span data-toggle="tooltip"
+								  data-original-title="{{file.data.length}} Row(s)">{{file.data.length}} <i class="fa fa-bars muted"></i></span>
+							<span data-toggle="tooltip"
+								  data-original-title="{{file.fields.length}} Column(s)"
+								  style="margin-left:8px">{{file.fields.length}} <i class="fa fa-columns muted"></i></span>
+							<span data-toggle="tooltip"
+								  data-original-title="{{file.fields | unique}} Unique key(s)"
+								  style="margin-left:8px">{{file.fields | unique}} <i class="fa fa-tags muted"></i></span>
+							<!--<span class="pull-right muted" style="margin-left:6px" ng-show="$index==0">Primary table</span>-->
+						</span>
+						<span class="clearfix"></span>
+					</p>
+				</div>
+
+				<!-- Fields -->
+				<ul class="unstyled fields-row">
+					<!-- Each field -->
+					<li class="field"
+						data-ng-repeat="field in file.fields"
+						data-ng-class="{
+							selected : field.key == selectedFieldMetadata.key,
+							confirmed : field.confirmed,
+							unique: field.uniqueKey,
+							special : field.special.length,
+							error : field.errors.length,
+							hidden : field.delete
+						}">
+
+						<div class="row-fluid">
+
+							<div class="span1">
+								<div data-ng-show="!isLinked(field)">
+									<a
+										data-ng-show="!field.delete"
+										data-toggle="tooltip"
+										data-ng-click="toggleDelete(field)"
+								  		data-original-title="Disable">
+								  		<i class="fa fa-eye muted"></i>
+								  	</a>
+
+								  	<a
+								  		data-ng-show="field.delete"
+										data-toggle="tooltip"
+										data-ng-click="toggleDelete(field)"
+								  		data-original-title="Enable">
+								  		<i class="fa fa-eye-slash muted"></i>
+								  	</a>
+								</div>
+								<div data-ng-show="isLinked(field)">&nbsp;</div>
+							</div> <!-- end of span1 -->
+
+							<div class="span11 field-content">
+
+								<span class="field-description" data-ng-click="setSelected(field,file)">
+									{{field.description}}<span class="edit"><i class="fa fa-pencil"></i></span>
+								</span>
+
+								<p class="type" data-ng-class="{ error : field.errors.length }" data-ng-show="!field.delete">
+									<span ng-show="field.type" data-ng-class="{ error : field.errors.length }">
+										<span class="">{{types[field.type]}}</span>
+										<span ng-show="field.errors.length" class="super error"> {{field.errors.length}} errors!</span>
+										<span class="" ng-show="!field.type">No type assigned</span>
+										<span class="special" ng-show="field.unassignedSpecialChars.length > 0"> &middot; Special chars</span>
+										<!--<span class="cardinality"> &middot; {{field.cardinality}}</span>-->
+
+									</span>
+
+								</p>
+
+								<div data-ng-show="!field.delete">
+
+									<!-- When augmented -->
+									<span class="augment-notification"
+										data-toggle="tooltip"
+										data-html="true"
+										data-original-title="<b>{{hasLinks(field).metadata.matches}}</b> matches in <b>{{hasLinks(field).lookup.file.label}}</b> (via {{hasLinks(field).lookup.field.description}})"
+										data-ng-show="hasLinks(field).lookup.file"
+										data-ng-style="{ 'background-color': hasLinks(field).metadata.background }"
+										data-ng-mouseout="highlightLink(hasLinks(null))"
+										data-ng-mouseover="highlightLink(hasLinks(field),file)"
+										data-ng-click="setSelected(field,file)">
+											<!--<i class="fa fa-link" ng-show="hasLinks(field).metadata.matches == field.cardinality"></i>
+											<i class="fa fa-unlink" ng-show="hasLinks(field).metadata.matches < field.cardinality"></i> -->
+											{{hasLinks(field).metadata.matches}} {{hasLinks(field).lookup.file.label}}
+										</span>
+
+									<!-- When can be augmented -->
+									<!--<span class="augment-notification initial"
+										data-toggle="tooltip"
+										data-original-title="Extend this dimension"
+										data-ng-click="showNewTableAndSelect(field,file)"
+										data-ng-show="!hasLinks(field).lookup.file && !field.errors.length && (!field.unassignedSpecialChars.length > 0 || field.confirmed)">Extend</span>-->
+
+									<!-- When special chars -->
+									<span class="augment-notification specials"
+										data-ng-click="setSelected(field,file)"
+										data-ng-class="{confirmed:field.confirmed}"
+										data-toggle="tooltip"
+										data-original-title="This dimension contains special characters, please review"
+										data-ng-show="!field.confirmed && field.unassignedSpecialChars.length > 0 && !hasLinks(field).lookup.file && !field.errors.length">
+											Review
+										</span>
+
+									<!-- When errors -->
+									<span class="augment-notification plus"
+										data-ng-click="setSelected(field,file)"
+										data-toggle="tooltip"
+										data-original-title="This dimension contains data type errors, please review"
+										data-ng-show="field.errors.length && !hasLinks(field).lookup.file"><i class="fa fa-exclamation-circle error"></i></span>
+
+									</div>
+
+							</div> <!-- end of span11 -->
+
+
+						</div> <!-- end of row -->
+
+					</li> <!-- end of field -->
+
+				</ul>
+
+				<div class="with-border">
+					<a class="pull-right danger small tiny delete"
+						data-toggle="tooltip"
+						data-original-title="Delete this table"
+						data-ng-click="deleteFile(file.uniqueId)"><i class="fa fa-trash-o"></i></a>
+					<div class="clearfix"></div>
+				</div>
+			</li>
+
+			<div class="span3 infos" ng-show="files.length>=1">
+				<p class="muted small">You can add additional tables by extending fields in your existing tables. For example, if your primary table is a list of letters, each letter may have an author. You can extend the author field and upload a new file with additional bibliographic information about the people who appear as authors in your letter table.</p>
+				<p class="muted small">You can also extend secondary tables. For example, your table with bibliographic information may include a birth place, and you may want to extend this field with using a third table with additional information about locations, such as latitude and longitude coordinates.</p>
+				<p class="muted small">These secondary tables must have a column with unique values that match the values in the field you are trying to extend.</p>
+			</div>
+
+		</ul>
+	</div>
+</div>
+
+<div class="row-fluid" >
+
+
+
+
+</div>
+
+
+<!--<a href="#/link" class="btn pull-right">Continue</a>-->

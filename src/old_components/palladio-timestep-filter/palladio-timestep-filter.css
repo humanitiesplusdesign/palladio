@@ -1,0 +1,13 @@
+[data-palladio-timestep-filter] path {
+	fill: #dddddd;
+}
+
+[data-palladio-timestep-filter] .axis path, [data-palladio-timestep-filter] .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-timestep-filter] .axis text {
+	font: 10px Helvetica, Arial, sans-serif;
+}

@@ -1,0 +1,26 @@
+<span data-ng-repeat="field in fields">
+	<div class="palette-dimension">
+		<span palladio-dimension model="field"></span>
+		<span>
+			<i class="fa fa-bars" data-ng-init="showProperties = false" 
+				data-ng-click="showProperties = !showProperties"
+				style="margin-right:5px"></i>
+			<!-- <i class="fa fa-filter" data-ng-init="showFilters = false" 
+				data-ng-click="showFilters = !showFilters"
+				data-ng-show="field.typeFieldUniques[0]"></i> -->
+		</span>
+		<ul class="palette-property-list" data-ng-show="showProperties">
+			<li data-ng-repeat="property in field.propertyDimensions">
+				<span palladio-dimension model="property"></span>
+			</li>
+		</ul>
+		<!-- <ul class="palette-property-list" data-ng-show="showFilters">
+			<li data-ng-repeat="type in field.typeFieldUniques[0]">
+				{{type}}
+			</li>
+		</ul> -->
+	</div>
+</span>
+<span class="palette-new-dimension-button">
+	<button class="btn">Define new field</button>
+</span>
