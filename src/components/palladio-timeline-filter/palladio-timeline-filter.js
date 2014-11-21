@@ -1,8 +1,8 @@
 // Timeline filter module
 
-angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
+angular.module('palladioTimelineFilter', ['palladio.date', 'palladio', 'palladioApp.services'])
 	.directive('palladioTimelineFilter', ['dateService', 'palladioService', function (dateService, palladioService) {
-		var filterColor = "#9DBCE4";
+		var filterColor = "#000";
 
 		var directiveDefObj = {
 			scope: {
@@ -49,11 +49,9 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 
 				var format, dimFormat, stackGroups, g, yr, brush,
 						color, y0, x, groups, lowestTime, highestTime, y1, stack, xAxis, yAxis,
-						area, sel, z, mMargin, gr,
+						area, sel, z, mMargin, extent,
 						hMargin, vMargin, yAxisWidth, xAxisHeight, mainHeight, mainWidth,
 						brushHeight, title, gBrush;
-
-				var extent = [];
 
 				///////////////////////////////////////////////////////////////////////
 				//
@@ -217,7 +215,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 
 					stack(timelineGroups);
 
-					gr = selection.select("svg").select("g");
+					var gr = selection.select("svg").select("g");
 
 					var tooltip = gr.select(".timeline-tooltip");
 
@@ -239,17 +237,6 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					z.x(x);
 					z.scaleExtent([1, Infinity]);
 					z.on("zoom", zoom);
-
-					// Create the highlight on the main view that will follow the brush. Create it first
-					// so that it is behind the groups.
-					if(!gr.select("g.large-highlight").empty()) {
-						gr.select("g.large-highlight").remove();
-					}
-					gr.append("g").classed("large-highlight", true)
-							.attr("height", mainHeight)
-							.attr("width", mainWidth);
-						
-					updateHighlights(gr);
 
 					// Disable zooming as it is broken.
 					// gr.call(z);
@@ -322,9 +309,6 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 
 					brush.on("brush", function () {
 						extent = brush.extent();
-
-						updateHighlights(gr);
-
 						scope.localDimension.filterFunction(dimFilter);
 						palladioService.update();
 					});
@@ -354,8 +338,6 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 							// If our container supports state saving.
 							if(scope.setFilter) scope.setFilter(brush.extent());
 						}
-
-						updateHighlights(gr);
 						
 						palladioService.update();
 					});
@@ -388,7 +370,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					brush.extentAdaption(function (selection) {
 						selection.attr("height", brushHeight)
 							.attr("fill", filterColor)
-							.attr("fill-opacity", ".25");
+							.attr("fill-opacity", ".1");
 					});
 
 					gBrush = gr.append("g").attr("class", "brush")
@@ -499,29 +481,6 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					var paths = group.select("path");
 
 					paths.attr("d", function(d) { return area(d); });
-				}
-
-				///////////////////////////////////////////////////////////////////////
-				//
-				// Update highlight / extents on the main timeline
-				//
-				///////////////////////////////////////////////////////////////////////
-
-				function updateHighlights(selection) {
-					var highlightRects = selection.select('.large-highlight')
-						.selectAll("rect")
-							.data(extent);
-						
-					highlightRects.exit().remove();
-					highlightRects.enter()
-						.append("rect")
-							.attr("height", mainHeight)
-							.attr("fill", filterColor)
-							.attr("fill-opacity", "1");
-
-					highlightRects
-						.attr("width", function (d) { return x(d[1]) - x(d[0]);})
-						.attr("transform", function(d) { return "translate(" + x(d[0]) + ", 0)"; });
 				}
 
 				///////////////////////////////////////////////////////////////////////
@@ -1034,8 +993,6 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 				function filterReset() {
 					scope.localDimension.filterAll();
 					brush.clear();
-					extent = brush.extent();
-					updateHighlights(gr);
 					palladioService.removeFilter(identifier);
 					palladioService.update();
 

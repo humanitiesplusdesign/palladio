@@ -12,25 +12,20 @@
 
 			<div class="setting row-fluid">
 				<label class="span4 inline">Layout</label>
-				<span class="span8" style="margin-left:0px">
-					<select bs-select ng-model="stepMode" ng-options="mode for mode in stepModes"
-							data-size="2" class="span12 form-control show-tick">
-					</select>
-				</span>
+				<select bs-select ng-model="stepMode" ng-options="mode for mode in stepModes"
+						data-size="2" class="span8 show-tick">
+				</select>
 			</div>
 
-			<div class="setting row-fluid">
-				<label class="span4 inline">Upper Date</label>
-				<span class="field span8" ng-click="showDateEndModal()">{{dateEndDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>
-			</div>
 
 			<div class="setting row-fluid">
-				<label class="span4 inline">Lower Date</label>
+				<label class="span4 inline">Start Date</label>
 				<span class="field span8" ng-click="showDateStartModal()">{{dateStartDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>
 			</div>
 
 			<div class="setting row-fluid">
-				<p class="tiny muted offset4 span8">In bar layout, the Lower Date determines order of the bars.</p>
+				<label class="span4 inline">End Date</label>
+				<span class="field span8" ng-click="showDateEndModal()">{{dateEndDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>
 			</div>
 
 

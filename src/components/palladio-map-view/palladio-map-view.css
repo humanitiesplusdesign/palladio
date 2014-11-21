@@ -104,24 +104,3 @@
 [data-palladio-map-view] .hidden-link {
 	display: none;
 }
-
-[data-palladio-map-view-with-settings] .layer-list {
-	list-style-type: none;
-	margin-left: 0px;
-	border: 1px solid #ddd;
-	border-radius: 2px;
-}
-
-[data-palladio-map-view-with-settings] .layer-list i {
-	cursor: pointer;
-}
-
-[data-palladio-map-view-with-settings] .layer-item {
-	padding: 6px 10px;
-	border-top: 1px solid #ddd;
-	font-size: 11px;
-}
-
-[data-palladio-map-view-with-settings] .layer-item:first-child {
-	border: none;
-}

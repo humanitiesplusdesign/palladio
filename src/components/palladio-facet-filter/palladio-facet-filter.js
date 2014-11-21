@@ -1,35 +1,235 @@
 // Facet filter module
 
-angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
-	.directive('palladioFacetFilter', function (palladioService, dataService) {
-		return {
-			scope : {
-				height: '@',
-				showControls: '@',
-				showAccordion: '@',
-				showDropArea: '@',
-				showSettings: '@',
-				configDimensions: '=',
-				configAggregation: '='
+angular.module('palladioFacetFilter', ['palladio', 'palladioApp.services'])
+	.directive('palladioFacetFilter', function (palladioService) {
+		var filterColor = "#A8DDB5";
+
+		var directiveDefObj = {
+			scope: {
+				dimensions: '=',
+				config: '=',
+				aggregateKey: '@',
+				aggregationType: '@',
+				setInternalState: '=',
+				readInternalState: '=',
+				height: '='
 			},
-			templateUrl : 'partials/palladio-facet-filter/template.html',
-			link : {
-				pre : function(scope, element) {
+			link: function (scope, element, attrs) {
 
-					var numericHeight;
-					var headerHeight = 30;
-					var minCellHeight = 20;
+				var deregister = [];
 
-					if(!scope.height) {
-						scope.calcHeight = "200px";
-						numericHeight = 200;
-					} else {
-						scope.calcHeight = scope.height;
-						numericHeight = +scope.calcHeight.substring(0, (scope.calcHeight.length - 2));
+				var uniqueDimension = scope.config.uniqueDimension;
+
+				var listMap = d3.map();
+
+				var sel = d3.select(element[0]).append("div");
+
+				var lists = sel.append("div")
+						.attr("class", "expanded-container")
+							.append("ul").attr("id", "sortable-expanded");
+
+				lists.selectAll("li").data(scope.dimensions, function(d) { return d.config.key; })
+					.enter().append("li")
+						.attr("class", "list-container")
+						.each(buildList);
+
+				// Build CrossFilter dimensions and D3 elastic_list charts.
+				scope.dimensions.forEach(function(dim) {
+					// TODO: Hack-in it here...
+					// For some reason this runs before the aggregateKey and aggregationType scope
+					// variables resolve, so we need to wait a split second.
+					window.setTimeout(function () { addDimension(dim); }, 100);
+				});
+
+				scope.$watchGroup(['config.uniqueDimension', 'aggregateKey',
+					'aggregationType'], function(nv, ov) {
+
+					if(nv[2] && (nv[0] !== ov[0] || nv[1] !== ov[1] || nv[2] !== ov[2])) {
+
+						uniqueDimension = scope.config.uniqueDimension;
+
+						rebuildFacets();
+					}
+				});
+
+				function rebuildFacets() {
+					// Rebuild all facets. We lose filters here, which is a problem.
+					scope.dimensions.forEach(function(dim) {
+						removeDimension(dim, dim.config.identifier);
+					});
+
+					lists.selectAll("li").data(scope.dimensions, function(d) { return d.config.key; })
+						.enter().append("li")
+							.attr("class", "list-container")
+							.each(buildList);
+
+					scope.dimensions.forEach(function(dim) {
+						addDimension(dim);
+					});
+				}
+
+				scope.$on('removeDim', function (event, args) {
+					removeDimension(args[0], args[1]);
+				});
+
+				scope.$on('addDim', function (event, args) {
+					var buttonQueryString = "#button" + args[0].config.domKey;
+
+					// Newly added dimensions are always collapsed.
+					d3.select("#sortable-expanded")
+						.append("li")
+							.attr("class", "list-container")
+							.datum(args[0])
+							.each(buildList);
+
+					addDimension(args[0]);
+				});
+
+				function buildList(x, i) {
+					var li = d3.select(this);
+					var domID = "#chart" + li.datum().config.domKey;
+
+					li.append("span").attr("class", "list-title").text(function(d) {
+						if(d.config.description)
+							return d.config.description;
+					});
+
+					// Sort buttons.
+					var buttonGroup = li.append("span")
+							.attr("class", "mode-buttons")
+								.append("div").attr("class", "btn-group");
+
+					buttonGroup.append("a").attr("class", "btn-mini")
+							.on("click", function() {
+								$(this).button('toggle');
+								if(d3.select(this).classed("active")) {
+									listMap.get(domID).selectAll();
+								} else {
+									listMap.get(domID).deselectAll();
+								}
+							})
+							.append("i").attr("class", "fa fa-check-square-o");
+
+					buttonGroup.append("a").attr("class", "btn-mini")
+							.on("click", function() {
+								$(this).button('toggle');
+								listMap.get(domID).toggleLabelSort();
+							})
+							.append("i").attr("class", "fa fa-sort-alpha-asc");
+
+					// Chart SVG
+					li.append("div").attr("class", "list")
+						.append("svg").attr("id", function(d) { return "chart" + d.config.domKey; });
+				}
+
+				function addDimension(dim) {
+					// DOM id where we are going to put the chart.
+					var domID = "#chart" + dim.config.domKey;
+					var dimension = dim.dimension;
+
+					// Build elastic_lists.js chart
+					var chart = elastic_list().dimension(dimension).callback(
+						function() {
+							if(listMap.get(domID).filter()) {
+								deregister.push(palladioService.setFilter(dim.config.identifier, dim.config.description, listMap.get(domID).filter(), listMap.get(domID).resetFilter));
+							} else {
+								palladioService.removeFilter(dim.config.identifier);
+							}
+							palladioService.update();
+						}
+					);
+
+					// Set dashboard-wide unique dimension, which may be over-ridden by the configuration.
+					chart.uniqueDimension(uniqueDimension);
+					chart.aggregateKey(scope.aggregateKey);
+					chart.aggregationType(scope.aggregationType);
+
+					if(scope.height) {
+						chart.height(scope.height - 20);
 					}
 
-					numericHeight = numericHeight - headerHeight;
-					scope.dropMarginTop = (numericHeight - 100)/3 + 'px';
+					// Apply configuration to elastic_list.js chart
+					if(dim.config.facets) {
+						dim.config.facets.forEach(function(c) {
+							chart[c.func].apply(chart, c.args);
+						});
+					}
+
+					// Set up scrollbar configuration on the list.
+					chart.scrollbarWidth(16);
+					chart.scrollbarElement($(element[0]).find( domID ).parent());
+
+					var actions = chart(d3.select($(element[0]).find(domID).get(0)));  // This renders the chart.
+
+					deregister.push(palladioService.onUpdate(domID, function() {
+						actions.update();
+					}));
+
+					deregister.push(palladioService.onReset(domID, function() {
+						actions.resetFilter();
+					}));
+
+					actions.deregister = deregister;
+
+					listMap.set(domID, actions);
+
+					actions.update();
+
+					// Make sortable.
+					$(element[0]).find("#sortable-expanded").sortable().disableSelection();
+				}
+
+				function removeDimension(dim, identifier) {
+					var domID = "#chart" + dim.config.domKey;
+
+					if(listMap.has(domID)) {
+						listMap.get(domID).resetFilter();
+						listMap.get(domID).deregister.forEach(function (f) { f(); });
+
+						// Remove the listMap
+						listMap.remove(domID);
+
+						// Remove the DOM.
+						$(element[0]).find(domID).parent().parent().remove();
+
+						// Emit the required events for Palladio to remove filters.
+						palladioService.removeFilter(identifier);
+						palladioService.update();
+					}
+				}
+
+				scope.setInternalState = function (state) {
+					state.domKeys.forEach(function(k, i) {
+						listMap.get("#chart" + k).filterInternal(state.filters[i]);
+					});
+					return state;
+				};
+
+				scope.readInternalState = function (state) {
+					// Order these by the same order as the dimKeys
+					state.filters = state.domKeys.map(function(k) {
+						return listMap.get("#chart" + k).filterInternal();
+					});
+					return state;
+				};
+
+				scope.$on('$destroy', function () {
+					deregister.forEach(function(f) { f(); });
+				});
+			}
+		};
+
+		return directiveDefObj;
+	})
+
+	.directive('palladioFacetFilterWithSettings', function (palladioService, dataService) {
+		return {
+			scope : true,
+			templateUrl : 'partials/palladio-facet-filter/template.html',
+
+
+			link : {
+				pre : function(scope, element, attrs) {
 
 					// In the pre-linking function we can use scope.data, scope.metadata, and
 					// scope.xfilter to populate any additional scope values required by the
@@ -48,15 +248,6 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 					scope.config = {};
 					scope.title = "Facet Filter";
 
-					scope.dropModel = false;
-
-					scope.$watch('dropModel', function() {
-						if(scope.dropModel) {
-							scope.dims = scope.dims.concat(scope.dropModel);
-							scope.dropModel = false;
-						}
-					});
-
 					// Set up aggregation selection.
 					scope.getAggDescription = function (field) {
 						if(field.type === 'count') {
@@ -67,38 +258,44 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 					};
 
 					var countDims = d3.map();
-					scope.metadata.filter(function (d) { return d.countable === true; })
-						.forEach(function (d) {
-							countDims.set(d.originFileId ? d.originFileId : 0, d);
-						});
-
-					scope.aggDims = scope.metadata.filter(function (d) { return d.countable === true || d.type === 'number'; })
-						.map(function (a) {
-							return {
-								key: a.key,
-								type: a.countable ? 'count' : 'sum',
-								field: a,
-								fileId: a.originFileId ? a.originFileId : 0
-							};
-						})
-						.sort(function (a, b) { return scope.getAggDescription(a) < scope.getAggDescription(b) ? -1 : 1; });
-
-							
-					scope.aggDim = scope.configAggregation ? scope.configAggregation : scope.aggDims[0];
-					scope.$watch('aggDim', function () {
-						if(scope.aggDim.key) {
-
-							// Rebuild the facets with the new grouping.
-							var selection = d3.select(element[0]).select('.inner-facet-container');
-							var facets = selection
-								.selectAll('.facet')
-									.data(scope.dims, function(d) { return calculateDomKey(d.key); });
-
-							facets.each(function (d) {
-								buildFacetData(d);
+						scope.metadata.filter(function (d) { return d.countable === true; })
+							.forEach(function (d) {
+								countDims.set(d.originFileId ? d.originFileId : 0, d);
 							});
 
-							updateFacets();
+					scope.aggDims = scope.metadata.filter(function (d) { return d.countable === true || d.type === 'number'; })
+							.map(function (a) {
+								return {
+									key: a.key,
+									type: a.countable ? 'count' : 'sum',
+									field: a,
+									fileId: a.originFileId ? a.originFileId : 0
+								};
+							})
+							.sort(function (a, b) { return scope.getAggDescription(a) < scope.getAggDescription(b) ? -1 : 1; });
+
+							
+					scope.aggDim = scope.aggDims[0];
+					scope.$watch('aggDim', function () {
+						if(!scope.aggDim) {
+							// No aggregation selected - just choose the first one
+							scope.countBy = scope.countDims.get(0).key;
+						} else {
+							// We figure out the unique aggregation dimension based on aggDim
+							if(scope.aggDim.type === 'count') {
+								scope.countBy = scope.aggDim.key;
+								scope.aggregationType = 'COUNT';
+								scope.aggregateKey = null;
+								scope.aggDescription = scope.getAggDescription(scope.aggDim);
+								scope.config.uniqueDimension = scope.countBy;
+							} else {
+								// We are summing
+								scope.countBy = countDims.get(scope.aggDim.fileId).key;
+								scope.aggregationType = 'SUM';
+								scope.aggregateKey = scope.aggDim.key;
+								scope.aggDescription = scope.getAggDescription(scope.aggDim);
+								scope.config.uniqueDimension = scope.countBy;
+							}
 						}
 					});
 					scope.showAggModal = function () { $('#' + scope.uniqueModalId).find('#facet-agg-modal').modal('show'); };
@@ -129,6 +326,9 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 						scope.config.uniqueDimension = scope.uniqueDimension.key;
 					}
 
+					// Get all the dimensions metadata that is type 'string' and not 'uniqueKey'.
+					// Right now we also restrict cardinality to less than 1000 for performance/usability
+					// reasons.
 					scope.fields = scope.metadata.filter(function () {
 						return true;
 					}).sort(function (a, b) { return a.description < b.description ? -1 : 1; });
@@ -136,289 +336,89 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 					// Get the countable fields.
 					scope.countFields = scope.metadata.sort(function (a, b) { return a.countDescription < b.countDescription ? -1 : 1; });
 
-					// If configuration dimensions are provided, default to those.
-					if(scope.configDimensions) {
-						scope.dims = scope.configDimensions;
-					} else {
-						scope.dims = [];
-					}
+					// Only take the first 10 valid dimensions. The reason is that the Cross-filter is limited
+					// to 32 dimensions so we don't want to overload it.
+					scope.dims = scope.fields.slice(0,4);
 
-					scope.check = function (d) {
-						return scope.dims.map(function (g) { return g.key; }).indexOf(d.key) !== -1;
-					};
-
-					scope.$watch('dims', function () {
-						scope.dims.forEach(function(d) {
-							// If the dim has not already been updated with dimensions/groups,
-							// update it.
-							if(d.dimension === undefined) {
-								buildFacetData(d);
+					scope.dimensions = scope.dims.map(function (d) {
+						return {
+							dimension: scope.xfilter.dimension(function (l) { return "" + l[d.key]; }),
+							config: {
+								key: d.key,
+								// We can't allow spaces or dots because of CSS & jqueryscrollpane incompatibility
+								domKey: calculateDomKey(d.key),
+								description: d.description,
+								identifier: d.description + Math.floor(Math.random() * 10000)
 							}
-						});
-
-						var selection = d3.select(element[0]).select('.inner-facet-container');
-
-						var facets = selection
-							.selectAll('.facet')
-								.data(scope.dims, function(d) { return calculateDomKey(d.key); });
-
-						// Build dimensions, groups
-						facets.enter().call(function(sel) {
-							var count = 0;
-							sel[0].forEach(function(d) {
-								count++; // Count added elements (sel[0].length is not reliable)
-							});
-
-							if(count > 0) {
-								// Extend the width of the inner- and mid-facet-container
-								selection.transition().style('width', (+selection.style('width').substring(0, selection.style('width').length - 2) + (205 * count)) + 'px');
-								d3.select(element[0]).select('.mid-facet-container').transition()
-									.style('width', (+d3.select(element[0]).select('.mid-facet-container')
-										.style('width').substring(0, d3.select(element[0]).select('.mid-facet-container')
-											.style('width').length - 2) + (205 * count)) + 'px');
-							}
-						});
-
-						// Build facets and button group
-						var buttonGroup = facets.enter()
-							.append('div')
-								.classed('facet', true)
-								.style('height', function() { return scope.calcHeight; })
-							.append('div')
-								.classed('facet-header', true)
-								.style('height', headerHeight)
-								.text(function(d) { return d.description; })
-							.append("span")
-								.attr("class", "mode-buttons")
-							.append("div").attr("class", "btn-group");
-
-						var cells = facets.selectAll('.cell')
-								.data(function (d) { return d.group.top(Infinity)
-											.map(function(g) {
-												return buildCellData(g,d);
-											}); },
-										function (d) { return d.key; });
-
-						// Sort options twiddle the cells.
-						buttonGroup.append("a").attr("class", "btn-mini")
-								.on("click", function(d) {
-									$(this).button('toggle');
-									// Remove all current filter values.
-									d.filters.splice(0, d.filters.length);
-									if(d3.select(this).classed("active")) {
-										d.group.all().forEach(function (g) {
-											d.filters.push(g.key);
-										});
-										d.dimension.filterFunction(function() { return true; });
-										palladioService.setFilter(
-											scope.uniqueToggleId + d.key,
-											d.description,
-											d.filters.join(', '),
-											function() {
-												d.filters.splice(0, d.filters.length); // Maintain the reference
-												d.dimension.filterAll();
-												palladioService.removeFilter(scope.uniqueToggleId + d.key);
-												palladioService.update();
-											}
-										);
-									} else {
-										d.dimension.filterAll();
-										palladioService.removeFilter(scope.uniqueToggleId + d.key);
-									}
-									palladioService.update();
-								})
-								.append("i").attr("class", "fa fa-check-square-o");
-
-						buttonGroup.append("a").attr("class", "btn-mini")
-								.on("click", function(d, i) {
-									$(this).button('toggle');
-									// Note that we have to reselect just the cells in this facet.
-									if(d3.select(this).classed("active")) {
-										d3.selectAll(cells[i]).sort(function(a,b) {
-											return d3.ascending(a.key, b.key);
-										});
-										// Switch icon
-										d3.select(this).select('i').classed('fa-sort-alpha-asc', false);
-										d3.select(this).select('i').classed('fa-sort-numeric-desc', true);
-									} else {
-										d3.selectAll(cells[i]).sort(function(a,b) {
-											return d3.descending(a.displayValue, b.displayValue);
-										});
-										// Switch icon
-										d3.select(this).select('i').classed('fa-sort-alpha-asc', true);
-										d3.select(this).select('i').classed('fa-sort-numeric-desc', false);
-									}
-								})
-								.append("i").attr("class", "fa fa-sort-alpha-asc");
-
-						buttonGroup.append("a").attr("class", "btn-mini")
-								.on("click", function (d) {
-									scope.$apply(function(s) {
-										s.dims = s.dims.filter(function (g) {
-											return g.key !== d.key;
-										});
-									});
-								})
-								.append("i").attr("class", "fa fa-times");
-
-						var newCells = cells.enter()
-							.append('div')
-								.classed('cell', true)
-								.on('click', filterCell );
-
-						newCells.append('div')
-								.classed('cell-text', true);
-
-						newCells.append('div')
-								.classed('cell-value', true);
-
-						newCells.call(updateCell);
-
-						// Remove facets.
-						facets.exit().each(function(d) {
-							// Collapse the width of the inner-facet-container
-							selection.transition().style('width', (+selection.style('width').substring(0, selection.style('width').length - 2) - 205) + 'px');
-							d3.select(element[0]).select('.mid-facet-container').transition()
-								.style('width', (+d3.select(element[0]).select('.mid-facet-container')
-									.style('width').substring(0, d3.select(element[0]).select('.mid-facet-container')
-										.style('width').length - 2) - 205) + 'px');
-							palladioService.removeFilter(scope.uniqueToggleId + d.key);
-							d.dimension.filterAll();
-							d.dimension.remove();
-							palladioService.update();
-						});
-
-						facets.exit().remove();
+						};
 					});
 
+					scope.$watch('dims', function (nv, ov) {
+						if(nv.length < ov.length) {
+							// Figure out which dimension was removed.
+							var removedDim;
+							var removedDimIdx;
 
-					function buildFacetData(data) {
-						if(data.dimension) {
-							data.dimension.filterAll();
-							data.dimension.remove();
-						}
-						data.dimension = scope.xfilter.dimension(function (l) { return "" + l[data.key]; });
-						var exceptionKey = scope.aggDim.key;
-						var summationKey = countDims.get(scope.aggDim.fileId).key;
-						data.group = scope.aggDim.type === "count" ?
-							reductio().exception(function (d) { return d[exceptionKey]; })
-								.exceptionCount(true)(data.dimension.group()) :
-							reductio().exception(function (d) { return d[exceptionKey]; })
-								.exceptionSum(function(d) { return d[summationKey]; });
-						if(scope.aggDim.type === "count") {
-							data.group.order(function (d) { return d.exceptionCount; });
-						} else {
-							data.group.order(function (d) { return d.exceptionSum; });
-						}
-						var topValue = scope.aggDim.type === "count" ?
-							data.group.top(1)[0].value.exceptionCount :
-							data.group.top(1)[0].value.exceptionSum;
-						var total = scope.aggDim.type === "count" ?
-							d3.sum(data.group.all(), function (d) { return d.value.exceptionCount; }) :
-							d3.sum(data.group.all(), function (d) { return d.value.exceptionSum; });
-						var topRange = topValue / total * numericHeight > minCellHeight*2 ? topValue / total * numericHeight : minCellHeight*2;
+							ov.forEach( function (d, i) {
+								if(removedDim === undefined && nv[i] && d.key !== nv[i].key) {
+									removedDim = d;
+								}
+							});
 
-						topRange = Math.floor(topRange) - 2;
-						
-						data.scale = d3.scale.linear()
-							.domain([1, topValue])
-							.range([minCellHeight, topRange]);
+							// Handle situation with it being the last element in ov.
+							if(removedDim === undefined) removedDim = ov[ov.length - 1];
 
-						data.domKey = calculateDomKey(data.key);
-						data.filters = [];
-					}
+							// Find the index;
+							scope.dimensions.forEach(function(d, i) {
+								if(d.config.key == removedDim.key) removedDimIdx = i;
+							});
 
-					function updateCell(sel) {
-						sel.classed('filter-value', function(d) { return d.inFilter; })
-							.transition()
-								// .style('height', function (d) { return d.displayValue > 0 ? d.scale(d.displayValue) + 'px' : '3px'; });
-								.style('height', function (d) { return d.displayValue > 0 ? minCellHeight + 'px' : '3px'; });
+							// Remove the old dimension from the Crossfilter and from the scope.
+							scope.dimensions[removedDimIdx].dimension.filterAll();
+							scope.dimensions[removedDimIdx].dimension.remove();
+							var removedInternalDimension = scope.dimensions.splice(removedDimIdx, 1)[0];
 
-						sel.select('.cell-text')
-							.text(function(d) { return d.displayValue > 0 ? d.key : ''; });
-
-						sel.select('.cell-value')
-							.text(function(d) { return d.displayValue > 0 ? d.displayValue : ''; });
-					}
-
-					function buildCellData(cellData, facetData) {
-						cellData.scale = facetData.scale;
-						cellData.facetKey = facetData.key;
-						cellData.facetDescription = facetData.description;
-						cellData.dimension = facetData.dimension;
-						cellData.filters = facetData.filters;
-						cellData.inFilter = cellData.filters.indexOf(cellData.key) !== -1;
-						if(scope.aggDim.type === "count") {
-							cellData.displayValue = cellData.value.exceptionCount;
-						} else {
-							cellData.displayValue = cellData.value.exceptionSum;
-						}
-						return cellData;
-					}
-
-					function filterCell(d) {
-						if(d.filters.indexOf(d.key) !== -1) {
-							// It's already in the filter.
-							d.filters.splice(d.filters.indexOf(d.key),1);
-						} else {
-							// It's not in the filter.
-							d.filters.push(d.key);
+							scope.$broadcast('removeDim', [removedInternalDimension, removedInternalDimension.config.identifier]);
 						}
 
-						d.dimension.filterFunction(filterFunction.bind(null, d));
+						if(nv.length > ov.length) {
+							// Figure out which dimension was added.
+							var addedDim;
 
-						if(d.filters.length > 0) {
-							deregister.push(
-								palladioService.setFilter(
-									scope.uniqueToggleId + d.facetKey,
-									d.facetDescription,
-									d.filters.join(', '),
-									function() {
-										d.filters.splice(0, d.filters.length); // Maintain the reference
-										d.dimension.filterAll();
-										palladioService.removeFilter(scope.uniqueToggleId + d.facetKey);
-										palladioService.update();
+							nv.forEach( function (d, i) {
+								if(addedDim === undefined && ov[i] && d.key !== ov[i].key) {
+									addedDim = d;
+								}
+							});
+							
+							// Handle situation with it being the last element in nv.
+							if(addedDim === undefined) addedDim = nv[nv.length - 1];
+
+							// Add the new dimension.
+							scope.dimensions.push(
+								{
+									dimension: scope.xfilter.dimension(function (l) { return "" + l[addedDim.key]; }),
+									config: {
+										key: addedDim.key,
+										// We can't allow spaces or dots because of CSS & jqueryscrollpane incompatibility
+										domKey: calculateDomKey(addedDim.key),
+										description: addedDim.description,
+										identifier: addedDim.description + Math.floor(Math.random() * 10000)
 									}
-								)
+								}
 							);
-						} else {
-							palladioService.removeFilter(scope.uniqueToggleId + d.facetKey);
+
+							scope.$broadcast('addDim', [scope.dimensions[scope.dimensions.length - 1]]);
 						}
-
-						palladioService.update();
-					}
-
-					function filterFunction(d, v) {
-						return d.filters.indexOf(v) !== -1 || d.filters.length === 0;
-					}
+					});
 
 					function calculateDomKey(key) {
-						return key.split("\n").join("").split('?').join("").split('"').join("").split(")").join("").split("(").join("").split(" ").join("").split(".").join("").split("#").join("").split("/").join("").split(",").join("").split("[").join("").split("]").join("").split("{").join("").split("}").join("");
+						return key.split("\n").join("").split('?').join("").split('"').join("").split(")").join("").split("(").join("").split(" ").join("").split(".").join("").split("#").join("").split("/").join("").split(",").join("");
 					}
-
-					function updateFacets() {
-						var selection = d3.select(element[0]).select('.inner-facet-container');
-
-						var facets = selection
-							.selectAll('.facet')
-								.data(scope.dims, function(d) { return calculateDomKey(d.key); });
-
-						var cells = facets.selectAll('.cell')
-							.data(function (d) { return d.group.top(Infinity)
-											.map(function(g) {
-												return buildCellData(g,d);
-											}); },
-										function (d) { return d.key; });
-
-						cells.call(updateCell);
-					}
-
-					var updateCallback = palladioService.onUpdate(scope.uniqueToggleId, updateFacets);
-
-					deregister.push(updateCallback);
 
 					// Clean up after ourselves. Remove dimensions that we have created. If we
 					// created watches on another scope, destroy those as well.
+					var destroyed = false;
 					scope.$on('$destroy', function () {
 						scope.dimensions.map(function(d) {
 							d.dimension.filterAll();
@@ -427,66 +427,117 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 
 						deregister.forEach(function (f) { f(); });
 
+						destroyed = true;
+
 						// Get rid of the modal.
 						$('#' + scope.uniqueModalId).remove();
 					});
 
-					scope.filterReset = function () {
-						scope.dims.forEach(function(d) {
-							d.filters = [];
-							d.dimension.filterAll();
-							palladioService.removeFilter(scope.uniqueToggleId + calculateDomKey(d.key));
-						});
-						palladioService.update();
-					};
+					// Watch for filter changes and record them.
+
+					scope.localFilters = [];
+					var filtersMap = d3.map();
+
+					scope.$on('updateFilter', function(event, args) {
+						filtersMap.set(args[0], [args[1], args[2], args[3]]);
+
+						if(!args[1]) {
+							filtersMap.remove(args[0]);
+						}
+
+						// We do this because d3.js's d3.map().entries() doesn't play nice
+						// with Angular.js's $digest function when used in an ng-repeat directive.
+						scope.localFilters = filtersMap.entries();
+					});
+
+					scope.$on('expandFilters', function(event) {
+						if($(element).find(".accordion-toggle").hasClass("collapsed")) {
+							$(element).find(".accordion-toggle").click();
+							scope.collapse = false;
+						}
+					});
+
+					scope.$on('collapseFilters', function(event) {
+						if(!$(element).find(".accordion-toggle").hasClass("collapsed")) {
+							$(element).find(".accordion-toggle").click();
+							scope.collapse = true;
+						}
+					});
+
 
 					// State save/load.
 
+					scope.setInternalState = function (state) {
+						// Placeholder
+						return state;
+					};
+
+					// Add internal state to the state.
+					scope.readInternalState = function (state) {
+						// Placeholder
+						return state;
+					};
+
 					var importState = function(state) {
-						scope.config = state.config;
-						scope.$digest();
+						// We have to manually manage digest()s between each stage of the load
+						// because the way we handle dimension additions/deletions is really
+						// really fragile.
 
-						// Remove default dims. We have to copy the array to do this in order to trigger
-						// our watcher.
-						while(scope.dims.length > 0) {
-							if(scope.dims.length > 1) {
-								scope.dims = scope.dims.slice(0, scope.dims.length - 1);
-							} else {
-								scope.dims = [];
-							}
+						// Unfortunately we have to wait for the default dimensions to even get set up.
+						// This is due to the use of setTimeout in the initial setup, which
+						// creates a race condition. Sadness.
+
+						window.setTimeout(function () {
+							scope.config = state.config;
 							scope.$digest();
-						}
 
-						// Need to do this one-by-one because of the way we watch for changes.
-						scope.fields.filter(function(f) { return state.dimKeys.indexOf(f.key) !== -1; })
-							.forEach(function(d) {
-								scope.dims = scope.dims.concat(d);
+							// Remove default dims. We have to copy the array to do this in order to trigger
+							// our watcher.
+							while(scope.dims.length > 0) {
+								if(scope.dims.length > 1) {
+									scope.dims = scope.dims.slice(0, scope.dims.length - 1);
+								} else {
+									scope.dims = [];
+								}
 								scope.$digest();
-							});
+							}
 
-						// Set the aggregation.
-						if(state.aggDimKey) scope.aggDim = scope.aggDims.filter(function(f) { return f.key === state.aggDimKey; })[0];
+							// Need to do this one-by-one because of the way we watch for changes.
+							scope.fields.filter(function(f) { return state.dimKeys.indexOf(f.key) !== -1; })
+								.forEach(function(d) {
+									scope.dims = scope.dims.concat(d);
+									scope.$digest();
+								});
 
-						// Recalculate domKeys (in case we change format)
-						state.domKeys = state.dimKeys.map(function(k) { return calculateDomKey(k); });
+							// Set the aggregation.
+							if(state.aggregationType) scope.aggregationType = state.aggregationType;
+							if(state.aggregateKey) scope.aggregateKey = state.aggregateKey;
+							if(state.aggDimKey) scope.aggDim = scope.aggDims.filter(function(f) { return f.key === state.aggDimKey; })[0];
 
-						scope.$digest();
+							// Recalculate domKeys (in case we change format)
+							state.domKeys = state.dimKeys.map(function(k) { return calculateDomKey(k); });
+
+							scope.$digest();
+								
+							scope.setInternalState(state);
+						}, 300);
 					};
 
 					var exportState = function() {
-						return {
+						return destroyed ? false : scope.readInternalState({
 							config: scope.config,
+							aggregationType: scope.aggregationType,
+							aggregateKey: scope.aggregateKey,
 							aggDimKey: scope.aggDim.key,
 							dimKeys: scope.dims.map(function(d) { return d.key; }),
 							domKeys: scope.dims.map(function(d) { return calculateDomKey(d.key); })
-						};
+						});
 					};
 
 					deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'facet', exportState, importState));
 				},
 
 				post : function(scope, element, attrs) {
-
 					$(element[0]).find('.toggle').on("click", function() {
 						$(element[0]).find('.settings-panel').toggle(0, function() {
 							$(element[0]).find('.view').toggleClass('span12');

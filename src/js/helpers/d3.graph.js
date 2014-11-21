@@ -56,9 +56,7 @@
 							current: true,
 							agg: link.data.agg,
 							initialAgg: initialAggs.get(link.data.source),
-							dimension: "source",
-							x: (width / 2) + (Math.random() * 10),
-							y: (height / 2) + (Math.random() * 10)
+							dimension: "source"
 						});
 
 						labelAnchors.set(link.data.source, { name: link.data.source, node : nodes.get(link.data.source) });
@@ -78,9 +76,7 @@
 							current: true,
 							agg: link.data.agg,
 							initialAgg: initialAggs.get(link.data.target),
-							dimension: "target",
-							x: (width / 2) + (Math.random() * 10),
-							y: (height / 2) + (Math.random() * 10)
+							dimension: "target"
 						});
 
 						labelAnchors.set(link.data.target, { name: link.data.target, node : nodes.get(link.data.target) });

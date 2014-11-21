@@ -4,51 +4,34 @@
 		<h4>Create a New Palladio project</h4>
 		<div class="row-fluid">
 			<div class="span4">
-				<div class="row-fluid">
-					<div class="span12">
-						<p class="small">You can load an existing Palladio project (.json format), load from a spreadsheet or flat-file, or load data from a SPARQL endpoint by choosing from options to the right.</p>
-						<p class="small">Your primary table is the main entity you want to visualize. It could be either an object, like a person or a letter, or a more abstract concept, like a relationship. Once you have loaded your primary table, you will be able to extend fields in the primary table with additional information.</p>
-						<p class="small">We recommend that your primary table include a unique key, which can be used to uniquely identify the different entities in the table.</p>
-					</div>
-				</div>
+				<p class="small">Copy and paste out of your spreadsheets, upload tabular data (e.g. .csv, .tab, .tsv), or link to a public Google spreadsheet to create a new Palladio project.</p>
+				<p class="small">Your primary table is the main entity you want to visualize. It could be either an object, like a person or a letter, or a more abstract concept, like a relationship. Once you have loaded your primary table, you will be able to extend fields in the primary table with additional information.</p>
+				<p class="small">We recommend that your primary table include a unique key, which can be used to uniquely identify the different entities in the table.</p>
 			</div>
 
 			<div class="span8">
-				<div class="data-loader" data-ng-init="loadFrom='palladio'">
-			        <ul class="nav nav-tabs front-page-nav-tabs" role="tablist" id="uploadTab">
-			        	<li data-ng-class="{'active' : loadFrom =='palladio'}"><a ng-click="loadFrom='palladio'" role="tab" data-toggle="tab">Open a Palladio project</a></li>
-				        <li data-ng-class="{'active' : loadFrom =='csv'}"><a ng-click="loadFrom='csv'" role="tab" data-toggle="tab">Load Spreadsheet or CSV</a></li>
-				        <li data-ng-class="{'active' : loadFrom =='sparql'}"><a ng-click="loadFrom='sparql'" role="tab" data-toggle="tab">Load from SPARQL endpoint</a></li>
-			        </ul>
-	                <div class="tab-content front-page-tab-content">
-						<div class="tab-pane" data-ng-class="{'active' : loadFrom =='csv'}" id="csv">
-							<p>Copy and paste out of your spreadsheets, drag-and-drop to upload tabular data (e.g. .csv, .tab, .tsv), or link to a public Google spreadsheet to create a new Palladio project.</p>
-							<div class="alert alert-warning" ng-show="parseError">{{parseError}}</div>
-							<textarea ui-codemirror="{ mode : 'text',  lineNumbers : true, lineWrapping: true, onDrop : onDrop }" placeholder="Paste your data or drop a file here" ng-model="text"></textarea>
-							<div class="">
-								<button class="btn" ng-click="parseExtendTable()" ng-disabled="!text">Load</button>
-							</div>
-						</div>
-						<div class="tab-pane" data-ng-class="{'active' : loadFrom =='sparql'}" id="sparql">
-							<p>You can load data from a SPARQL endpoint by providing both the endpoint URL and a valid SPARQL query. After you run the SPARQL query you will have the opportunity to validate your data and re-run the query if necessary before loading the data into Palladio.</p>
-							<yasgui data="text" endpoint="sparqlEndpoint"></yasgui>
-							<div class="">
-								<button class="btn" ng-click="parseExtendTable()" ng-show="text">Load data</button>
-							</div>
-							<div class="alert alert-warning" ng-show="parseError">{{parseError}}</div>
-						</div>
-						<div class="tab-pane" data-ng-class="{'active' : loadFrom == 'palladio'}" id="palladio">
-							<p>If you have already created and saved a Palladio project and would like to revisit your previous work, please upload your .json file by clicking here.</p>
-							<button class="btn"
-								palladio-data-upload
-					            on-load="onLoad()">
-					            Select a file
-					        </button>
-						</div>
+				<div class="data-loader">
+					<div class="alert alert-warning" ng-show="parseError">{{parseError}}</div>
+					<textarea ui-codemirror="{ mode : 'text',  lineNumbers : true, lineWrapping: true, onDrop : onDrop }" placeholder="Paste your data or drop a file here" ng-model="text"></textarea>
+					<div class="">
+						<button class="btn" ng-click="parseExtendTable()" ng-disabled="!text">Load</button>
 					</div>
 				</div>
 			</div>
 		</div>
+
+		<div class="row-fluid">
+			<div class="span4">
+				<h4>Open a Palladio project</h4>
+				<p>If you have already created and saved a Palladio project and would like to revisit your previous work, please upload your .json file by clicking here.</p>
+				<button class="btn"
+					palladio-data-upload
+		            on-load="onLoad()">
+		            Select a file
+		        </button>
+			</div>
+		</div>
+		
 	</div>
 </div>
 

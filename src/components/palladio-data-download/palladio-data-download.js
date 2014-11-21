@@ -1,6 +1,6 @@
 // Palladio data upload component
 
-angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
+angular.module('palladioDataDownload', ['palladioApp.services', 'palladio'])
 	.directive('palladioDataDownload', function (dataService, version, palladioService) {
 		var directiveObj = {
 			// scope: false,

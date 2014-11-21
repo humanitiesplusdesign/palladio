@@ -1,4 +1,4 @@
-angular.module('palladioTableView', ['palladio', 'palladio.services'])
+angular.module('palladioTableView', ['palladio', 'palladioApp.services'])
 	// Palladio Table View
 	.directive('palladioTableView', function (palladioService) {
 
@@ -7,7 +7,6 @@ angular.module('palladioTableView', ['palladio', 'palladio.services'])
 			scope : {
 				dimensions : '=',
 				dimension : '=',
-				height: '@',
 				xfilter: '=',
 				exportFunc: '='
 			},
@@ -15,14 +14,7 @@ angular.module('palladioTableView', ['palladio', 'palladio.services'])
 			link: function (scope, element, attrs) {
 
 				function refresh() {
-					if(!scope.height) {
-						scope.calcHeight = $(window).height();
-					} else {
-						scope.calcHeight = scope.height;
-					}
-
-					element.height(scope.calcHeight);
-					$(element[0].nextElementSibling).height(scope.calcHeight);
+					element.height($(window).height());
 				}
 
 				$(document).ready(refresh);
@@ -223,9 +215,7 @@ angular.module('palladioTableView', ['palladio', 'palladio.services'])
 	.directive('palladioTableViewWithSettings', function (palladioService, dataService) {
 
 		return {
-			scope: {
-				height: '@'
-			},
+			scope: true,
 			templateUrl : 'partials/palladio-table-view/template.html',
 			link: {
 

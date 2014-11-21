@@ -1,4 +1,4 @@
-angular.module('palladioMapView', ['palladio', 'palladio.services'])
+angular.module('palladioMapView', ['palladio', 'palladioApp.services'])
 	.directive('palladioMapView', function (palladioService) {
 
 		var directiveDefObj = {
@@ -12,7 +12,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				destinationCoordinatesAccessor : '=',
 				filterDimension : '=',
 				sequenceAccessor : '=',
-				tileSets: '=',
 				pointSize : '=',
 				maxPointSize : '=',
 				showLinks : '=',
@@ -29,7 +28,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				var uniqueId = "mapView" + Math.floor(Math.random() * 10000);
 				var deregister = [];
 				var search = '';
-				var l; // User-defined map layer
 
 				deregister.push(palladioService.onUpdate(uniqueId, function() {
 					// Only update if the table is visible.
@@ -251,7 +249,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						.filter( function (d) { return d.key && d.value.data.agg > 0; })
 						.forEach( function (d) {
 							// Must copy the group value because these values will be updated if we have a destGroup.
-							groupPoints.set(d.key, { data: angular.copy(d.value.data), count: d.value.count, initialCount: d.value.initialCount });
+							groupPoints.set(d.key, angular.copy(d.value));
 						});
 
 					// Having to merge is not ideal. Would be better to maintain a different grouping,
@@ -265,7 +263,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 									groupPoints.get(d.key).data.agg += +d.value.data.agg;
 								} else {
 									// Must copy the group value because these values will be updated.
-									groupPoints.set(d.key, { data: angular.copy(d.value.data), count: d.value.count, initialCount: d.value.initialCount });
+									groupPoints.set(d.key, angular.copy(d.value));
 								}
 							});
 					}
@@ -579,11 +577,84 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 										.attr("class","legend-title")
 										.style("margin-left", function(d){ return (-(pointSize(maxPointSize)-pointSize(d))+pointSize(maxPointSize)*2 + 10) + "px"; })
 										.html(String)
-							
+									//.attr("transform", function (d,i){ return i==1 ? "translate(38,72)": "translate(38,50)"});
+
+
+							/*var legendText = title = legend.append("text")
+								.attr("class","legend-title")
+								.attr("x","10")
+								.attr("y","12")
+								.text(scope.countDescription);
+
+							labels = legend.selectAll("text.legend-value")
+								.data([ maxPointSize, 1 ])
+								.enter().append("text")
+								.attr("class","legend-value")
+								.attr("x","76")
+								.attr("y",function (d,i){ return i==1 ? 72: 50 })
+								.text(function (d){ return d; });
+								*/
 						}
+						/*
+
+						if(maxPointSize) {
+
+					    	d3.select(element[0]).selectAll("svg.legend").remove();
+
+					    	if (!scope.pointSize) return;
+
+					    	var circles,legend,labels;
+
+					    	legend = d3.select(element[0]).selectAll("svg.legend")
+			          			.data(function(d){ return [d]; })
+			          			.enter()
+			          			.append("svg")
+			          			.attr("class", "legend")
+			          			.attr("width","130px")
+								.attr("height","86px");
+
+							legend.append("rect")
+								.attr("class","legend-back")
+								.attr("width","130px")
+								.attr("height","86px")
+								.attr("rx","2px")
+								.attr("ry","2px");
+
+							circles = legend.selectAll("circle")
+								.data([ maxPointSize, 1 ])
+								.enter().append("circle")
+								.attr("r", function (d,i){ return pointSize(d); })
+								.attr("transform", function (d,i){ return i==1 ? "translate(38,72)": "translate(38,50)"});
+
+							var legendText = title = legend.append("text")
+								.attr("class","legend-title")
+								.attr("x","10")
+								.attr("y","12")
+								.text(scope.countDescription);
+
+							labels = legend.selectAll("text.legend-value")
+								.data([ maxPointSize, 1 ])
+								.enter().append("text")
+								.attr("class","legend-value")
+								.attr("x","76")
+								.attr("y",function (d,i){ return i==1 ? 72: 50 })
+								.text(function (d){ return d; });
+						}*/
 			        }
 
 			        function tooltipNode(d,i){
+
+			        	/*var div;
+				   		div = document.createElement("div");
+						return {
+							title : d.properties.value.description,
+							content: div,
+							detection: "shape",
+							placement: "mouse",
+							gravity: "top",
+							displacement: [-50, 0],
+							mousemove: true
+					    };*/
 
 					    return {
 						    type: "tooltip",
@@ -675,6 +746,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 		        	minZoom = 1,
 		        	maxZoom = 20,
 		        	coordinates = [45.4640, 9.1916],
+		        	l = new L.mapbox.tileLayer('cesta.hd9ak6ie'),
 		        	m = new L.Map(element[0], {
 		            	center: new L.LatLng(coordinates[0], coordinates[1]),
 		            	zoom: zoom,
@@ -703,40 +775,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 		       	var filterDimension = null;
 
-		       	scope.$watchCollection('tileSets', function () {
-					scope.tileSets.forEach(function(ts, i) {
-						if(!ts.layer) {
-							if(ts.url) {
-								// Example: http://a.tile.stamen.com/watercolor/{z}/{x}/{y}.png
-								ts.layer = L.tileLayer(ts.url);
-							}
-							if(ts.mbId) {
-								// Assume we have a mapbox id. Example: esjewett.k36b48ge
-								ts.layer = L.mapbox.tileLayer(ts.mbId);
-							}
-
-							if(ts.layer) {
-								m.addLayer(ts.layer);
-								ts.toggle = function () {
-									ts.enabled = !ts.enabled;
-									if(ts.enabled) {
-										ts.layer.setOpacity(1);
-									} else {
-										ts.layer.setOpacity(0);
-									}
-								}
-							}
-						}
-
-						if(ts.layer) {
-							// Update remove function to the current index.
-							ts.remove = function() {
-								m.removeLayer(ts.layer);
-								scope.tileSets.splice(i, 1);
-							};
-						}
-					});
-				});
+		   		m.addLayer(l);
 
 				scope.$on("resize", function(){
 					m.invalidateSize(false);
@@ -751,7 +790,9 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				$(window).resize(refresh);
 				scope.$on("changeLayout", function(){
 					m.invalidateSize(false);
-				});
+				})
+
+
 			}
 		};
 
@@ -767,16 +808,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 				scope.metadata = dataService.getDataSync().metadata;
 				scope.xfilter = dataService.getDataSync().xfilter;
-
-				scope.tileSets = [
-					{
-						"url": null,
-						"mbId": 'cesta.hd9ak6ie',
-						"enabled": true,
-						"description": "Land",
-						"layer": null
-					}
-				];
 
 				scope.uniqueToggleId = "mapView" + Math.floor(Math.random() * 10000);
 				scope.uniqueModalId = scope.uniqueToggleId + "modal";
@@ -849,7 +880,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					}
 				});
 				scope.showAggModal = function () { $('#' + scope.uniqueModalId).find('#agg-modal').modal('show'); };
-				scope.showLayerModal = function () { $('#' + scope.uniqueModalId).find('#layer-modal').modal('show'); }
 
 				scope.descriptiveDims = scope.metadata
 						// We only allow choosing dimensions from the same origin file as the first coordinate dimension
@@ -1052,7 +1082,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						s.countDim = state.countDim;
 						s.descriptiveDim = state.descriptiveDim;
 						s.showLinks = state.showLinks;
-						s.tileSets = state.tileSets;
 						s.pointSize = state.pointSize;
 						s.mapType = s.mapTypes.filter(function (d) { return d.value === state.mapType.value; })[0];
 						if(state.mapping.sourceCoordinates) {
@@ -1079,14 +1108,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						countDim: scope.countDim,
 						descriptiveDim: scope.descriptiveDim,
 						showLinks: scope.showLinks,
-						tileSets: scope.tileSets.map(function (t) {
-							return {
-								"url": t.url,
-								"mbId": t.mbId,
-								"enabled": t.enabled,
-								"description": t.description,
-							};
-						}),
 						pointSize: scope.pointSize,
 						mapType: scope.mapType,
 						mapping: scope.mapping,
@@ -1114,114 +1135,4 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 		};
 
 		return directiveObj;
-	})
-	.directive('layerModal', function () {
-		return {
-			replace : true,
-			scope : {
-				layers: '='
-			},
-			template: '<div class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">' +
-  				'<div class="modal-header">' +
-			    	'<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>' +
-			    	'<h4 style="line-height: normal">Add a new map layer</h4>' +
-			  	'</div>' +
-			  	'<div class="modal-body" style="min-height: 280px">' +
-			    	'<form class="form-horizontal">' +
-						
-						'<div class="control-group">' +
-							'<label class="control-label" for="layerDescription">Description</label>' +
-							'<div class="controls">' +
-								'<input type="text" placeholder="Description" id="layerDescription" ng-model="description" class="span8">' +
-							'</div>' +
-						'</div>' +
-						
-						'<div class="control-group">' +
-							'<label class="control-label">Choose one of Palladio default layers or create a new one.</label>' +
-							'<div class="controls">' +
-								'<div class="span8">' +
-									'<select bs-select data-placeholder="Choose a style" ng-model="layerOption" ng-options="t as t.description for t in layerOptions" class="form-control show-tick"></select>' +
-								'</div>' +
-							'</div>' +
-						'</div>' +
-
-						'<div class="control-group" ng-show="layerOption && layerOption.custom">' +
-							'<label class="control-label" for="layerUrl">Tileset URL <span class="help-block">Includes {x}, {y}, {z}</span></label>' +
-							'<div class="controls">' +
-								'<input type="text" id="layerUrl" ng-model="url" class="span8">' +
-							'</div>' +
-						'</div>' +
-
-						'<div class="control-group" ng-show="layerOption && layerOption.custom">' +
-							'<label class="control-label" for="layerMbId">Mapbox ID<span class="help-block">A Mapbox project ID</span></label>' +
-							'<div class="controls">' +
-								'<input type="text" id="layerMbId" ng-model="mbId" class="span8">' +
-							'</div>' +
-						'</div>' +
-					'</form>' +
-			  	'</div>' +
-			  	'<div class="modal-footer" style="display:block;">' +
-			  		'<button class="btn" data-dismiss="modal" data-ng-click="addLayer()">Add</button>' +
-			    	'<button class="btn" data-dismiss="modal">Close</button>' +
-			  	'</div>' +
-			'</div>',
-
-			link: function postLink(scope, elements, attrs) {
-
-				scope.layerOptions = [
-					{
-						"mbId": "cesta.hd9ak6ie",
-						"description": "Land",
-					},
-					{
-						"mbId": "cesta.k8g7eofo",
-						"description": "Buildings and Areas",
-					},
-					{
-						"mbId": "cesta.k8m9p19p",
-						"description": "Streets",
-					},
-					{
-						"mbId": "cesta.k8ghh462",
-						"description": "Terrain",
-					},
-					{
-						"mbId": "cesta.k8gof2np",
-						"description": "Satellite",
-					},
-					{
-						"custom" : true,
-						"description": "Custom...",
-					}
-				]
-
-				scope.layerOption = scope.layerOptions[0];
-				
-				scope.addLayer = function () {
-
-					if (scope.layerOption && !scope.layerOption.custom) {
-						scope.layers.push({
-							"url": null,
-							"mbId": scope.layerOption.mbId,
-							"enabled": true,
-							"description": scope.description ? scope.description : scope.layerOption.description,
-							"layer": null
-						});
-					}
-					else if (scope.url || scope.mbId) {
-						scope.layers.push({
-							"url": scope.url ? scope.url : null,
-							"mbId": scope.mbId ? scope.mbId : null,
-							"enabled": true,
-							"description": scope.description,
-							"layer": null
-						});
-					}
-
-					scope.url = null;
-					scope.mbId = null;
-					scope.description = null;
-				}
-			}
-		};
 	});

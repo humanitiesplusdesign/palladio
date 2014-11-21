@@ -5,8 +5,8 @@
 // for usage examples.
 
 angular.module('palladio', [])
-	.constant('version', '0.8.0')
-	.factory('palladioService', ['$compile', "$rootScope", function($compile, $scope) {
+	.constant('version', '0.6.0')
+	.factory('palladioService', [function() {
 
 		var updateListeners = d3.map();
 
@@ -17,7 +17,7 @@ angular.module('palladio', [])
 
 		var deregisterUpdateListener = function (id) {
 			updateListeners.remove(id);
-		};
+		}
 
 		var update = function () {
 			updateListeners.values().forEach(function (u) {
@@ -121,48 +121,6 @@ angular.module('palladio', [])
 			return stateFunctions.values();
 		};
 
-
-		// Insert a facet filter into the DOM, wired into the Palladio model.
-		//
-		// Options
-		//		showControls: true
-		//		showAccordion: true
-		//		showDropArea: true
-		//		dimensions: []
-		//		aggregation: []
-		//		height: 300px
-		var facetFilter = function(selector, options) {
-			if(options === undefined) options = {};
-
-			// var newScope = scope.$new(true, scope.$parent);
-			var newScope = $scope.$new(false);
-			var compileString = '<div data-palladio-facet-filter ';
-
-			compileString += options.showControls !== undefined ? 'show-controls="' + options.showControls + '" ' : 'show-controls="false" ';
-			compileString += options.showAccordion !== undefined ? 'show-accordion="' + options.showAccordion + '" ' : 'show-accordion="false" ';
-			compileString += options.showDropArea !== undefined ? 'show-drop-area="' + options.showDropArea + '" ' : 'show-drop-area="false" ';
-			compileString += options.showSettings !== undefined ? 'show-settings="' + options.showSettings + '" ' : 'show-settings="false" ';
-			compileString += options.height ? 'height="' + options.height + '" ' : 'height="300px" ';
-
-			if(options.dimensions) {
-				newScope.dimensions = angular.copy(options.dimensions);
-				compileString += 'config-dimensions="dimensions" ';
-			}
-
-			if(options.aggregation) {
-				newScope.aggregation = angular.copy(options.aggregation);
-				compileString += 'config-aggregation="aggregation" ';
-			}
-
-			compileString += '></div>';
-
-			console.log(compileString);
-
-			var directive = $compile(compileString)(newScope);
-
-			$(selector).append(directive);
-		};
-
 		return {
 			onUpdate: registerUpdateListener,
 			update: update,
@@ -174,7 +132,6 @@ angular.module('palladio', [])
 			onSearch: registerSearchCallback,
 			search: search,
 			registerStateFunctions: registerStateFunctions,
-			getStateFunctions: getStateFunctions,
-			facetFilter: facetFilter
+			getStateFunctions: getStateFunctions
 		};
 	}]);

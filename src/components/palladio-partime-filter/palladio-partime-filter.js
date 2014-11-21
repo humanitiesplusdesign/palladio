@@ -1,6 +1,6 @@
 // Palladio template component module
 
-angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
+angular.module('palladioPartimeFilter', ['palladio.date', 'palladio', 'palladioApp.services'])
 	.directive('palladioPartimeFilter', function (dateService, palladioService, dataService) {
 		var directiveObj = {
 			scope: true,
@@ -66,7 +66,6 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 					var width = $(window).width()*0.7;
 					var height = 150;
 					var margin = 25;
-					var filterColor = '#9DBCE4';
 
 					setup();
 					update();
@@ -99,15 +98,14 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						var endValues = dim.top(Infinity).map(function (d) { return format.reformatExternal(d[scope.dateEndDim.key]); })
 								// Check for invalid dates
 								.filter(function (d) { return format.parse(d).valueOf(); });
-						var allValues = startValues.concat(endValues);
 
 						// Scales
 						x = d3.time.scale().range([0, width])
-								.domain([ format.parse(d3.min(allValues)), format.parse(d3.max(allValues)) ]);
+								.domain([ format.parse(d3.min(startValues)), format.parse(d3.max(endValues)) ]);
 						xStart = d3.time.scale().range([0, width])
-								.domain([ format.parse(d3.min(allValues)), format.parse(d3.max(allValues)) ]);
+								.domain([ format.parse(d3.min(startValues)), format.parse(d3.max(endValues)) ]);
 						xEnd = d3.time.scale().range([0, width])
-								.domain([ format.parse(d3.min(allValues)), format.parse(d3.max(allValues)) ]);
+								.domain([ format.parse(d3.min(startValues)), format.parse(d3.max(endValues)) ]);
 						y = d3.scale.linear().range([height, 0])
 								.domain([0, 1]);
 						yStep = d3.scale.linear().range([height, 0])
@@ -200,31 +198,30 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						bottom = g.append('g')
 							.attr("class", "axis x-axis")
 							.attr("transform", "translate(" + 0 + "," + (height) + ")")
-							.call(bottomBrush)
-							.call(xAxisStart);
+							.call(xAxisStart)
+							.call(bottomBrush);
 
-						bottom.selectAll('rect').attr('height', margin);
+						bottom.selectAll('rect').attr('height', 25);
 
 						top = g.append('g')
 							.attr("class", "axis x-axis")
-							.call(topBrush)
-							.call(xAxisEnd);
+							.call(xAxisEnd)
+							.call(topBrush);
 
 						top.selectAll('rect')
-							.attr('height', margin)
-							.attr('transform', "translate(0,-" + margin +")");
+							.attr('height', 25)
+							.attr('transform', "translate(0,-25)");
 
 						middle = g.append('g')
-							.attr("transform", "translate(" + 0 + "," + (margin + 0.5) + ")")
+							.attr("transform", "translate(" + 0 + "," + (margin) + ")")
 							.call(midBrush);
 
 						middle.selectAll('rect')
-							.attr('height', height - 1)
-							.attr('transform', "translate(0,-" + margin + ")");
+							.attr('height', height)
+							.attr('transform', "translate(0,-25)");
 
 						g.selectAll('.extent')
-							.attr('fill', filterColor)
-							.attr('opacity', 0.6);
+							.attr('opacity', 0.1);
 					}
 
 					function update() {

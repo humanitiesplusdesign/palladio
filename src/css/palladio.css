@@ -262,7 +262,7 @@ strong {
 }
 
 .modal h4 {
-  font-weight: 300;
+  font-weight: 400;
 }
 
 .modal-backdrop, .modal-backdrop.fade.in {
@@ -293,8 +293,7 @@ strong {
   margin: 0px;
   margin-left: -20px;
   font: 12px Roboto;  
-  line-height: 1;
-  font-weight: 300;
+line-height: 1;
 }
 
 .modal .pill i {
@@ -302,36 +301,6 @@ strong {
 }
 
 .modal .pill input {
-  display: none;
-}
-
-.dimension-pill, .file-pill {
-  display: inline-block;
-  padding: 2px 10px;
-  margin: 2px;
-  border-radius: 2px;
-  background-color: #eee;
-}
-
-.dimension-pill-checked, .file-pill-checked {
-  background-color: #444;
-  color: #eee;
-}
-
-.dimension-pill label, .file-pill label {
-  display: inline-block;
-  margin: 0px;
-  margin-left: -20px;
-  font: 12px Roboto;  
-  line-height: 1;
-  font-weight: 300;
-}
-
-.dimension-pill i {
-  margin-right: 10px;
-}
-
-.dimension-pill input, .file-pill input {
   display: none;
 }
 
@@ -865,7 +834,7 @@ li.field .field-description:hover {
   text-align: right;
   font-size: 11px;
   font-family: Roboto, sans-serif;
-  font-weight: 400;
+  font-weight: bold;
   background-color: #e4e4e4;
   padding: 0px 6px;
   border-radius: 2px;
@@ -1179,7 +1148,7 @@ input[type="checkbox"] {
 .message {
   top: 0px;
   bottom: 0px;
-  /*position: absolute;*/
+  position: absolute;
   left: 0px;
   right: 0px;
   font-size: 24px;
@@ -1392,9 +1361,9 @@ button.close {
 
 }
 
-/*.accordion .in {
+.accordion .in {
   margin-top: 10px;
-}*/
+}
 
 .footer {
   padding: 10px 0px;
@@ -1458,7 +1427,6 @@ button.close {
   letter-spacing: 0px;
   text-transform: none;
   border: 1px solid #ddd;
-  margin-bottom: 10px;
 }
 
 .bootstrap-select.btn-group>.btn:first-child {
@@ -1585,10 +1553,6 @@ pre.CodeMirror-placeholder {
   border: none;
 }
 
-.CodeMirror pre {
-  font-size: 11px;
-}
-
 .d3-tip {
   line-height: 1;
   padding: 10px 8px;
@@ -1644,49 +1608,4 @@ pre.CodeMirror-placeholder {
   margin: -4px 0 0 -1px;
   top: 50%;
   left: 100%;
-}
-
-.front-page-nav-tabs {
-  margin-bottom: 0px;
-}
-
-.front-page-tab-content {
-  margin-top: -1;
-  padding: 10px;
-  padding-top: 20px;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-top-style: none;
-  -webkit-border-radius: 0 0 4px 4px;
-  -moz-border-radius: 0 0 4px 4px;
-  border-radius: 0 0 4px 4px;
-}
-
-.btn-group {
-  line-height: 1.6;
-}
-
-#palette {
-  position:fixed;
-  right:0;
-  top: 55px;
-  z-index: 1000;
-  background-color: #fff;
-  padding-top: 10px;
-  padding-bottom: 1000px;
-  width: 200px;
-  height: 100%;
-}
-
-.palette-displayed {
-  -webkit-transition: all 0.5s;
-  margin-right: 200px;
-}
-
-.palette-displayed .settings {
-  margin-right: 200px;
-}
-
-.palette-displayed #footer {
-  right: 200px;
 }
