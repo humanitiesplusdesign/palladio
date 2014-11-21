@@ -2,7 +2,7 @@ describe("Validation Service:", function () {
 	var vs;
 
 	beforeEach(function () {
-		module("palladio.services.validation");
+		module("palladioApp.services");
 
 		inject(['validationService', function(validationService) {
 			vs = validationService;

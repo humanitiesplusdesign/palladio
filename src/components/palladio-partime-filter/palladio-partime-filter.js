@@ -1,6 +1,6 @@
 // Palladio template component module
 
-angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
+angular.module('palladioPartimeFilter', ['palladio.date', 'palladio', 'palladioApp.services'])
 	.directive('palladioPartimeFilter', function (dateService, palladioService, dataService) {
 		var directiveObj = {
 			scope: true,

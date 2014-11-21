@@ -1,6 +1,6 @@
 // List view module
 
-angular.module('palladioListView', ['palladio', 'palladio.services'])
+angular.module('palladioListView', ['palladio', 'palladioApp.services'])
 	.directive('palladioListView', function (palladioService) {
 		
 		var directiveDefObj = {

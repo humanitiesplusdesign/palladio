@@ -3,21 +3,19 @@
 	<a class="toggle" data-toggle="tooltip" data-original-title="Settings" data-placement="bottom">
 		<i class="fa fa-cog"></i>
 	</a>
-	<div data-ng-show="countDim"
-		data-palladio-table-view 
+	<div data-palladio-table-view 
 		style="margin-bottom: -55px"
-		dimension="countDim"
-		height="{{height}}"
+		dimension="countDim" 
 		dimensions="tableDimensions"
 		xfilter="xfilter"
 		export-func="exportCsv">
 	</div>
-
-	<!-- Message -->
-	<div class="message" data-ng-show="!countDim">
-		Please select a Row dimension and any display dimensions</br>you would like to see from the Settings panel
-	</div>
 </div> 
+
+<!-- Message -->
+<div class="message" data-ng-show="!countDim">
+	Please select a Row dimension and any display dimensions</br>you would like to see from the Settings panel
+</div>
 
 <!-- Settings -->
 <div class="span4 settings"> 

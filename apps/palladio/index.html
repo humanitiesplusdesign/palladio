@@ -76,34 +76,22 @@
                             <i class="fa fa-search" style="margin-right:10px"></i><input class="search" ng-model="searchText" type="text" placeholder="Search in the view..." style="margin-bottom: 0px"></input>
                         </span>
                     </li>
-                    <!-- <li data-ng-show="location.path() == '/visualization'"
-                        data-ng-init="showPalette = false"
-                        data-ng-click="showPalette = !showPalette"
-                        id="palette-top" class="pull-right" style="margin-right:20px">
-
-                        <span>
-                            <i class="fa fa-bars"></i>
-                        </span>
-                    </li> -->
                   </ul>
 
                 </div>
               </div>
             </div>
 
-            <!-- <div id="palette" data-ng-show="showPalette && location.path() == '/visualization'">
-                <div data-palladio-palette></div>
-            </div> -->
+            
 
-            <div ui-view id="main"
-                data-ng-class="{'palette-displayed' : showPalette}"></div>
-
+            <div ui-view id="main"></div>
         </div> <!-- wrapper -->
 
         <div id="spinner"></div>
 
         <script src="palladio.js"></script>
         <script src="http://api.tiles.mapbox.com/mapbox.js/v1.0.4/mapbox.js"></script>
+        <script src="templates.js"></script>
 
         <script src="js/app.js"></script>
 

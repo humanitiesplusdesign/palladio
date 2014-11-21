@@ -21,7 +21,7 @@ describe("Data Service:", function () {
 	];
 
 	beforeEach(function () {
-		module("palladio.services.data");
+		module("palladioApp.services");
 	});
 
 	it('service should exist', inject(['dataService', function(ds) {

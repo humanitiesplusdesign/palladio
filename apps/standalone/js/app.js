@@ -1,42 +1,32 @@
 angular.module('palladioStandaloneApp', [
 	'palladio',
-	'palladio.controllers',
-	'palladio.services',
-	'palladio.directives',
-	'palladio.filters',
-	'palladioDataUpload',
+	'palladioApp.controllers',
+	'palladioApp.services',
+	'palladioApp.directives',
+	'palladioApp.filters',
+	'palladioHistogramFilter',
 	'palladioTimelineFilter',
 	'palladioFacetFilter',
 	'palladioTableView',
-	'palladioPalette',
-	'ui.router'
+	'ngRoute'
 	])
-	.config(function($stateProvider, $urlRouterProvider) {
-		$urlRouterProvider.otherwise("/upload");
-
-		$stateProvider
-			.state('/upload', {
-				url: '/upload',
+	.config(function($routeProvider) {
+		$routeProvider
+			.when('/', {
+				redirectTo : '/upload'
+			})
+			.when('/index.html', {
+				redirectTo : '/upload'
+			})
+			.when('/upload', {
 				templateUrl: 'partials/upload-standalone.html',
 				controller: 'WorkflowCtrl'
 			})
-			.state('/visualization', {
-				url: '/visualization',
+			.when('/visualization', {
 				templateUrl: 'partials/visualization-standalone.html',
-				controller: function($scope, data, palladioService) {
-					palladioService.facetFilter("#facet-filter-here", {
-						height: "600px",
-						showControls: false,
-						showSettings: false,
-						showAccordion: false,
-						showDropArea: false,
-						dimensions: data.metadata.slice(0,4)
-					});
-				},
+				controller: 'VisualizationCtrl',
 				resolve: {
-					data: function (dataService) {
-						return dataService.getData();
-					}
+					data: 'dataPromise'
 				}
 			});
 	});

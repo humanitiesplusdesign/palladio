@@ -1,17 +1,15 @@
 var app = angular.module('palladioApp', [
 	'palladio',
-	'palladio.controllers',
-	'palladio.services',
-	'palladio.directives',
-	'palladio.filters',
+	'palladioApp.controllers',
+	'palladioApp.services',
+	'palladioApp.load',
+	'palladioApp.directives',
+	'palladioApp.filters',
 	'ui.codemirror',
 	'ui.router',
 
 	'palladioDataUpload',
 	'palladioDataDownload',
-
-	// Palette
-	'palladioPalette',
 	
 	// Filters
 	'palladioTimelineFilter',

@@ -1,6 +1,6 @@
 // Timeline filter module
 
-angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
+angular.module('palladioTimelineFilter', ['palladio.date', 'palladio', 'palladioApp.services'])
 	.directive('palladioTimelineFilter', ['dateService', 'palladioService', function (dateService, palladioService) {
 		var filterColor = "#9DBCE4";
 

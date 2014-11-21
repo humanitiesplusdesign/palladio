@@ -3,14 +3,9 @@
     "gulp": "^3.6.2",
     "gulp-angular-templates": "0.0.1",
     "gulp-concat": "^2.2.0",
-    "gulp-filter": "^1.0.2",
-    "gulp-order": "^1.1.1",
     "gulp-rename": "^1.2.0",
     "gulp-uglify": "^0.2.1",
-    "gulp-webserver": "^0.8.2",
     "karma": "~0.10",
-    "karma-jasmine": "~0.1",
-    "main-bower-files": "^2.0.0",
-    "merge-stream": "^0.1.5"
+    "karma-jasmine": "~0.1"
   }
 }

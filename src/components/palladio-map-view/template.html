@@ -13,7 +13,6 @@
 		description-field="descriptiveDim"
 		sequence-accessor="sequenceAccessor"
 		filter-dimension="filterDimension"
-		tile-sets="tileSets"
 		point-size="pointSize"
 		max-point-size="maxPointSize"
 		show-links="showLinks"
@@ -30,7 +29,7 @@
 			<div class="setting">
 				<label>Map type</label>
 				<select bs-select ng-model="mapType" ng-options="type.label for type in mapTypes"
-						data-size="5" class="span12 form-control show-tick">
+						data-size="5" class="span12 show-tick">
 				</select> 
 			</div>
 		</div>
@@ -47,7 +46,7 @@
 				<label>Places</label>
 				<select bs-select ng-model="mapping.sourceCoordinates" 
 						ng-options="field as field.description for field in latlonFields" 
-						data-size="5" class="span12 form-control show-tick">
+						data-size="5" class="span12 show-tick">
 					<option value=""><i>None</i></option>
 				</select> 
 			</div>
@@ -56,7 +55,7 @@
 				<label>Source Places</label>
 				<select bs-select ng-model="mapping.sourceCoordinates" 
 						ng-options="field as field.description for field in latlonFields" 
-						data-size="5" class="span12 form-control show-tick">
+						data-size="5" class="span12 show-tick">
 					<option value=""><i>None</i></option>
 				</select> 
 			</div>
@@ -69,7 +68,7 @@
 					<label>Destination Places</label>
 					<select bs-select ng-model="mapping.destinationCoordinates" 
 							ng-options="field as field.description for field in latlonFields"
-							data-size="5" class="span12 form-control show-tick">
+							data-size="5" class="span12 show-tick">
 					<option value=""><i>None</i></option>
 				</select> 
 			</div>
@@ -78,7 +77,7 @@
 				<label>Establish sequence by</label>
 				<select bs-select ng-model="mapping.sequence" 
 						ng-options="field.description for field in dateFields" 
-						data-size="5" class="span12 form-control show-tick">
+						data-size="5" class="span12 show-tick">
 					<option value=""><i>None</i></option>
 				</select> 
 			</div>
@@ -145,27 +144,6 @@
 			<div class="space"></div>
 
 			<div class="setting">
-				<label class="text">Layers</label>
-				<div class="row-fluid">
-					<ul class="layer-list">
-
-						<li class="layer-item" data-ng-repeat="layer in tileSets | orderBy:index">
-							<i class="fa fa-eye-slash" data-ng-click="layer.toggle()" ng-show="!layer.enabled" data-toggle="tooltip" data-original-title="Show"></i>
-							<i class="fa fa-eye" data-ng-click="layer.toggle()" ng-show="layer.enabled" data-toggle="tooltip" data-original-title="Hide"></i>
-							<span style="margin-left: 10px">{{layer.description}}</span>
-							<i class="fa fa-times pull-right" data-ng-click="layer.remove();" style="line-height: 1.6"></i>
-						</li>
-						<li class="layer-item" data-ng-show="!tileSets.length">
-							<span>No layers</span>
-						</li>
-					</ul>
-					<button class="btn" data-ng-click="showLayerModal()">Add new layer</button>
-				</div>
-			</div>
-
-			<div class="space"></div>
-
-			<div class="setting">
 				<a ng-click="exportSvg(this, 'Palladio Map.svg')">
 					<i class="fa fa-arrow-circle-down margin-right"></i> Export places and links as .svg
 				</a>
@@ -180,5 +158,4 @@
 	<div id="agg-modal" data-modal dimensions="aggDims" model="aggDim" 
 			description-accessor="getAggDescription"></div>
 	<div id="description-modal" data-modal dimensions="descriptiveDims" model="descriptiveDim"></div>
-	<div id="layer-modal" data-layer-modal layers="tileSets"></div>
 </div>

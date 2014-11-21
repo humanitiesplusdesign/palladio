@@ -1,7 +1,7 @@
 describe("Parse Service:", function () {
 
 	beforeEach(function () {
-		module("palladio.services.parse");
+		module("palladioApp.services");
 	});
 
 	it('parseService service should exist', inject(['parseService', function(ps) {

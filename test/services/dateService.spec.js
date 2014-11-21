@@ -1,7 +1,7 @@
 describe("Date Service:", function () {
 
 	beforeEach(function () {
-		module("palladio.services.date");
+		module("palladio.date");
 	});
 
 	it('should exist', inject(['dateService', function(d) {

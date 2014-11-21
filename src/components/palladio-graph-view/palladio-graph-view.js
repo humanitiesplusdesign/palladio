@@ -1,4 +1,4 @@
-angular.module('palladioGraphView', ['palladio.services', 'palladio'])
+angular.module('palladioGraphView', ['palladioApp.services', 'palladio', 'palladioApp.services'])
 	// Palladio Timechart View
 	.directive('palladioGraphView', function (palladioService) {
 
@@ -374,6 +374,7 @@ angular.module('palladioGraphView', ['palladio.services', 'palladio'])
 					}
 
 					scope.exportSvg = function(source, title){
+						console.log(scope.getSvg());
 						exportService(scope.getSvg(), title);
 					};
 
