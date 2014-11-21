@@ -14,8 +14,8 @@
 			highlightTarget = function () {},
 			removeHighlight = function () {};
 
-		var force, forceLabel, drag, line, zoom, overlay, main, nodes, path, paths, node, anchorLink, anchorNode, anchorNodeText, anchorNodeCircle, labelAnchors, labelAnchorLinks, nodeLabel, nodeLabelShadow,
-			nodeLabelText, initialAggs, resetFunc, canvas, links;
+		var force, forceLabel, drag, line, zoom, overlay, main, nodes, path, node, anchorLink, anchorNode, anchorNodeText, anchorNodeCircle, labelAnchors, labelAnchorLinks, nodeLabel, nodeLabelShadow,
+			nodeLabelText, initialAggs, resetFunc;
 
 		resetFunc = function () { };
 
@@ -56,9 +56,7 @@
 							current: true,
 							agg: link.data.agg,
 							initialAgg: initialAggs.get(link.data.source),
-							dimension: "source",
-							x: (width / 2) + (Math.random() * 10),
-							y: (height / 2) + (Math.random() * 10)
+							dimension: "source"
 						});
 
 						labelAnchors.set(link.data.source, { name: link.data.source, node : nodes.get(link.data.source) });
@@ -78,9 +76,7 @@
 							current: true,
 							agg: link.data.agg,
 							initialAgg: initialAggs.get(link.data.target),
-							dimension: "target",
-							x: (width / 2) + (Math.random() * 10),
-							y: (height / 2) + (Math.random() * 10)
+							dimension: "target"
 						});
 
 						labelAnchors.set(link.data.target, { name: link.data.target, node : nodes.get(link.data.target) });
@@ -111,7 +107,7 @@
 					};
 				});
 				// Labels
-
+				
 				labelAnchorLinks = [];
 
 				labelAnchorLinks = labelAnchors.entries().filter(function(d){ return !d.value.fake; }).map(function (d,i){
@@ -136,19 +132,15 @@
 
 				// Main layers
 				main.selectAll(".layer").remove();
-				// main.append("g").attr("class","layer links");
+				main.append("g").attr("class","layer links");
 				main.append("g").attr("class","layer nodes");
 				main.append("g").attr("class","layer labels");
 
 				// Links
 
-				paths = document.createElement("g");
-
-				path = d3.select(paths)
-						.attr("class", "layer links")
-					.selectAll("path.link")
-						.data(showLinks ? force.links() : [ ], function (d) { return d.source.name + "-" + d.target.name; });
-
+				path = main.select(".links").selectAll("path.link")
+					.data(showLinks ? force.links() : [ ], function (d) { return d.source.name + "-" + d.target.name; });
+				
 				// Don't remove all paths. Only remove paths that have been exited before updating
 				// the remaining.
 				path.exit().remove();
@@ -164,7 +156,7 @@
 
 				node = main.select(".nodes").selectAll(".node")
 					.data(force.nodes(), function (d) { return d.name; });
-
+				
 				// Don't remove all nodes. Only remove nodes that have been exited before updating
 				// the remaining.
 				node.exit().remove();
@@ -192,12 +184,12 @@
 				// Don't remove all nodes. Only remove nodes that have been exited before updating
 				// the remaining.
 				anchorNode.exit().remove();
-
+				
 				anchorNode.enter().append("g")
 					.attr("class", "anchor-node")
 					.append("svg:text")
 						.style("fill", "#555")
-						.style("font-family", "merriweather, Arial, Helvetica")
+						.style("font-family", "Arial, Helvetica")
 						.style("font-size", 11)
 						.text(function(d, i) {
 							return d.fake ? "" : d.node.name;
@@ -205,7 +197,7 @@
 
 			});
 
-
+			
 
 			nodeSizeChange = function () {
 				node = main.selectAll("g.node")
@@ -274,7 +266,7 @@
 
 				line = d3.svg.line().interpolate('bundle');
 
-				zoom = d3.behavior.zoom().scaleExtent([0.1,10]).on("zoom", function () { zoomed = true; redraw();} );
+				zoom = d3.behavior.zoom().scaleExtent([0.1,10]).on("zoom", redraw);
 
 				zoomByFactor(2);
 
@@ -301,7 +293,8 @@
 						.data([{}]);
 
 				main.enter().append("g")
-						.attr("class", "main");
+						.attr("class", "main")
+						.call(zoom);
 
 				main.exit().remove();
 
@@ -320,8 +313,6 @@
 						}
 					});
 				});
-
-				canvas = d3.select(selection[0][0].parentElement).select('canvas').node().getContext('2d');
 			}
 
 			resetFunc = function () {
@@ -346,14 +337,14 @@
 				sourceY = source.y * zoom.scale() + zoom.translate()[1],
 				targetX = target.x * zoom.scale() + zoom.translate()[0],
 				targetY = target.y * zoom.scale() + zoom.translate()[1];
-				// rad = Math.sqrt( Math.pow(targetX-sourceX,2) + Math.pow(targetY-sourceY, 2) )/4,
-				// sourceP = Math.atan2((targetY-sourceY),(targetX-sourceX)) - Math.PI/8,
-				// targetP = Math.atan2((sourceY-targetY),(sourceX-targetX)) + Math.PI/8;
-
+				rad = Math.sqrt( Math.pow(targetX-sourceX,2) + Math.pow(targetY-sourceY, 2) )/4,
+				sourceP = Math.atan2((targetY-sourceY),(targetX-sourceX)) - Math.PI/8,
+				targetP = Math.atan2((sourceY-targetY),(sourceX-targetX)) + Math.PI/8;
+						
 			return line([
 				[sourceX, sourceY],
-				// [sourceX+rad*Math.cos(sourceP),sourceY+rad*Math.sin(sourceP)],
-				// [targetX+rad*Math.cos(targetP),targetY+rad*Math.sin(targetP)],
+				[sourceX+rad*Math.cos(sourceP),sourceY+rad*Math.sin(sourceP)],
+				[targetX+rad*Math.cos(targetP),targetY+rad*Math.sin(targetP)],
 				[targetX,targetY]
 			]);
 		}
@@ -366,11 +357,12 @@
 			});
 		}
 
-		// Flag to indicate that a zoom happened. In this case, we need to recalculate widths
-		// from getBBox()
-		var zoomed = true;
-
 		function redraw() {
+
+			path.attr("d", curve)
+				.attr("href", function (d) {
+					return "#path" + d.source.index + "_" + d.target.index;
+				});
 
 			node.classed("hidden", function (d) {
 				return searchText &&
@@ -382,23 +374,11 @@
 					d.node.name.toLowerCase().indexOf(searchText.toLowerCase()) === -1;
 			});
 
-			// Draw canvas paths
-			canvas.clearRect(0, 0, width, height);
-			canvas.strokeStyle = "#ccc";
-			canvas.beginPath();
-			path.each(function (d) {
-				if(!(searchText &&
+			path.classed("hidden", function (d) {
+				return searchText &&
 					( d.source.name.toLowerCase().indexOf(searchText.toLowerCase()) === -1 &&
-						d.target.name.toLowerCase().indexOf(searchText.toLowerCase()) === -1 ))) {
-					canvas.moveTo(
-						d.source.x * zoom.scale() + zoom.translate()[0],
-						d.source.y * zoom.scale() + zoom.translate()[1]);
-					canvas.lineTo(
-						d.target.x * zoom.scale() + zoom.translate()[0],
-						d.target.y * zoom.scale() + zoom.translate()[1]);
-				}
+						d.target.name.toLowerCase().indexOf(searchText.toLowerCase()) === -1 );
 			});
-			canvas.stroke();
 
 			node.call(updateNode);
 
@@ -408,31 +388,23 @@
 				d.y = d.node.y;
 			});
 
-			var shiftX, shiftY, diffX, diffY, dist;
-			anchorNode.each(function (d) {
-				if(zoomed) {
-					d.width = this.childNodes[0].getBBox().width;
-				}
-				// b = this.childNodes[0].getBBox();
+			var shiftX, shiftY, b, diffX, diffY, dist;
+			anchorNode.each(function (d, i) {
+				b = this.childNodes[0].getBBox();
 				diffX = d.x - d.node.x;
 				diffY = d.y - d.node.y;
 				dist = Math.sqrt(diffX * diffX + diffY * diffY);
 
-				shiftX = d.width * (diffX - dist) / (dist * 2);
-				shiftX = Math.max(-d.width, Math.min(0, shiftX));
+				shiftX = b.width * (diffX - dist) / (dist * 2);
+				shiftX = Math.max(-b.width, Math.min(0, shiftX));
 				shiftY = 5;
-				if(shiftX && shiftY) {
-					this.childNodes[0].setAttribute("transform", "translate(" + shiftX + "," + shiftY + ")");
-				}
+				this.childNodes[0].setAttribute("transform", "translate(" + shiftX + "," + shiftY + ")");
 			});
 
 			anchorNode.call(updateNode);
-
-			zoomed = false;
 		}
 
 		function zoomByFactor(factor) {
-			zoomed = true;
 			var scale = zoom.scale();
 			var extent = zoom.scaleExtent();
 			var newScale = scale * factor;
@@ -537,13 +509,13 @@
 								name: n.name,
 								x: n.x,
 								y: n.y
-							};
+							}
 						});
 				} else {
 					return false;
 				}
 			}
-
+			
 			var nameMap = d3.map();
 
 			if(names) {
@@ -565,27 +537,7 @@
 			}
 
 			return chart;
-		};
-
-		chart.getSvg = function () {
-
-			// Update unrendered SVG paths.
-			path.attr("d", curve)
-				.attr("href", function (d) {
-					return "#path" + d.source.index + "_" + d.target.index;
-				});
-
-			// Keep SVG paths up to date (not rendered)
-			path.classed("hidden", function (d) {
-				return searchText &&
-					( d.source.name.toLowerCase().indexOf(searchText.toLowerCase()) === -1 &&
-						d.target.name.toLowerCase().indexOf(searchText.toLowerCase()) === -1 );
-			});
-
-			var clone = main[0][0].parentElement.cloneNode(true);
-			clone.children[1].appendChild(paths);
-			return d3.select(clone);
-		};
+		}
 
 		return chart;
 	};

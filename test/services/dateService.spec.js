@@ -1,7 +1,7 @@
 describe("Date Service:", function () {
 
 	beforeEach(function () {
-		module("palladio.services.date");
+		module("palladio.date");
 	});
 
 	it('should exist', inject(['dateService', function(d) {
@@ -11,8 +11,8 @@ describe("Date Service:", function () {
 	it('should provide a .format method to output an internal format based on Date objects',
 		inject(['dateService', function (d) {
 
-		var td = new Date(Date.UTC(1999,0,1));
-		var nd = new Date(Date.UTC(-1,0,1));
+		var td = new Date(Date.UTC(1999,1,1));
+		var nd = new Date(Date.UTC(-1,1,1));
 
 		expect(d.format(td)).toEqual("1999-01-01");
 		expect(d.format(nd)).toEqual("-0001-01-01");
@@ -21,8 +21,8 @@ describe("Date Service:", function () {
 	it('should provide a .formatMonth method to output an internal format based on Date objects',
 		inject(['dateService', function (d) {
 
-		var td = new Date(Date.UTC(1999,0,1));
-		var nd = new Date(Date.UTC(-1,0,1));
+		var td = new Date(Date.UTC(1999,1,1));
+		var nd = new Date(Date.UTC(-1,1,1));
 
 		expect(d.formatMonth(td)).toEqual("1999-01");
 		expect(d.formatMonth(nd)).toEqual("-0001-01");
@@ -31,8 +31,8 @@ describe("Date Service:", function () {
 	it('should provide a .formatYear method to output an internal format based on Date objects',
 		inject(['dateService', function (d) {
 
-		var td = new Date(Date.UTC(1999,0,1));
-		var nd = new Date(Date.UTC(-1,0,1));
+		var td = new Date(Date.UTC(1999,1,1));
+		var nd = new Date(Date.UTC(-1,1,1));
 
 		expect(d.formatYear(td)).toEqual("1999");
 		expect(d.formatYear(nd)).toEqual("-0001");
@@ -41,12 +41,12 @@ describe("Date Service:", function () {
 	it('should provide a .parse method to build a Date object based on internal format',
 		inject(['dateService', function (d) {
 
-		var td = new Date(Date.UTC(1999,0,5));
-		var sd = new Date(Date.UTC(10,9,10));
+		var td = new Date(Date.UTC(1999,1,1));
+		var sd = new Date(Date.UTC(10,10,10));
 		sd.setUTCFullYear(10);
-		var nd = new Date(Date.UTC(-1,0,1));
+		var nd = new Date(Date.UTC(-1,1,1));
 
-		expect(d.format.parse("1999-01-05")).toEqual(td);
+		expect(d.format.parse("1999-01-01")).toEqual(td);
 		
 		expect(d.format.parse("0010-10-10")).toEqual(sd);
 
@@ -56,10 +56,10 @@ describe("Date Service:", function () {
 	it('should provide a .parseExternal method to build a Date object based on supported external formats',
 		inject(['dateService', function (d) {
 
-		var td = new Date(Date.UTC(1999,0,1));
-		var sd = new Date(Date.UTC(10,9,10));
+		var td = new Date(Date.UTC(1999,1,1));
+		var sd = new Date(Date.UTC(10,10,10));
 		sd.setUTCFullYear(10);
-		var nd = new Date(Date.UTC(-1,0,1));
+		var nd = new Date(Date.UTC(-1,1,1));
 
 		expect(d.format.parseExternal("1999-01-01")).toEqual(td);
 		expect(d.format.parseExternal("1999-1-1")).toEqual(td);

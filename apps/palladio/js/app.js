@@ -1,56 +1,50 @@
 var app = angular.module('palladioApp', [
 	'palladio',
-	'palladio.controllers',
-	'palladio.services',
-	'palladio.directives',
-	'palladio.filters',
+	'palladioApp.controllers',
+	'palladioApp.services',
+	'palladioApp.directives',
+	'palladioApp.filters',
 	'ui.codemirror',
-	'ui.router',
-
-	'palladioDataUpload',
-	'palladioDataDownload',
-
-	// Palette
-	'palladioPalette',
+	'ngRoute',
 	
 	// Filters
 	'palladioTimelineFilter',
+	'palladioArctimeFilter',
 	'palladioFacetFilter',
-	'palladioTimespanFilter',
-	'palladioPartimeFilter',
+	'palladioLifetimeFilter',
 	// Views
 	'palladioListView',
 	'palladioMapView',
 	'palladioTableView',
 	'palladioSelectionView',
-	'palladioGraphView']
+	'palladioTimechartView',
+	'palladioGraphView',
+	// Widgets
+	'palladioDownloadWidget']
 	)
-	.config(function($stateProvider, $urlRouterProvider) {
-
-		$urlRouterProvider.otherwise("/");
-
-		$stateProvider
-			.state('/', {
-				url: '/',
-				templateUrl: 'partials/start.html',
+	.constant('version', '0.9')
+	.config(function($routeProvider) {
+		$routeProvider
+			.when('/', {
+				//templateUrl: 'partials/upload.html',
+				redirectTo : '/upload'
 			})
-			.state('/upload', {
-				url: '/upload',
+			.when('/index.html', {
+				//templateUrl: 'partials/upload.html'
+				redirectTo : '/upload'
+			})
+			.when('/upload', {
 				templateUrl: 'partials/upload.html',
 				controller: 'UploadRefineCtrl'
 			})
-			.state('/link', {
-				url: '/link',
+			.when('/link', {
 				templateUrl: 'partials/link.html'
 			})
-			.state('/visualization', {
-				url: '/visualization',
+			.when('/visualization', {
 				templateUrl: 'partials/visualization.html',
 				controller: 'VisualizationCtrl',
 				resolve: {
-					data: function (dataService) {
-						return dataService.getData();
-					}
+					data: 'dataPromise'
 				}
 			});
 	})

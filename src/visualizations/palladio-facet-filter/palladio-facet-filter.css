@@ -1,0 +1,167 @@
+[data-palladio-facet-filter] ul {
+	padding: 0;
+	margin: 0;
+}
+
+[data-palladio-facet-filter] .list {
+	overflow: auto;
+	outline: none;
+}
+
+[data-palladio-facet-filter] .list-container {
+	padding: 2 0 0 2;
+	font-weight: normal;
+	text-align: left;
+	margin: 0;
+	margin-bottom: 1em;
+	float:left;
+	margin-right: 10px;
+}
+
+[data-palladio-facet-filter] #sortable-expanded {
+	list-style-type: none;
+}
+
+[data-palladio-facet-filter] #sortable-collapsed .list-title {
+	font-weight: normal;
+	font-size: 0.9em;
+}
+
+[data-palladio-facet-filter] .list-title {
+	font-size: 12px;
+	width: 120px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: inline-block;
+}
+
+[data-palladio-facet-filter] .collapse-button i {
+	margin-top: 3px;
+	vertical-align: top;
+}
+
+[data-palladio-facet-filter] .list-header {
+	height: 1.4em;
+	font-weight: bold;
+	margin: 2px 0.5em;
+}
+
+[data-palladio-facet-filter] .collapsed {
+	display: none;
+}
+
+[data-palladio-facet-filter] .invisible {
+	opacity: 0;
+}
+
+[data-palladio-facet-filter] #collapsed-lists {
+	font-weight: normal;
+	text-align: left;
+}
+
+[data-palladio-facet-filter] #collapsed-scroll {
+	overflow: auto;
+}
+
+[data-palladio-facet-filter] #collapsed-lists ul {
+	list-style-type: none;
+}
+
+[data-palladio-facet-filter] #collapsed-lists ul li {
+	margin: 2px;
+	padding-bottom: 2px;
+}
+
+[data-palladio-facet-filter] #collapsed-lists li {
+	margin: 2px;
+	padding-bottom: 2px;
+	float:none;
+}
+
+[data-palladio-facet-filter] .mode-buttons {
+	margin-right: 10px;
+	float: right;
+}
+
+[data-palladio-facet-filter] .btn {
+	padding: 0 6px;
+	font-size: 10.5px;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+
+[data-palladio-facet-filter] .btn-mini {
+	color: #666;
+	font-size: 12px;
+}
+
+[data-palladio-facet-filter] .btn-mini:hover {
+	color: #222;
+}
+
+
+[data-palladio-facet-filter] .label {
+	text-shadow: none;
+	font-weight: 300;
+	font-size: 11px;
+}
+
+[data-palladio-facet-filter] .cell {
+	cursor: pointer;
+}
+
+
+[data-palladio-facet-filter] .cell rect {
+	fill: #dddddd;
+}
+
+[data-palladio-facet-filter] .cell rect.filtered {
+	fill: #67D6E5;
+}
+
+[data-palladio-facet-filter] .cell:hover rect {
+	fill: #bbbbbb;
+}
+
+[data-palladio-facet-filter] .jspTrack {
+	background: #ddd;
+}
+
+[data-palladio-facet-filter] .jspDrag {
+	background: #888;
+}
+
+[data-palladio-facet-filter-with-settings] .selection-title {
+	text-transform: uppercase;
+	margin-top: 7px;
+	margin-bottom: 7px;
+	margin-right: 5px;
+	display: inline-block;
+}
+
+[data-palladio-facet-filter-with-settings] .selection-display {
+	list-style-type: none;
+	display: inline-block;
+	margin-left: 0px;
+}
+
+[data-palladio-facet-filter-with-settings] .selection-pill {
+	padding: 5px;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin: 2px;
+	background-color: lightgray;
+	border-radius: 2px;
+	display: inline-block;
+	font-size: 12px;
+}
+
+[data-palladio-facet-filter-with-settings] .selection-pill i {
+	margin-left: 7px;
+}
+
+[data-palladio-facet-filter-with-settings] .selection-label {
+	font-weight: bold;
+}

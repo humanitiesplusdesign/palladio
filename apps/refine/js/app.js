@@ -1,10 +1,10 @@
 var app = angular.module('refineApp', [
 	'palladio',
 	'ngRoute',
-	'palladio.controllers',
-	'palladio.services',
-	'palladio.directives',
-	'palladio.filters',
+	'palladioApp.controllers',
+	'palladioApp.services',
+	'palladioApp.directives',
+	'palladioApp.filters',
 	'ui.codemirror']
 	)
 	.constant('version', '0.9')

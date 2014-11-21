@@ -1,0 +1,16 @@
+[data-palladio-table-view] {
+	width: 100%;
+	margin-bottom: 90px;
+}
+
+[data-palladio-table-view] table {
+	font-size: 12px;
+}
+
+[data-palladio-table-view] td {
+	font-weight: 300;
+}
+
+[data-palladio-table-view] {
+	overflow: auto;
+}

@@ -1,0 +1,141 @@
+<div class="view">
+	<a class="toggle" data-toggle="tooltip" data-original-title="Settings" data-placement="bottom">
+		<i class="fa fa-cog"></i>
+	</a>
+	<div data-palladio-map-view
+		type="mapType.value"
+		source-dimension="source"
+		source-accessor="sourceAccessor"
+		source-coordinates-accessor="sourceCoordinatesAccessor"
+		destination-dimension="destination"
+		destination-accessor="destinationAccessor"
+		destination-coordinates-accessor="destinationCoordinatesAccessor"
+		description-field="descriptiveDim"
+		sequence-accessor="sequenceAccessor"
+		search-text="searchText"
+		filter-dimension="filterDimension"
+		point-size="pointSize"
+		max-point-size="maxPointSize"
+		show-links="showLinks"
+		data-aggregation-type="{{aggregationType}}"
+		data-aggregate-key="{{aggregateKey}}"
+		count-by="{{countBy}}"
+		count-description="{{aggDescription}}">
+	</div>
+</div>
+<!-- Settings -->
+<div class="span4 settings open">
+	<p class="super tiny">Map Settings</p>
+	<div class="row-fluid">
+		<div class="span6">						     
+			<div class="setting">
+				<label>Map type</label>
+				<select bs-select ng-model="mapType" ng-options="type.label for type in mapTypes"
+						data-size="5" class="span12 show-tick">
+				</select> 
+			</div>
+		</div>
+		<div class="span6">
+			<label>&nbsp;</label>
+			<span class="help-block"></span>
+		</div>
+	</div>
+
+	<div class="row-fluid">
+		<div class="span6">
+						        
+			<div class="setting" ng-show="mapType.value=='points' || mapType.value=='sequence'">
+				<label>Places</label>
+				<select bs-select ng-model="mapping.sourceCoordinates" 
+						ng-options="field as field.description for field in latlonFields" 
+						data-size="5" class="span12 show-tick">
+					<option value=""><i>None</i></option>
+				</select> 
+			</div>
+						    
+			<div class="setting" ng-show="mapType.value=='point-to-point'">
+				<label>Source Places</label>
+				<select bs-select ng-model="mapping.sourceCoordinates" 
+						ng-options="field as field.description for field in latlonFields" 
+						data-size="5" class="span12 show-tick">
+					<option value=""><i>None</i></option>
+				</select> 
+			</div>
+
+			<div class="space"></div>
+
+			<div class="setting">
+				<label class="checkbox">
+					<input type="checkbox" ng-model="pointSize"> Size points
+				</label>
+			</div>
+
+			<div class="setting" data-ng-show="pointSize">
+				<label class="">Point size corresponds to</label>
+				<span class="field" ng-click="showAggModal()">
+						{{getAggDescription(aggDim) || "Choose..."}}
+					<i class="fa fa-bars pull-right"></i>
+				</span>
+			</div>
+
+			<div class="setting" data-ng-show="pointSize">
+				<label class="text">Upper value of point scale</label>
+				<div class="row-fluid">
+					<input class="span12" type="number" ng-model="maxPointSize">
+				</div>
+			</div>
+
+			<div class="space"></div>
+						      	
+			<div class="setting">
+				<label class="">Tooltip label</label>
+				<span class="field" ng-click="showDescriptionModal()">
+						{{descriptiveDim.description || "Choose..."}}
+					<i class="fa fa-bars pull-right"></i>
+				</span>
+			</div>
+
+			<div class="space"></div>
+
+			<div class="setting">
+				<a ng-click="exportSvg(this, 'Palladio Map.svg')">
+					<i class="fa fa-arrow-circle-down margin-right"></i> Export places and links as .svg
+				</a>
+			</div>
+
+		</div>
+
+		<div class="span6">
+
+			<div class="setting" ng-show="mapType.value=='point-to-point'">
+					<label>Destination Places</label>
+					<select bs-select ng-model="mapping.destinationCoordinates" 
+							ng-options="field as field.description for field in latlonFields"
+							data-size="5" class="span12 show-tick">
+					<option value=""><i>None</i></option>
+				</select> 
+			</div>
+
+			<div class="setting" ng-show="mapType.value=='sequence'">
+				<label>Establish sequence by</label>
+				<select bs-select ng-model="mapping.sequence" 
+						ng-options="field.description for field in dateFields" 
+						data-size="5" class="span12 show-tick">
+					<option value=""><i>None</i></option>
+				</select> 
+			</div>
+
+			<div class="setting" ng-show="mapType.value=='point-to-point' || mapType.value=='sequence'">
+				<label class="checkbox">
+					<input type="checkbox" ng-model="showLinks"> Show links
+				</label>
+			</div>
+
+		</div>
+	</div>
+</div>
+<div id="{{uniqueModalId}}">
+	<div id="agg-modal" data-modal dimensions="aggDims" model="aggDim" 
+			description-accessor="getAggDescription"></div>
+	<div id="description-modal" data-modal dimensions="descriptiveDims" model="descriptiveDim"></div>
+</div>

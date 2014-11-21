@@ -1,66 +1,34 @@
 <!-- Files -->
-<div class="row-fluid" data-ng-show="!files.length">
-	<div class="span10 offset1">
-		<h4>Create a New Palladio project</h4>
-		<div class="row-fluid">
-			<div class="span4">
-				<div class="row-fluid">
-					<div class="span12">
-						<p class="small">You can load an existing Palladio project (.json format), load from a spreadsheet or flat-file, or load data from a SPARQL endpoint by choosing from options to the right.</p>
-						<p class="small">Your primary table is the main entity you want to visualize. It could be either an object, like a person or a letter, or a more abstract concept, like a relationship. Once you have loaded your primary table, you will be able to extend fields in the primary table with additional information.</p>
-						<p class="small">We recommend that your primary table include a unique key, which can be used to uniquely identify the different entities in the table.</p>
-					</div>
-				</div>
-			</div>
-
-			<div class="span8">
-				<div class="data-loader" data-ng-init="loadFrom='palladio'">
-			        <ul class="nav nav-tabs front-page-nav-tabs" role="tablist" id="uploadTab">
-			        	<li data-ng-class="{'active' : loadFrom =='palladio'}"><a ng-click="loadFrom='palladio'" role="tab" data-toggle="tab">Open a Palladio project</a></li>
-				        <li data-ng-class="{'active' : loadFrom =='csv'}"><a ng-click="loadFrom='csv'" role="tab" data-toggle="tab">Load Spreadsheet or CSV</a></li>
-				        <li data-ng-class="{'active' : loadFrom =='sparql'}"><a ng-click="loadFrom='sparql'" role="tab" data-toggle="tab">Load from SPARQL endpoint</a></li>
-			        </ul>
-	                <div class="tab-content front-page-tab-content">
-						<div class="tab-pane" data-ng-class="{'active' : loadFrom =='csv'}" id="csv">
-							<p>Copy and paste out of your spreadsheets, drag-and-drop to upload tabular data (e.g. .csv, .tab, .tsv), or link to a public Google spreadsheet to create a new Palladio project.</p>
-							<div class="alert alert-warning" ng-show="parseError">{{parseError}}</div>
-							<textarea ui-codemirror="{ mode : 'text',  lineNumbers : true, lineWrapping: true, onDrop : onDrop }" placeholder="Paste your data or drop a file here" ng-model="text"></textarea>
-							<div class="">
-								<button class="btn" ng-click="parseExtendTable()" ng-disabled="!text">Load</button>
-							</div>
-						</div>
-						<div class="tab-pane" data-ng-class="{'active' : loadFrom =='sparql'}" id="sparql">
-							<p>You can load data from a SPARQL endpoint by providing both the endpoint URL and a valid SPARQL query. After you run the SPARQL query you will have the opportunity to validate your data and re-run the query if necessary before loading the data into Palladio.</p>
-							<yasgui data="text" endpoint="sparqlEndpoint"></yasgui>
-							<div class="">
-								<button class="btn" ng-click="parseExtendTable()" ng-show="text">Load data</button>
-							</div>
-							<div class="alert alert-warning" ng-show="parseError">{{parseError}}</div>
-						</div>
-						<div class="tab-pane" data-ng-class="{'active' : loadFrom == 'palladio'}" id="palladio">
-							<p>If you have already created and saved a Palladio project and would like to revisit your previous work, please upload your .json file by clicking here.</p>
-							<button class="btn"
-								palladio-data-upload
-					            on-load="onLoad()">
-					            Select a file
-					        </button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+<div class="row" data-ng-show="!files.length">
+	<div class="span3">&nbsp;</div>
+	<div class="span3 small">
+		<b>Primary table</b>
 	</div>
 </div>
-
-
-<!--<div class="row-fluid" ng-show="files.length">
-	<div class="span12">
-		<p>
-			<button palladio-data-download class="btn">Save this project</button>
-		</p>
+<div class="row-fluid" data-ng-show="files.length">
+	<div class="span3 small">
+		<b>Primary table</b>
 	</div>
-</div>-->
-
+	<div class="span3 muted small">Secondary table(s)</div>
+</div>
+<div class="row" data-ng-show="!files.length">
+	<div class="span3 small" style="padding-left:20px; margin-top:-30px">
+		<span data-ng-show="!files.length"><img src="img/palladio_logo.png" width="90" align="left" style="margin-right:15px;margin-bottom:1px"><strong>Palladio</strong> is a web-based platform for the visualization of complex, multi-dimensional data. Our goal has been to open up data visualization to any researcher, by making it possible to upload and visualize data within a web browser, without any barriers. In the Palladio platform there is no need to create an account and nor do we store any data. On the visualization side, we have emphasized tools for filtering: a timeline filter allows researchers to explore data at both micro and macro temporal scales. The facet filter function provides the option to sort and filter data at various levels, which is of particular use when exploring multidimensional data sets.</span>
+	</div>
+	<div class="span3 small">
+		<p class="small">Your primary table is the main entity you want to visualize. It could be either an object, like a person or a letter, or a more abstract concept, like a relationship. Once you have loaded your primary table, you will be able to extend fields in the primary table with additional information.</p>
+		<p class="small">We recommend that your primary table include a unique key, which can be used to uniquely identify the different entities in the table.</p>
+		<p><a href="http://hdlab.stanford.edu/projects/palladio/">Need help? Read our full documentation.</a></p>
+	</div>
+	<div class="data-loader span6">
+		<div class="alert alert-warning" ng-show="parseError">{{parseError}}</div>
+		<textarea ui-codemirror="{ mode : 'text',  lineNumbers : true, lineWrapping: true, onDrop : onDrop }" placeholder="Paste your data or drop a file here" ng-model="text"></textarea>
+		<div class="">
+			<button class="btn" ng-click="parseExtendTable()" ng-disabled="!text">Load data</button>
+		</div>
+		<div class="clearfix"></div>
+	</div>
+</div>
 <div class="row-fluid" ng-show="files.length">
 	<div class="span12 muted small">
 		<ul class="unstyled row-fluid files-list" group every="4" watch="files.length">
@@ -73,20 +41,15 @@
 		                    data-original-title="Rename"
 		                    type="text" class="editable span12 left" ng-class="{strong:$index==0}" ng-model="file.label" placeholder="Untitled"></input>
 					<p class="tiny small" style="cursor:pointer">
-						<span class="" ng-show="$index==0">Primary table</span>
-						<span class="" ng-show="$index!=0">Secondary table</span>
-						<span class="pull-right">
-							<span data-toggle="tooltip"
-								  data-original-title="{{file.data.length}} Row(s)">{{file.data.length}} <i class="fa fa-bars muted"></i></span>
-							<span data-toggle="tooltip"
-								  data-original-title="{{file.fields.length}} Column(s)"
-								  style="margin-left:8px">{{file.fields.length}} <i class="fa fa-columns muted"></i></span>
-							<span data-toggle="tooltip"
-								  data-original-title="{{file.fields | unique}} Unique key(s)"
-								  style="margin-left:8px">{{file.fields | unique}} <i class="fa fa-tags muted"></i></span>
-							<!--<span class="pull-right muted" style="margin-left:6px" ng-show="$index==0">Primary table</span>-->
-						</span>
-						<span class="clearfix"></span>
+						<span data-toggle="tooltip"
+							  data-original-title="{{file.data.length}} Row(s)">{{file.data.length}} <i class="fa fa-bars muted"></i></span>
+						<span data-toggle="tooltip"
+							  data-original-title="{{file.fields.length}} Column(s)"
+							  style="margin-left:8px">{{file.fields.length}} <i class="fa fa-columns muted"></i></span>
+						<span data-toggle="tooltip"
+							  data-original-title="{{file.fields | unique}} Unique key(s)"
+							  style="margin-left:8px">{{file.fields | unique}} <i class="fa fa-tags muted"></i></span>
+						<!--<span class="pull-right muted" style="margin-left:6px" ng-show="$index==0">Primary table</span>-->
 					</p>
 				</div>
 
@@ -95,7 +58,7 @@
 					<!-- Each field -->
 					<li class="field"
 						data-ng-repeat="field in file.fields"
-						data-ng-class="{
+						data-ng-class="{ 
 							selected : field.key == selectedFieldMetadata.key,
 							confirmed : field.confirmed,
 							unique: field.uniqueKey,
@@ -126,7 +89,7 @@
 								</div>
 								<div data-ng-show="isLinked(field)">&nbsp;</div>
 							</div> <!-- end of span1 -->
-
+							
 							<div class="span11 field-content">
 
 								<span class="field-description" data-ng-click="setSelected(field,file)">
@@ -138,9 +101,8 @@
 										<span class="">{{types[field.type]}}</span>
 										<span ng-show="field.errors.length" class="super error"> {{field.errors.length}} errors!</span>
 										<span class="" ng-show="!field.type">No type assigned</span>
-										<span class="special" ng-show="field.unassignedSpecialChars.length > 0"> &middot; Special chars</span>
-										<!--<span class="cardinality"> &middot; {{field.cardinality}}</span>-->
-
+										<span class="cardinality"> &middot; {{field.cardinality}}</span>
+			
 									</span>
 
 								</p>
@@ -157,17 +119,17 @@
 										data-ng-mouseout="highlightLink(hasLinks(null))"
 										data-ng-mouseover="highlightLink(hasLinks(field),file)"
 										data-ng-click="setSelected(field,file)">
-											<!--<i class="fa fa-link" ng-show="hasLinks(field).metadata.matches == field.cardinality"></i>
+											<!--<i class="fa fa-link" ng-show="hasLinks(field).metadata.matches == field.cardinality"></i> 
 											<i class="fa fa-unlink" ng-show="hasLinks(field).metadata.matches < field.cardinality"></i> -->
 											{{hasLinks(field).metadata.matches}} {{hasLinks(field).lookup.file.label}}
 										</span>
 
 									<!-- When can be augmented -->
-									<!--<span class="augment-notification initial"
+									<span class="augment-notification initial"
 										data-toggle="tooltip"
 										data-original-title="Extend this dimension"
 										data-ng-click="showNewTableAndSelect(field,file)"
-										data-ng-show="!hasLinks(field).lookup.file && !field.errors.length && (!field.unassignedSpecialChars.length > 0 || field.confirmed)">Extend</span>-->
+										data-ng-show="!hasLinks(field).lookup.file && field.unassignedSpecialChars.length === 0 && !field.errors.length">Extend</span>
 
 									<!-- When special chars -->
 									<span class="augment-notification specials"
@@ -175,9 +137,7 @@
 										data-ng-class="{confirmed:field.confirmed}"
 										data-toggle="tooltip"
 										data-original-title="This dimension contains special characters, please review"
-										data-ng-show="!field.confirmed && field.unassignedSpecialChars.length > 0 && !hasLinks(field).lookup.file && !field.errors.length">
-											Review
-										</span>
+										data-ng-show="field.unassignedSpecialChars.length > 0 && !hasLinks(field).lookup.file && !field.errors.length">Review</span>
 
 									<!-- When errors -->
 									<span class="augment-notification plus"
@@ -190,8 +150,8 @@
 
 							</div> <!-- end of span11 -->
 
-
-						</div> <!-- end of row -->
+						
+						</div> <!-- end of row -->			
 
 					</li> <!-- end of field -->
 
@@ -220,8 +180,12 @@
 
 
 
-
+	
 </div>
+
+	
 
 
 <!--<a href="#/link" class="btn pull-right">Continue</a>-->
+
+

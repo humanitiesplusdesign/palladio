@@ -1,118 +1,21 @@
-<div class="text-center home">
-	<div class="row-fluid">
-		<div class="span10 offset1">
-			<h3>Palladio is a web-based platform for the visualization of complex, multi-dimensional data. Visit <a href="http://hdlab.stanford.edu/projects/palladio/" target="_blank">Humanities+Design</a> to learn more about this NEH funded project. And please <a href="mailto:palladio@designhumanities.org">send us your feedback!</a></h3>
+<div class="container">
+	<div class="step">
+		<div class="header text-center">
+			<h1 class="title">Palladio<span class="muted small"> (beta)</span></h1> 
 		</div>
-	</div>
-</div>
 
-<div class="container-fluid">
+		<div class="text-center">
+			<p class="lead">Palladio is a data visualization platform developed at <a href="http://hdlab.stanford.edu">Humanities+Design</a>,<br/>a research lab within the <a href="http://cesta.stanford.edu">Center for Spatial and Textual Analysis (CESTA)</a> at <a href="http://www.stanford.edu">Stanford University</a>.</p>
+			<p class="small">New to Palladio? <a href="http://humanitiesplusdesign.github.io/palladio-beta" class="super">Read the documentation</a> or watch the <a href="http://humanitiesplusdesign.github.io/palladio-beta" class="super">demonstration videos.</a></p>
+			<p><br/></p>	
+			<p class="small"><a href="#/upload" class="btn" data-ng-click="clearFiles()">Get started</a> or play with a sample data set <a href="#/upload" class="btn" data-ng-click="loadTheatersSample()">Sample Data 1</a> <a href="#/upload" class="btn" data-ng-click="loadFakeSample()">Sample Data 2</a></p>
+			
 
-	<div class="step" style="padding-bottom:50px">
+			<p class="muted logo-wrapper">
+				<img class="logo" src="img/neh_logo.png" /><br/>
+				<span>Palladio is part of the <b>Networks in History</b> project, funded by the <a href="http://www.neh.gov/divisions/odh">Office of Digital Humanities</a> at the <a href="http://www.neh.gov">National Endowment for the Humanities</a>.</span>
+			</p>
 
-
-
-		<div class="row-fluid">
-			<div class="span10 offset1">
-
-				<h2 class="text-center">What can I do with Palladio? An Overview.</h2>
-
-				<h4>Create or Open Palladio projects</h4>
-				<div class="row-fluid">
-					<div class="span4">
-						<p>Copy and paste out of your spreadsheets, upload tabular data (e.g. .csv, .tab, .tsv), or link to a public Google spreadsheet to create a new Palladio project.</p>
-					</div>
-					<div class="span8">
-						<img class="thumb" src="/img/upload.png">
-					</div>
-				</div>
-
-				<h4>View</h4>
-				<div class="row-fluid">
-					<div class="span12">
-						<div class="row-fluid">
-							<div class="span4">
-								<p>In the <b>Map view,</b> you can see any coordinates data as points on a map. Relationships between distinct points can be connected by lines, with the arc of the line representing the flow of the relationship. Points on the map can be sized to represent their relative magnitude within your data. With the map’s tooltip function you can select which information will be displayed when hovering over a specific point on the map.  Zoom in and out using the + and – buttons. Export the nodes and links of Map visualizations (though not the Map background itself) as .svg files</p>
-							</div>
-							<div class="span8">
-								<img class="thumb" src="/img/map-view.png">
-							</div>
-						</div>
-						<div class="row-fluid">
-							<div class="span4">
-								<p>In the <b>Graph view,</b> you can visualize the relationships between any two dimensions of your data. Graph information will be displayed as nodes connected by lines. Nodes can be scaled to reflect their relative magnitude within your data. The display of links and labels can be toggled on and off.  Export Graph visualizations as .svg files.</p>
-							</div>
-							<div class="span8">
-								<img class="thumb" src="/img/graph-view.png">
-							</div>
-						</div>
-						<div class="row-fluid">
-							<div class="span4">
-								<p>In the <b>List view,</b> dimensions of your data can be arranged to make customized lists. Export List visualizations as .csv files.</p>
-							</div>
-							<div class="span8">
-								<img class="thumb" src="/img/list-view.png">
-							</div>
-						</div>
-						<div class="row-fluid">
-							<div class="span4">
-								<p>In the <b>Gallery view,</b> data can be displayed within a grid setting for quick reference. Here dimensions of your data can also be linked to outside web-based information. Sort your data according to different dimensions. </p>
-							</div>
-							<div class="span8">
-								<img class="thumb" src="/img/gallery-view.png">
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<h4>Filter</h4>
-				<div class="row-fluid">
-					<div class="span12">
-						<div class="row-fluid">
-							<div class="span4">
-								<p>With the <b>TimeLine</b> tool you can display temporal information as stacked bar graphs. Using these graphs you can customize the visualizations above to reflect specific temporal periods of your choosing. Display any kind of temporal information and group this temporal data according to different dimensions.</p>
-							</div>
-							<div class="span8">
-								<img class="thumb" src="/img/timeline.png">
-							</div>
-						</div>
-						<div class="row-fluid">
-							<div class="span4">
-								<p>The <b>TimeSpan</b> tool works similarly to the Timeline in terms of its display and filtering capabilities, but in this case spans of time (in other words, anything with a starting and ending date) are represented as individual entities. Timespans can be displayed as parallel coordinates or horizontal bars.</p>
-							</div>
-							<div class="span8">
-								<img class="thumb" src="/img/timespan.png">
-							</div>
-						</div>
-						<div class="row-fluid">
-							<div class="span4">
-								<p>With the <b>Facet Filter</b> tool (based on <a href="http://moritz.stefaner.eu/projects/elastic-lists/" target="_blank">Moritz Stefaner’s Elastic Lists</a>) you can focus on very specific aspects of your research by applying filters to different dimensions within your multi-dimensional data. The possible combinations are limited only by your data. You can also see numerical information about your specific dimensions, which may especially useful within large and complex datasets.</p>
-							</div>
-							<div class="span8">
-								<img class="thumb" src="/img/facet.png">
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<h4>Save and Export</h4>
-				<div class="row-fluid">
-					<div class="span3">
-						We do not store or save your data, but you can export and save, re-use or share your work with colleagues. 
-					</div>
-					<div class="span9">
-						<div class="row-fluid">
-							<div class="span4">
-								<div class="thumb thumb-top" style="background-image: url(/img/save-1.png)"></div>
-							</div>
-							<div class="span4"><div class="thumb thumb-top" style="background-image: url(/img/save-2.png)"></div></div>
-						</div>
-					</div>
-				</div>
-
-				<h2 class="text-center">To learn more about Palladio, as well as other projects underway at Humanities+Design, please visit <a href="http://hdlab.stanford.edu" target="_blank">hdlab.stanford.edu.</a></h2>
-				
-			</div>
 		</div>
 	</div>
 </div>
