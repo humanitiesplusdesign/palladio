@@ -64766,6 +64766,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 				width: '@',
 				height: '@',
 				mode: '@',
+				short: '=',
 				extentOverride: '=',
 				aggregationType: '@',
 				aggregateKey: '@',
@@ -64800,7 +64801,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 
 				var format, dimFormat, stackGroups, g, yr, brush,
 						color, y0, x, groups, lowestTime, highestTime, y1, stack, xAxis, yAxis,
-						area, sel, z, mMargin, gr,
+						area, sel, z, mMargin, gr, groupContainer,
 						hMargin, vMargin, yAxisWidth, xAxisHeight, mainHeight, mainWidth,
 						brushHeight, title, gBrush;
 
@@ -64864,6 +64865,16 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					if(nv !== ov) {
 						title = scope.title;
 						titleSetup();
+					}
+				});
+
+				scope.$watch('short', function (nv) {
+					if(nv) {
+						gr.select('.y-axis').style('display', 'none');
+						groupContainer.attr('transform', 'matrix(1, 0, 0, 0.25, 0, 119.5)');
+					} else {
+						gr.select('.y-axis').style('display', 'inline');
+						groupContainer.attr('transform', 'matrix(1, 0, 0, 1, 0, 0)');
 					}
 				});
 
@@ -64966,16 +64977,6 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					z.scaleExtent([1, Infinity]);
 					z.on("zoom", zoom);
 
-					// Remove all the groups so they get properly recreated.
-					gr.selectAll(".group").remove();
-
-					var group = gr.selectAll(".group")
-							.data(timelineGroups);
-
-					color.domain(d3.extent(timelineGroups, function(d){ return d[0].i; }));
-
-					group.style("fill", function(d,i) { return color(d[0].i); });
-
 					if(!gr.select("g.x-axis").empty()) {
 						gr.select("g.x-axis").remove();
 					}
@@ -65063,6 +65064,23 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					gBrush.select('rect.background').attr("height", mainHeight);
 
 					// Groups must be appended after the brush to support tooltips.
+
+					// Remove all the groups so they get properly recreated.
+					gr.selectAll(".group").remove();
+
+					if(!gr.select(".groups").empty()) {
+						gr.select(".groups").remove();
+					}
+
+					groupContainer = gr.append('g').attr("class", "groups");
+
+					var group = groupContainer.selectAll(".group")
+							.data(timelineGroups);
+
+					color.domain(d3.extent(timelineGroups, function(d){ return d[0].i; }));
+
+					group.style("fill", function(d) { return color(d[0].i); });
+
 					var newGroups = group.enter()
 							.append("g")
 								.attr("class", "group");
@@ -65150,7 +65168,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 
 					stack(timelineGroups);
 
-					var group = gr.selectAll(".group")
+					var group = groupContainer.selectAll(".group")
 							.data(timelineGroups);
 
 					if(mode === 'stack') {
@@ -65749,76 +65767,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 	.directive('palladioTimelineFilterWithSettings', ['dateService', 'palladioService', 'dataService', function (dateService, palladioService, dataService) {
 		var directiveObj = {
 			scope: true,
-			template:	'<div class="row-fluid">' +
-							
-							'<div class="span3">' +
-								'<div class="accordion-heading row-fluid">' +
-									'<a class="span1 text-center angle" data-toggle="collapse" data-ng-click="collapse=!collapse" data-ng-init="collapse=false" data-parent="#filters" href="{{uniqueToggleHref}}" target="_self">'+
-										'<span data-ng-show="!collapse"><i class="fa fa-angle-down"></i></span>'+
-										'<span data-ng-show="collapse"><i class="fa fa-angle-right"></i></span>'+
-									'</a>' +
-									'<input type="text" class="editable span11" data-ng-model="title"></input>' +
-								'</div>' +
-								'<div class="settings-panel accordion-body" ng-show="!collapse"> ' +
-									'<div class="setting row-fluid">' +
-										'<label class="span4 inline">Dates</label>' +
-										'<span class="field span8" ng-click="showDateModal()">{{dateProp.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
-									'</div>' +
-
-									'<div class="setting row-fluid" data-ng-show="!shortVersion">' +
-										'<label class="span4 inline">Group by</label>' +
-										'<span class="field span8" ng-click="showGroupModal()">{{groupProp.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
-									'</div>' +
-
-									'<div class="setting row-fluid" data-ng-show="!shortVersion">' +
-										'<label class="span4 inline">Height shows</label>' +
-										'<span class="field span8" ng-click="showAggModal()">{{getAggDescription(aggDim) || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
-									'</div>' +
-
-									'<div class="setting row-fluid" data-ng-show="!shortVersion">' +
-										'<span class="span4"></span>' +
-										'<span class="">' +
-											'<a class="" data-ng-click="zoomToFilter()">Zoom to filter</a>' +
-										'</span>' +
-									'</div>' +
-								'</div>' +
-							'</div>' + // chiusura span4
-							
-							'<div class="span9">' +
-								'<!-- View -->' +
-								'<div id="{{uniqueToggleId}}" class="row-fluid accordion-body collapse in component">' +
-									'<div class="span12 view">' +
-										'<a class="toggle" class="close"></a>' +
-										'<div data-palladio-timeline-filter ' +
-											'data-dimension="dateDim" ' +
-											'data-group-accessor="groupAccessor" ' +
-											'data-xfilter="xfilter" ' +
-											'data-type="date" ' +
-											'data-title={{title}} ' +
-											'data-height="200" ' +
-											'data-mode={{mode}} ' +
-											'data-count-by={{countBy}} ' +
-											'data-aggregation-type={{aggregationType}} ' +
-											'data-aggregate-key={{aggregateKey}} ' +
-											'data-set-filter="setFilter" ' +
-											'data-get-filter="getFilter" ' +
-											'data-extent-override="extentOverride" >' +
-										'</div>' +
-									'</div> ' +
-								'</div>' +
-								'<div id={{uniqueModalId}}>' +
-									'<div id="date-modal" data-modal dimensions="dateDims" model="dateProp"></div>' +
-									'<div id="group-modal" data-modal dimensions="groupDims" model="groupProp"></div>' +
-									'<div id="agg-modal" data-modal dimensions="aggDims" model="aggDim" description-accessor="getAggDescription"></div>' +
-								'</div>' +
-							'</div>' +
-
-							'<a class="remove fa fa-trash-o" data-ng-click="removeFilter($event)" data-toggle="tooltip" data-title="Delete"></a>' +
-							'<a class="reset fa fa-eraser" style="line-height:40px" data-ng-click="filterReset()" data-toggle="tooltip" data-title="Clear"></a>' +
-							'<a data-ng-show="!shortVersion" class="short fa fa-compress" style="line-height:40px" data-ng-click="shortVersion = !shortVersion" data-toggle="tooltip" data-title="Compress"></a>' +
-							'<a data-ng-show="shortVersion" class="short fa fa-expand" style="line-height:40px" data-ng-click="shortVersion = !shortVersion" data-toggle="tooltip" data-title="Expand"></a>' +
-
-						'</div>',
+			templateUrl: 'partials/palladio-timeline-filter/template.html',
 
 			link: { pre: function(scope, element, attrs) {
 
@@ -67100,6 +67049,10 @@ angular.module('palladio').run(['$templateCache', function($templateCache) {
 angular.module('palladio').run(['$templateCache', function($templateCache) {
     $templateCache.put('partials/palladio-table-view/template.html',
         "<!-- View -->\n<div class=\"view\">\n\t<a class=\"toggle\" data-toggle=\"tooltip\" data-original-title=\"Settings\" data-placement=\"bottom\">\n\t\t<i class=\"fa fa-cog\"></i>\n\t</a>\n\t<div data-ng-show=\"countDim\"\n\t\tdata-palladio-table-view \n\t\tstyle=\"margin-bottom: -55px\"\n\t\tdimension=\"countDim\"\n\t\theight=\"{{height}}\"\n\t\tdimensions=\"tableDimensions\"\n\t\txfilter=\"xfilter\"\n\t\texport-func=\"exportCsv\">\n\t</div>\n\n\t<!-- Message -->\n\t<div class=\"message\" data-ng-show=\"!countDim\">\n\t\tPlease select a Row dimension and any display dimensions</br>you would like to see from the Settings panel\n\t</div>\n</div> \n\n<!-- Settings -->\n<div class=\"span4 settings\"> \n\t<div class=\"row-fluid\">\n\t\t<div class=\"setting\">\n\t\t\t<label class=\"\">Row dimension</label>\n\t\t\t<span class=\"field\" ng-click=\"showCountModal()\">\n\t\t\t\t{{countDim.description || \"Choose...\"}}\n\t\t\t\t<i class=\"fa fa-bars pull-right\"></i>\n\t\t\t</span>\n\t\t\t<span class=\"muted\" style=\"font-size: 11px; font-weight: 300\">\n\t\t\t\tAt least one row per value in this dimension. Multiple values will be displayed as lists in each cell.\n\t\t\t</span>\n\t\t</div>\n\n\t\t<br />\n\n\t\t<div class=\"setting\"> \n\t\t\t<label>Dimensions</label> \n\t\t\t<span class=\"field\" ng-click=\"showModal()\">\n\t\t\t\t{{fieldDescriptions() || \"Choose...\"}}\n\t\t\t\t<i class=\"fa fa-bars pull-right\"></i>\n\t\t\t</span>\n\t\t</div>\n\n\t\t<br />\n\n\t\t<div class=\"setting\">\n\t\t\t<a ng-click=\"exportCsv()\">\n\t\t\t\t<i class=\"fa fa-arrow-circle-down margin-right\"></i> Export table as .csv\n\t\t\t</a>\n\t\t</div>\n\n\t</div>\n</div>\n<!--Modal-->\n<div id=\"{{uniqueModalId}}\">\n\t<div id=\"table-modal\" data-modal dimensions=\"fields\" model=\"tableDimensions\" sortable=\"true\"></div>\n\t<div id=\"count-modal\" data-modal dimensions=\"countDims\" model=\"countDim\" description-accessor=\"getCountDescription\"></div>\n</div>");
+}]);
+angular.module('palladio').run(['$templateCache', function($templateCache) {
+    $templateCache.put('partials/palladio-timeline-filter/template.html',
+        "<div class=\"row-fluid\">\n\t<div class=\"span3\">\n\t\t<div class=\"accordion-heading row-fluid\">\n\t\t\t<a class=\"span1 text-center angle\" data-toggle=\"collapse\" \n\t\t\t\tdata-ng-click=\"collapse=!collapse\" data-ng-init=\"collapse=false\"\n\t\t\t\tdata-parent=\"#filters\" href=\"{{uniqueToggleHref}}\" target=\"_self\">\n\n\t\t\t\t<span data-ng-show=\"!collapse\"><i class=\"fa fa-angle-down\"></i></span>\n\t\t\t\t<span data-ng-show=\"collapse\"><i class=\"fa fa-angle-right\"></i></span>\n\t\t\t</a>\n\t\t\t<input type=\"text\" class=\"editable span11\" data-ng-model=\"title\"></input>\n\t\t</div>\n\t\t<div class=\"settings-panel accordion-body\" ng-show=\"!collapse && !shortVersion\">\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Dates</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showDateModal()\">\n\t\t\t\t\t{{dateProp.description || \"Choose...\"}}\n\t\t\t\t\t<i class=\"fa fa-bars pull-right\"></i>\n\t\t\t\t</span>\n\t\t\t</div>\n\t\t\t<div class=\"setting row-fluid\" data-ng-show=\"!shortVersion\">\n\t\t\t\t<label class=\"span4 inline\">Group by</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showGroupModal()\">\n\t\t\t\t\t{{groupProp.description || \"Choose...\"}}\n\t\t\t\t\t<i class=\"fa fa-bars pull-right\"></i>\n\t\t\t\t</span>\n\t\t\t</div>\n\t\t\t<div class=\"setting row-fluid\" data-ng-show=\"!shortVersion\">\n\t\t\t\t<label class=\"span4 inline\">Height shows</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showAggModal()\">\n\t\t\t\t\t{{getAggDescription(aggDim) || \"Choose...\"}}\n\t\t\t\t\t<i class=\"fa fa-bars pull-right\"></i>\n\t\t\t\t</span>\n\t\t\t</div>\n\t\t\t<div class=\"setting row-fluid\" data-ng-show=\"!shortVersion\">\n\t\t\t\t<span class=\"span4\"></span>\n\t\t\t\t<span class=\"\">\n\t\t\t\t\t<a class=\"\" data-ng-click=\"zoomToFilter()\">Zoom to filter</a>\n\t\t\t\t</span>\n\t\t\t</div>\n\t\t</div>\n\t</div>\n\n\t<div class=\"span9\">\n\t<!-- View -->\n\t\t<div id=\"{{uniqueToggleId}}\" class=\"row-fluid accordion-body collapse in component\">\n\t\t\t<div class=\"span12 view\">\n\t\t\t\t<a class=\"toggle\" class=\"close\"></a>\n\t\t\t\t<div data-palladio-timeline-filter \n\t\t\t\t\tdata-dimension=\"dateDim\" \n\t\t\t\t\tdata-group-accessor=\"groupAccessor\" \n\t\t\t\t\tdata-xfilter=\"xfilter\" \n\t\t\t\t\tdata-type=\"date\"\n\t\t\t\t\tdata-short=\"shortVersion\"\n\t\t\t\t\tdata-title=\"{{title}}\" \n\t\t\t\t\tdata-height=\"200\" \n\t\t\t\t\tdata-mode=\"{{mode}}\" \n\t\t\t\t\tdata-count-by=\"{{countBy}} \"\n\t\t\t\t\tdata-aggregation-type=\"{{aggregationType}}\"\n\t\t\t\t\tdata-aggregate-key=\"{{aggregateKey}}\"\n\t\t\t\t\tdata-set-filter=\"setFilter\" \n\t\t\t\t\tdata-get-filter=\"getFilter\" \n\t\t\t\t\tdata-extent-override=\"extentOverride\" >\n\t\t\t\t</div>\n\t\t\t</div> \n\t\t</div>\n\t\t<div id=\"{{uniqueModalId}}\">\n\t\t\t<div id=\"date-modal\" data-modal dimensions=\"dateDims\" model=\"dateProp\"></div>\n\t\t\t<div id=\"group-modal\" data-modal dimensions=\"groupDims\" model=\"groupProp\"></div>\n\t\t\t<div id=\"agg-modal\" data-modal dimensions=\"aggDims\" model=\"aggDim\" \n\t\t\t\tdescription-accessor=\"getAggDescription\"></div>\n\t\t</div>\n\t</div>\n\n\t<a class=\"remove fa fa-trash-o\" data-ng-click=\"removeFilter($event)\"\n\t\tdata-toggle=\"tooltip\" data-title=\"Delete\"></a>\n\t<a class=\"reset fa fa-eraser\" style=\"line-height:40px\" data-ng-click=\"filterReset()\"\n\t\tdata-toggle=\"tooltip\" data-title=\"Clear\"></a>\n\t<a data-ng-show=\"!shortVersion && !collapse\" class=\"short fa fa-compress\" style=\"line-height:40px\"\n\t\tdata-ng-click=\"shortVersion = !shortVersion\" data-toggle=\"tooltip\"\n\t\tdata-title=\"Compress\"></a>\n\t<a data-ng-show=\"shortVersion && !collapse\" class=\"short fa fa-expand\" style=\"line-height:40px\"\n\t\tdata-ng-click=\"shortVersion = !shortVersion\" data-toggle=\"tooltip\" \n\t\tdata-title=\"Expand\"></a>\n\n</div>");
 }]);
 angular.module('palladio').run(['$templateCache', function($templateCache) {
     $templateCache.put('partials/palladio-data-upload/template.html',

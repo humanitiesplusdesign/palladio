@@ -15,6 +15,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 				width: '@',
 				height: '@',
 				mode: '@',
+				short: '=',
 				extentOverride: '=',
 				aggregationType: '@',
 				aggregateKey: '@',
@@ -49,7 +50,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 
 				var format, dimFormat, stackGroups, g, yr, brush,
 						color, y0, x, groups, lowestTime, highestTime, y1, stack, xAxis, yAxis,
-						area, sel, z, mMargin, gr,
+						area, sel, z, mMargin, gr, groupContainer,
 						hMargin, vMargin, yAxisWidth, xAxisHeight, mainHeight, mainWidth,
 						brushHeight, title, gBrush;
 
@@ -113,6 +114,16 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					if(nv !== ov) {
 						title = scope.title;
 						titleSetup();
+					}
+				});
+
+				scope.$watch('short', function (nv) {
+					if(nv) {
+						gr.select('.y-axis').style('display', 'none');
+						groupContainer.attr('transform', 'matrix(1, 0, 0, 0.25, 0, 119.5)');
+					} else {
+						gr.select('.y-axis').style('display', 'inline');
+						groupContainer.attr('transform', 'matrix(1, 0, 0, 1, 0, 0)');
 					}
 				});
 
@@ -215,16 +226,6 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					z.scaleExtent([1, Infinity]);
 					z.on("zoom", zoom);
 
-					// Remove all the groups so they get properly recreated.
-					gr.selectAll(".group").remove();
-
-					var group = gr.selectAll(".group")
-							.data(timelineGroups);
-
-					color.domain(d3.extent(timelineGroups, function(d){ return d[0].i; }));
-
-					group.style("fill", function(d,i) { return color(d[0].i); });
-
 					if(!gr.select("g.x-axis").empty()) {
 						gr.select("g.x-axis").remove();
 					}
@@ -312,6 +313,23 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					gBrush.select('rect.background').attr("height", mainHeight);
 
 					// Groups must be appended after the brush to support tooltips.
+
+					// Remove all the groups so they get properly recreated.
+					gr.selectAll(".group").remove();
+
+					if(!gr.select(".groups").empty()) {
+						gr.select(".groups").remove();
+					}
+
+					groupContainer = gr.append('g').attr("class", "groups");
+
+					var group = groupContainer.selectAll(".group")
+							.data(timelineGroups);
+
+					color.domain(d3.extent(timelineGroups, function(d){ return d[0].i; }));
+
+					group.style("fill", function(d) { return color(d[0].i); });
+
 					var newGroups = group.enter()
 							.append("g")
 								.attr("class", "group");
@@ -399,7 +417,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 
 					stack(timelineGroups);
 
-					var group = gr.selectAll(".group")
+					var group = groupContainer.selectAll(".group")
 							.data(timelineGroups);
 
 					if(mode === 'stack') {
@@ -998,76 +1016,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 	.directive('palladioTimelineFilterWithSettings', ['dateService', 'palladioService', 'dataService', function (dateService, palladioService, dataService) {
 		var directiveObj = {
 			scope: true,
-			template:	'<div class="row-fluid">' +
-							
-							'<div class="span3">' +
-								'<div class="accordion-heading row-fluid">' +
-									'<a class="span1 text-center angle" data-toggle="collapse" data-ng-click="collapse=!collapse" data-ng-init="collapse=false" data-parent="#filters" href="{{uniqueToggleHref}}" target="_self">'+
-										'<span data-ng-show="!collapse"><i class="fa fa-angle-down"></i></span>'+
-										'<span data-ng-show="collapse"><i class="fa fa-angle-right"></i></span>'+
-									'</a>' +
-									'<input type="text" class="editable span11" data-ng-model="title"></input>' +
-								'</div>' +
-								'<div class="settings-panel accordion-body" ng-show="!collapse"> ' +
-									'<div class="setting row-fluid">' +
-										'<label class="span4 inline">Dates</label>' +
-										'<span class="field span8" ng-click="showDateModal()">{{dateProp.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
-									'</div>' +
-
-									'<div class="setting row-fluid" data-ng-show="!shortVersion">' +
-										'<label class="span4 inline">Group by</label>' +
-										'<span class="field span8" ng-click="showGroupModal()">{{groupProp.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
-									'</div>' +
-
-									'<div class="setting row-fluid" data-ng-show="!shortVersion">' +
-										'<label class="span4 inline">Height shows</label>' +
-										'<span class="field span8" ng-click="showAggModal()">{{getAggDescription(aggDim) || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
-									'</div>' +
-
-									'<div class="setting row-fluid" data-ng-show="!shortVersion">' +
-										'<span class="span4"></span>' +
-										'<span class="">' +
-											'<a class="" data-ng-click="zoomToFilter()">Zoom to filter</a>' +
-										'</span>' +
-									'</div>' +
-								'</div>' +
-							'</div>' + // chiusura span4
-							
-							'<div class="span9">' +
-								'<!-- View -->' +
-								'<div id="{{uniqueToggleId}}" class="row-fluid accordion-body collapse in component">' +
-									'<div class="span12 view">' +
-										'<a class="toggle" class="close"></a>' +
-										'<div data-palladio-timeline-filter ' +
-											'data-dimension="dateDim" ' +
-											'data-group-accessor="groupAccessor" ' +
-											'data-xfilter="xfilter" ' +
-											'data-type="date" ' +
-											'data-title={{title}} ' +
-											'data-height="200" ' +
-											'data-mode={{mode}} ' +
-											'data-count-by={{countBy}} ' +
-											'data-aggregation-type={{aggregationType}} ' +
-											'data-aggregate-key={{aggregateKey}} ' +
-											'data-set-filter="setFilter" ' +
-											'data-get-filter="getFilter" ' +
-											'data-extent-override="extentOverride" >' +
-										'</div>' +
-									'</div> ' +
-								'</div>' +
-								'<div id={{uniqueModalId}}>' +
-									'<div id="date-modal" data-modal dimensions="dateDims" model="dateProp"></div>' +
-									'<div id="group-modal" data-modal dimensions="groupDims" model="groupProp"></div>' +
-									'<div id="agg-modal" data-modal dimensions="aggDims" model="aggDim" description-accessor="getAggDescription"></div>' +
-								'</div>' +
-							'</div>' +
-
-							'<a class="remove fa fa-trash-o" data-ng-click="removeFilter($event)" data-toggle="tooltip" data-title="Delete"></a>' +
-							'<a class="reset fa fa-eraser" style="line-height:40px" data-ng-click="filterReset()" data-toggle="tooltip" data-title="Clear"></a>' +
-							'<a data-ng-show="!shortVersion" class="short fa fa-compress" style="line-height:40px" data-ng-click="shortVersion = !shortVersion" data-toggle="tooltip" data-title="Compress"></a>' +
-							'<a data-ng-show="shortVersion" class="short fa fa-expand" style="line-height:40px" data-ng-click="shortVersion = !shortVersion" data-toggle="tooltip" data-title="Expand"></a>' +
-
-						'</div>',
+			templateUrl: 'partials/palladio-timeline-filter/template.html',
 
 			link: { pre: function(scope, element, attrs) {
 
