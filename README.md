@@ -56,3 +56,23 @@ $ gulp
 Once this is running, go to [http://localhost:8000/](http://localhost:8000/).
 
 Use Ctrl-C to stop the server.
+
+## Development
+
+Generally, update files in the /src directory, not the palladio.js/palladio.css files in the root directory or in the apps directories. When running, Gulp will automatically detect changes in the /src directory and update the compiled Palladio files as required.
+
+### Running tests
+
+Test coverage in Palladio is not great at the moment, but there are tests covering much of the functionality in the various services that Palladio defines. We're working on improving coverage to the rest of the framework.
+
+From the command line at the root directory run:
+
+```
+karma start ./test/karma.conf.js
+```
+
+If you don't have karma installed, you may need to install it first:
+
+```
+npm install -g karma
+```
