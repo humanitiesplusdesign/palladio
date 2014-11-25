@@ -109,29 +109,12 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					}
 				});
 
-				// Test mode changes.
-				// window.setTimeout(function() {
-				//	scope.$apply(function (scope) { scope.mode = 'multiple'; });
-				// }, 10000);
-
-				// window.setTimeout(function() {
-				//	scope.$apply(function (scope) { scope.mode = 'stack'; });
-				// }, 15000);
-
 				scope.$watch('title', function(nv, ov) {
 					if(nv !== ov) {
 						title = scope.title;
 						titleSetup();
 					}
 				});
-
-				// Test title changes.
-				// window.setTimeout(function() {
-				//	scope.$apply(function (scope) { scope.title = 'Testing Testing'; });
-				// }, 10000);
-				// window.setTimeout(function() {
-				//	scope.$apply(function (scope) { scope.title = undefined; });
-				// }, 15000);
 
 				scope.$watchGroup(['uniqueDimension', 'aggregationType', 'aggregationType'], function(nv, ov) {
 					if(nv[0] !== ov[0] || nv[1] !== ov[1] || nv[2] !== ov[2]) {
@@ -140,14 +123,6 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 						sel.call(updateTimeline);
 					}
 				});
-
-				// Test unique dimension changes.
-				// window.setTimeout(function() {
-				//	scope.$apply(function (scope) { scope.uniqueDimension = 'Birth Year'; });
-				// }, 10000);
-				// window.setTimeout(function() {
-				//	scope.$apply(function (scope) { scope.uniqueDimension = 'People ID'; });
-				// }, 20000);
 
 				scope.$watch('localDimension', function(nv, ov) {
 					if(nv) {
@@ -240,68 +215,11 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					z.scaleExtent([1, Infinity]);
 					z.on("zoom", zoom);
 
-					// Create the highlight on the main view that will follow the brush. Create it first
-					// so that it is behind the groups.
-					if(!gr.select("g.large-highlight").empty()) {
-						gr.select("g.large-highlight").remove();
-					}
-					gr.append("g").classed("large-highlight", true)
-							.attr("height", mainHeight)
-							.attr("width", mainWidth);
-						
-					updateHighlights(gr);
-
-					// Disable zooming as it is broken.
-					// gr.call(z);
-
-					// Set up the brush timeline.
-					var brushTimeline = gr.select(".brush-timeline");
-					if(brushTimeline.empty()) {
-						brushTimeline = gr.append("g").attr("class", "brush-timeline");
-						brushTimeline.attr("transform", "translate(0, " + (mainHeight + mMargin) + ")");
-					}
-
-					var brushGroups = brushTimeline.selectAll(".brush-group")
-							.data(timelineGroups);
-
-					brushGroups.exit().remove();
-					var newBrushGroups = brushGroups.enter()
-							.append("g")
-								.attr("class", "brush-group");
-
-					newBrushGroups.append("path")
-							.attr("class", "area")
-							.attr("transform", "scale(1, " + (brushHeight/mainHeight) + ")");
-					brushGroups.style("fill", "grey");
-
 					// Remove all the groups so they get properly recreated.
 					gr.selectAll(".group").remove();
 
 					var group = gr.selectAll(".group")
 							.data(timelineGroups);
-
-					var newGroups = group.enter()
-							.append("g")
-								.attr("class", "group");
-
-					newGroups.append("path")
-							.attr("class", "area")
-							.on("mouseover", function (d) {
-								d3.select(this).style("fill", "#67D6E5");
-							})
-							.on("mouseout", function (d) {
-								d3.select(this).style("fill", function(d) { return color(d[0].i); });
-							})
-							.tooltip(function (d,i){
-								return {
-									text : stackGroups[d[0].i],
-									displacement : [0,20],
-									position: [0,0],
-									gravity: "right",
-									placement: "mouse",
-									mousemove : true
-								};
-							});
 
 					color.domain(d3.extent(timelineGroups, function(d){ return d[0].i; }));
 
@@ -313,7 +231,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 
 					gr.append("g")
 							.attr("class", "axis x-axis")
-							.attr("transform", "translate(0," + (mainHeight + mMargin + brushHeight) + ")")
+							.attr("transform", "translate(0," + mainHeight + ")")
 							.call(xAxis);
 
 					brush.on("brushstart", function () {
@@ -322,8 +240,6 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 
 					brush.on("brush", function () {
 						extent = brush.extent();
-
-						updateHighlights(gr);
 
 						scope.localDimension.filterFunction(dimFilter);
 						palladioService.update();
@@ -355,7 +271,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 							if(scope.setFilter) scope.setFilter(brush.extent());
 						}
 
-						updateHighlights(gr);
+						// updateHighlights(gr);
 						
 						palladioService.update();
 					});
@@ -366,13 +282,12 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 
 					brush.resizeAdaption(function (selection) {
 						selection.append("path")
-							//.attr("d", resizePath)
-							.attr("transform", "translate(0, " + -(brushHeight * (1/4)) + ")");
+							.attr("transform", "translate(0, " + -(mainHeight * (1/4)) + ")");
 							
-						selection.select("rect").attr("height", brushHeight);
+						selection.select("rect").attr("height", mainHeight);
 
 						function resizePath(d) {
-							var e = +(d[0] == "e"), x = e ? 1 : -1, y = (brushHeight)*(1/2);
+							var e = +(d[0] == "e"), x = e ? 1 : -1, y = (mainHeight)*(1/2);
 							return "M" + (0.5 * x) + "," + y +
 								"A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6) +
 								"V" + (2 * y - 6) +
@@ -386,16 +301,41 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					});
 
 					brush.extentAdaption(function (selection) {
-						selection.attr("height", brushHeight)
+						selection.attr("height", mainHeight)
 							.attr("fill", filterColor)
 							.attr("fill-opacity", ".25");
 					});
 
 					gBrush = gr.append("g").attr("class", "brush")
-								.attr("transform", "translate(0, " + (mainHeight + mMargin) + ")")
 								.call(brush);
 
-					gBrush.select('rect.background').attr("height", brushHeight);
+					gBrush.select('rect.background').attr("height", mainHeight);
+
+					// Groups must be appended after the brush to support tooltips.
+					var newGroups = group.enter()
+							.append("g")
+								.attr("class", "group");
+
+					newGroups.append("path")
+							.attr("class", "area")
+							.attr("transform", "translate(-0.5,-0.5)")
+							.style("fill", function(d) { return color(d[0].i); })
+							.on("mouseover", function (d) {
+								d3.select(this).style("fill", "#67D6E5");
+							})
+							.on("mouseout", function (d) {
+								d3.select(this).style("fill", function(d) { return color(d[0].i); });
+							})
+							.tooltip(function (d,i){
+								return {
+									text : stackGroups[d[0].i],
+									displacement : [0,20],
+									position: [0,0],
+									gravity: "right",
+									placement: "mouse",
+									mousemove : true
+								};
+							});
 
 					if(tooltip.empty()) {
 						// Set up the tooltip.
@@ -462,9 +402,6 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					var group = gr.selectAll(".group")
 							.data(timelineGroups);
 
-					var brushGroups = gr.selectAll(".brush-group")
-							.data(timelineGroups);
-
 					if(mode === 'stack') {
 						if(!gr.select('.y-axis').empty()) {
 							gr.select('.y-axis').call(yAxis);
@@ -481,7 +418,6 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					}
 
 					group.exit().remove();
-					brushGroups.exit().remove();
 
 					group.transition()
 						.attr("transform", function(d, i) {
@@ -492,36 +428,9 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 							}
 						});
 
-					var brushPaths = brushGroups.select("path");
-							
-					brushPaths.attr("d", function(d) { return area(d); });
-
 					var paths = group.select("path");
 
 					paths.attr("d", function(d) { return area(d); });
-				}
-
-				///////////////////////////////////////////////////////////////////////
-				//
-				// Update highlight / extents on the main timeline
-				//
-				///////////////////////////////////////////////////////////////////////
-
-				function updateHighlights(selection) {
-					var highlightRects = selection.select('.large-highlight')
-						.selectAll("rect")
-							.data(extent);
-						
-					highlightRects.exit().remove();
-					highlightRects.enter()
-						.append("rect")
-							.attr("height", mainHeight)
-							.attr("fill", filterColor)
-							.attr("fill-opacity", "1");
-
-					highlightRects
-						.attr("width", function (d) { return x(d[1]) - x(d[0]);})
-						.attr("transform", function(d) { return "translate(" + x(d[0]) + ", 0)"; });
 				}
 
 				///////////////////////////////////////////////////////////////////////
@@ -746,9 +655,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					yAxisWidth = 30;
 					// Width & height of the main visualization
 					mainWidth = width - hMargin*2 - yAxisWidth;
-					mainHeight = (height - vMargin*2 - mMargin - xAxisHeight)*0.8;
-					// Height of the brush visualization
-					brushHeight = (height - vMargin*2 - mMargin - xAxisHeight)*0.2;
+					mainHeight = (height - vMargin*2 - xAxisHeight);
 
 					//color = d3.scale.ordinal().domain([0,8]).range(colorbrewer.Greys[9]);
 					color = d3.scale.linear().interpolate(d3.interpolateLab).range(['#DDDDDD','#444444']);
@@ -820,8 +727,6 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 						sel.append("span")
 								.attr("class", "list-title");
 					}
-
-					//titleSetup();
 				}
 
 				///////////////////////////////////////////////////////////////////////
@@ -1035,7 +940,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					scope.localDimension.filterAll();
 					brush.clear();
 					extent = brush.extent();
-					updateHighlights(gr);
+					// updateHighlights(gr);
 					palladioService.removeFilter(identifier);
 					palladioService.update();
 
@@ -1237,7 +1142,10 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 								};
 							})
 							.sort(function (a, b) { return scope.getAggDescription(a) < scope.getAggDescription(b) ? -1 : 1; });
-					scope.aggDim = scope.aggDims[0];
+					// Take the first aggDim from the first file.
+					scope.aggDim = scope.aggDims.filter(function(d) { return d.fileId === 0; })[0] ? 
+									scope.aggDims.filter(function(d) { return d.fileId === 0; })[0] :
+									scope.aggDims[0];
 					scope.$watch('aggDim', function () {
 						// scope.countBy = scope.aggDim ? scope.countDim.key : scope.countBy;
 						if(!scope.aggDim) {
