@@ -148,6 +148,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 					};
 
 					scope.$watch('dims', function () {
+
 						scope.dims.forEach(function(d) {
 							// If the dim has not already been updated with dimensions/groups,
 							// update it.
@@ -163,21 +164,22 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 								.data(scope.dims, function(d) { return calculateDomKey(d.key); });
 
 						// Build dimensions, groups
-						facets.enter().call(function(sel) {
-							var count = 0;
-							sel[0].forEach(function(d) {
-								count++; // Count added elements (sel[0].length is not reliable)
-							});
+						facets.enter()
+							.call(function(sel) {
+								var count = 0;
+								sel[0].forEach(function(d) {
+									count++; // Count added elements (sel[0].length is not reliable)
+								});
 
-							if(count > 0) {
-								// Extend the width of the inner- and mid-facet-container
-								selection.transition().style('width', (+selection.style('width').substring(0, selection.style('width').length - 2) + (205 * count)) + 'px');
-								d3.select(element[0]).select('.mid-facet-container').transition()
-									.style('width', (+d3.select(element[0]).select('.mid-facet-container')
-										.style('width').substring(0, d3.select(element[0]).select('.mid-facet-container')
-											.style('width').length - 2) + (205 * count)) + 'px');
-							}
-						});
+								if(count > 0) {
+									// Extend the width of the inner- and mid-facet-container
+									selection.transition().style('width', (+selection.style('width').substring(0, selection.style('width').length - 2) + (205 * count)) + 'px');
+									d3.select(element[0]).select('.mid-facet-container').transition()
+										.style('width', (+d3.select(element[0]).select('.mid-facet-container')
+											.style('width').substring(0, d3.select(element[0]).select('.mid-facet-container')
+												.style('width').length - 2) + (205 * count)) + 'px');
+								}
+							});
 
 						// Build facets and button group
 						var buttonGroup = facets.enter()
@@ -193,7 +195,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 							.append("div").attr("class", "btn-group");
 
 						var cells = facets.selectAll('.cell')
-								.data(function (d) { return d.group.top(Infinity)
+								.data(function (d) { console.log(d); return d.group.top(Infinity)
 											.map(function(g) {
 												return buildCellData(g,d);
 											}); },
@@ -420,6 +422,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 					// Clean up after ourselves. Remove dimensions that we have created. If we
 					// created watches on another scope, destroy those as well.
 					scope.$on('$destroy', function () {
+						console.log("Destroying...");
 						scope.dimensions.map(function(d) {
 							d.dimension.filterAll();
 							d.dimension.remove();

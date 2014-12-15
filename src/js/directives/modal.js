@@ -86,4 +86,4 @@ angular.module('palladio.directives.modal', [])
 				};
 			}
 		};
-	})
+	});

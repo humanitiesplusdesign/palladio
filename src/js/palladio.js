@@ -156,8 +156,6 @@ angular.module('palladio', [])
 
 			compileString += '></div>';
 
-			console.log(compileString);
-
 			var directive = $compile(compileString)(newScope);
 
 			$(selector).append(directive);
