@@ -56245,15 +56245,25 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			if(loadService.layout()) $location.path('/visualization');
 		};
 
-		// Auto-load file auto-load.json if it exists.
-		$http.get('auto-load.json')
-			.success(function(data) {
-				loadService.loadJson(data);
-				$scope.onLoad();
-			})
-			.error(function() {
-				console.log("Attempted to load auto-load.json but it did not exist. This is not usually a problem.");
-			});
+		function loadFile(path) {
+			$http.get(path)
+				.success(function(data) {
+					loadService.loadJson(data);
+					$scope.onLoad();
+				})
+				.error(function() {
+					console.log("Attempted to load auto-load.json but it did not exist. This is not usually a problem.");
+				});
+		}
+
+		console.log($location.search());
+		if($location.search().file) {
+			// Load the file from the path on the URL.
+			loadFile($location.search().file);
+		} else {
+			// Otherwise auto-load file auto-load.json if it exists.
+			loadFile('auto-load.json');
+		}
 
 		// Alert when leaving
 		$(window).bind('beforeunload', function(){
@@ -56773,36 +56783,6 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		}, 1000);
 	});
 
-angular.module('palladio.filters', [])
-  .filter('titleCase', function () {
-		return function (str) {
-			return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
-		};
-	})
-
-  .filter('confirmed', function () {
-    return function (fields) {
-      return fields.filter(function(d){ return d.confirmed; }).length;
-    };
-  })
-
-  .filter('special', function () {
-    return function (fields) {
-      return fields.filter(function(d){ return d.special.length; }).length;
-    };
-  })
-
-  .filter('unique', function () {
-    return function (fields) {
-        return fields.filter(function(d){ return d.uniqueKey; }).length;
-    };
-  })
-
-  .filter('notSameFile', function () {
-    return function (files, fileId) {
-        return files.filter(function (d){ return d.id !== fileId; });
-    };
-  });
 angular.module('palladio.directives.dimension', ['palladio'])
 	.directive('palladioDimension', ['palladioService', function(ps) {
 		return {
@@ -57585,6 +57565,36 @@ angular.module('palladio.directives.yasgui', [
 			}
 		};
 	});
+angular.module('palladio.filters', [])
+  .filter('titleCase', function () {
+		return function (str) {
+			return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+		};
+	})
+
+  .filter('confirmed', function () {
+    return function (fields) {
+      return fields.filter(function(d){ return d.confirmed; }).length;
+    };
+  })
+
+  .filter('special', function () {
+    return function (fields) {
+      return fields.filter(function(d){ return d.special.length; }).length;
+    };
+  })
+
+  .filter('unique', function () {
+    return function (fields) {
+        return fields.filter(function(d){ return d.uniqueKey; }).length;
+    };
+  })
+
+  .filter('notSameFile', function () {
+    return function (files, fileId) {
+        return files.filter(function (d){ return d.id !== fileId; });
+    };
+  });
 var crossfilterHelpers = {
 
 	///////////////////////////////////////////////////////////////////////

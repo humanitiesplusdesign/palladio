@@ -111,15 +111,25 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			if(loadService.layout()) $location.path('/visualization');
 		};
 
-		// Auto-load file auto-load.json if it exists.
-		$http.get('auto-load.json')
-			.success(function(data) {
-				loadService.loadJson(data);
-				$scope.onLoad();
-			})
-			.error(function() {
-				console.log("Attempted to load auto-load.json but it did not exist. This is not usually a problem.");
-			});
+		function loadFile(path) {
+			$http.get(path)
+				.success(function(data) {
+					loadService.loadJson(data);
+					$scope.onLoad();
+				})
+				.error(function() {
+					console.log("Attempted to load auto-load.json but it did not exist. This is not usually a problem.");
+				});
+		}
+
+		console.log($location.search());
+		if($location.search().file) {
+			// Load the file from the path on the URL.
+			loadFile($location.search().file);
+		} else {
+			// Otherwise auto-load file auto-load.json if it exists.
+			loadFile('auto-load.json');
+		}
 
 		// Alert when leaving
 		$(window).bind('beforeunload', function(){
