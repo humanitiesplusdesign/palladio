@@ -32,20 +32,14 @@
 			<div class="setting row-fluid">
 				<p class="tiny muted offset4 span8">In bar layout, the Lower Date determines order of the bars.</p>
 			</div>
-
-
-			<!--<div class="setting row-fluid">
-				<label class="span4 inline">Toggle Layout</label>
-				<span class="span8">
-					<input type="checkbox" data-ng-checked="stepMode" data-ng-model="stepMode">
-				</span>
-			</div>-->
 		</div>
 
 	</div>
 
 	<div class="span9 main-viz">
-		<div id="{{uniqueToggleId}}" class="row-fluid accordion-body collapse in component"></div>
+		<div id="{{uniqueToggleId}}" class="row-fluid accordion-body collapse in component">
+			<!-- SVG inserted here -->
+		</div>
 		<div id="{{uniqueModalId}}">
 			<div id="date-start-modal" data-modal dimensions="dateDims" model="dateStartDim"></div>
 			<div id="date-end-modal" data-modal dimensions="dateDims" model="dateEndDim"></div>

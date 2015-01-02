@@ -86,11 +86,28 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 
 						dim = scope.xfilter.dimension(
 							function(d) {
-								return [ format.reformatExternal(d[scope.dateStartDim.key]),
-										format.reformatExternal(d[scope.dateEndDim.key]) ]; });
+								if((format.reformatExternal(d[scope.dateStartDim.key]) !== '' &&
+									format.reformatExternal(d[scope.dateEndDim.key]) !== '') ||
+									format.reformatExternal(d[scope.dateStartDim.key]) === 
+									format.reformatExternal(d[scope.dateEndDim.key]) ) {
+										// Both populated OR both equal (i.e. blank)
+										return [ format.reformatExternal(d[scope.dateStartDim.key]),
+											format.reformatExternal(d[scope.dateEndDim.key]) ];
+								} else {
+									// Otherwise set the blank one equal to the populated one.
+									if(format.reformatExternal(d[scope.dateStartDim.key]) === '') {
+										return [ format.reformatExternal(d[scope.dateEndDim.key]),
+												format.reformatExternal(d[scope.dateEndDim.key]) ];
+									} else {
+										return [ format.reformatExternal(d[scope.dateStartDim.key]),
+												format.reformatExternal(d[scope.dateStartDim.key]) ];
+									}
+								}
+							}
+						);
 
 						// For now we keep the grouping simple and just do a naive count. To enable
-						// 'countBy' functionality we need to use the Crossfilter helpers.
+						// 'countBy' functionality we need to use the Crossfilter helpers or Reductio.
 						group = dim.group();
 
 						var startValues = dim.top(Infinity).map(function (d) { return format.reformatExternal(d[scope.dateStartDim.key]); })
@@ -231,7 +248,8 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						var paths = svg.select('g').selectAll('.path')
 							.data(group.top(Infinity)
 									.filter(function (d) {
-										return d.key[0] !== "" && d.key[1] !== "" && d.value !== 0;
+										// Require start OR end date.
+										return (d.key[0] !== "" || d.key[1] !== "") && d.value !== 0;
 									}).sort(function (a, b) { return a.key[0] < b.key[0] ? -1 : 1; }),
 								function (d) { return d.key[0] + " - " + d.key[1]; });
 
@@ -240,35 +258,84 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						}
 
 						paths.exit().remove();
-						paths.enter()
+						var newPaths = paths.enter()
+								.append('g')
+									.attr('class', 'path');
+
+						newPaths
+								.append('circle')
+									.attr('class', 'path-start')
+									.attr('r', 1)
+									.attr('fill-opacity', 0.8)
+									.attr('stroke-opacity', 0.8)
+									.attr('stroke-width', 0.8)
+									.style("display", "none");
+
+						newPaths
+								.append('circle')
+									.attr('class', 'path-end')
+									.attr('r', 1)
+									.attr('fill-opacity', 0.8)
+									.attr('stroke-opacity', 0.8)
+									.attr('stroke-width', 0.8)
+									.style("display", "none");
+
+						newPaths
 								.append('line')
-									.attr('class', 'path')
 									.attr('stroke-width', 1)
 									.attr('stroke-opacity', 0.8);
+
+						var lines = paths.selectAll('line');
+						var circles = paths.selectAll('circle');
+						var startCircles = paths.selectAll('.path-start');
+						var endCircles = paths.selectAll('.path-end');
 
 						if(scope.stepMode == "Bars") {
 							// We need to refigure the yStep scale since the number of groups can change.
 							yStep.domain([-1, group.top(Infinity)
 									.filter(function (d) {
-										return d.key[0] !== "" && d.key[1] !== "" && d.value !== 0;
+										// Require start OR end date.
+										return (d.key[0] !== "" || d.key[1] !== "") && d.value !== 0;
 									}).length]);
 
-							paths.attr('stroke', fill);
+							// Calculate fille based on selection.
+							lines.attr('stroke', fill);
+							circles.attr('stroke', fill);
+							circles.attr('fill', fill);
 
-							paths
+							lines
 								.transition()
 									.attr('x1', function (d) { return x(format.parse(d.key[0])); } )
-									.attr('y1', function (d, i) { return yStep(i); })
+									.attr('y1', 0)
 									.attr('x2', function (d) { return x(format.parse(d.key[1])); })
-									.attr('y2', function (d, i) { return yStep(i); });
-						} else {
-							paths.attr('stroke', fill);
+									.attr('y2', 0);
+
+							startCircles.attr('cx', function (d) { return x(format.parse(d.key[0])); });
+							endCircles.attr('cx', function (d) { return x(format.parse(d.key[1])); });
+
+							// Translate the paths to their proper height.
 							paths
+								.transition()
+									.attr("transform", function (d, i) { return "translate(0," + yStep(i) + ")"; });
+
+							// Show the circles.
+							circles.style("display", "inline")
+						} else {
+							// Hide the circles.
+							circles.style("display", "none")
+
+							lines.attr('stroke', fill);
+							lines
 								.transition()
 									.attr('x1', function (d) { return x(format.parse(d.key[0])); })
 									.attr('y1', y(0))
 									.attr('x2', function (d) { return x(format.parse(d.key[1])); })
 									.attr('y2', y(1));
+
+							// All parallel bars start at 0.
+							paths
+								.transition()
+									.attr("transform", "translate(0,0)");
 						}
 					}
 
