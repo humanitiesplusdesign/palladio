@@ -122,7 +122,6 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 				});
 		}
 
-		console.log($location.search());
 		if($location.search().file) {
 			// Load the file from the path on the URL.
 			loadFile($location.search().file);
