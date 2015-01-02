@@ -37,6 +37,10 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 					scope.dateStartDim = scope.dateDims[0];
 					scope.dateEndDim = scope.dateDims[1] ? scope.dateDims[1] : scope.dateDims[0];
 
+					// Label dimensions.
+					scope.labelDims = scope.metadata;
+					scope.tooltipLabelDim = scope.labelDims[0];
+
 					scope.title = "Time Span Filter";
 
 					scope.stepModes = ['Parallel', 'Bars'];
@@ -50,6 +54,10 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						$('#' + scope.uniqueModalId).find('#date-end-modal').modal('show');
 					};
 
+					scope.showTooltipLabelModal = function () {
+						$('#' + scope.uniqueModalId).find('#tooltip-label-modal').modal('show');
+					};
+
 				}, post: function(scope, element) {
 
 					// If you are building a d3.js visualization, you can grab the containing
@@ -58,13 +66,13 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 					// d3.select(element[0]);
 
 					var sel, svg, dim, group, x, y, xStart, xEnd, emitFilterText, removeFilterText,
-						topBrush, midBrush, bottomBrush, top, bottom, middle, filter, yStep;
+						topBrush, midBrush, bottomBrush, top, bottom, middle, filter, yStep, tooltip;
 
 					var format = dateService.format;
 
 					// Constants...
 					var width = $(window).width()*0.7;
-					var height = 150;
+					var height = 200;
 					var margin = 25;
 					var filterColor = '#9DBCE4';
 
@@ -84,23 +92,27 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 
 						if(dim) dim.remove();
 
+						// Dimension has structure [startDate, endDate, label]
 						dim = scope.xfilter.dimension(
 							function(d) {
 								if((format.reformatExternal(d[scope.dateStartDim.key]) !== '' &&
 									format.reformatExternal(d[scope.dateEndDim.key]) !== '') ||
-									format.reformatExternal(d[scope.dateStartDim.key]) === 
+									format.reformatExternal(d[scope.dateStartDim.key]) ===
 									format.reformatExternal(d[scope.dateEndDim.key]) ) {
 										// Both populated OR both equal (i.e. blank)
 										return [ format.reformatExternal(d[scope.dateStartDim.key]),
-											format.reformatExternal(d[scope.dateEndDim.key]) ];
+												format.reformatExternal(d[scope.dateEndDim.key]),
+												d[scope.tooltipLabelDim.key] ];
 								} else {
 									// Otherwise set the blank one equal to the populated one.
 									if(format.reformatExternal(d[scope.dateStartDim.key]) === '') {
 										return [ format.reformatExternal(d[scope.dateEndDim.key]),
-												format.reformatExternal(d[scope.dateEndDim.key]) ];
+												format.reformatExternal(d[scope.dateEndDim.key]),
+												d[scope.tooltipLabelDim.key] ];
 									} else {
 										return [ format.reformatExternal(d[scope.dateStartDim.key]),
-												format.reformatExternal(d[scope.dateStartDim.key]) ];
+												format.reformatExternal(d[scope.dateStartDim.key]),
+												d[scope.tooltipLabelDim.key] ];
 									}
 								}
 							}
@@ -242,6 +254,32 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						g.selectAll('.extent')
 							.attr('fill', filterColor)
 							.attr('opacity', 0.6);
+
+						tooltip = g.select(".timespan-tooltip");
+						// Set up the tooltip.
+						if(tooltip.empty()) {
+							tooltip = g.append("g")
+									.attr("class", "timespan-tooltip")
+									.attr("pointer-events", "none")
+									.style("display", "none");
+
+							tooltip.append("foreignObject")
+									.attr("width", 100)
+									.attr("height", 26)
+									.attr("pointer-events", "none")
+								.append("html")
+									.style("background-color", "rgba(0,0,0,0)")
+								.append("div")
+									.style("padding-left", 3)
+									.style("padding-right", 3)
+									.style("text-align", "center")
+									.style("white-space", "nowrap")
+									.style("overflow", "hidden")
+									.style("text-overflow", "ellipsis")
+									.style("border-radius", "5px")
+									.style("background-color", "white")
+									.style("border", "3px solid grey");
+						}
 					}
 
 					function update() {
@@ -261,6 +299,18 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						var newPaths = paths.enter()
 								.append('g')
 									.attr('class', 'path');
+
+						newPaths
+							.tooltip(function (d){
+								return {
+									text : d.key[2] + ": " + d.key[0] + " - " + d.key[1],
+									displacement : [0,20],
+									position: [0,0],
+									gravity: "right",
+									placement: "mouse",
+									mousemove : true
+								};
+							});
 
 						newPaths
 								.append('circle')
@@ -354,7 +404,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						update();
 					};
 
-					scope.$watchGroup(['dateStartDim', 'dateEndDim'], function () {
+					scope.$watchGroup(['dateStartDim', 'dateEndDim', 'tooltipLabelDim'], function () {
 						reset();
 						setup();
 						update();
@@ -440,6 +490,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						scope.title = state.title;
 						scope.dateStartDim = scope.dateDims.filter(function(d) { return d.key === state.dateStartDim; })[0];
 						scope.dateEndDim = scope.dateDims.filter(function(d) { return d.key === state.dateEndDim; })[0];
+						scope.tooltipLabelDim = scope.labelDims.filter(function(d) { return d.key === state.tooltipLabelDim; })[0];
 						topBrush.extent(state.topExtent.map(function(d) { return dateService.format.parse(d); }));
 						midBrush.extent(state.midExtent.map(function(d) { return dateService.format.parse(d); }));
 						bottomBrush.extent(state.bottomExtent.map(function(d) { return dateService.format.parse(d); }));
@@ -463,6 +514,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 							title: scope.title,
 							dateStartDim: scope.dateStartDim.key,
 							dateEndDim: scope.dateEndDim.key,
+							tooltipLabelDim: scope.tooltipLabelDim.key,
 							topExtent: topBrush.extent().map(function(d) { return dateService.format(d); }),
 							midExtent: midBrush.extent().map(function(d) { return dateService.format(d); }),
 							bottomExtent: bottomBrush.extent().map(function(d) { return dateService.format(d); }),
