@@ -56592,7 +56592,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		$scope.removeFilter = function (event) {
 			// '$destroy' event isn't getting fired properly with just .remove(), so we do it
 			// ourselves.
-			angular.element(event.currentTarget.parentElement.parentElement).scope().$broadcast('$destroy');
+			angular.element(event.currentTarget.parentElement).scope().$broadcast('$destroy');
 			angular.element(event.currentTarget.parentElement.parentElement.parentElement).remove();
 			palladioService.update();
 			$('.tooltip').remove();
@@ -56607,12 +56607,12 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 						$('#filters').prepend($compile('<li><div data-palladio-timeline-filter-with-settings></div></li>')($scope));
 					}
 					break;
-				case 'timespan':
-					$('#filters').prepend($compile('<li><div data-palladio-timespan-filter></div></li>')($scope));
-					break;
-				case 'timestep':
-					$('#filters').prepend($compile('<li><div data-palladio-timestep-filter></div></li>')($scope));
-					break;
+				// case 'timespan':
+				// 	$('#filters').prepend($compile('<li><div data-palladio-timespan-filter></div></li>')($scope));
+				// 	break;
+				// case 'timestep':
+				// 	$('#filters').prepend($compile('<li><div data-palladio-timestep-filter></div></li>')($scope));
+				// 	break;
 				case 'partime':
 					if(!$scope.blurTimeSpan) {
 						$('#filters').prepend($compile('<li><div data-palladio-partime-filter></div></li>')($scope));
@@ -56623,12 +56623,12 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 						$('#filters').prepend($compile('<li><div data-palladio-facet-filter show-controls="true" show-accordion="true" show-drop-area="false" show-settings="true"></div></li>')($scope));
 					}
 					break;
-				case 'histogram':
-					$('#filters').prepend($compile('<li><div data-palladio-histogram-filter-with-settings></div></li>')($scope));
-					break;
-				case 'arctime':
-					$('#filters').prepend($compile('<li><div data-palladio-arctime-filter-with-settings></div></li>')($scope));
-					break;
+				// case 'histogram':
+				// 	$('#filters').prepend($compile('<li><div data-palladio-histogram-filter-with-settings></div></li>')($scope));
+				// 	break;
+				// case 'arctime':
+				// 	$('#filters').prepend($compile('<li><div data-palladio-arctime-filter-with-settings></div></li>')($scope));
+				// 	break;
 			}
 			$scope.showAddFilter = false;
 		};
@@ -56782,6 +56782,36 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		}, 1000);
 	});
 
+angular.module('palladio.filters', [])
+  .filter('titleCase', function () {
+		return function (str) {
+			return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+		};
+	})
+
+  .filter('confirmed', function () {
+    return function (fields) {
+      return fields.filter(function(d){ return d.confirmed; }).length;
+    };
+  })
+
+  .filter('special', function () {
+    return function (fields) {
+      return fields.filter(function(d){ return d.special.length; }).length;
+    };
+  })
+
+  .filter('unique', function () {
+    return function (fields) {
+        return fields.filter(function(d){ return d.uniqueKey; }).length;
+    };
+  })
+
+  .filter('notSameFile', function () {
+    return function (files, fileId) {
+        return files.filter(function (d){ return d.id !== fileId; });
+    };
+  });
 angular.module('palladio.directives.dimension', ['palladio'])
 	.directive('palladioDimension', ['palladioService', function(ps) {
 		return {
@@ -57564,36 +57594,6 @@ angular.module('palladio.directives.yasgui', [
 			}
 		};
 	});
-angular.module('palladio.filters', [])
-  .filter('titleCase', function () {
-		return function (str) {
-			return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
-		};
-	})
-
-  .filter('confirmed', function () {
-    return function (fields) {
-      return fields.filter(function(d){ return d.confirmed; }).length;
-    };
-  })
-
-  .filter('special', function () {
-    return function (fields) {
-      return fields.filter(function(d){ return d.special.length; }).length;
-    };
-  })
-
-  .filter('unique', function () {
-    return function (fields) {
-        return fields.filter(function(d){ return d.uniqueKey; }).length;
-    };
-  })
-
-  .filter('notSameFile', function () {
-    return function (files, fileId) {
-        return files.filter(function (d){ return d.id !== fileId; });
-    };
-  });
 var crossfilterHelpers = {
 
 	///////////////////////////////////////////////////////////////////////
@@ -63951,7 +63951,13 @@ angular.module('palladioPalette', ['palladio', 'palladio.services']) // Rename t
 angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 	.directive('palladioPartimeFilter', function (dateService, palladioService, dataService) {
 		var directiveObj = {
-			scope: true,
+			scope: {
+				fullHeight: '@',
+				fullWidth: '@',
+				showControls: '@',
+				showAccordion: '@',
+				view: '@'
+			},
 			templateUrl: 'partials/palladio-partime-filter/template.html',
 
 			link: { pre: function(scope) {
@@ -64019,9 +64025,10 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 					var format = dateService.format;
 
 					// Constants...
-					var width = $(window).width()*0.7;
-					var height = 200;
 					var margin = 25;
+					var width = scope.fullWidth === 'true' ? $(window).width() - margin*2 : $(window).width()*0.7;
+					var height = scope.height ? +scope.height : 200;
+					var height = scope.fullHeight === 'true' ? $(window).height()-200 : height;
 					var filterColor = '#9DBCE4';
 
 					setup();
@@ -64145,6 +64152,8 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 							topExtent = topBrush.empty() ? [] : topBrush.extent();
 							dim.filterFunction(filter);
 							palladioService.update();
+						});
+						topBrush.on('brushend', function () {
 							emitFilterText();
 						});
 
@@ -64155,6 +64164,8 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 							bottomExtent = bottomBrush.empty() ? [] : bottomBrush.extent();
 							dim.filterFunction(filter);
 							palladioService.update();
+						});
+						bottomBrush.on('brushend', function () {
 							emitFilterText();
 						});
 
@@ -64165,6 +64176,8 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 							midExtent = midBrush.empty() ? [] : midBrush.extent();
 							dim.filterFunction(filter);
 							palladioService.update();
+						});
+						midBrush.on('brushend', function () {
 							emitFilterText();
 						});
 
@@ -64420,10 +64433,14 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						// Clean up after yourself. Remove dimensions that we have created. If we
 						// created watches on another scope, destroy those as well.
 
-						dim.filterAll();
-						group.remove();
-						dim.remove();
+						if(dim) {
+							dim.filterAll();
+							group.remove();
+							dim.remove();
+							dim = undefined;
+						}
 						deregister.forEach(function(f) { f(); });
+						deregister = [];
 
 					});
 
@@ -64474,6 +64491,15 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 
 					// Move the modal out of the fixed area.
 					$(element[0]).find('#date-start-modal').parent().appendTo('body');
+
+					// Set up the toggle if in view state.
+					if(scope.view === 'true') {
+						$(document).ready(function(){
+							$(element[0]).find('.toggle').click(function() {
+								$(element[0]).find('.settings').toggleClass('open close');
+							});
+						});
+					}
 				}
 			}
 		};
@@ -67147,7 +67173,7 @@ angular.module('palladio').run(['$templateCache', function($templateCache) {
 }]);
 angular.module('palladio').run(['$templateCache', function($templateCache) {
     $templateCache.put('partials/visualization.html',
-        "<div id=\"visualization\">\n  <div class=\"row-fluid\" data-ng-show=\"layout==='geo'\">\n    <div class=\"with-settings\" data-palladio-map-view-with-settings></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='time'\">\n    <div class=\"with-settings\" data-palladio-timechart-view-with-settings></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='graph'\">\n    <div class=\"with-settings\" data-palladio-graph-view-with-settings></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='table'\">\n    <div style=\"position: absolute; right: 40px; top:10px; z-index:20\" data-palladio-download-widget></div>\n    <div class=\"with-settings\" data-palladio-table-view-with-settings></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='grid'\">\n    <div style=\"position: absolute; right: 40px; top:10px; z-index:20\" data-palladio-download-widget></div>\n    <div class=\"with-settings\" data-palladio-list-view-with-settings></div>\n  </div>\n</div>\n<div id=\"footer\" data-ng-show=\"showFilters()\">\n                <div class=\"\">\n                    <div id=\"filters-wrapper\" class=\"\">\n                        <div class=\"row-fluid filters-header\">\n                            <a style=\"line-height:30px\" data-ng-click=\"expandedFilters = !expandedFilters\" data-ng-init=\"expandedFilters = true\" class=\"pull-left\">\n                                <span data-ng-show=\"expandedFilters\"><i class=\"fa fa-angle-down text-center\" style=\"width:10px\"></i></span>\n                                <span data-ng-show=\"!expandedFilters\"><i class=\"fa fa-angle-right text-center\" style=\"width:10px\"></i></span>\n                            </a>\n\n                            <div class=\"row-fluid\" style=\"padding: 0px 10px 0px 20px;\">\n                                <a  data-toggle=\"tooltip\"\n                                    data-original-title=\"Add a new Facet Filter\"\n                                    class=\"view-link selected alert alert-info\"\n                                    data-ng-click=\"addFilter('facet')\"\n                                    data-ng-class=\"{selected: filter.indexOf('facet') !== -1, blur: blurFacet}\">Facet</a>\n\n                                <a  data-toggle=\"tooltip\"\n                                    data-original-title=\"Add a new Timeline Filter\"\n                                    class=\"view-link selected alert alert-info\"\n                                    data-ng-click=\"addFilter('timeline')\"\n                                    data-ng-class=\"{selected: filter.indexOf('timeline') !== -1, blur: blurTimeline}\">TimeLine</a>\n\n                                <a  data-toggle=\"tooltip\"\n                                    data-original-title=\"Add a new Time Spans Filter\"\n                                    class=\"view-link selected alert alert-info\"\n                                    data-ng-click=\"addFilter('partime')\"\n                                    data-ng-class=\"{selected: filter.indexOf('partime') !== -1, blur: blurTimeSpan}\">TimeSpan</a>\n\n                                <div class=\"\" data-palladio-selection-view></div>\n                            </div>\n\n\n                            <div class=\"clearfix\"></div>\n                        </div>\n\n\n\n                        <div class=\"row-fluid\" data-ng-show=\"expandedFilters\"></div>\n                        <ul data-ng-show=\"expandedFilters\" class=\"unstyled accordion\" id=\"filters\"></ul>\n                    </div>\n                </div>\n            </div>\n");
+        "<div id=\"visualization\">\n  <div class=\"row-fluid\" data-ng-show=\"layout==='geo'\">\n    <div class=\"with-settings\" data-palladio-map-view-with-settings></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='time'\">\n    <div class=\"with-settings\" data-full-height=\"true\" data-full-width=\"true\"\n      data-show-controls = \"false\" data-show-accordion = \"false\"\n      data-view = \"true\"\n      data-palladio-partime-filter></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='graph'\">\n    <div class=\"with-settings\" data-palladio-graph-view-with-settings></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='table'\">\n    <div style=\"position: absolute; right: 40px; top:10px; z-index:20\" data-palladio-download-widget></div>\n    <div class=\"with-settings\" data-palladio-table-view-with-settings></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='grid'\">\n    <div style=\"position: absolute; right: 40px; top:10px; z-index:20\" data-palladio-download-widget></div>\n    <div class=\"with-settings\" data-palladio-list-view-with-settings></div>\n  </div>\n</div>\n<div id=\"footer\" data-ng-show=\"showFilters()\">\n                <div class=\"\">\n                    <div id=\"filters-wrapper\" class=\"\">\n                        <div class=\"row-fluid filters-header\">\n                            <a style=\"line-height:30px\" data-ng-click=\"expandedFilters = !expandedFilters\" data-ng-init=\"expandedFilters = true\" class=\"pull-left\">\n                                <span data-ng-show=\"expandedFilters\"><i class=\"fa fa-angle-down text-center\" style=\"width:10px\"></i></span>\n                                <span data-ng-show=\"!expandedFilters\"><i class=\"fa fa-angle-right text-center\" style=\"width:10px\"></i></span>\n                            </a>\n\n                            <div class=\"row-fluid\" style=\"padding: 0px 10px 0px 20px;\">\n                                <a  data-toggle=\"tooltip\"\n                                    data-original-title=\"Add a new Facet Filter\"\n                                    class=\"view-link selected alert alert-info\"\n                                    data-ng-click=\"addFilter('facet')\"\n                                    data-ng-class=\"{selected: filter.indexOf('facet') !== -1, blur: blurFacet}\">Facet</a>\n\n                                <a  data-toggle=\"tooltip\"\n                                    data-original-title=\"Add a new Timeline Filter\"\n                                    class=\"view-link selected alert alert-info\"\n                                    data-ng-click=\"addFilter('timeline')\"\n                                    data-ng-class=\"{selected: filter.indexOf('timeline') !== -1, blur: blurTimeline}\">TimeLine</a>\n\n                                <a  data-toggle=\"tooltip\"\n                                    data-original-title=\"Add a new Time Spans Filter\"\n                                    class=\"view-link selected alert alert-info\"\n                                    data-ng-click=\"addFilter('partime')\"\n                                    data-ng-class=\"{selected: filter.indexOf('partime') !== -1, blur: blurTimeSpan}\">TimeSpan</a>\n\n                                <div class=\"\" data-palladio-selection-view></div>\n                            </div>\n\n\n                            <div class=\"clearfix\"></div>\n                        </div>\n\n\n\n                        <div class=\"row-fluid\" data-ng-show=\"expandedFilters\"></div>\n                        <ul data-ng-show=\"expandedFilters\" class=\"unstyled accordion\" id=\"filters\"></ul>\n                    </div>\n                </div>\n            </div>\n");
 }]);
 angular.module('palladio').run(['$templateCache', function($templateCache) {
     $templateCache.put('partials/palladio-data-download/template.html',
@@ -67175,7 +67201,7 @@ angular.module('palladio').run(['$templateCache', function($templateCache) {
 }]);
 angular.module('palladio').run(['$templateCache', function($templateCache) {
     $templateCache.put('partials/palladio-partime-filter/template.html',
-        "<div class=\"row-fluid\">\n\t<div class=\"span3\">\n\t\t<div class=\"accordion-heading row-fluid\">\n\t\t\t<a class=\"span1 text-center angle\" data-toggle=\"collapse\" data-ng-click=\"collapse=!collapse\" data-ng-init=\"collapse=false\" data-parent=\"#filters\" href=\"{{uniqueToggleHref}}\" target=\"_self\">\n\t\t\t\t<span data-ng-show=\"!collapse\"><i class=\"fa fa-angle-down\"></i></span>\n\t\t\t\t<span data-ng-show=\"collapse\"><i class=\"fa fa-angle-right\"></i></span>\n\t\t\t</a>\n\t\t\t<input type=\"text\" class=\"editable span11\" data-ng-model=\"title\"></input>\n\t\t</div>\n\n\t\t<div class=\"settings-panel accordion-body\" ng-show=\"!collapse\">\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Layout</label>\n\t\t\t\t<span class=\"span8\" style=\"margin-left:0px\">\n\t\t\t\t\t<select bs-select ng-model=\"stepMode\" ng-options=\"mode for mode in stepModes\"\n\t\t\t\t\t\t\tdata-size=\"2\" class=\"span12 form-control show-tick\">\n\t\t\t\t\t</select>\n\t\t\t\t</span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Upper Date</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showDateEndModal()\">{{dateEndDim.description || \"Choose...\"}}<i class=\"fa fa-bars pull-right\"></i></span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Lower Date</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showDateStartModal()\">{{dateStartDim.description || \"Choose...\"}}<i class=\"fa fa-bars pull-right\"></i></span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<p class=\"tiny muted offset4 span8\">In bar layout, the Lower Date determines order of the bars.</p>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Tooltip Label</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showTooltipLabelModal()\">{{tooltipLabelDim.description || \"Choose...\"}}<i class=\"fa fa-bars pull-right\"></i></span>\n\t\t\t</div>\n\t\t</div>\n\n\t</div>\n\n\t<div class=\"span9 main-viz\">\n\t\t<div id=\"{{uniqueToggleId}}\" class=\"row-fluid accordion-body collapse in component\">\n\t\t\t<!-- SVG inserted here -->\n\t\t</div>\n\t\t<div id=\"{{uniqueModalId}}\">\n\t\t\t<div id=\"date-start-modal\" data-modal dimensions=\"dateDims\" model=\"dateStartDim\"></div>\n\t\t\t<div id=\"date-end-modal\" data-modal dimensions=\"dateDims\" model=\"dateEndDim\"></div>\n\t\t\t<div id=\"tooltip-label-modal\" data-modal dimensions=\"labelDims\" model=\"tooltipLabelDim\"></div>\n\t\t</div>\n\t</div>\n\n\t<a class=\"remove fa fa-trash-o\" data-ng-click=\"removeFilter($event)\" data-toggle=\"tooltip\" data-title=\"Delete\"></a>\n\t<a class=\"reset fa fa-eraser\" style=\"line-height:40px\" data-ng-click=\"filterReset()\" data-toggle=\"tooltip\" data-title=\"Clear\"></a>\n</div>\n");
+        "<div class=\"row-fluid\">\n\t<div data-ng-class=\"{span3: view !== 'true', settings: view === 'true', open: view === 'true'}\">\n\t\t<div ng-if=\"showAccordion !== 'false'\" class=\"accordion-heading row-fluid\">\n\t\t\t<a class=\"span1 text-center angle\" data-toggle=\"collapse\" data-ng-click=\"collapse=!collapse\" data-ng-init=\"collapse=false\" data-parent=\"#filters\" href=\"{{uniqueToggleHref}}\" target=\"_self\">\n\t\t\t\t<span data-ng-show=\"!collapse\"><i class=\"fa fa-angle-down\"></i></span>\n\t\t\t\t<span data-ng-show=\"collapse\"><i class=\"fa fa-angle-right\"></i></span>\n\t\t\t</a>\n\t\t\t<input type=\"text\" class=\"editable span11\" data-ng-model=\"title\"></input>\n\t\t</div>\n\n\t\t<div class=\"settings-panel accordion-body\" ng-show=\"!collapse\">\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Layout</label>\n\t\t\t\t<span class=\"span8\" style=\"margin-left:0px\">\n\t\t\t\t\t<select bs-select ng-model=\"stepMode\" ng-options=\"mode for mode in stepModes\"\n\t\t\t\t\t\t\tdata-size=\"2\" class=\"span12 form-control show-tick\">\n\t\t\t\t\t</select>\n\t\t\t\t</span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Upper Date</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showDateEndModal()\">{{dateEndDim.description || \"Choose...\"}}<i class=\"fa fa-bars pull-right\"></i></span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Lower Date</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showDateStartModal()\">{{dateStartDim.description || \"Choose...\"}}<i class=\"fa fa-bars pull-right\"></i></span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<p class=\"tiny muted offset4 span8\">In bar layout, the Lower Date determines order of the bars.</p>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Tooltip Label</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showTooltipLabelModal()\">{{tooltipLabelDim.description || \"Choose...\"}}<i class=\"fa fa-bars pull-right\"></i></span>\n\t\t\t</div>\n\t\t</div>\n\n\t</div>\n\n\t<div class=\"main-viz\" data-ng-class = \"{ view: view === 'true', span9: view !== 'true', span12: view === 'true' }\">\n\t\t<div id=\"{{uniqueToggleId}}\" class=\"row-fluid accordion-body collapse in component\">\n\t\t\t<!-- SVG inserted here -->\n\t\t</div>\n\t\t<div id=\"{{uniqueModalId}}\">\n\t\t\t<div id=\"date-start-modal\" data-modal dimensions=\"dateDims\" model=\"dateStartDim\"></div>\n\t\t\t<div id=\"date-end-modal\" data-modal dimensions=\"dateDims\" model=\"dateEndDim\"></div>\n\t\t\t<div id=\"tooltip-label-modal\" data-modal dimensions=\"labelDims\" model=\"tooltipLabelDim\"></div>\n\t\t</div>\n\t</div>\n\n\t<a data-ng-show=\"showControls !== 'false'\" class=\"remove fa fa-trash-o\"\n\t\tdata-ng-click=\"$parent.removeFilter($event)\" data-toggle=\"tooltip\" data-title=\"Delete\"></a>\n\t<a data-ng-show=\"showControls !== 'false'\" class=\"reset fa fa-eraser\" style=\"line-height:40px\"\n\t\tdata-ng-click=\"filterReset()\" data-toggle=\"tooltip\" data-title=\"Clear\"></a>\n\t<a data-ng-show=\"view === 'true'\" class=\"toggle\" data-toggle=\"tooltip\" data-original-title=\"Settings\"\n\t\tdata-placement=\"bottom\"><i class=\"fa fa-cog\"></i></a>\n</div>\n");
 }]);
 angular.module('palladio').run(['$templateCache', function($templateCache) {
     $templateCache.put('partials/palladio-table-view/template.html',
@@ -67183,7 +67209,7 @@ angular.module('palladio').run(['$templateCache', function($templateCache) {
 }]);
 angular.module('palladio').run(['$templateCache', function($templateCache) {
     $templateCache.put('partials/palladio-timeline-filter/template.html',
-        "<div class=\"row-fluid\">\n\t<div class=\"span3\">\n\t\t<div class=\"accordion-heading row-fluid\">\n\t\t\t<a class=\"span1 text-center angle\" data-toggle=\"collapse\" \n\t\t\t\tdata-ng-click=\"collapse=!collapse\" data-ng-init=\"collapse=false\"\n\t\t\t\tdata-parent=\"#filters\" href=\"{{uniqueToggleHref}}\" target=\"_self\">\n\n\t\t\t\t<span data-ng-show=\"!collapse\"><i class=\"fa fa-angle-down\"></i></span>\n\t\t\t\t<span data-ng-show=\"collapse\"><i class=\"fa fa-angle-right\"></i></span>\n\t\t\t</a>\n\t\t\t<input type=\"text\" class=\"editable span11\" data-ng-model=\"title\"></input>\n\t\t</div>\n\t\t<div class=\"settings-panel accordion-body\" ng-show=\"!collapse && !shortVersion\">\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Dates</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showDateModal()\">\n\t\t\t\t\t{{dateProp.description || \"Choose...\"}}\n\t\t\t\t\t<i class=\"fa fa-bars pull-right\"></i>\n\t\t\t\t</span>\n\t\t\t</div>\n\t\t\t<div class=\"setting row-fluid\" data-ng-show=\"!shortVersion\">\n\t\t\t\t<label class=\"span4 inline\">Group by</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showGroupModal()\">\n\t\t\t\t\t{{groupProp.description || \"Choose...\"}}\n\t\t\t\t\t<i class=\"fa fa-bars pull-right\"></i>\n\t\t\t\t</span>\n\t\t\t</div>\n\t\t\t<div class=\"setting row-fluid\" data-ng-show=\"!shortVersion\">\n\t\t\t\t<label class=\"span4 inline\">Height shows</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showAggModal()\">\n\t\t\t\t\t{{getAggDescription(aggDim) || \"Choose...\"}}\n\t\t\t\t\t<i class=\"fa fa-bars pull-right\"></i>\n\t\t\t\t</span>\n\t\t\t</div>\n\t\t\t<div class=\"setting row-fluid\" data-ng-show=\"!shortVersion\">\n\t\t\t\t<span class=\"span4\"></span>\n\t\t\t\t<span class=\"\">\n\t\t\t\t\t<a class=\"\" data-ng-click=\"zoomToFilter()\">Zoom to filter</a>\n\t\t\t\t</span>\n\t\t\t</div>\n\t\t</div>\n\t</div>\n\n\t<div class=\"span9\">\n\t<!-- View -->\n\t\t<div id=\"{{uniqueToggleId}}\" class=\"row-fluid accordion-body collapse in component\">\n\t\t\t<div class=\"span12 view\">\n\t\t\t\t<a class=\"toggle\" class=\"close\"></a>\n\t\t\t\t<div data-palladio-timeline-filter \n\t\t\t\t\tdata-dimension=\"dateDim\" \n\t\t\t\t\tdata-group-accessor=\"groupAccessor\" \n\t\t\t\t\tdata-xfilter=\"xfilter\" \n\t\t\t\t\tdata-type=\"date\"\n\t\t\t\t\tdata-short=\"shortVersion\"\n\t\t\t\t\tdata-title=\"{{title}}\" \n\t\t\t\t\tdata-height=\"200\" \n\t\t\t\t\tdata-mode=\"{{mode}}\" \n\t\t\t\t\tdata-count-by=\"{{countBy}} \"\n\t\t\t\t\tdata-aggregation-type=\"{{aggregationType}}\"\n\t\t\t\t\tdata-aggregate-key=\"{{aggregateKey}}\"\n\t\t\t\t\tdata-set-filter=\"setFilter\" \n\t\t\t\t\tdata-get-filter=\"getFilter\" \n\t\t\t\t\tdata-extent-override=\"extentOverride\" >\n\t\t\t\t</div>\n\t\t\t</div> \n\t\t</div>\n\t\t<div id=\"{{uniqueModalId}}\">\n\t\t\t<div id=\"date-modal\" data-modal dimensions=\"dateDims\" model=\"dateProp\"></div>\n\t\t\t<div id=\"group-modal\" data-modal dimensions=\"groupDims\" model=\"groupProp\"></div>\n\t\t\t<div id=\"agg-modal\" data-modal dimensions=\"aggDims\" model=\"aggDim\" \n\t\t\t\tdescription-accessor=\"getAggDescription\"></div>\n\t\t</div>\n\t</div>\n\n\t<a class=\"remove fa fa-trash-o\" data-ng-click=\"removeFilter($event)\"\n\t\tdata-toggle=\"tooltip\" data-title=\"Delete\"></a>\n\t<a class=\"reset fa fa-eraser\" style=\"line-height:40px\" data-ng-click=\"filterReset()\"\n\t\tdata-toggle=\"tooltip\" data-title=\"Clear\"></a>\n\t<a data-ng-show=\"!shortVersion && !collapse\" class=\"short fa fa-compress\" style=\"line-height:40px\"\n\t\tdata-ng-click=\"shortVersion = !shortVersion\" data-toggle=\"tooltip\"\n\t\tdata-title=\"Compress\"></a>\n\t<a data-ng-show=\"shortVersion && !collapse\" class=\"short fa fa-expand\" style=\"line-height:40px\"\n\t\tdata-ng-click=\"shortVersion = !shortVersion\" data-toggle=\"tooltip\" \n\t\tdata-title=\"Expand\"></a>\n\n</div>");
+        "<div class=\"row-fluid\">\n\t<div class=\"span3\">\n\t\t<div class=\"accordion-heading row-fluid\">\n\t\t\t<a class=\"span1 text-center angle\" data-toggle=\"collapse\" \n\t\t\t\tdata-ng-click=\"collapse=!collapse\" data-ng-init=\"collapse=false\"\n\t\t\t\tdata-parent=\"#filters\" href=\"{{uniqueToggleHref}}\" target=\"_self\">\n\n\t\t\t\t<span data-ng-show=\"!collapse\"><i class=\"fa fa-angle-down\"></i></span>\n\t\t\t\t<span data-ng-show=\"collapse\"><i class=\"fa fa-angle-right\"></i></span>\n\t\t\t</a>\n\t\t\t<input type=\"text\" class=\"editable span11\" data-ng-model=\"title\"></input>\n\t\t</div>\n\t\t<div class=\"settings-panel accordion-body\" ng-show=\"!collapse && !shortVersion\">\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Dates</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showDateModal()\">\n\t\t\t\t\t{{dateProp.description || \"Choose...\"}}\n\t\t\t\t\t<i class=\"fa fa-bars pull-right\"></i>\n\t\t\t\t</span>\n\t\t\t</div>\n\t\t\t<div class=\"setting row-fluid\" data-ng-show=\"!shortVersion\">\n\t\t\t\t<label class=\"span4 inline\">Group by</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showGroupModal()\">\n\t\t\t\t\t{{groupProp.description || \"Choose...\"}}\n\t\t\t\t\t<i class=\"fa fa-bars pull-right\"></i>\n\t\t\t\t</span>\n\t\t\t</div>\n\t\t\t<div class=\"setting row-fluid\" data-ng-show=\"!shortVersion\">\n\t\t\t\t<label class=\"span4 inline\">Height shows</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showAggModal()\">\n\t\t\t\t\t{{getAggDescription(aggDim) || \"Choose...\"}}\n\t\t\t\t\t<i class=\"fa fa-bars pull-right\"></i>\n\t\t\t\t</span>\n\t\t\t</div>\n\t\t\t<div class=\"setting row-fluid\" data-ng-show=\"!shortVersion\">\n\t\t\t\t<span class=\"span4\"></span>\n\t\t\t\t<span class=\"\">\n\t\t\t\t\t<a class=\"\" data-ng-click=\"zoomToFilter()\">Zoom to filter</a>\n\t\t\t\t</span>\n\t\t\t</div>\n\t\t</div>\n\t</div>\n\n\t<div class=\"span9\">\n\t<!-- View -->\n\t\t<div id=\"{{uniqueToggleId}}\" class=\"row-fluid accordion-body collapse in component\">\n\t\t\t<div class=\"span12 view\">\n\t\t\t\t<a class=\"toggle\" class=\"close\"></a>\n\t\t\t\t<div data-palladio-timeline-filter \n\t\t\t\t\tdata-dimension=\"dateDim\" \n\t\t\t\t\tdata-group-accessor=\"groupAccessor\" \n\t\t\t\t\tdata-xfilter=\"xfilter\" \n\t\t\t\t\tdata-type=\"date\"\n\t\t\t\t\tdata-short=\"shortVersion\"\n\t\t\t\t\tdata-title=\"{{title}}\" \n\t\t\t\t\tdata-height=\"200\" \n\t\t\t\t\tdata-mode=\"{{mode}}\" \n\t\t\t\t\tdata-count-by=\"{{countBy}} \"\n\t\t\t\t\tdata-aggregation-type=\"{{aggregationType}}\"\n\t\t\t\t\tdata-aggregate-key=\"{{aggregateKey}}\"\n\t\t\t\t\tdata-set-filter=\"setFilter\" \n\t\t\t\t\tdata-get-filter=\"getFilter\" \n\t\t\t\t\tdata-extent-override=\"extentOverride\" >\n\t\t\t\t</div>\n\t\t\t</div> \n\t\t</div>\n\t\t<div id=\"{{uniqueModalId}}\">\n\t\t\t<div id=\"date-modal\" data-modal dimensions=\"dateDims\" model=\"dateProp\"></div>\n\t\t\t<div id=\"group-modal\" data-modal dimensions=\"groupDims\" model=\"groupProp\"></div>\n\t\t\t<div id=\"agg-modal\" data-modal dimensions=\"aggDims\" model=\"aggDim\" \n\t\t\t\tdescription-accessor=\"getAggDescription\"></div>\n\t\t</div>\n\t</div>\n\n\t<a class=\"remove fa fa-trash-o\" data-ng-click=\"$parent.removeFilter($event)\"\n\t\tdata-toggle=\"tooltip\" data-title=\"Delete\"></a>\n\t<a class=\"reset fa fa-eraser\" style=\"line-height:40px\" data-ng-click=\"filterReset()\"\n\t\tdata-toggle=\"tooltip\" data-title=\"Clear\"></a>\n\t<a data-ng-show=\"!shortVersion && !collapse\" class=\"short fa fa-compress\" style=\"line-height:40px\"\n\t\tdata-ng-click=\"shortVersion = !shortVersion\" data-toggle=\"tooltip\"\n\t\tdata-title=\"Compress\"></a>\n\t<a data-ng-show=\"shortVersion && !collapse\" class=\"short fa fa-expand\" style=\"line-height:40px\"\n\t\tdata-ng-click=\"shortVersion = !shortVersion\" data-toggle=\"tooltip\" \n\t\tdata-title=\"Expand\"></a>\n\n</div>");
 }]);
 angular.module('palladio').run(['$templateCache', function($templateCache) {
     $templateCache.put('partials/palladio-data-upload/template.html',

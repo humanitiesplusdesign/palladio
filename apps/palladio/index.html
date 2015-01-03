@@ -62,6 +62,10 @@
                         data-ng-class="{'active' : location.path() == '/visualization' && layout=='grid'}"><a ui-sref="/visualization" ui-sref-opts="{reload: reload}" data-ng-click="setLayout('grid')" class="short">Gallery</a>
                     </li>
 
+                    <li data-ng-show="files.length"
+                        data-ng-class="{'active' : location.path() == '/visualization' && layout=='time'}"><a ui-sref="/visualization" ui-sref-opts="{reload: reload}" data-ng-click="setLayout('time')" class="short">Time</a>
+                    </li>
+
                     <li data-ng-show="files.length">
                         <span><button palladio-data-download class="btn" style="margin-top:0px">Save</button></span>
                     </li>

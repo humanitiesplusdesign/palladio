@@ -3,7 +3,13 @@
 angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 	.directive('palladioPartimeFilter', function (dateService, palladioService, dataService) {
 		var directiveObj = {
-			scope: true,
+			scope: {
+				fullHeight: '@',
+				fullWidth: '@',
+				showControls: '@',
+				showAccordion: '@',
+				view: '@'
+			},
 			templateUrl: 'partials/palladio-partime-filter/template.html',
 
 			link: { pre: function(scope) {
@@ -71,9 +77,10 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 					var format = dateService.format;
 
 					// Constants...
-					var width = $(window).width()*0.7;
-					var height = 200;
 					var margin = 25;
+					var width = scope.fullWidth === 'true' ? $(window).width() - margin*2 : $(window).width()*0.7;
+					var height = scope.height ? +scope.height : 200;
+					var height = scope.fullHeight === 'true' ? $(window).height()-200 : height;
 					var filterColor = '#9DBCE4';
 
 					setup();
@@ -197,6 +204,8 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 							topExtent = topBrush.empty() ? [] : topBrush.extent();
 							dim.filterFunction(filter);
 							palladioService.update();
+						});
+						topBrush.on('brushend', function () {
 							emitFilterText();
 						});
 
@@ -207,6 +216,8 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 							bottomExtent = bottomBrush.empty() ? [] : bottomBrush.extent();
 							dim.filterFunction(filter);
 							palladioService.update();
+						});
+						bottomBrush.on('brushend', function () {
 							emitFilterText();
 						});
 
@@ -217,6 +228,8 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 							midExtent = midBrush.empty() ? [] : midBrush.extent();
 							dim.filterFunction(filter);
 							palladioService.update();
+						});
+						midBrush.on('brushend', function () {
 							emitFilterText();
 						});
 
@@ -472,10 +485,14 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						// Clean up after yourself. Remove dimensions that we have created. If we
 						// created watches on another scope, destroy those as well.
 
-						dim.filterAll();
-						group.remove();
-						dim.remove();
+						if(dim) {
+							dim.filterAll();
+							group.remove();
+							dim.remove();
+							dim = undefined;
+						}
 						deregister.forEach(function(f) { f(); });
+						deregister = [];
 
 					});
 
@@ -526,6 +543,15 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 
 					// Move the modal out of the fixed area.
 					$(element[0]).find('#date-start-modal').parent().appendTo('body');
+
+					// Set up the toggle if in view state.
+					if(scope.view === 'true') {
+						$(document).ready(function(){
+							$(element[0]).find('.toggle').click(function() {
+								$(element[0]).find('.settings').toggleClass('open close');
+							});
+						});
+					}
 				}
 			}
 		};

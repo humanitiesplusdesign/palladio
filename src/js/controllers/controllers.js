@@ -458,7 +458,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		$scope.removeFilter = function (event) {
 			// '$destroy' event isn't getting fired properly with just .remove(), so we do it
 			// ourselves.
-			angular.element(event.currentTarget.parentElement.parentElement).scope().$broadcast('$destroy');
+			angular.element(event.currentTarget.parentElement).scope().$broadcast('$destroy');
 			angular.element(event.currentTarget.parentElement.parentElement.parentElement).remove();
 			palladioService.update();
 			$('.tooltip').remove();
@@ -473,12 +473,12 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 						$('#filters').prepend($compile('<li><div data-palladio-timeline-filter-with-settings></div></li>')($scope));
 					}
 					break;
-				case 'timespan':
-					$('#filters').prepend($compile('<li><div data-palladio-timespan-filter></div></li>')($scope));
-					break;
-				case 'timestep':
-					$('#filters').prepend($compile('<li><div data-palladio-timestep-filter></div></li>')($scope));
-					break;
+				// case 'timespan':
+				// 	$('#filters').prepend($compile('<li><div data-palladio-timespan-filter></div></li>')($scope));
+				// 	break;
+				// case 'timestep':
+				// 	$('#filters').prepend($compile('<li><div data-palladio-timestep-filter></div></li>')($scope));
+				// 	break;
 				case 'partime':
 					if(!$scope.blurTimeSpan) {
 						$('#filters').prepend($compile('<li><div data-palladio-partime-filter></div></li>')($scope));
@@ -489,12 +489,12 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 						$('#filters').prepend($compile('<li><div data-palladio-facet-filter show-controls="true" show-accordion="true" show-drop-area="false" show-settings="true"></div></li>')($scope));
 					}
 					break;
-				case 'histogram':
-					$('#filters').prepend($compile('<li><div data-palladio-histogram-filter-with-settings></div></li>')($scope));
-					break;
-				case 'arctime':
-					$('#filters').prepend($compile('<li><div data-palladio-arctime-filter-with-settings></div></li>')($scope));
-					break;
+				// case 'histogram':
+				// 	$('#filters').prepend($compile('<li><div data-palladio-histogram-filter-with-settings></div></li>')($scope));
+				// 	break;
+				// case 'arctime':
+				// 	$('#filters').prepend($compile('<li><div data-palladio-arctime-filter-with-settings></div></li>')($scope));
+				// 	break;
 			}
 			$scope.showAddFilter = false;
 		};
