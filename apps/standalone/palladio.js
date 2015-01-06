@@ -56782,36 +56782,6 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		}, 1000);
 	});
 
-angular.module('palladio.filters', [])
-  .filter('titleCase', function () {
-		return function (str) {
-			return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
-		};
-	})
-
-  .filter('confirmed', function () {
-    return function (fields) {
-      return fields.filter(function(d){ return d.confirmed; }).length;
-    };
-  })
-
-  .filter('special', function () {
-    return function (fields) {
-      return fields.filter(function(d){ return d.special.length; }).length;
-    };
-  })
-
-  .filter('unique', function () {
-    return function (fields) {
-        return fields.filter(function(d){ return d.uniqueKey; }).length;
-    };
-  })
-
-  .filter('notSameFile', function () {
-    return function (files, fileId) {
-        return files.filter(function (d){ return d.id !== fileId; });
-    };
-  });
 angular.module('palladio.directives.dimension', ['palladio'])
 	.directive('palladioDimension', ['palladioService', function(ps) {
 		return {
@@ -59060,6 +59030,36 @@ var d3_svg_brushResizes = [
 	}
 
 })();
+angular.module('palladio.filters', [])
+  .filter('titleCase', function () {
+		return function (str) {
+			return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+		};
+	})
+
+  .filter('confirmed', function () {
+    return function (fields) {
+      return fields.filter(function(d){ return d.confirmed; }).length;
+    };
+  })
+
+  .filter('special', function () {
+    return function (fields) {
+      return fields.filter(function(d){ return d.special.length; }).length;
+    };
+  })
+
+  .filter('unique', function () {
+    return function (fields) {
+        return fields.filter(function(d){ return d.uniqueKey; }).length;
+    };
+  })
+
+  .filter('notSameFile', function () {
+    return function (files, fileId) {
+        return files.filter(function (d){ return d.id !== fileId; });
+    };
+  });
 angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.services.validation',
 		'palladio.services.spinner'])
 	.factory("dataService", function (parseService, validationService, spinnerService, $q) {
@@ -63994,10 +63994,12 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 					// Label dimensions.
 					scope.labelDims = scope.metadata;
 					scope.tooltipLabelDim = scope.labelDims[0];
+					scope.groupDim = scope.labelDims[0];
 
 					scope.title = "Time Span Filter";
 
-					scope.stepModes = ['Parallel', 'Bars'];
+					scope.stepModes = ['Bars', 'Parallel'];
+					if(scope.view === 'true') scope.stepModes.push('Grouped Bars');
 					scope.stepMode = scope.stepModes[0];
 
 					scope.showDateStartModal = function () {
@@ -64010,6 +64012,10 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 
 					scope.showTooltipLabelModal = function () {
 						$('#' + scope.uniqueModalId).find('#tooltip-label-modal').modal('show');
+					};
+
+					scope.showGroupModal = function () {
+						$('#' + scope.uniqueModalId).find('#group-modal').modal('show');
 					};
 
 				}, post: function(scope, element) {
@@ -64047,7 +64053,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 
 						if(dim) dim.remove();
 
-						// Dimension has structure [startDate, endDate, label]
+						// Dimension has structure [startDate, endDate, label, group]
 						dim = scope.xfilter.dimension(
 							function(d) {
 								if((format.reformatExternal(d[scope.dateStartDim.key]) !== '' &&
@@ -64057,17 +64063,20 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 										// Both populated OR both equal (i.e. blank)
 										return [ format.reformatExternal(d[scope.dateStartDim.key]),
 												format.reformatExternal(d[scope.dateEndDim.key]),
-												d[scope.tooltipLabelDim.key] ];
+												d[scope.tooltipLabelDim.key],
+												d[scope.groupDim.key] ];
 								} else {
 									// Otherwise set the blank one equal to the populated one.
 									if(format.reformatExternal(d[scope.dateStartDim.key]) === '') {
 										return [ format.reformatExternal(d[scope.dateEndDim.key]),
 												format.reformatExternal(d[scope.dateEndDim.key]),
-												d[scope.tooltipLabelDim.key] ];
+												d[scope.tooltipLabelDim.key],
+												d[scope.groupDim.key] ];
 									} else {
 										return [ format.reformatExternal(d[scope.dateStartDim.key]),
 												format.reformatExternal(d[scope.dateStartDim.key]),
-												d[scope.tooltipLabelDim.key] ];
+												d[scope.tooltipLabelDim.key],
+												d[scope.groupDim.key] ];
 									}
 								}
 							}
@@ -64249,8 +64258,14 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 									.filter(function (d) {
 										// Require start OR end date.
 										return (d.key[0] !== "" || d.key[1] !== "") && d.value !== 0;
-									}).sort(function (a, b) { return a.key[0] < b.key[0] ? -1 : 1; }),
-								function (d) { return d.key[0] + " - " + d.key[1]; });
+									}).sort(function (a, b) {
+										if(scope.stepMode !== 'Grouped Bars' || a.key[3] === b.key[3]) {
+											return a.key[0] < b.key[0] ? -1 : 1;
+										} else {
+											return a.key[3] < b.key[3] ? -1 : 1;
+										}
+									}),
+								function (d) { return d.key[0] + " - " + d.key[1] + " - " + d.key[3]; });
 
 						function fill(d) {
 							return filter(d.key) ? "#555555" : "#CCCCCC";
@@ -64301,7 +64316,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						var startCircles = paths.selectAll('.path-start');
 						var endCircles = paths.selectAll('.path-end');
 
-						if(scope.stepMode == "Bars") {
+						if(scope.stepMode === "Bars" || scope.stepMode === 'Grouped Bars') {
 							// We need to refigure the yStep scale since the number of groups can change.
 							yStep.domain([-1, group.top(Infinity)
 									.filter(function (d) {
@@ -64330,10 +64345,10 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 									.attr("transform", function (d, i) { return "translate(0," + yStep(i) + ")"; });
 
 							// Show the circles.
-							circles.style("display", "inline")
+							circles.style("display", "inline");
 						} else {
 							// Hide the circles.
-							circles.style("display", "none")
+							circles.style("display", "none");
 
 							lines.attr('stroke', fill);
 							lines
@@ -64365,13 +64380,13 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						update();
 					};
 
-					scope.$watchGroup(['dateStartDim', 'dateEndDim', 'tooltipLabelDim'], function () {
+					scope.$watchGroup(['dateStartDim', 'dateEndDim', 'tooltipLabelDim', 'groupDim'], function () {
 						reset();
 						setup();
 						update();
 					});
 
-					scope.$watch('stepMode', function (ov, nv) {
+					scope.$watch('stepMode', function (nv, ov) {
 						if(nv !== undefined) {
 							update();
 						}
@@ -67201,7 +67216,7 @@ angular.module('palladio').run(['$templateCache', function($templateCache) {
 }]);
 angular.module('palladio').run(['$templateCache', function($templateCache) {
     $templateCache.put('partials/palladio-partime-filter/template.html',
-        "<div class=\"row-fluid\">\n\t<div data-ng-class=\"{span3: view !== 'true', settings: view === 'true', open: view === 'true'}\">\n\t\t<div ng-if=\"showAccordion !== 'false'\" class=\"accordion-heading row-fluid\">\n\t\t\t<a class=\"span1 text-center angle\" data-toggle=\"collapse\" data-ng-click=\"collapse=!collapse\" data-ng-init=\"collapse=false\" data-parent=\"#filters\" href=\"{{uniqueToggleHref}}\" target=\"_self\">\n\t\t\t\t<span data-ng-show=\"!collapse\"><i class=\"fa fa-angle-down\"></i></span>\n\t\t\t\t<span data-ng-show=\"collapse\"><i class=\"fa fa-angle-right\"></i></span>\n\t\t\t</a>\n\t\t\t<input type=\"text\" class=\"editable span11\" data-ng-model=\"title\"></input>\n\t\t</div>\n\n\t\t<div class=\"settings-panel accordion-body\" ng-show=\"!collapse\">\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Layout</label>\n\t\t\t\t<span class=\"span8\" style=\"margin-left:0px\">\n\t\t\t\t\t<select bs-select ng-model=\"stepMode\" ng-options=\"mode for mode in stepModes\"\n\t\t\t\t\t\t\tdata-size=\"2\" class=\"span12 form-control show-tick\">\n\t\t\t\t\t</select>\n\t\t\t\t</span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Upper Date</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showDateEndModal()\">{{dateEndDim.description || \"Choose...\"}}<i class=\"fa fa-bars pull-right\"></i></span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Lower Date</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showDateStartModal()\">{{dateStartDim.description || \"Choose...\"}}<i class=\"fa fa-bars pull-right\"></i></span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<p class=\"tiny muted offset4 span8\">In bar layout, the Lower Date determines order of the bars.</p>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Tooltip Label</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showTooltipLabelModal()\">{{tooltipLabelDim.description || \"Choose...\"}}<i class=\"fa fa-bars pull-right\"></i></span>\n\t\t\t</div>\n\t\t</div>\n\n\t</div>\n\n\t<div class=\"main-viz\" data-ng-class = \"{ view: view === 'true', span9: view !== 'true', span12: view === 'true' }\">\n\t\t<div id=\"{{uniqueToggleId}}\" class=\"row-fluid accordion-body collapse in component\">\n\t\t\t<!-- SVG inserted here -->\n\t\t</div>\n\t\t<div id=\"{{uniqueModalId}}\">\n\t\t\t<div id=\"date-start-modal\" data-modal dimensions=\"dateDims\" model=\"dateStartDim\"></div>\n\t\t\t<div id=\"date-end-modal\" data-modal dimensions=\"dateDims\" model=\"dateEndDim\"></div>\n\t\t\t<div id=\"tooltip-label-modal\" data-modal dimensions=\"labelDims\" model=\"tooltipLabelDim\"></div>\n\t\t</div>\n\t</div>\n\n\t<a data-ng-show=\"showControls !== 'false'\" class=\"remove fa fa-trash-o\"\n\t\tdata-ng-click=\"$parent.removeFilter($event)\" data-toggle=\"tooltip\" data-title=\"Delete\"></a>\n\t<a data-ng-show=\"showControls !== 'false'\" class=\"reset fa fa-eraser\" style=\"line-height:40px\"\n\t\tdata-ng-click=\"filterReset()\" data-toggle=\"tooltip\" data-title=\"Clear\"></a>\n\t<a data-ng-show=\"view === 'true'\" class=\"toggle\" data-toggle=\"tooltip\" data-original-title=\"Settings\"\n\t\tdata-placement=\"bottom\"><i class=\"fa fa-cog\"></i></a>\n</div>\n");
+        "<div class=\"row-fluid\">\n\t<div data-ng-class=\"{span3: view !== 'true', settings: view === 'true', open: view === 'true'}\">\n\t\t<div ng-if=\"showAccordion !== 'false'\" class=\"accordion-heading row-fluid\">\n\t\t\t<a class=\"span1 text-center angle\" data-toggle=\"collapse\" data-ng-click=\"collapse=!collapse\" data-ng-init=\"collapse=false\" data-parent=\"#filters\" href=\"{{uniqueToggleHref}}\" target=\"_self\">\n\t\t\t\t<span data-ng-show=\"!collapse\"><i class=\"fa fa-angle-down\"></i></span>\n\t\t\t\t<span data-ng-show=\"collapse\"><i class=\"fa fa-angle-right\"></i></span>\n\t\t\t</a>\n\t\t\t<input type=\"text\" class=\"editable span11\" data-ng-model=\"title\"></input>\n\t\t</div>\n\n\t\t<div class=\"settings-panel accordion-body\" ng-show=\"!collapse\">\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Layout</label>\n\t\t\t\t<span class=\"span8\" style=\"margin-left:0px\">\n\t\t\t\t\t<select bs-select ng-model=\"stepMode\" ng-options=\"mode for mode in stepModes\"\n\t\t\t\t\t\t\tdata-size=\"3\" class=\"span12 form-control show-tick\">\n\t\t\t\t\t</select>\n\t\t\t\t</span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Upper Date</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showDateEndModal()\">{{dateEndDim.description || \"Choose...\"}}<i class=\"fa fa-bars pull-right\"></i></span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Lower Date</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showDateStartModal()\">{{dateStartDim.description || \"Choose...\"}}<i class=\"fa fa-bars pull-right\"></i></span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<p class=\"tiny muted offset4 span8\">In bar layout, the Lower Date determines order of the bars.</p>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Tooltip Label</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showTooltipLabelModal()\">{{tooltipLabelDim.description || \"Choose...\"}}<i class=\"fa fa-bars pull-right\"></i></span>\n\t\t\t</div>\n\n\t\t\t<div data-ng-show=\"stepMode === 'Grouped Bars'\" class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Grouping</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showGroupModal()\">{{groupDim.description || \"Choose...\"}}<i class=\"fa fa-bars pull-right\"></i></span>\n\t\t\t</div>\n\t\t</div>\n\n\t</div>\n\n\t<div class=\"main-viz\" data-ng-class = \"{ view: view === 'true', span9: view !== 'true', span12: view === 'true' }\">\n\t\t<div id=\"{{uniqueToggleId}}\" class=\"row-fluid accordion-body collapse in component\">\n\t\t\t<!-- SVG inserted here -->\n\t\t</div>\n\t\t<div id=\"{{uniqueModalId}}\">\n\t\t\t<div id=\"date-start-modal\" data-modal dimensions=\"dateDims\" model=\"dateStartDim\"></div>\n\t\t\t<div id=\"date-end-modal\" data-modal dimensions=\"dateDims\" model=\"dateEndDim\"></div>\n\t\t\t<div id=\"tooltip-label-modal\" data-modal dimensions=\"labelDims\" model=\"tooltipLabelDim\"></div>\n\t\t\t<div id=\"group-modal\" data-modal dimensions=\"labelDims\" model=\"groupDim\"></div>\n\t\t</div>\n\t</div>\n\n\t<a data-ng-show=\"showControls !== 'false'\" class=\"remove fa fa-trash-o\"\n\t\tdata-ng-click=\"$parent.removeFilter($event)\" data-toggle=\"tooltip\" data-title=\"Delete\"></a>\n\t<a data-ng-show=\"showControls !== 'false'\" class=\"reset fa fa-eraser\" style=\"line-height:40px\"\n\t\tdata-ng-click=\"filterReset()\" data-toggle=\"tooltip\" data-title=\"Clear\"></a>\n\t<a data-ng-show=\"view === 'true'\" class=\"toggle\" data-toggle=\"tooltip\" data-original-title=\"Settings\"\n\t\tdata-placement=\"bottom\"><i class=\"fa fa-cog\"></i></a>\n</div>\n");
 }]);
 angular.module('palladio').run(['$templateCache', function($templateCache) {
     $templateCache.put('partials/palladio-table-view/template.html',

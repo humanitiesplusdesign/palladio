@@ -46,10 +46,12 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 					// Label dimensions.
 					scope.labelDims = scope.metadata;
 					scope.tooltipLabelDim = scope.labelDims[0];
+					scope.groupDim = scope.labelDims[0];
 
 					scope.title = "Time Span Filter";
 
-					scope.stepModes = ['Parallel', 'Bars'];
+					scope.stepModes = ['Bars', 'Parallel'];
+					if(scope.view === 'true') scope.stepModes.push('Grouped Bars');
 					scope.stepMode = scope.stepModes[0];
 
 					scope.showDateStartModal = function () {
@@ -62,6 +64,10 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 
 					scope.showTooltipLabelModal = function () {
 						$('#' + scope.uniqueModalId).find('#tooltip-label-modal').modal('show');
+					};
+
+					scope.showGroupModal = function () {
+						$('#' + scope.uniqueModalId).find('#group-modal').modal('show');
 					};
 
 				}, post: function(scope, element) {
@@ -99,7 +105,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 
 						if(dim) dim.remove();
 
-						// Dimension has structure [startDate, endDate, label]
+						// Dimension has structure [startDate, endDate, label, group]
 						dim = scope.xfilter.dimension(
 							function(d) {
 								if((format.reformatExternal(d[scope.dateStartDim.key]) !== '' &&
@@ -109,17 +115,20 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 										// Both populated OR both equal (i.e. blank)
 										return [ format.reformatExternal(d[scope.dateStartDim.key]),
 												format.reformatExternal(d[scope.dateEndDim.key]),
-												d[scope.tooltipLabelDim.key] ];
+												d[scope.tooltipLabelDim.key],
+												d[scope.groupDim.key] ];
 								} else {
 									// Otherwise set the blank one equal to the populated one.
 									if(format.reformatExternal(d[scope.dateStartDim.key]) === '') {
 										return [ format.reformatExternal(d[scope.dateEndDim.key]),
 												format.reformatExternal(d[scope.dateEndDim.key]),
-												d[scope.tooltipLabelDim.key] ];
+												d[scope.tooltipLabelDim.key],
+												d[scope.groupDim.key] ];
 									} else {
 										return [ format.reformatExternal(d[scope.dateStartDim.key]),
 												format.reformatExternal(d[scope.dateStartDim.key]),
-												d[scope.tooltipLabelDim.key] ];
+												d[scope.tooltipLabelDim.key],
+												d[scope.groupDim.key] ];
 									}
 								}
 							}
@@ -301,8 +310,14 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 									.filter(function (d) {
 										// Require start OR end date.
 										return (d.key[0] !== "" || d.key[1] !== "") && d.value !== 0;
-									}).sort(function (a, b) { return a.key[0] < b.key[0] ? -1 : 1; }),
-								function (d) { return d.key[0] + " - " + d.key[1]; });
+									}).sort(function (a, b) {
+										if(scope.stepMode !== 'Grouped Bars' || a.key[3] === b.key[3]) {
+											return a.key[0] < b.key[0] ? -1 : 1;
+										} else {
+											return a.key[3] < b.key[3] ? -1 : 1;
+										}
+									}),
+								function (d) { return d.key[0] + " - " + d.key[1] + " - " + d.key[3]; });
 
 						function fill(d) {
 							return filter(d.key) ? "#555555" : "#CCCCCC";
@@ -353,7 +368,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						var startCircles = paths.selectAll('.path-start');
 						var endCircles = paths.selectAll('.path-end');
 
-						if(scope.stepMode == "Bars") {
+						if(scope.stepMode === "Bars" || scope.stepMode === 'Grouped Bars') {
 							// We need to refigure the yStep scale since the number of groups can change.
 							yStep.domain([-1, group.top(Infinity)
 									.filter(function (d) {
@@ -382,10 +397,10 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 									.attr("transform", function (d, i) { return "translate(0," + yStep(i) + ")"; });
 
 							// Show the circles.
-							circles.style("display", "inline")
+							circles.style("display", "inline");
 						} else {
 							// Hide the circles.
-							circles.style("display", "none")
+							circles.style("display", "none");
 
 							lines.attr('stroke', fill);
 							lines
@@ -417,13 +432,13 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						update();
 					};
 
-					scope.$watchGroup(['dateStartDim', 'dateEndDim', 'tooltipLabelDim'], function () {
+					scope.$watchGroup(['dateStartDim', 'dateEndDim', 'tooltipLabelDim', 'groupDim'], function () {
 						reset();
 						setup();
 						update();
 					});
 
-					scope.$watch('stepMode', function (ov, nv) {
+					scope.$watch('stepMode', function (nv, ov) {
 						if(nv !== undefined) {
 							update();
 						}

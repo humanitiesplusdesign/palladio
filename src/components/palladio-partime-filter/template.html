@@ -14,7 +14,7 @@
 				<label class="span4 inline">Layout</label>
 				<span class="span8" style="margin-left:0px">
 					<select bs-select ng-model="stepMode" ng-options="mode for mode in stepModes"
-							data-size="2" class="span12 form-control show-tick">
+							data-size="3" class="span12 form-control show-tick">
 					</select>
 				</span>
 			</div>
@@ -37,6 +37,11 @@
 				<label class="span4 inline">Tooltip Label</label>
 				<span class="field span8" ng-click="showTooltipLabelModal()">{{tooltipLabelDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>
 			</div>
+
+			<div data-ng-show="stepMode === 'Grouped Bars'" class="setting row-fluid">
+				<label class="span4 inline">Grouping</label>
+				<span class="field span8" ng-click="showGroupModal()">{{groupDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>
+			</div>
 		</div>
 
 	</div>
@@ -49,6 +54,7 @@
 			<div id="date-start-modal" data-modal dimensions="dateDims" model="dateStartDim"></div>
 			<div id="date-end-modal" data-modal dimensions="dateDims" model="dateEndDim"></div>
 			<div id="tooltip-label-modal" data-modal dimensions="labelDims" model="tooltipLabelDim"></div>
+			<div id="group-modal" data-modal dimensions="labelDims" model="groupDim"></div>
 		</div>
 	</div>
 
