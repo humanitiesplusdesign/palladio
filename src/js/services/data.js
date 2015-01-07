@@ -68,6 +68,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 		var addFileRaw = function(file) {
 			files.push(file);
 			uniqueCounter++;
+
 			setDirty();
 		};
 

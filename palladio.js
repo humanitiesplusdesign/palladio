@@ -56708,7 +56708,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			if(state.timelines) {
 				state.timelines.forEach(function (f, i) {
 					if(!timelineImportFunctions[i]) $scope.addFilter('timeline');
-					timelineImportFunctions[i](f);
+					window.setTimeout(function () { timelineImportFunctions[i](f); }, 300);
 				});
 			}
 
@@ -59130,6 +59130,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 		var addFileRaw = function(file) {
 			files.push(file);
 			uniqueCounter++;
+
 			setDirty();
 		};
 
@@ -60042,7 +60043,8 @@ angular.module('palladio.services.export', [])
 		};
 	});
 angular.module('palladio.services.load', ['palladio.services.data'])
-	.factory("loadService", ['dataService', '$q', function(dataService, $q) {
+	.factory("loadService", ['dataService', '$q', 'parseService', 'validationService', 
+			function(dataService, $q, parseService, validationService) {
 
 		var visState = {};
 		var layoutState;
@@ -60065,7 +60067,21 @@ angular.module('palladio.services.load', ['palladio.services.data'])
 		}
 
 		function loadJson(json) {
-			json.files.forEach(function (f) { dataService.addFileRaw(f); });
+			json.files.forEach(function (f) { 
+
+				// Rebuild autofields
+				f.autoFields = parseService.getFields(f.data);
+
+				// Rebuild unique values and errors for each field.
+				f.fields.forEach(function(g) {
+					if(f.autoFields.filter(function (d) { return d.key === g.key; })[0]) {
+						g.uniques = f.autoFields.filter(function (d) { return d.key === g.key; })[0].uniques;
+						g.errors = validationService(g.uniques.map(function(d) { return d.key; }), g.type);
+					}
+				});
+
+				dataService.addFileRaw(f);
+			});
 			json.links.forEach(function (l) {
 				// First fix the file references.
 				l.lookup.file = dataService.getFiles().filter(function(f) { return f.uniqueId === l.lookup.file.uniqueId; })[0];
@@ -60570,12 +60586,31 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 			templateUrl: 'partials/palladio-data-download/template.html',
 
 			link: function(scope) {
-
 				scope.exportDataModel = function() {
+					// Strip autoFields, uniques, errors from all files/fields
+					var files = dataService.getFiles().map(function(f) {
+						f.autoFields = [];
+
+						f.fields.forEach(function(g) {
+							g.uniques = [];
+							g.errors = [];
+						});
+
+						return f;
+					});
+
+					// Strip everything but the unique file id from links
+					var links = dataService.getLinks().map(function(l) {
+						l.lookup.file = { uniqueId: l.lookup.file.uniqueId };
+						l.source.file = { uniqueId: l.source.file.uniqueId };
+
+						return l;
+					});
+
 					var ex = {
 						version: version,
-						files: dataService.getFiles(),
-						links: dataService.getLinks(),
+						files: files,
+						links: links,
 						layout: scope.layout,
 						vis: palladioService.getStateFunctions().map(function(s) {
 							return {
@@ -64362,87 +64397,6 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 		return directiveObj;
 	});
 
-// Selection view module
-
-angular.module('palladioSelectionView', ['palladio'])
-	.directive('palladioSelectionView', function (palladioService) {
-
-		var directiveDefObj = {
-			scope: true,
-			link: function (scope, element) {
-
-				var uniqueId = "selectionView" + Math.floor(Math.random() * 10000);
-				var deregister = [];
-
-				deregister.push(palladioService.onUpdate(uniqueId, function() {
-					buildSelection();
-				}));
-
-				scope.$on('$destroy', function () {
-
-					// Clean up after yourself. Remove dimensions that we have created. If we
-					// created watches on another scope, destroy those as well.
-
-					deregister.forEach(function(f) { f(); });
-				});
-
-				function buildSelection() {
-					var sel = d3.select(element[0]);
-
-					if(sel.select("ul").empty()) {
-						sel.append("ul").attr("class", "selection-display");
-					}
-
-					var ul = sel.select("ul");
-
-					/*if(ul.select("span").empty()) {
-						ul.append("span").attr("class", "selection-title").text("Filters");
-					}*/
-
-					sel.selectAll("span.muted").remove();
-
-					if (palladioService.getFilters().entries().length === 0) {
-						sel.append("span")
-							.attr("class","muted small")
-							.style("margin-left", "5px")
-							.text("No active filters");
-					}
-
-					var pills = ul.selectAll("li")
-						.data(palladioService.getFilters().entries(), function (d) { return d.key; });
-
-					pills.enter().call(function (selection) {
-							var li = selection.append("li")
-									.attr("class", "selection-pill");
-							li.append("span")
-									.attr("class", "selection-label");
-							li.append("span")
-									.attr("class", "selection-text");
-							li.append("a")
-									.attr("class","remove")
-									.html('&times;')
-									.on("click", function (d) { d.value[2](); });
-						});
-
-					pills.exit().remove();
-
-					pills.call(function (selection) {
-							selection.select("span.selection-label")
-									.text(function (d) { return d.value[0]; });
-							selection.select("span.selection-text")
-									.text(function (d) { return d.value[1]; })
-									.attr("title", function (d) { return d.value[1]; });
-						});
-
-				}
-
-				buildSelection();
-
-			}
-		};
-
-		return directiveDefObj;
-	});
 angular.module('palladioTableView', ['palladio', 'palladio.services'])
 	// Palladio Table View
 	.directive('palladioTableView', function (palladioService) {
@@ -64760,6 +64714,87 @@ angular.module('palladioTableView', ['palladio', 'palladio.services'])
 				}
 			}
 		};
+	});
+// Selection view module
+
+angular.module('palladioSelectionView', ['palladio'])
+	.directive('palladioSelectionView', function (palladioService) {
+
+		var directiveDefObj = {
+			scope: true,
+			link: function (scope, element) {
+
+				var uniqueId = "selectionView" + Math.floor(Math.random() * 10000);
+				var deregister = [];
+
+				deregister.push(palladioService.onUpdate(uniqueId, function() {
+					buildSelection();
+				}));
+
+				scope.$on('$destroy', function () {
+
+					// Clean up after yourself. Remove dimensions that we have created. If we
+					// created watches on another scope, destroy those as well.
+
+					deregister.forEach(function(f) { f(); });
+				});
+
+				function buildSelection() {
+					var sel = d3.select(element[0]);
+
+					if(sel.select("ul").empty()) {
+						sel.append("ul").attr("class", "selection-display");
+					}
+
+					var ul = sel.select("ul");
+
+					/*if(ul.select("span").empty()) {
+						ul.append("span").attr("class", "selection-title").text("Filters");
+					}*/
+
+					sel.selectAll("span.muted").remove();
+
+					if (palladioService.getFilters().entries().length === 0) {
+						sel.append("span")
+							.attr("class","muted small")
+							.style("margin-left", "5px")
+							.text("No active filters");
+					}
+
+					var pills = ul.selectAll("li")
+						.data(palladioService.getFilters().entries(), function (d) { return d.key; });
+
+					pills.enter().call(function (selection) {
+							var li = selection.append("li")
+									.attr("class", "selection-pill");
+							li.append("span")
+									.attr("class", "selection-label");
+							li.append("span")
+									.attr("class", "selection-text");
+							li.append("a")
+									.attr("class","remove")
+									.html('&times;')
+									.on("click", function (d) { d.value[2](); });
+						});
+
+					pills.exit().remove();
+
+					pills.call(function (selection) {
+							selection.select("span.selection-label")
+									.text(function (d) { return d.value[0]; });
+							selection.select("span.selection-text")
+									.text(function (d) { return d.value[1]; })
+									.attr("title", function (d) { return d.value[1]; });
+						});
+
+				}
+
+				buildSelection();
+
+			}
+		};
+
+		return directiveDefObj;
 	});
 // Timeline filter module
 
