@@ -86,7 +86,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 					var margin = 25;
 					var width = scope.fullWidth === 'true' ? $(window).width() - margin*2 : $(window).width()*0.7;
 					var height = scope.height ? +scope.height : 200;
-					var height = scope.fullHeight === 'true' ? $(window).height()-200 : height;
+					height = scope.fullHeight === 'true' ? $(window).height()-200 : height;
 					var filterColor = '#9DBCE4';
 
 					setup();

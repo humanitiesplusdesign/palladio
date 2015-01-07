@@ -10736,6 +10736,20 @@ pre.CodeMirror-placeholder {
   right: 200px;
 }
 
+[data-palladio-duration-view] path {
+	fill: #dddddd;
+}
+
+[data-palladio-duration-view] .axis path, [data-palladio-duration-view] .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-duration-view] .axis text {
+	font: 10px Merriweather, Helvetica, Arial, sans-serif;
+}
+
 [data-palladio-facet-filter] .selection-title {
 	text-transform: uppercase;
 	margin-top: 7px;
