@@ -1,5 +1,6 @@
 angular.module('palladio.services.load', ['palladio.services.data'])
-	.factory("loadService", ['dataService', '$q', function(dataService, $q) {
+	.factory("loadService", ['dataService', '$q', 'parseService', 'validationService', 
+			function(dataService, $q, parseService, validationService) {
 
 		var visState = {};
 		var layoutState;
@@ -22,7 +23,21 @@ angular.module('palladio.services.load', ['palladio.services.data'])
 		}
 
 		function loadJson(json) {
-			json.files.forEach(function (f) { dataService.addFileRaw(f); });
+			json.files.forEach(function (f) { 
+
+				// Rebuild autofields
+				f.autoFields = parseService.getFields(f.data);
+
+				// Rebuild unique values and errors for each field.
+				f.fields.forEach(function(g) {
+					if(f.autoFields.filter(function (d) { return d.key === g.key; })[0]) {
+						g.uniques = f.autoFields.filter(function (d) { return d.key === g.key; })[0].uniques;
+						g.errors = validationService(g.uniques.map(function(d) { return d.key; }), g.type);
+					}
+				});
+
+				dataService.addFileRaw(f);
+			});
 			json.links.forEach(function (l) {
 				// First fix the file references.
 				l.lookup.file = dataService.getFiles().filter(function(f) { return f.uniqueId === l.lookup.file.uniqueId; })[0];

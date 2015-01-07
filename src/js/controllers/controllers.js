@@ -574,7 +574,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			if(state.timelines) {
 				state.timelines.forEach(function (f, i) {
 					if(!timelineImportFunctions[i]) $scope.addFilter('timeline');
-					timelineImportFunctions[i](f);
+					window.setTimeout(function () { timelineImportFunctions[i](f); }, 300);
 				});
 			}
 
