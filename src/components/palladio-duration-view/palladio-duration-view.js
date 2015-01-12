@@ -40,16 +40,19 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 
 					// Take the first number dimension we find.
 					scope.durationDims = scope.metadata.filter(function (d) { return d.type === 'number'; });
-					scope.durationDim = scope.durationDims[0];
+					// scope.durationDim = scope.durationDims[0];
 
 					// Label dimensions.
 					scope.labelDims = scope.metadata;
 					scope.tooltipLabelDim = scope.labelDims[0];
-					scope.groupDim = scope.labelDims[0];
+					// scope.groupDim = scope.labelDims[0];
+					// scope.xGroupDim = scope.labelDims[0];
+					scope.xSortDim = scope.labelDims[0];
 
 					scope.title = "Duration view";
 
-					scope.modes = ['Actual duration'];
+					scope.modes = ['Constant duration'];
+					if(scope.durationDims.length > 0) scope.modes.push('Actual duration');
 					scope.mode = scope.modes[0];
 
 					scope.showDurationModal = function () {
@@ -64,6 +67,14 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 						$('#' + scope.uniqueModalId).find('#group-modal').modal('show');
 					};
 
+					scope.showXGroupModal = function () {
+						$('#' + scope.uniqueModalId).find('#x-group-modal').modal('show');
+					};
+
+					scope.showXSortModal = function () {
+						$('#' + scope.uniqueModalId).find('#x-sort-modal').modal('show');
+					};
+
 				}, post: function(scope, element) {
 
 					// If you are building a d3.js visualization, you can grab the containing
@@ -72,7 +83,8 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 					// d3.select(element[0]);
 
 					var sel, svg, dim, group, x, y, xStart, xEnd, emitFilterText, removeFilterText,
-						topBrush, midBrush, bottomBrush, top, bottom, middle, filter, yStep, tooltip;
+						topBrush, midBrush, bottomBrush, top, bottom, middle, filter, yStep, tooltip,
+						colors, bottomAxis, topAxis, yAxis;
 
 					var format = dateService.format;
 
@@ -88,6 +100,16 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 					update();
 
 					function setup() {
+						// Check necessary fields are selected.
+						if(!scope.tooltipLabelDim ||
+							!scope.groupDim ||
+							!scope.xGroupDim ||
+							!scope.xSortDim ||
+							(scope.mode === 'Actual duration' && !scope.durationDim)) {
+
+							return false;
+						}
+
 						sel = d3.select(d3.select(element[0]).select(".main-viz")[0][0].children[0]);
 						if(!sel.select('svg').empty()) sel.select('svg').remove();
 						svg = sel.append('svg');
@@ -106,30 +128,44 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 						// 'countBy' functionality we need to use the Crossfilter helpers or Reductio.
 						group = dim.group();
 
+						// Use reductio value-lists to track the xGroup for each group.
+						var reducer = reductio().count(true)
+							.nest([function(d) { return d[scope.xGroupDim.key]; }]);
+
+						if(scope.mode === 'Actual duration') {
+							reducer.sum(function(d) { return +d[scope.durationDim.key]; });
+						}
+
+						reducer(group);
+
 						// Scales
-						x = d3.scale.linear().range([0, width - leftMargin])
-								.domain([ 0, d3.max(group.top(Infinity), function (d) { return d.value; }) ]);
+						x = d3.scale.linear().range([0, width - leftMargin]);
+						setXDomain();
 						y = d3.scale.ordinal().rangeBands([height, 0], 0.2)
 								.domain(group.top(Infinity)
 									.filter(function (d) {
-										return d.value !== 0;
+										return d.value.count !== 0;
 									}).map(function(d) { return d.key; }));
 
-						var bottomAxis = d3.svg.axis().orient("bottom").scale(x);
-						var topAxis = d3.svg.axis().orient("top").scale(x);
-						var yAxis = d3.svg.axis().orient("left").scale(y);
+						colors = d3.scale.ordinal()
+							.range(colorbrewer.Greys[9])
+							.domain(scope.xGroupDim.uniques);
+
+						bottomAxis = d3.svg.axis().orient("bottom").scale(x);
+						topAxis = d3.svg.axis().orient("top").scale(x);
+						yAxis = d3.svg.axis().orient("left").scale(y);
 
 						// Build the visualization.
 						var g = svg.append('g')
 								.attr("transform", "translate(" + leftMargin + "," + margin + ")");
 
 						bottom = g.append('g')
-							.attr("class", "axis x-axis")
+							.attr("class", "axis x-axis x-bottom")
 							.attr("transform", "translate(" + 0 + "," + (height) + ")")
 							.call(bottomAxis);
 
 						top = g.append('g')
-							.attr("class", "axis x-axis")
+							.attr("class", "axis x-axis x-top")
 							.call(topAxis);
 
 						left = g.append('g')
@@ -164,129 +200,111 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 					}
 
 					function update() {
-						var groups = svg.select('g').selectAll('.path')
+						// Check necessary fields are selected.
+						if(!scope.tooltipLabelDim ||
+							!scope.groupDim ||
+							!scope.xGroupDim ||
+							!scope.xSortDim ||
+							(scope.mode === 'Actual duration' && !scope.durationDim)) {
+
+							return false;
+						}
+
+						// Update the x-scale and x-axes
+						setXDomain();
+						bottomAxis.scale(x);
+						topAxis.scale(x);
+						svg.select('.x-bottom').call(bottomAxis);
+						svg.select('.x-top').call(topAxis);
+
+						var groups = svg.select('g').selectAll('.duration-group')
 							.data(group.top(Infinity)
 									.filter(function (d) {
-										// Require start OR end date.
-										return d.value !== 0;
+										return d.value.count !== 0;
 									}),
 								function (d) { return d.key; });
 
 						groups.exit().remove();
 
-						var newGroups = groups.enter()
+						groups.enter()
 								.append('g')
 									.attr('class', 'duration-group')
 									.attr('transform', function(d) {
-										return 'translate(0,' + y(d.key) + ')';
+										return 'translate(1,' + y(d.key) + ')';
 									});
 
-						newGroups.append('rect')
-								.attr('class', 'duration-bar')
-								.attr('fill', 'black')
-								.attr('stroke', 'black')
-								.attr('width', function(d) { return x(d.value); })
-								.attr('height', y.rangeBand());
+						var constantDuration = scope.mode === 'Constant duration';
+						var rectWidth = x(1) - x(0);
 
-						// paths.exit().remove();
-						// var newPaths = paths.enter()
-						// 		.append('g')
-						// 			.attr('class', 'path');
+						function calcWidth(d) {
+							return constantDuration ?
+								rectWidth :
+								(isNaN(+d[scope.durationDim.key]) ?
+									0 :
+									x(+d[scope.durationDim.key]));
+						}
 
-						// newPaths
-						// 	.tooltip(function (d){
-						// 		return {
-						// 			text : d.key[2] + ": " + d.key[0] + " - " + d.key[1],
-						// 			displacement : [0,20],
-						// 			position: [0,0],
-						// 			gravity: "right",
-						// 			placement: "mouse",
-						// 			mousemove : true
-						// 		};
-						// 	});
+						var rects = groups.selectAll('.duration-bar')
+							.data(function(d, i) {
+								var total = 0;
 
-						// newPaths
-						// 		.append('circle')
-						// 			.attr('class', 'path-start')
-						// 			.attr('r', 1)
-						// 			.attr('fill-opacity', 0.8)
-						// 			.attr('stroke-opacity', 0.8)
-						// 			.attr('stroke-width', 0.8)
-						// 			.style("display", "none");
+								// Flatten to basic records
+								return d.value.nest.map(function(n) {
+									return n.values;
+								}).reduce(function(a, b) {
+									return a.concat(b);
+								}).sort(function(a, b) {
+									return d3.ascending(a[scope.xSortDim.key], b[scope.xSortDim.key]);
+								}).map(function(d) {
+									total = total + calcWidth(d);
+									// Build object with information needed to visualize
+									return {
+										name: d[scope.xGroupDim.key],
+										group: i,
+										x: calcWidth(d),
+										offset: (total - calcWidth(d))
+									};
+								});
+							}, function(d, i) { return d.name + '-' + d.group + '-' + i; });
 
-						// newPaths
-						// 		.append('circle')
-						// 			.attr('class', 'path-end')
-						// 			.attr('r', 1)
-						// 			.attr('fill-opacity', 0.8)
-						// 			.attr('stroke-opacity', 0.8)
-						// 			.attr('stroke-width', 0.8)
-						// 			.style("display", "none");
+						rects.exit().remove();
 
-						// newPaths
-						// 		.append('line')
-						// 			.attr('stroke-width', 1)
-						// 			.attr('stroke-opacity', 0.8);
+						rects.enter()
+								.append('rect')
+									.attr('height', y.rangeBand())
+									.attr('class', 'duration-bar');
 
-						// var lines = paths.selectAll('line');
-						// var circles = paths.selectAll('circle');
-						// var startCircles = paths.selectAll('.path-start');
-						// var endCircles = paths.selectAll('.path-end');
+						rects
+							.attr('width', function(d) { return d.x ? d.x : 0; })
+							.attr('fill', function(d) { return colors(d.name); })
+							.attr('stroke', function(d) { return colors(d.name); })
+							.attr('transform', function(d) { return 'translate(' + (d.offset ? d.offset : 0) + ',0)'; })
+							.tooltip(function (d){
+								return {
+									text : d.name,
+									displacement : [0,20],
+									position: [0,0],
+									gravity: "right",
+									placement: "mouse",
+									mousemove : true
+								};
+							});
+					}
 
-						// if(scope.mode === "Bars" || scope.mode === 'Grouped Bars') {
-						// 	// We need to refigure the yStep scale since the number of groups can change.
-						// 	yStep.domain([-1, group.top(Infinity)
-						// 			.filter(function (d) {
-						// 				// Require start OR end date.
-						// 				return (d.key[0] !== "" || d.key[1] !== "") && d.value !== 0;
-						// 			}).length]);
-
-						// 	// Calculate fille based on selection.
-						// 	lines.attr('stroke', fill);
-						// 	circles.attr('stroke', fill);
-						// 	circles.attr('fill', fill);
-
-						// 	lines
-						// 		.transition()
-						// 			.attr('x1', function (d) { return x(format.parse(d.key[0])); } )
-						// 			.attr('y1', 0)
-						// 			.attr('x2', function (d) { return x(format.parse(d.key[1])); })
-						// 			.attr('y2', 0);
-
-						// 	startCircles.attr('cx', function (d) { return x(format.parse(d.key[0])); });
-						// 	endCircles.attr('cx', function (d) { return x(format.parse(d.key[1])); });
-
-						// 	// Translate the paths to their proper height.
-						// 	paths
-						// 		.transition()
-						// 			.attr("transform", function (d, i) { return "translate(0," + yStep(i) + ")"; });
-
-						// 	// Show the circles.
-						// 	circles.style("display", "inline");
-						// } else {
-						// 	// Hide the circles.
-						// 	circles.style("display", "none");
-
-						// 	lines.attr('stroke', fill);
-						// 	lines
-						// 		.transition()
-						// 			.attr('x1', function (d) { return x(format.parse(d.key[0])); })
-						// 			.attr('y1', y(0))
-						// 			.attr('x2', function (d) { return x(format.parse(d.key[1])); })
-						// 			.attr('y2', y(1));
-
-						// 	// All parallel bars start at 0.
-						// 	paths
-						// 		.transition()
-						// 			.attr("transform", "translate(0,0)");
-						// }
+					function setXDomain() {
+						if(scope.mode === 'Actual duration') {
+							x.domain([ 0, d3.max(group.top(Infinity), function (d) { return d.value.sum; }) ]);
+						} else {
+							x.domain([ 0, d3.max(group.top(Infinity), function (d) { return d.value.count; }) ]);
+						}
 					}
 
 					function reset() {
-						group.remove();
-						dim.remove();
-						svg.remove();
-						palladioService.update();
+						if(dim) {
+							group.remove();
+							dim.remove();
+							svg.remove();
+						}
 					}
 
 					scope.filterReset = function () {
@@ -295,16 +313,10 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 						update();
 					};
 
-					scope.$watchGroup(['durationDim', 'tooltipLabelDim', 'groupDim'], function () {
+					scope.$watchGroup(['mode', 'durationDim', 'tooltipLabelDim', 'groupDim', 'xGroupDim', 'xSortDim'], function () {
 						reset();
 						setup();
 						update();
-					});
-
-					scope.$watch('mode', function (nv, ov) {
-						if(nv !== undefined) {
-							update();
-						}
 					});
 
 					//
@@ -355,8 +367,11 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 
 					deregister.push(palladioService.onUpdate(scope.uniqueToggleId, function() {
 						// Only update if the table is visible.
-						update();
+						if(element.is(':visible')) { update(); }
 					}));
+
+					// Update when it becomes visible (updating when not visibile errors out)
+					scope.$watch(function() { return element.is(':visible'); }, update);
 
 					scope.$on('$destroy', function () {
 
@@ -384,6 +399,9 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 						scope.title = state.title;
 						scope.durationDim = scope.durationDims.filter(function(d) { return d.key === state.durationDim; })[0];
 						scope.tooltipLabelDim = scope.labelDims.filter(function(d) { return d.key === state.tooltipLabelDim; })[0];
+						scope.groupDim = scope.labelDims.filter(function(d) { return d.key === state.groupDim; })[0];
+						scope.xGroupDim = scope.labelDims.filter(function(d) { return d.key === state.xGroupDim; })[0];
+						scope.xSortDim = scope.labelDims.filter(function(d) { return d.key === state.xSortDim; })[0];
 
 						scope.mode = state.mode;
 
@@ -396,6 +414,9 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 							title: scope.title,
 							durationDim: scope.durationDim.key,
 							tooltipLabelDim: scope.tooltipLabelDim.key,
+							groupDim: scope.groupDim.key,
+							xGroupDim: scope.xGroupDim.key,
+							xSortDim: scope.xSortDim.key,
 							mode: scope.mode
 						};
 					}

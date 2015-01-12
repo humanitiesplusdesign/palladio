@@ -11,7 +11,7 @@
 				</span>
 			</div>
 
-			<div class="setting row-fluid">
+			<div class="setting row-fluid" data-ng-show="mode === 'Actual duration'">
 				<label class="span4 inline">Duration</label>
 				<span class="field span8" ng-click="showDurationModal()">{{durationDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>
 			</div>
@@ -22,8 +22,18 @@
 			</div>
 
 			<div class="setting row-fluid">
-				<label class="span4 inline">Grouping</label>
+				<label class="span4 inline">Y-Grouping</label>
 				<span class="field span8" ng-click="showGroupModal()">{{groupDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>
+			</div>
+
+			<div class="setting row-fluid">
+				<label class="span4 inline">X-Grouping</label>
+				<span class="field span8" ng-click="showXGroupModal()">{{xGroupDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>
+			</div>
+
+			<div class="setting row-fluid">
+				<label class="span4 inline">X-Sort</label>
+				<span class="field span8" ng-click="showXSortModal()">{{xSortDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>
 			</div>
 		</div>
 
@@ -37,6 +47,8 @@
 			<div id="duration-modal" data-modal dimensions="durationDims" model="durationDim"></div>
 			<div id="tooltip-label-modal" data-modal dimensions="labelDims" model="tooltipLabelDim"></div>
 			<div id="group-modal" data-modal dimensions="labelDims" model="groupDim"></div>
+			<div id="x-group-modal" data-modal dimensions="labelDims" model="xGroupDim"></div>
+			<div id="x-sort-modal" data-modal dimensions="labelDims" model="xSortDim"></div>
 		</div>
 	</div>
 
