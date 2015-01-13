@@ -253,9 +253,10 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 		///////////////////////////////////////////////////////////////////////
 
 		var tempArr, tempRow, card, newData, dimsToExplode, dimsWithHiers, dimsWithIgnores,
-			centralFile, internalLinks;
+			centralFile, internalLinks, tempField, filesToProcess;
 
 		function process() {
+
 			tempArr = [];
 			tempRow = {};
 			tempField = {};
@@ -266,7 +267,39 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 			dimsWithHiers = [];
 			dimsWithIgnores = [];
 			centralFile = undefined;
-			internalLinks = angular.copy(links),
+			internalLinks = links.map(function(l) {
+				return {
+					source: {
+						file: {
+							uniqueId: l.source.file.uniqueId,
+							label: l.source.file.label,
+							fields: l.source.file.fields.map(function(f) {
+								return copyField(f);
+							}),
+							data: l.source.file.data
+						},
+						field: {
+							type: l.source.field.type,
+							key: l.source.field.key
+						}
+					},
+					lookup: {
+						file: {
+							uniqueId: l.lookup.file.uniqueId,
+							label: l.lookup.file.label,
+							fields: l.lookup.file.fields.map(function(f) {
+								return copyField(f);
+							}),
+							data: l.lookup.file.data
+						},
+						field: {
+							type: l.lookup.field.type,
+							key: l.lookup.field.key
+						}
+					},
+					metadata: l.metadata
+				};
+			});
 			filesToProcess = [];
 
 			// Functions to populate incoming and outgoing links for each file and link file. 
