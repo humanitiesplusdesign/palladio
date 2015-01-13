@@ -9371,6 +9371,10 @@ strong {
   color: #F8607E;
 }
 
+.file-download {
+  margin-right: 10px;
+}
+
 .primary {
   color: #0BBBF3;
 }
