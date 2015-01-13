@@ -1,7 +1,7 @@
 // Palladio data upload component
 
 angular.module('palladioDataUpload', ['palladio.services'])
-	.directive('palladioDataUpload', function (dataService, loadService) {
+	.directive('palladioDataUpload', function (dataService, loadService, spinnerService) {
 		var directiveObj = {
 			scope: {
 				'load': '&onLoad'
@@ -12,9 +12,17 @@ angular.module('palladioDataUpload', ['palladio.services'])
 			link: function(scope) {
 
 				scope.loadDataModel = function(input) {
-					loadService.load(input).then(function () {
-						scope.load();
-					});
+					spinnerService.spin();
+					var reader = new FileReader();
+					reader.onload = function() {
+						var json = JSON.parse(reader.result);
+						loadService.loadJson(json);
+						scope.$apply(function(s) { s.load(); });
+					};
+					reader.readAsText(input.files[0]);
+					// We need to clear the input so that we pick up future uploads. This is *not*
+					// cross-browser-compatible.
+					input.value = null;
 				};
 
 				scope.triggerDataModelSelector = function () {

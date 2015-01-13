@@ -723,7 +723,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 
 			if(dirty) {
 				spinnerService.spin();
-				setTimeout(innerProcess, 10);
+				setTimeout(innerProcess, 1);
 			} else {
 				processData.resolve();
 			}

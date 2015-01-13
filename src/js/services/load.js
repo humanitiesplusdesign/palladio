@@ -6,22 +6,6 @@ angular.module('palladio.services.load', ['palladio.services.data'])
 		var layoutState;
 		var visStateDirty = false;
 
-		function load(input) {
-			var deferred = $q.defer();
-			var reader = new FileReader();
-			reader.onload = function() {
-				var json = JSON.parse(reader.result);
-				loadJson(json);
-				deferred.resolve();
-			};
-			reader.readAsText(input.files[0]);
-			// We need to clear the input so that we pick up future uploads. This is *not*
-			// cross-browser-compatible.
-			input.value = null;
-
-			return deferred.promise;
-		}
-
 		function loadJson(json) {
 			json.files.forEach(function (f) { 
 
@@ -96,7 +80,6 @@ angular.module('palladio.services.load', ['palladio.services.data'])
 		}
 
 		return {
-			load: load,
 			loadJson: loadJson,
 			build: buildVis,
 			layout: getLayout

@@ -107,17 +107,25 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		$scope.onLoad = function() {
 			// Only move on to the visualization if the save file has a visualization part, in
 			// which case it would have a layout specified.
-			if(!loadService.layout()) $location.path('/upload');
-			if(loadService.layout()) $location.path('/visualization');
+			if(!loadService.layout()) {
+				$location.path('/upload');
+				spinnerService.hide();
+			}
+			// if(loadService.layout()) setTimeout(function() { $location.path('/visualization'); }, 1000);
+			if(loadService.layout()) {
+				$location.path('/visualization');
+			}
 		};
 
 		function loadFile(path) {
+			spinnerService.spin();
 			$http.get(path)
 				.success(function(data) {
 					loadService.loadJson(data);
 					$scope.onLoad();
 				})
 				.error(function() {
+					spinnerService.hide();
 					console.log("Attempted to load auto-load.json but it did not exist. This is not usually a problem.");
 				});
 		}
@@ -559,7 +567,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			timestepExportFunctions = [];
 
 		function importState(state) {
-			if(state.facets) {
+			if(state.facets.length > 0) {
 				state.facets.forEach(function (f, i) {
 					if(!facetImportFunctions[i]) $scope.addFilter('facet');
 
@@ -571,21 +579,21 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 				});
 			}
 
-			if(state.timelines) {
+			if(state.timelines.length > 0) {
 				state.timelines.forEach(function (f, i) {
 					if(!timelineImportFunctions[i]) $scope.addFilter('timeline');
 					window.setTimeout(function () { timelineImportFunctions[i](f); }, 300);
 				});
 			}
 
-			if(state.partimes) {
+			if(state.partimes.length > 0) {
 				state.partimes.forEach(function (f, i) {
 					if(!partimeImportFunctions[i]) $scope.addFilter('partime');
 					window.setTimeout(function() { partimeImportFunctions[i](f); }, 300);
 				});
 			}
 
-			if(state.timesteps) {
+			if(state.timesteps.length > 0) {
 				state.timesteps.forEach(function (f, i) {
 					if(!timestepImportFunctions[i]) $scope.addFilter('timestep');
 					window.setTimeout(function() { timestepImportFunctions[i](f); }, 300);

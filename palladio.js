@@ -60084,17 +60084,25 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		$scope.onLoad = function() {
 			// Only move on to the visualization if the save file has a visualization part, in
 			// which case it would have a layout specified.
-			if(!loadService.layout()) $location.path('/upload');
-			if(loadService.layout()) $location.path('/visualization');
+			if(!loadService.layout()) {
+				$location.path('/upload');
+				spinnerService.hide();
+			}
+			// if(loadService.layout()) setTimeout(function() { $location.path('/visualization'); }, 1000);
+			if(loadService.layout()) {
+				$location.path('/visualization');
+			}
 		};
 
 		function loadFile(path) {
+			spinnerService.spin();
 			$http.get(path)
 				.success(function(data) {
 					loadService.loadJson(data);
 					$scope.onLoad();
 				})
 				.error(function() {
+					spinnerService.hide();
 					console.log("Attempted to load auto-load.json but it did not exist. This is not usually a problem.");
 				});
 		}
@@ -60536,7 +60544,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			timestepExportFunctions = [];
 
 		function importState(state) {
-			if(state.facets) {
+			if(state.facets.length > 0) {
 				state.facets.forEach(function (f, i) {
 					if(!facetImportFunctions[i]) $scope.addFilter('facet');
 
@@ -60548,21 +60556,21 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 				});
 			}
 
-			if(state.timelines) {
+			if(state.timelines.length > 0) {
 				state.timelines.forEach(function (f, i) {
 					if(!timelineImportFunctions[i]) $scope.addFilter('timeline');
 					window.setTimeout(function () { timelineImportFunctions[i](f); }, 300);
 				});
 			}
 
-			if(state.partimes) {
+			if(state.partimes.length > 0) {
 				state.partimes.forEach(function (f, i) {
 					if(!partimeImportFunctions[i]) $scope.addFilter('partime');
 					window.setTimeout(function() { partimeImportFunctions[i](f); }, 300);
 				});
 			}
 
-			if(state.timesteps) {
+			if(state.timesteps.length > 0) {
 				state.timesteps.forEach(function (f, i) {
 					if(!timestepImportFunctions[i]) $scope.addFilter('timestep');
 					window.setTimeout(function() { timestepImportFunctions[i](f); }, 300);
@@ -61437,1522 +61445,6 @@ angular.module('palladio.filters', [])
         return files.filter(function (d){ return d.id !== fileId; });
     };
   });
-angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.services.validation',
-		'palladio.services.spinner'])
-	.factory("dataService", function (parseService, validationService, spinnerService, $q) {
-
-		// Set this to "true" if data or links have been added/removed/changed
-
-		var dirty = false;
-
-		// Files that are loaded in the refine stage
-		var files = [];
-
-		var data, metadata, xfilter;
-
-		// We give files unique numeric identifiers.
-		var uniqueCounter = 0;
-
-		var addFile = function (data, label) {
-			var file = {};
-			file.label = label || "Untitled";
-			file.id = files.length;
-			// Do auto-recognition on load
-			file.autoFields = parseService.getFields(data);
-
-			var maxUniques = d3.max(file.autoFields, function (f) { return f.uniques.length; });
-			var descriptiveField = file.autoFields.filter(function (f) { return f.uniques.length === maxUniques; })[0];
-
-			file.autoFields.forEach(function (f) { if(f.key !== descriptiveField.key) f.descriptiveField = descriptiveField; });
-
-			var uniqueKey;
-
-			// If this is the first/primary file, count by the descriptive field.
-			if(files.length === 0) {
-				uniqueKey = file.autoFields.filter(function (f) { return f.uniqueKey; })[0];
-				if(uniqueKey) {
-					uniqueKey.countBy = true;
-				} else {
-					descriptiveField.countBy = true;
-				}
-			}
-
-			// But only pick up the basics by default. If the user triggers auto-recognition
-			// then we can get the rest of the auto-recognized meta-data, like type.
-			file.fields = file.autoFields.map(function (d) {
-				return {
-					key: d.key,
-					description: d.description,
-					cardinality: d.cardinality,
-					type: d.type,
-					blanks: d.blanks,
-					uniques: d.uniques,
-					uniqueKey: d.uniqueKey,
-					special: d.special,
-					unassignedSpecialChars: d.special,
-					countBy: d.countBy,
-					errors: validationService(d.uniques.map(function(d) { return d.key; }), d.type),
-					descriptiveField: d.descriptiveField
-				};
-			});
-
-			file.data = data;
-			file.uniqueId = uniqueCounter;
-			uniqueCounter++;
-
-			files.push(file);
-			setDirty();
-		};
-
-		var addFileRaw = function(file) {
-			files.push(file);
-			uniqueCounter++;
-
-			setDirty();
-		};
-
-		var deleteFile = function(fileId) {
-			var i = null;
-
-			files.forEach(function(f, idx) {
-				if(f.uniqueId === fileId) {
-					i = idx;
-				}
-			});
-
-			// Remove the file.
-			if(i !== null) files.splice(i, 1);
-
-			// Remove links to this file.
-			var linksToDelete = [];
-			links.forEach(function (l, i) {
-				if(l.lookup.file.uniqueId === fileId ||
-					l.source.file.uniqueId === fileId) {
-					linksToDelete.unshift([l, i]);
-				}
-			});
-			linksToDelete.forEach(function (d) {
-				deleteLink(d[0], d[1]);
-			});
-
-			setDirty();
-		};
-
-		var getFiles = function() {
-			return files;
-		};
-
-		var setCountBy = function(field) {
-			// There can be only one.
-			files.forEach(function (file) {
-				file.fields.forEach( function (field) {
-					field.countBy = false;
-				});
-			});
-
-			field.countBy = true;
-		};
-
-		function copyField(field) {
-			return {
-				blanks: field.blanks,
-				cardinality: field.cardinality,
-				confirmed: field.confirmed,
-				countBy: field.countBy,
-				countDescription: field.countDescription,
-				countable: field.countable,
-				delete: field.delete,
-				description: field.description,
-				descriptiveField: field.descriptiveField,
-				errors: field.errors.slice(0),
-				hierDelimiter: field.hierDelimiter,
-				ignore: field.ignore,
-				key: field.key,
-				mvDelimiter: field.mvDelimiter,
-				originFileId: field.originFileId,
-				special: field.special.slice(0),
-				type: field.type,
-				typeField: field.typeField,
-				unassignedSpecialChars: field.unassignedSpecialChars? field.unassignedSpecialChars.slice(0) : undefined,
-				uniqueKey: field.uniqueKey,
-				uniques: field.uniques.slice(0),
-			};
-		}
-
-		// Links that are populated in the link stage:
-		var links = [];
-
-		var addLink = function (link) {
-
-			// If the lookup field is undefined, determine the best field using calcLinkMetadata method.
-			if(link.lookup.field === undefined) {
-				var md = {};
-				var maxMatches = -1;
-				var bestField = {};
-
-				link.lookup.file.fields.forEach(function(f) {
-					// Try calculating metadata with this link.
-					link.lookup.field = f;
-					md = calcLinkMetadata(link.source, link.lookup);
-					if(md.matches > maxMatches) {
-						maxMatches = md.matches;
-						bestField = f;
-					}
-				});
-
-				link.lookup.field = bestField;
-			}
-			
-			// If metadata is undefined, calculate it.
-			if(link.metadata === undefined) {
-				link.metadata = calcLinkMetadata(link.source, link.lookup);
-			}
-
-			links.push(link);
-			setDirty();
-		};
-
-		var addLinkRaw = function (link) {
-			links.push(link);
-			setDirty();
-		}
-
-		var deleteLink = function (link, index) {
-			
-			// Figure out the index if we need to.
-			if(index === undefined) {
-				links.forEach(function(l, i) {
-					if(l.source.file.uniqueId === link.source.file.uniqueId &&
-						l.source.field.key === link.source.field.key &&
-						l.lookup.file.uniqueId === link.lookup.file.uniqueId &&
-						l.lookup.field.key === link.lookup.field.key) {
-
-						index = i;
-					}
-				});
-			}
-
-			links.splice(index,1);
-			setDirty();
-		};
-
-		var getLinks = function () {
-			return links;
-		};
-
-		var calcLinkMetadata = function(source, lookup) {
-			var lookupMap = d3.map();
-			var coercedKey;
-
-			lookup.field.uniques.forEach(function (d) {
-				if(lookup.field.type !== 'number') {
-					coercedKey = d.key;
-				} else {
-					coercedKey = +d.key;
-				}
-				lookupMap.set(coercedKey, true);
-			});
-
-			var total = source.field.uniques.length;
-
-			var matches = source.field.uniques
-					.map(function (d) {
-						if(source.field.type !== 'number') {
-							coercedKey = d.key.split(source.field.mvDelimiter)[0].trim();
-						} else {
-							coercedKey = +d.key.split(source.field.mvDelimiter)[0].trim();
-						}
-						return lookupMap.has(coercedKey);
-					})
-					.filter(function (d) { return d; })
-					.length;
-
-			var color = "#33C44A"; //"rgba(0, 255, 0, 0.5)";
-
-			if(matches/total < 0.99) {
-				color = "rgba(226, 217, 0, 1)";
-			}
-
-			if(matches/total < 0.30) {
-				color = "rgb(247, 0, 69)"
-			}
-
-			return {
-				matches: matches,
-				total: total,
-				lookup: lookup.file.data.length,
-				background: color
-			};
-		};
-
-		///////////////////////////////////////////////////////////////////////
-		//
-		// Groundwork for the getData function.
-		//
-		///////////////////////////////////////////////////////////////////////
-
-		var tempArr, tempRow, card, newData, dimsToExplode, dimsWithHiers, dimsWithIgnores,
-			centralFile, internalLinks;
-
-		function process() {
-			tempArr = [];
-			tempRow = {};
-			tempField = {};
-			card = 1;
-			newData = [];
-			metadata = [];
-			dimsToExplode = [];
-			dimsWithHiers = [];
-			dimsWithIgnores = [];
-			centralFile = undefined;
-			internalLinks = angular.copy(links),
-			filesToProcess = [];
-
-			// Functions to populate incoming and outgoing links for each file and link file. 
-			// Note, the function is using the uniqueId on 'f' in the forEach scope, so it is 
-			// always the old uniqueId even though we copy the files during the lookup process.
-			// filesToProcess = links.map(function (link) { return link.source.file; });
-
-			files.forEach(function (f) {
-				determineCountableFields(f);
-				filesToProcess.push(f);
-			});
-
-			filesToProcess.forEach(function (f) {
-				determineCountableFields(f);
-				f.sourceFor = function () {
-					return internalLinks.filter( function (l) {
-						return l.source.file.uniqueId === f.uniqueId;
-					});
-				};
-			});
-
-			// Update countable attributes on links as well.
-			links.forEach(function(l) {
-				determineCountableFields(l.source.file);
-				determineCountableFields(l.lookup.file);
-			});
-
-			internalLinks.forEach(function(l) {
-				determineCountableFields(l.source.file);
-				determineCountableFields(l.lookup.file);
-			});
-
-			// Deal with the situation in which there are no links by only taking the first file.
-			if(files[0]) {
-				centralFile = filesToProcess[0];
-			}
-
-			// Traverse a network of links, determining which file is the central one.
-			// Note: If you don't link all files together, then unlinked files *** are ignored ***
-			internalLinks.forEach(function (l) {
-				// If our current central file guess is used as a lookup in this link, replace it
-				// with the source file. Also do this if centralFile is not defined.
-				if( !centralFile || centralFile.uniqueId === l.lookup.file.uniqueId ) {
-					centralFile = filesToProcess.filter(function (f) { return f.uniqueId === l.source.file.uniqueId; })[0];
-				}
-			});
-
-			// Function to perform lookups recursively.
-			function performLookups(file) {
-
-				var nf = transformFile(file);
-
-				// For a single file, just return that file.
-				if(nf.sourceFor().length === 0) {
-					return nf;
-				}
-
-				nf.sourceFor().forEach( function (l) {
-
-					var lookup = function () {
-						// Build the lookup map.
-						var lookupMap = d3.map();
-						var coercedKey = '';
-						l.lookup.file.data.forEach( function (d) {
-							if(l.lookup.field.type !== 'number') {
-								coercedKey = "" + d[l.lookup.field.key];
-							} else {
-								coercedKey = +d[l.lookup.field.key];
-							}
-							lookupMap.set(coercedKey, d);
-						});
-
-						function doLookup(d) {
-							// 'd' is the source record
-							l.lookup.file.fields.forEach(function (f) {
-								if(l.source.field.type !== 'number') {
-									coercedKey = "" + d[l.source.field.key];
-								} else {
-									coercedKey = +d[l.source.field.key];
-								}
-
-								if(lookupMap.has(coercedKey)) {
-									d[f.key] = lookupMap.get(coercedKey)[f.key];
-								} else {
-									// Wipe out the field if no lookup exists.
-									d[f.key] = "";
-								}
-							});
-
-							// Populate the 'type' field.
-							d[l.lookup.field.key + ' type'] = l.source.field.key;
-						}
-
-						return doLookup;
-					}();
-
-					// NOTE/BUG: This construct does not deal with lookups of different types with one source table ... does it?
-					// TODO: Need a test for the above.
-					if(nf.data[0][l.lookup.field.key + ' type'] === undefined) {
-						// If we don't already have a 'type' field for this lookup, perform lookups in place.
-						nf.data.forEach( function (d) {
-							// Perform the lookup.
-							lookup(d);
-						});
-					} else {
-						// Otherwise we need to duplicate the existing data and push new lines.
-
-						var originalData = nf.data.map(function (d) {
-							return angular.extend({}, d);
-						});
-						
-						originalData.forEach( function (d) {
-							// Perform the lookup.
-							lookup(d);
-
-							// Push the new line
-							nf.data.push(d);
-						});
-					}
-
-					// Update field metadata.
-					l.lookup.file.fields.forEach(function (f) {
-						// If the field already exists, just add a 'type' value to it if necessary.
-						var fieldArr = nf.fields.filter(function (field) { return field.key === f.key; });
-						if(fieldArr.length > 0) {
-							// Check the typeField actually exists.
-							if(fieldArr[0].typeField === undefined) fieldArr[0].typeField = [];
-							// Add the new field to it if it isn't already there.
-							if(fieldArr[0].typeField.indexOf(l.lookup.field.key + ' type') === -1 ) {
-								fieldArr[0].typeField.push(l.lookup.field.key + ' type');
-							}
-						} else {
-							var newField = copyField(f);
-							if(newField.typeField === undefined) newField.typeField = [];
-							if(newField.originFile === undefined) newField.originFileId = l.lookup.file.uniqueId;
-							newField.typeField.push(l.lookup.field.key + ' type');
-							nf.fields.push(newField);
-						}
-					});
-				});
-
-				// Remove all links with this file as the source so we don't reprocess them.
-				// Note: The current forEach is looping over an array of links that the
-				//		sourceFor() function compiled before this deletion, so we will still
-				//		process links that are pending in the current loop.
-				var newLinks = internalLinks.filter(function (link) {
-					return link.source.file.uniqueId !== nf.uniqueId;
-				});
-
-				// Rewrite links whoose source is the lookup file for this link.
-				nf.sourceFor().forEach(function (l) {
-					newLinks.forEach(function (link) {
-						if(link.source.file.uniqueId === l.lookup.file.uniqueId) {
-							// We need to re-point the file.
-							link.source.file = nf;
-						}
-					});
-				});
-
-				internalLinks = newLinks;
-
-				// Re-run lookups (eventually there won't be any more).
-				nf = performLookups(nf);
-
-				return nf;
-			}
-
-			if(centralFile) {
-
-				var newFile = performLookups(centralFile);
-
-				// Update typeField uniques.
-				newFile.fields.forEach(function (f) {
-					if(f.typeField !== undefined && f.typeField.length > 0) {
-						f.typeFieldUniques = [];
-						f.typeField.forEach(function (t, i) {
-							f.typeFieldUniques[i] = [];
-							newFile.data.forEach(function (d) {
-								if(f.typeFieldUniques[i].indexOf(d[t]) === -1) {
-									f.typeFieldUniques[i].push(d[t]);
-								}
-							});
-						});
-					}
-				});
-
-				metadata = newFile.fields;
-				data = newFile.data;
-				xfilter = crossfilter(data);
-			}
-		}
-
-		function transformFile(file) {
-			var newFile = {};
-
-			newFile = splitHierarchies(
-							removeIgnoredValues(
-								explodeMultiValueFields(
-									removeDeletedDimensions(
-										file
-									)
-								)
-							)
-						);
-
-			return newFile;
-		}
-
-		function removeDeletedDimensions(file) {
-			var data = [];
-			var newRow = {};
-			var newFile = {};
-			var dimsWithDelete = [];
-
-			file.fields.forEach(function (f) {
-				if(f.delete) {
-					dimsWithDelete.push(f);
-				}
-			});
-
-			data = file.data.map(function (d) {
-
-				newRow = angular.extend({}, d);
-
-				// Remove deleted dimensions
-				dimsWithDelete.forEach(function (dim) {
-					delete newRow[dim.key];
-				});
-
-				return newRow;
-			});
-
-			newFile = {};
-			newFile.autoFields = file.autoFields.map(function (f) { return copyField(f); });
-			newFile.data = data;
-			newFile.fields = file.fields
-									.map(function (f) { return copyField(f); })
-									.filter(function(f) { return !f.delete; });
-			newFile.id = file.id;
-			newFile.label = file.label;
-			newFile.sourceFor = file.sourceFor;
-			newFile.uniqueId = file.uniqueId;
-
-			return newFile;
-		}
-
-		function splitHierarchies(file) {
-
-			var data = [];
-			var fields = [];
-			var newFile = {};
-			var dimsWithHiers = [];
-			var highestLevels = d3.map();
-
-			file.fields.forEach(function (f) {
-				if(f.hierDelimiter && f.hierDelimiter !== "") {
-					dimsWithHiers.push(f);
-				}
-			});
-
-			data = file.data.map(function (d) {
-				// Handle hierarchies
-				dimsWithHiers.forEach(function (f) {
-					if(typeof d[f.key] === 'string') {
-						d[f.key].split(f.hierDelimiter).forEach(function (h, i) {
-							if(i === 0) {
-								d[f.key] = h;
-							} else {
-								d[f.key + " " + i] = h;
-								if(!highestLevels.has(f.key) || highestLevels.get(f.key) < i)
-									highestLevels.set(f.key, i);
-							}
-						});
-					}
-				});
-				return d;
-			});
-
-			fields = file.fields.map(function(f) { return copyField(f); });
-
-			// Update metadata with hierarchy dimensions
-			var newField;
-			dimsWithHiers.forEach(function (f) {
-				for(i = 1; i <= highestLevels.get(f.key); i++) {
-					newField = copyField(f);
-					newField.key = f.key + " " + i;
-					newField.description = f.key + " Level " + (i+1);
-					fields.push(newField);
-				}
-			});
-
-			newFile = {};
-			newFile.autoFields = file.autoFields.map(function (f) { return copyField(f); });
-			newFile.data = data;
-			newFile.fields = fields;
-			newFile.id = file.id;
-			newFile.label = file.label;
-			newFile.sourceFor = file.sourceFor;
-			newFile.uniqueId = file.uniqueId;
-
-			return newFile;
-		}
-
-		function determineCountableFields(file) {
-			var countableFields = file.fields.filter(function (f) { return f.uniqueKey; });
-
-			if(countableFields.length > 0) {
-				file.fields.filter(function (f) { return f.uniqueKey; })
-					.forEach(function (u, i) {
-						// Only do one field per file.
-						if(i === 0) {
-							u.countable = true;
-							u.countDescription = file.label;
-						}
-					});
-			} else {
-				// No countable fields, so use the "countBy" field if it exists
-				file.fields.filter(function(f) { return f.countBy; })
-					.forEach(function(u, i) {
-						// Only do one field per file.
-						if(i === 0) {
-							u.countable = true;
-							u.countDescription = file.label;
-						}
-					});
-			}
-		}
-
-		function removeIgnoredValues(file) {
-
-			var data = [];
-			var newFile = {};
-			var dimsWithIgnores = [];
-
-			file.fields.forEach(function (f) {
-				if(f.ignore && f.ignore.length > 0) {
-					dimsWithIgnores.push(f);
-				}
-			});
-
-			data = file.data.map(function (d) {
-
-				// Remove ignored values
-				dimsWithIgnores.forEach(function (dim) {
-					dim.ignore.forEach(function (ignore) {
-						d[dim.key] = d[dim.key].split(ignore).join("");
-					});
-				});
-
-				return d;
-			});
-
-			newFile = {};
-			newFile.autoFields = file.autoFields.map(function (f) { return copyField(f); });
-			newFile.data = data;
-			newFile.fields = file.fields.map(function (f) { return copyField(f); });
-			newFile.id = file.id;
-			newFile.label = file.label;
-			newFile.sourceFor = file.sourceFor;
-			newFile.uniqueId = file.uniqueId;
-
-			return newFile;
-		}
-
-		function explodeMultiValueFields(file) {
-
-			var data = [];
-			var newFile = {};
-			var dimsToExplode = [];
-
-			file.fields.forEach(function (f) {
-				if(f.mvDelimiter && f.mvDelimiter !== "") {
-					dimsToExplode.push(f);
-				}
-			});
-
-			file.data.map(function(r) {
-				// Start by splitting the comma-delimited values into arrays and stripping spaces
-				tempRow = angular.extend({}, r);
-				dimsToExplode.forEach(function(k) {
-					tempArr = [];
-					if(r[k.key] !== undefined)  {
-						tempArr = r[k.key].split(k.mvDelimiter).map(function (v) {
-							return v.trim();
-						});
-					}
-					tempRow[k.key] = tempArr;
-				});
-
-				return tempRow;
-			}).forEach(function(r) {  // Then we have to add several rows for each record.
-
-				// Start by getting the cardinality (number of rows we need to create) by multiplying the 
-				// length of all the arrays in the attributes we need to explode.
-				card = dimsToExplode.reduce(function(p, c) {
-					// What if the length is 0? Then treat it as 1.
-					return p * ( r[c.key].length ? r[c.key].length : 1 );
-				}, 1);
-
-				if(card <= 1) { // If it's 1 or less, then we only need one row.
-					tempRow = angular.extend({}, r);
-
-					// Convert back to strings
-					dimsToExplode.forEach(function(k) {
-						tempArr = r[k.key];
-						tempRow[k.key] = tempArr.shift();
-					});
-
-					data.push(tempRow);
-				} else {        // It's multiple rows, so things get a little interesting.
-
-					// Get the arrays of values of which we're going to take the cartesian product.
-					tempArr = dimsToExplode.map(function(k) {
-						return r[k.key];
-					});
-
-					// tempArr is now the cartesian product.
-					tempArr = cartesian(tempArr);
-
-					// Cycle through the cartesian product array and create new rows, then append them to
-					// newData.
-
-					tempArr.forEach(function(a) {
-						tempRow = angular.extend({}, r);
-
-						dimsToExplode.forEach(function(k, i) {
-							tempRow[k.key] = a[i];
-						});
-
-						data.push(tempRow);
-					});
-				}
-			});
-
-			newFile = {};
-			newFile.autoFields = file.autoFields.map(function(f) { return copyField(f); });
-			newFile.data = data;
-			newFile.fields = file.fields.map(function (f) { return copyField(f); });
-			newFile.id = file.id;
-			newFile.label = file.label;
-			newFile.sourceFor = file.sourceFor;
-			newFile.uniqueId = file.uniqueId;
-
-			return newFile;
-		}
-
-		function getData() {
-			var processData = $q.defer();
-
-			function innerProcess() {
-				process();
-				processData.resolve();
-			}
-
-			if(dirty) {
-				spinnerService.spin();
-				setTimeout(innerProcess, 10);
-			} else {
-				processData.resolve();
-			}
-
-			dirty = false;
-			return processData.promise.then(function () {
-				spinnerService.hide();
-				return {
-					data: data,
-					metadata: metadata,
-					xfilter: xfilter
-				};
-			});
-		}
-
-		function getDataSync() {
-			if(dirty) {
-				process();
-				dirty = false;
-			}
-			
-			return {
-				data: data,
-				metadata: metadata,
-				xfilter: xfilter
-			};
-		}
-
-		function isDirty() {
-			return dirty;
-		}
-
-		function setDirty() {
-			dirty = true;
-		}
-
-		return {
-			getData: getData,
-			getDataSync: getDataSync,
-			addFile: addFile,
-			addFileRaw: addFileRaw,
-			deleteFile: deleteFile,
-			getFiles: getFiles,
-			addLink: addLink,
-			addLinkRaw: addLinkRaw,
-			deleteLink: deleteLink,
-			getLinks: getLinks,
-			isDirty: isDirty,
-			setDirty: setDirty,
-			calcLinkMetadata: calcLinkMetadata,
-			setCountBy: setCountBy
-		};
-
-		// Helper function for munging data with multiple values in a field.
-		// Cribbed from: 
-		// http://stackoverflow.com/questions/15298912/javascript-generating-combinations-from-n-arrays-with-m-elements
-		function cartesian(arg) {
-			var r = [], max = arg.length-1;
-			function helper(arr, i) {
-				for (var j=0, l=arg[i].length; j<l; j++) {
-					var a = arr.slice(0); // clone arr
-					a.push(arg[i][j]);
-					if (i==max) {
-						r.push(a);
-					} else helper(a, i+1);
-				}
-			}
-			helper([], 0);
-			return r;
-		}
-	})
-	.factory("dataPromise", function (dataService) {
-		return dataService.getData();
-	});
-angular.module('palladio.services.date', [])
-	.factory('dateService', function() {
-
-		var posYear = true;
-		var yearLength = 0;
-		var tempDate;
-		var tempStr = "";
-		var yearStr = "";
-		var monthStr = "";
-		var dateStr = "";
-
-		var arr;
-		var isoParser = d3.time.format.iso.parse;
-
-		function padYear(year) {
-			tempStr = "" + year;
-			posYear = ( tempStr[0] !== '-' );
-			yearLength = tempStr.length;
-
-			// Handle 1999, 999, 99, 9, 0, -1, -11, -111, -1111
-			if(posYear && yearLength === 4) return tempStr;
-			if(!posYear && yearLength === 5) return tempStr;
-			if(posYear && yearLength === 3) return "0" + tempStr;
-			if(!posYear && yearLength === 4) return "-0" + tempStr.substr(1,3);
-			if(posYear && yearLength === 2) return "00" + tempStr;
-			if(!posYear && yearLength === 3) return "-00" + tempStr.substr(1,2);
-			if(posYear && yearLength === 1) return "000" + tempStr;
-			if(!posYear && yearLength === 2) return "-000" + tempStr.substr(1,1);
-		}
-
-		function padMonth(month) {
-			tempStr = "" + month;
-			if(tempStr.length === 2) return tempStr;
-			if(tempStr.length === 1) return "0" + tempStr;
-		}
-
-		function padDate(date) {
-			tempStr = "" + date;
-			if(tempStr.length === 2) return tempStr;
-			if(tempStr.length === 1) return "0" + tempStr;
-		}
-
-		function normalizeDateString(s) {
-			if(s && s.length <= 5) {
-				return "" + padYear(s) + "-01-01";
-			} else {
-				// Handle [-YYY]Y-[M]M-[D]D
-				if(s && (s.length > 4 && s.length <= 11 ) && s.indexOf('/') === -1) {
-					arr = s.split('-');
-					if(s[0] === '-') {
-						// We have a negative year
-						return "-" + padYear(arr[1]) + '-' + padMonth(arr[2]) + '-' + padDate(arr[3]);
-					} else {
-						// Positive year
-						return "" + padYear(arr[0]) + '-' + padMonth(arr[1]) + '-' + padDate(arr[2]);
-					}
-				} else {
-					// Handle [M]M/[D]D/[-YYY]Y
-					if(s && (s.length > 4 && s.length <= 11 ) && s.indexOf('/') !== -1) {
-						arr = s.split('/');
-						return "" + padYear(arr[2]) + '-' + padMonth(arr[0]) + '-' + padDate(arr[1]);
-					} else {
-						if(s && s.length > 9 && isoParser(s)) {
-							// ISO formatted date
-							return "" + dimFormat(isoParser(s));
-						} else {
-							return "" + s;
-						}
-					}
-				}
-			}
-			return "";
-		}
-
-		var dimFormat = function (t) {
-			if(t) {
-				return padYear(t.getUTCFullYear()) + "-" +
-					(t.getUTCMonth() > 8 ? t.getUTCMonth() + 1 : '0' + (t.getUTCMonth() + 1)) + "-" +
-					(t.getUTCDate() > 9 ? t.getUTCDate() : '0' + t.getUTCDate());
-			}
-		};
-		
-		dimFormat.parse = function (s) {
-			if(s && s.length === 10 | s.length === 11) {
-				posYear = s.length === 11 ? false : true;
-				yearStr = s.substr(0, posYear ? 4 : 5);
-				monthStr = s.substr(posYear ? 5 : 6, 2);
-				dateStr = s.substr(posYear ? 8 : 9, 2);
-				tempDate = new Date(Date.UTC(+yearStr, (+monthStr - 1), +dateStr));
-				// Date.UTC doesn't work properly for years from 0 - 100
-				// so we have to specifically set the year.
-				tempDate.setUTCFullYear(+yearStr);
-				return tempDate;
-			} else { return ""; }
-		};
-
-		dimFormat.parseExternal = function (s) {
-			return dimFormat.parse(normalizeDateString(s));
-		};
-
-		dimFormat.reformatExternal = normalizeDateString;
-
-		dimFormat.toString = function () { return "%Y-%m-%d"; };
-
-		var dimFormatMonth = function (t) {
-			if(t) {
-				return padYear(t.getUTCFullYear()) + "-" +
-					(t.getUTCMonth() > 8 ? t.getUTCMonth() + 1 : '0' + (t.getUTCMonth() + 1));
-			}
-		};
-		
-		dimFormatMonth.parse = function (s) {
-			if(s && s.length === 7 | s.length === 8) {
-				posYear = s.length === 9 ? false : true;
-				yearStr = s.substr(0, posYear ? 4 : 5);
-				monthStr = s.substr(posYear ? 5 : 6, 2);
-				tempDate = new Date(Date.UTC(+yearStr, (+monthStr - 1), "01"));
-				// Date.UTC doesn't work properly for years from 0 - 100
-				// so we have to specifically set the year.
-				tempDate.setUTCFullYear(+yearStr);
-				return tempDate;
-			} else { return ""; }
-		};
-
-		dimFormatMonth.toString = function () { return "%Y-%m"; };
-
-		var dimFormatYear = function (t) {
-			if(t) {
-				return padYear(t.getUTCFullYear());
-			}
-		};
-		
-		dimFormatYear.parse = function (s) {
-			if(s && s.length === 4 | s.length === 5) {
-				posYear = s.length === 5 ? false : true;
-				yearStr = s.substr(0, posYear ? 4 : 5);
-				tempDate = new Date(Date.UTC(+yearStr, "01", "01"));
-				// Date.UTC doesn't work properly for years from 0 - 100
-				// so we have to specifically set the year.
-				tempDate.setUTCFullYear(+yearStr);
-				return tempDate;
-			} else { return ""; }
-		};
-
-		dimFormatYear.toString = function () { return "%Y"; };
-
-		return {
-			format: dimFormat,
-			formatMonth: dimFormatMonth,
-			formatYear: dimFormatYear
-		};
-	});
-angular.module('palladio.services.export', [])
-	.factory("exportService", function() {
-		return function (source, title) {
-
-			function getBlob() {
-            	return window.Blob || window.WebKitBlob || window.MozBlob;
-          	}
-
-          	var BB = getBlob();
-         
-          	var html = source
-            	.attr("version", 1.1)
-            	.attr("xmlns", "http://www.w3.org/2000/svg")
-            	.attr("style", "")
-            	.node();
-
-            var text = $('<div></div>').html($(html).clone()).html();
-
-          	var isSafari = (navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1);
-
-	        if (isSafari) {
-	            var img = "data:image/svg+xml;utf8," + html;
-	            var newWindow = window.open(img, 'download');
-	        } else {
-	            var blob = new BB([text], { type: "data:image/svg+xml" });
-	            saveAs(blob, title)
-	        }
-        
-		};
-	});
-angular.module('palladio.services.load', ['palladio.services.data'])
-	.factory("loadService", ['dataService', '$q', 'parseService', 'validationService', 
-			function(dataService, $q, parseService, validationService) {
-
-		var visState = {};
-		var layoutState;
-		var visStateDirty = false;
-
-		function load(input) {
-			var deferred = $q.defer();
-			var reader = new FileReader();
-			reader.onload = function() {
-				var json = JSON.parse(reader.result);
-				loadJson(json);
-				deferred.resolve();
-			};
-			reader.readAsText(input.files[0]);
-			// We need to clear the input so that we pick up future uploads. This is *not*
-			// cross-browser-compatible.
-			input.value = null;
-
-			return deferred.promise;
-		}
-
-		function loadJson(json) {
-			json.files.forEach(function (f) { 
-
-				// Rebuild autofields
-				f.autoFields = parseService.getFields(f.data);
-
-				// Rebuild unique values and errors for each field.
-				f.fields.forEach(function(g) {
-					if(f.autoFields.filter(function (d) { return d.key === g.key; })[0]) {
-						g.uniques = f.autoFields.filter(function (d) { return d.key === g.key; })[0].uniques;
-						g.errors = validationService(g.uniques.map(function(d) { return d.key; }), g.type);
-					}
-				});
-
-				dataService.addFileRaw(f);
-			});
-			json.links.forEach(function (l) {
-				// First fix the file references.
-				l.lookup.file = dataService.getFiles().filter(function(f) { return f.uniqueId === l.lookup.file.uniqueId; })[0];
-				l.source.file = dataService.getFiles().filter(function(f) { return f.uniqueId === l.source.file.uniqueId; })[0];
-
-				dataService.addLinkRaw(l);
-			});
-
-			// Does this file include visualization state information?
-			if(json.vis && json.vis.length > 0) {
-				visState = json.vis;
-				layoutState = json.layout;
-				visStateDirty = true;
-			}
-		}
-
-		function buildVis(stateFunctions) {
-			if(visStateDirty) {
-
-				// Build a lookup based on type. Multiple visualizations of a type are supported,
-				// but ordering is based on order that the visualizations were originally registered.
-				// We assume a static layout (e.g. that once /visualization loads all visualizations)
-				// are present on the page and have registered their state functions. If further
-				// setup is required (e.g. instantiating filters), then the application itself should
-				// register a state function with appropriate type and then handle the instantiation
-				// of the visualizations as required.
-
-				var stateLookup = d3.map();
-				visState.forEach(function (v) {
-					if(stateLookup.has(v.type)) {
-						stateLookup.get(v.type).push(v.importJson);
-					} else {
-						stateLookup.set(v.type, [v.importJson]);
-					}
-				});
-
-				stateFunctions.forEach(function (s) {
-					if(stateLookup.has(s.type) && stateLookup.get(s.type).length > 0) {
-						// Shift the import off the stack for this type and import it.
-						s.import(stateLookup.get(s.type).shift());
-
-						// If we've imported all the visualizations of this type from the file.
-						if(stateLookup.get(s.type).length === 0) stateLookup.remove(s.type);
-					}
-				});
-
-				// Are there any visualization states saved in the file that we didn't use?
-				stateLookup.keys().forEach(function (k) {
-					console.warn("It looks like this import file includes a visualization with type " + k.type + " that didn't match any visualizations in this application.");
-				});
-			}
-		}
-
-		function getLayout() {
-			return layoutState;
-		}
-
-		return {
-			load: load,
-			loadJson: loadJson,
-			build: buildVis,
-			layout: getLayout
-		};
-	}]);
-angular.module('palladio.services.parse', [])
-	.factory('parseService', [ '$http', '$q', function($http, $q){
-
-		var parseColumn = function (prop, data, delimiter, hier, ignore, type) {
-
-			// If the delimiter is an empty string, replace with null.
-			if(delimiter === "") delimiter = null;
-			if(hier === "") hier = null;
-
-			// Note: the three dashes are different even though they don't look different.
-			var specials = ['-', '–', '—', ';', ':', '_', ',', '?', '/', '!', '~'];
-
-			var raw = data.reduce(function(prev, curr, i, a) {
-				if(curr[prop] === null || curr[prop] === undefined || curr[prop] === "") {
-
-					// Count it as a blank.
-					prev.blanks = prev.blanks + 1;
-				} else {
-
-					// Search for special characters depending on the field type.
-					specials.filter(function(s) {
-						// Ignore some specials depending on the data type.
-						return !(type === 'date' && s === '-' ) &&
-								!(type === 'url' && (s === ':' || s === '/' || s === '_' || s === '-' ));
-					}).forEach(function (s) {
-						if(curr[prop].indexOf(s) !== -1) {
-							prev.specials.push(s);
-							// We've already seen this char once so we don't have to check
-							// it again for this column.
-							specials = specials.filter( function(d) { return d !== s; });
-						}
-					});
-
-					// Split at the multi-value delimiter (if it's null, no split)
-					curr[prop].split(delimiter).map(function(d) {
-
-						// Remove characters that should be ignored.
-						if(ignore) {
-							ignore.forEach(function (ig) {
-								d = d.split(ig).join('');
-							});
-						}
-
-						// Trim trailing whitespace (occurs if using a delimiter + space
-						// which is quite common)
-						return d.trim();
-					}).forEach(function (d) {
-
-						// Indicate a hierarchy split.
-						d = d.replace(hier, "&rarr;");
-
-						// Test if we've already counted it.
-						if(!prev.map.has(d)) {
-
-							// If not count it and add it to the map.
-							prev.card = prev.card + 1;
-							prev.map.set(d, 1);
-						} else {
-							prev.map.set(d, prev.map.get(d) + 1);
-						}
-					});
-				}
-				return prev;
-			}, { card: 0, blanks: 0, map: d3.map(), specials: [] });
-
-			var md = {
-				uniques: raw.map.entries(),
-				cardinality: raw.card,
-				blanks: raw.blanks,
-				special: raw.specials,
-				uniqueKey: raw.map.keys().length === data.length
-			};
-
-			return md;
-		};
-
-		return {
-
-			getFields : function(objs) {
-
-				var isBoolean = function(value) {
-					return typeof value == 'boolean';
-				};
-
-				var isString = function(value){
-					return typeof value == 'string';
-				};
-
-				var isArray = function(value){
-					return value.toString() == '[object Array]';
-				};
-
-				var isNumber = function(value){
-					return typeof value == 'number'; //|| !isNaN(parseFloat(value));
-				};
-
-				var isObject = function(value){
-					return value !== null && typeof value == 'object';
-				};
-
-				var isDate = function(value){
-					return value.toString() == '[object Date]';
-				};
-
-				var isFunction = function(value){
-					return typeof value == 'function';
-				};
-
-				var isBooleanLike = function(value){
-					if (value.toLowerCase() === 'true' || value.toLowerCase() === 'yes' || value === 1 ) return true;
-					if (value.toLowerCase() === 'false' || value.toLowerCase() === 'no' || value === 0 ) return true;
-					return false;
-				};
-
-				var isNumberLike = function(value) {
-					return !isNaN(value.replace(',','.'));
-				};
-
-				var isDateLike = function(value){
-					// We allow zero-dates (1999-00-00) even though they aren't technically valid.
-					// We allow negative years in dates
-					var dateTest = RegExp('^[-]\\d\\d\\d\\d($)|([-](0[0-9]|1[012]|[0-9])[-](0[0-9]|[12][0-9]|3[01]|[0-9])$)');
-					if(dateTest.test(value)) return true;
-					return false;
-				};
-
-				var isLatLonLike = function(value){
-					var pieces = value.split(',');
-					if (pieces.length !== 2) return false;
-					if (isNumberLike(pieces[0]) && isNumberLike(pieces[1])) return true;
-					return false;
-				};
-
-				var isUrlLike = function(value){
-					if ( value.indexOf("https://") === 0 || value.indexOf("http://") === 0 || value.indexOf("www.") === 0 ) return true;
-					return false;
-				};
-
-				var sniff = function(value) {
-					if (typeof value === 'undefined' || value === null || value.length === 0) return 'null';
-					if (isObject(value)) return 'object';
-					if (isArray(value)) return 'array';
-					if (isNumber(value)) return 'number';
-					// String
-					if (isUrlLike(value)) return 'url';
-					//if (isBooleanLike(value)) return 'boolean';
-					if (isDateLike(value)) return 'date';
-					if (isNumberLike(value)) return 'number';
-					if (isLatLonLike(value)) return 'latlong';
-					if (isString(value)) return 'text';
-					return null;
-				};
-
-				var maxOnValue = function(obj){
-					var entries = d3.entries(obj).sort(function(a,b){ return a.value < b.value; });
-					return entries[0].key == "null" && entries.length > 1 ? entries[1].key : entries[0].key;
-				};
-
-				var reach = function(obj, path){
-					path = path ? path.split('.') : null;
-					var result = obj;
-					if (!path) return obj;
-					for (var i=0, len=path.length; i<len; i++){
-						result = result[path[i]];
-					}
-					return result;
-				};
-
-				var unique = function(array, path) {
-					var nesting = d3.nest()
-						.key(function(d) { return reach(d,path); })
-						.map(array);
-					return d3.keys(nesting);
-				};
-
-				count = function(array,path) {
-					var nesting = d3.nest()
-						.key(function(d) { return reach(d, path); })
-						.rollup(function(d){return d.length;})
-						.map(array);
-					return nesting;
-				};
-
-				var keys = {};
-
-				d3.keys(objs[0]).forEach(function(d){ keys[d] = []; });
-
-				objs.forEach(function(d){
-					for(var key in keys) {
-						keys[key].push(sniff(d[key]));
-					}
-				});
-
-				return d3.keys(objs[0]).map(function(d){
-					
-					var md = parseColumn(d, objs, '', '', [], maxOnValue(count(keys[d])));
-
-					return {
-						key:d,
-						description:d,
-						type:maxOnValue(count(keys[d])),
-						cardinality: md.cardinality,
-						blanks: md.blanks,
-						countBy: false,
-						uniques: md.uniques,
-						special: md.special,
-						unassignedSpecialChars: md.special,
-						uniqueKey: md.uniqueKey,
-						errors: []
-					};
-				});
-
-			},
-
-			detectDelimiter : function(string, delimiters) {
-
-				if (!arguments.length) return;
-
-				if (!delimiters) delimiters = [",",";",":","\t"];
-				
-				var rows = string.split("\n"),
-					delimitersCount = delimiters.map(function(d){ return 0; }),
-					character,
-					quoted = false,
-					firstChar = true;
-				
-				// only on the header, for now!
-				for (var row=0; row < 1; row++) {
-
-					// ignoring blank rows */
-					if (!rows[row].length) continue;
-
-					for (var characterCount=0; characterCount < rows[row].length - 1; characterCount++) {
-
-						character = rows[row][characterCount];
-
-						switch(character) {
-
-							case '"':
-								if (quoted) {
-									if (rows[row][characterCount+1] != '"') quoted = false;
-									else characterCount++;
-								}
-								else if (firstChar) quoted = true;
-								
-								break;
-								
-							default:
-								if (!quoted) {
-									var index = delimiters.indexOf(character);
-									if (index !== -1)
-									{
-										delimitersCount[index]++;
-										firstChar = true;
-										continue;
-									}
-								}
-								break;
-						}
-						if (firstChar) firstChar = false;
-					}
-				}
-
-				var maxCount = d3.max(delimitersCount);
-				return maxCount === 0 ? '\0' : delimiters[delimitersCount.indexOf(maxCount)];
-			},
-
-			parseText : function(string, delimiter) {
-				
-				if (!delimiter) delimiter = this.detectDelimiter(string);
-				
-				var objPattern = new RegExp(
-					(
-						"(\\" + delimiter + "|\\r?\\n|\\r|^)" +
-						"(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
-						"([^\"\\" + delimiter + "\\r\\n]*))"
-					),
-					"gi"
-				);
-
-				var arrData = [[]],
-					objData = [],
-					header = [];
-						
-				for (var arrMatches = objPattern.exec( string ); arrMatches; arrMatches = objPattern.exec( string )){
-
-					try {
-						var strMatchedDelimiter = arrMatches[ 1 ];
-
-						if (strMatchedDelimiter.length &&
-							(strMatchedDelimiter != delimiter)
-							){
-								arrData.push( [] );
-							}
-						
-						var strMatchedValue;
-						if (arrMatches[ 2 ]){
-							strMatchedValue = arrMatches[ 2 ].replace(
-								new RegExp( "\"\"", "g" ),
-								"\""
-							);
-						} else {
-							strMatchedValue = arrMatches[ 3 ];
-						}
-
-						arrData[ arrData.length - 1 ].push( strMatchedValue );
-					
-					} catch(e) {
-						throw new Error(e.message);
-					}
-				}
-				
-				header = arrData[0];
-					
-				for (var row=1; row<arrData.length; row++) {
-
-					// skipping empty rows
-					if (arrData[row].length == 1 && arrData[row].length != header.length) continue;
-					
-					if(arrData[row].length == header.length) {
-						var obj = {};
-						for (var h in header){
-							obj[header[h]] = arrData[row][h];
-						}
-						objData.push(obj);
-					} else {
-						throw new Error("There's something strange at line " + (row+1) + ". Please review your data." );
-					}
-				}
-				
-				return objData;
-
-			},
-
-			parseUrl : function(url) {
-
-				var deferred = $q.defer();
-
-				$http.get(url).success(function(data){
-					deferred.resolve(data);
-				}).error(function(){
-					deferred.reject("Sorry, an error occured while fetching the data.");
-				});
-        
-				return deferred.promise;
-			},
-
-			parseColumn: parseColumn
-
-		};
-
-	}]);
-angular.module('palladio.services',
-	[	'palladio.services.date',
-		'palladio.services.spinner',
-		'palladio.services.parse',
-		'palladio.services.validation',
-		'palladio.services.export',
-		'palladio.services.data',
-		'palladio.services.date',
-		'palladio.services.load' ]);
-angular.module('palladio.services.spinner', [])
-	.factory("spinnerService", function () {
-
-		var opts = {
-			lines: 13, // The number of lines to draw
-			length: 8, // The length of each line
-			width: 4, // The line thickness
-			radius: 15, // The radius of the inner circle
-			corners: 1, // Corner roundness (0..1)
-			rotate: 0, // The rotation offset
-			direction: 1, // 1: clockwise, -1: counterclockwise
-			color: '#000', // #rgb or #rrggbb or array of colors
-			speed: 1, // Rounds per second
-			trail: 60, // Afterglow percentage
-			shadow: false, // Whether to render a shadow
-			hwaccel: false, // Whether to use hardware acceleration
-			className: 'spinner', // The CSS class to assign to the spinner
-			zIndex: 2e9 // The z-index (defaults to 2000000000)
-		};
-
-		var target, spinner;
-
-		return {
-			spin: function () {
-				if(!target) {
-					// Try to set up if we aren't already.
-					target = document.getElementById('spinner');
-					spinner = new Spinner(opts).spin();
-
-					if(target) {
-						target.appendChild(spinner.el);
-					}
-				}
-
-				if(target) $(target).show();
-				
-			},
-			hide: function () {
-				if(target) $(target).hide();
-			}
-		}
-	});
-angular.module('palladio.services.validation', [])
-
-	.factory("validationService", function() {
-		return function (uniques, type) {
-			var errors = [];
-			var dateTest = RegExp('^([-]?\\d{1,4}|[-]?\\d{1,4}[-](0[1-9]|1[012]|[1-9])[-](0[1-9]|[12][0-9]|3[01]|[1-9]))$');
-			var latlongTest = RegExp('^(\\-?\\d+(\\.\\d+)?),\\s*(\\-?\\d+(\\.\\d+)?)$');
-
-			uniques.forEach(function (d) {
-				switch (type) {
-					case 'number':
-						if(isNaN(+d)) errors.push({ value: d, message: '"' + d + '" is not a number' });
-						break;
-					case 'date':
-						if(!dateTest.test(d)) errors.push({ value: d, message: '"' + d + '" is not a date' });
-						break;
-					case 'latlong':
-						if(!latlongTest.test(d)) errors.push({ value: d, message: '"' + d + '" is not a lat/long pair'});
-						break;
-					case 'url':
-						break;
-				}
-			});
-
-			return errors;
-		};
-	});
 var crossfilterHelpers = {
 
 	///////////////////////////////////////////////////////////////////////
@@ -64419,6 +62911,1505 @@ var d3_svg_brushResizes = [
 	}
 
 })();
+angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.services.validation',
+		'palladio.services.spinner'])
+	.factory("dataService", function (parseService, validationService, spinnerService, $q) {
+
+		// Set this to "true" if data or links have been added/removed/changed
+
+		var dirty = false;
+
+		// Files that are loaded in the refine stage
+		var files = [];
+
+		var data, metadata, xfilter;
+
+		// We give files unique numeric identifiers.
+		var uniqueCounter = 0;
+
+		var addFile = function (data, label) {
+			var file = {};
+			file.label = label || "Untitled";
+			file.id = files.length;
+			// Do auto-recognition on load
+			file.autoFields = parseService.getFields(data);
+
+			var maxUniques = d3.max(file.autoFields, function (f) { return f.uniques.length; });
+			var descriptiveField = file.autoFields.filter(function (f) { return f.uniques.length === maxUniques; })[0];
+
+			file.autoFields.forEach(function (f) { if(f.key !== descriptiveField.key) f.descriptiveField = descriptiveField; });
+
+			var uniqueKey;
+
+			// If this is the first/primary file, count by the descriptive field.
+			if(files.length === 0) {
+				uniqueKey = file.autoFields.filter(function (f) { return f.uniqueKey; })[0];
+				if(uniqueKey) {
+					uniqueKey.countBy = true;
+				} else {
+					descriptiveField.countBy = true;
+				}
+			}
+
+			// But only pick up the basics by default. If the user triggers auto-recognition
+			// then we can get the rest of the auto-recognized meta-data, like type.
+			file.fields = file.autoFields.map(function (d) {
+				return {
+					key: d.key,
+					description: d.description,
+					cardinality: d.cardinality,
+					type: d.type,
+					blanks: d.blanks,
+					uniques: d.uniques,
+					uniqueKey: d.uniqueKey,
+					special: d.special,
+					unassignedSpecialChars: d.special,
+					countBy: d.countBy,
+					errors: validationService(d.uniques.map(function(d) { return d.key; }), d.type),
+					descriptiveField: d.descriptiveField
+				};
+			});
+
+			file.data = data;
+			file.uniqueId = uniqueCounter;
+			uniqueCounter++;
+
+			files.push(file);
+			setDirty();
+		};
+
+		var addFileRaw = function(file) {
+			files.push(file);
+			uniqueCounter++;
+
+			setDirty();
+		};
+
+		var deleteFile = function(fileId) {
+			var i = null;
+
+			files.forEach(function(f, idx) {
+				if(f.uniqueId === fileId) {
+					i = idx;
+				}
+			});
+
+			// Remove the file.
+			if(i !== null) files.splice(i, 1);
+
+			// Remove links to this file.
+			var linksToDelete = [];
+			links.forEach(function (l, i) {
+				if(l.lookup.file.uniqueId === fileId ||
+					l.source.file.uniqueId === fileId) {
+					linksToDelete.unshift([l, i]);
+				}
+			});
+			linksToDelete.forEach(function (d) {
+				deleteLink(d[0], d[1]);
+			});
+
+			setDirty();
+		};
+
+		var getFiles = function() {
+			return files;
+		};
+
+		var setCountBy = function(field) {
+			// There can be only one.
+			files.forEach(function (file) {
+				file.fields.forEach( function (field) {
+					field.countBy = false;
+				});
+			});
+
+			field.countBy = true;
+		};
+
+		function copyField(field) {
+			return {
+				blanks: field.blanks,
+				cardinality: field.cardinality,
+				confirmed: field.confirmed,
+				countBy: field.countBy,
+				countDescription: field.countDescription,
+				countable: field.countable,
+				delete: field.delete,
+				description: field.description,
+				descriptiveField: field.descriptiveField,
+				errors: field.errors.slice(0),
+				hierDelimiter: field.hierDelimiter,
+				ignore: field.ignore,
+				key: field.key,
+				mvDelimiter: field.mvDelimiter,
+				originFileId: field.originFileId,
+				special: field.special.slice(0),
+				type: field.type,
+				typeField: field.typeField,
+				unassignedSpecialChars: field.unassignedSpecialChars? field.unassignedSpecialChars.slice(0) : undefined,
+				uniqueKey: field.uniqueKey,
+				uniques: field.uniques.slice(0),
+			};
+		}
+
+		// Links that are populated in the link stage:
+		var links = [];
+
+		var addLink = function (link) {
+
+			// If the lookup field is undefined, determine the best field using calcLinkMetadata method.
+			if(link.lookup.field === undefined) {
+				var md = {};
+				var maxMatches = -1;
+				var bestField = {};
+
+				link.lookup.file.fields.forEach(function(f) {
+					// Try calculating metadata with this link.
+					link.lookup.field = f;
+					md = calcLinkMetadata(link.source, link.lookup);
+					if(md.matches > maxMatches) {
+						maxMatches = md.matches;
+						bestField = f;
+					}
+				});
+
+				link.lookup.field = bestField;
+			}
+			
+			// If metadata is undefined, calculate it.
+			if(link.metadata === undefined) {
+				link.metadata = calcLinkMetadata(link.source, link.lookup);
+			}
+
+			links.push(link);
+			setDirty();
+		};
+
+		var addLinkRaw = function (link) {
+			links.push(link);
+			setDirty();
+		}
+
+		var deleteLink = function (link, index) {
+			
+			// Figure out the index if we need to.
+			if(index === undefined) {
+				links.forEach(function(l, i) {
+					if(l.source.file.uniqueId === link.source.file.uniqueId &&
+						l.source.field.key === link.source.field.key &&
+						l.lookup.file.uniqueId === link.lookup.file.uniqueId &&
+						l.lookup.field.key === link.lookup.field.key) {
+
+						index = i;
+					}
+				});
+			}
+
+			links.splice(index,1);
+			setDirty();
+		};
+
+		var getLinks = function () {
+			return links;
+		};
+
+		var calcLinkMetadata = function(source, lookup) {
+			var lookupMap = d3.map();
+			var coercedKey;
+
+			lookup.field.uniques.forEach(function (d) {
+				if(lookup.field.type !== 'number') {
+					coercedKey = d.key;
+				} else {
+					coercedKey = +d.key;
+				}
+				lookupMap.set(coercedKey, true);
+			});
+
+			var total = source.field.uniques.length;
+
+			var matches = source.field.uniques
+					.map(function (d) {
+						if(source.field.type !== 'number') {
+							coercedKey = d.key.split(source.field.mvDelimiter)[0].trim();
+						} else {
+							coercedKey = +d.key.split(source.field.mvDelimiter)[0].trim();
+						}
+						return lookupMap.has(coercedKey);
+					})
+					.filter(function (d) { return d; })
+					.length;
+
+			var color = "#33C44A"; //"rgba(0, 255, 0, 0.5)";
+
+			if(matches/total < 0.99) {
+				color = "rgba(226, 217, 0, 1)";
+			}
+
+			if(matches/total < 0.30) {
+				color = "rgb(247, 0, 69)"
+			}
+
+			return {
+				matches: matches,
+				total: total,
+				lookup: lookup.file.data.length,
+				background: color
+			};
+		};
+
+		///////////////////////////////////////////////////////////////////////
+		//
+		// Groundwork for the getData function.
+		//
+		///////////////////////////////////////////////////////////////////////
+
+		var tempArr, tempRow, card, newData, dimsToExplode, dimsWithHiers, dimsWithIgnores,
+			centralFile, internalLinks;
+
+		function process() {
+			tempArr = [];
+			tempRow = {};
+			tempField = {};
+			card = 1;
+			newData = [];
+			metadata = [];
+			dimsToExplode = [];
+			dimsWithHiers = [];
+			dimsWithIgnores = [];
+			centralFile = undefined;
+			internalLinks = angular.copy(links),
+			filesToProcess = [];
+
+			// Functions to populate incoming and outgoing links for each file and link file. 
+			// Note, the function is using the uniqueId on 'f' in the forEach scope, so it is 
+			// always the old uniqueId even though we copy the files during the lookup process.
+			// filesToProcess = links.map(function (link) { return link.source.file; });
+
+			files.forEach(function (f) {
+				determineCountableFields(f);
+				filesToProcess.push(f);
+			});
+
+			filesToProcess.forEach(function (f) {
+				determineCountableFields(f);
+				f.sourceFor = function () {
+					return internalLinks.filter( function (l) {
+						return l.source.file.uniqueId === f.uniqueId;
+					});
+				};
+			});
+
+			// Update countable attributes on links as well.
+			links.forEach(function(l) {
+				determineCountableFields(l.source.file);
+				determineCountableFields(l.lookup.file);
+			});
+
+			internalLinks.forEach(function(l) {
+				determineCountableFields(l.source.file);
+				determineCountableFields(l.lookup.file);
+			});
+
+			// Deal with the situation in which there are no links by only taking the first file.
+			if(files[0]) {
+				centralFile = filesToProcess[0];
+			}
+
+			// Traverse a network of links, determining which file is the central one.
+			// Note: If you don't link all files together, then unlinked files *** are ignored ***
+			internalLinks.forEach(function (l) {
+				// If our current central file guess is used as a lookup in this link, replace it
+				// with the source file. Also do this if centralFile is not defined.
+				if( !centralFile || centralFile.uniqueId === l.lookup.file.uniqueId ) {
+					centralFile = filesToProcess.filter(function (f) { return f.uniqueId === l.source.file.uniqueId; })[0];
+				}
+			});
+
+			// Function to perform lookups recursively.
+			function performLookups(file) {
+
+				var nf = transformFile(file);
+
+				// For a single file, just return that file.
+				if(nf.sourceFor().length === 0) {
+					return nf;
+				}
+
+				nf.sourceFor().forEach( function (l) {
+
+					var lookup = function () {
+						// Build the lookup map.
+						var lookupMap = d3.map();
+						var coercedKey = '';
+						l.lookup.file.data.forEach( function (d) {
+							if(l.lookup.field.type !== 'number') {
+								coercedKey = "" + d[l.lookup.field.key];
+							} else {
+								coercedKey = +d[l.lookup.field.key];
+							}
+							lookupMap.set(coercedKey, d);
+						});
+
+						function doLookup(d) {
+							// 'd' is the source record
+							l.lookup.file.fields.forEach(function (f) {
+								if(l.source.field.type !== 'number') {
+									coercedKey = "" + d[l.source.field.key];
+								} else {
+									coercedKey = +d[l.source.field.key];
+								}
+
+								if(lookupMap.has(coercedKey)) {
+									d[f.key] = lookupMap.get(coercedKey)[f.key];
+								} else {
+									// Wipe out the field if no lookup exists.
+									d[f.key] = "";
+								}
+							});
+
+							// Populate the 'type' field.
+							d[l.lookup.field.key + ' type'] = l.source.field.key;
+						}
+
+						return doLookup;
+					}();
+
+					// NOTE/BUG: This construct does not deal with lookups of different types with one source table ... does it?
+					// TODO: Need a test for the above.
+					if(nf.data[0][l.lookup.field.key + ' type'] === undefined) {
+						// If we don't already have a 'type' field for this lookup, perform lookups in place.
+						nf.data.forEach( function (d) {
+							// Perform the lookup.
+							lookup(d);
+						});
+					} else {
+						// Otherwise we need to duplicate the existing data and push new lines.
+
+						var originalData = nf.data.map(function (d) {
+							return angular.extend({}, d);
+						});
+						
+						originalData.forEach( function (d) {
+							// Perform the lookup.
+							lookup(d);
+
+							// Push the new line
+							nf.data.push(d);
+						});
+					}
+
+					// Update field metadata.
+					l.lookup.file.fields.forEach(function (f) {
+						// If the field already exists, just add a 'type' value to it if necessary.
+						var fieldArr = nf.fields.filter(function (field) { return field.key === f.key; });
+						if(fieldArr.length > 0) {
+							// Check the typeField actually exists.
+							if(fieldArr[0].typeField === undefined) fieldArr[0].typeField = [];
+							// Add the new field to it if it isn't already there.
+							if(fieldArr[0].typeField.indexOf(l.lookup.field.key + ' type') === -1 ) {
+								fieldArr[0].typeField.push(l.lookup.field.key + ' type');
+							}
+						} else {
+							var newField = copyField(f);
+							if(newField.typeField === undefined) newField.typeField = [];
+							if(newField.originFile === undefined) newField.originFileId = l.lookup.file.uniqueId;
+							newField.typeField.push(l.lookup.field.key + ' type');
+							nf.fields.push(newField);
+						}
+					});
+				});
+
+				// Remove all links with this file as the source so we don't reprocess them.
+				// Note: The current forEach is looping over an array of links that the
+				//		sourceFor() function compiled before this deletion, so we will still
+				//		process links that are pending in the current loop.
+				var newLinks = internalLinks.filter(function (link) {
+					return link.source.file.uniqueId !== nf.uniqueId;
+				});
+
+				// Rewrite links whoose source is the lookup file for this link.
+				nf.sourceFor().forEach(function (l) {
+					newLinks.forEach(function (link) {
+						if(link.source.file.uniqueId === l.lookup.file.uniqueId) {
+							// We need to re-point the file.
+							link.source.file = nf;
+						}
+					});
+				});
+
+				internalLinks = newLinks;
+
+				// Re-run lookups (eventually there won't be any more).
+				nf = performLookups(nf);
+
+				return nf;
+			}
+
+			if(centralFile) {
+
+				var newFile = performLookups(centralFile);
+
+				// Update typeField uniques.
+				newFile.fields.forEach(function (f) {
+					if(f.typeField !== undefined && f.typeField.length > 0) {
+						f.typeFieldUniques = [];
+						f.typeField.forEach(function (t, i) {
+							f.typeFieldUniques[i] = [];
+							newFile.data.forEach(function (d) {
+								if(f.typeFieldUniques[i].indexOf(d[t]) === -1) {
+									f.typeFieldUniques[i].push(d[t]);
+								}
+							});
+						});
+					}
+				});
+
+				metadata = newFile.fields;
+				data = newFile.data;
+				xfilter = crossfilter(data);
+			}
+		}
+
+		function transformFile(file) {
+			var newFile = {};
+
+			newFile = splitHierarchies(
+							removeIgnoredValues(
+								explodeMultiValueFields(
+									removeDeletedDimensions(
+										file
+									)
+								)
+							)
+						);
+
+			return newFile;
+		}
+
+		function removeDeletedDimensions(file) {
+			var data = [];
+			var newRow = {};
+			var newFile = {};
+			var dimsWithDelete = [];
+
+			file.fields.forEach(function (f) {
+				if(f.delete) {
+					dimsWithDelete.push(f);
+				}
+			});
+
+			data = file.data.map(function (d) {
+
+				newRow = angular.extend({}, d);
+
+				// Remove deleted dimensions
+				dimsWithDelete.forEach(function (dim) {
+					delete newRow[dim.key];
+				});
+
+				return newRow;
+			});
+
+			newFile = {};
+			newFile.autoFields = file.autoFields.map(function (f) { return copyField(f); });
+			newFile.data = data;
+			newFile.fields = file.fields
+									.map(function (f) { return copyField(f); })
+									.filter(function(f) { return !f.delete; });
+			newFile.id = file.id;
+			newFile.label = file.label;
+			newFile.sourceFor = file.sourceFor;
+			newFile.uniqueId = file.uniqueId;
+
+			return newFile;
+		}
+
+		function splitHierarchies(file) {
+
+			var data = [];
+			var fields = [];
+			var newFile = {};
+			var dimsWithHiers = [];
+			var highestLevels = d3.map();
+
+			file.fields.forEach(function (f) {
+				if(f.hierDelimiter && f.hierDelimiter !== "") {
+					dimsWithHiers.push(f);
+				}
+			});
+
+			data = file.data.map(function (d) {
+				// Handle hierarchies
+				dimsWithHiers.forEach(function (f) {
+					if(typeof d[f.key] === 'string') {
+						d[f.key].split(f.hierDelimiter).forEach(function (h, i) {
+							if(i === 0) {
+								d[f.key] = h;
+							} else {
+								d[f.key + " " + i] = h;
+								if(!highestLevels.has(f.key) || highestLevels.get(f.key) < i)
+									highestLevels.set(f.key, i);
+							}
+						});
+					}
+				});
+				return d;
+			});
+
+			fields = file.fields.map(function(f) { return copyField(f); });
+
+			// Update metadata with hierarchy dimensions
+			var newField;
+			dimsWithHiers.forEach(function (f) {
+				for(i = 1; i <= highestLevels.get(f.key); i++) {
+					newField = copyField(f);
+					newField.key = f.key + " " + i;
+					newField.description = f.key + " Level " + (i+1);
+					fields.push(newField);
+				}
+			});
+
+			newFile = {};
+			newFile.autoFields = file.autoFields.map(function (f) { return copyField(f); });
+			newFile.data = data;
+			newFile.fields = fields;
+			newFile.id = file.id;
+			newFile.label = file.label;
+			newFile.sourceFor = file.sourceFor;
+			newFile.uniqueId = file.uniqueId;
+
+			return newFile;
+		}
+
+		function determineCountableFields(file) {
+			var countableFields = file.fields.filter(function (f) { return f.uniqueKey; });
+
+			if(countableFields.length > 0) {
+				file.fields.filter(function (f) { return f.uniqueKey; })
+					.forEach(function (u, i) {
+						// Only do one field per file.
+						if(i === 0) {
+							u.countable = true;
+							u.countDescription = file.label;
+						}
+					});
+			} else {
+				// No countable fields, so use the "countBy" field if it exists
+				file.fields.filter(function(f) { return f.countBy; })
+					.forEach(function(u, i) {
+						// Only do one field per file.
+						if(i === 0) {
+							u.countable = true;
+							u.countDescription = file.label;
+						}
+					});
+			}
+		}
+
+		function removeIgnoredValues(file) {
+
+			var data = [];
+			var newFile = {};
+			var dimsWithIgnores = [];
+
+			file.fields.forEach(function (f) {
+				if(f.ignore && f.ignore.length > 0) {
+					dimsWithIgnores.push(f);
+				}
+			});
+
+			data = file.data.map(function (d) {
+
+				// Remove ignored values
+				dimsWithIgnores.forEach(function (dim) {
+					dim.ignore.forEach(function (ignore) {
+						d[dim.key] = d[dim.key].split(ignore).join("");
+					});
+				});
+
+				return d;
+			});
+
+			newFile = {};
+			newFile.autoFields = file.autoFields.map(function (f) { return copyField(f); });
+			newFile.data = data;
+			newFile.fields = file.fields.map(function (f) { return copyField(f); });
+			newFile.id = file.id;
+			newFile.label = file.label;
+			newFile.sourceFor = file.sourceFor;
+			newFile.uniqueId = file.uniqueId;
+
+			return newFile;
+		}
+
+		function explodeMultiValueFields(file) {
+
+			var data = [];
+			var newFile = {};
+			var dimsToExplode = [];
+
+			file.fields.forEach(function (f) {
+				if(f.mvDelimiter && f.mvDelimiter !== "") {
+					dimsToExplode.push(f);
+				}
+			});
+
+			file.data.map(function(r) {
+				// Start by splitting the comma-delimited values into arrays and stripping spaces
+				tempRow = angular.extend({}, r);
+				dimsToExplode.forEach(function(k) {
+					tempArr = [];
+					if(r[k.key] !== undefined)  {
+						tempArr = r[k.key].split(k.mvDelimiter).map(function (v) {
+							return v.trim();
+						});
+					}
+					tempRow[k.key] = tempArr;
+				});
+
+				return tempRow;
+			}).forEach(function(r) {  // Then we have to add several rows for each record.
+
+				// Start by getting the cardinality (number of rows we need to create) by multiplying the 
+				// length of all the arrays in the attributes we need to explode.
+				card = dimsToExplode.reduce(function(p, c) {
+					// What if the length is 0? Then treat it as 1.
+					return p * ( r[c.key].length ? r[c.key].length : 1 );
+				}, 1);
+
+				if(card <= 1) { // If it's 1 or less, then we only need one row.
+					tempRow = angular.extend({}, r);
+
+					// Convert back to strings
+					dimsToExplode.forEach(function(k) {
+						tempArr = r[k.key];
+						tempRow[k.key] = tempArr.shift();
+					});
+
+					data.push(tempRow);
+				} else {        // It's multiple rows, so things get a little interesting.
+
+					// Get the arrays of values of which we're going to take the cartesian product.
+					tempArr = dimsToExplode.map(function(k) {
+						return r[k.key];
+					});
+
+					// tempArr is now the cartesian product.
+					tempArr = cartesian(tempArr);
+
+					// Cycle through the cartesian product array and create new rows, then append them to
+					// newData.
+
+					tempArr.forEach(function(a) {
+						tempRow = angular.extend({}, r);
+
+						dimsToExplode.forEach(function(k, i) {
+							tempRow[k.key] = a[i];
+						});
+
+						data.push(tempRow);
+					});
+				}
+			});
+
+			newFile = {};
+			newFile.autoFields = file.autoFields.map(function(f) { return copyField(f); });
+			newFile.data = data;
+			newFile.fields = file.fields.map(function (f) { return copyField(f); });
+			newFile.id = file.id;
+			newFile.label = file.label;
+			newFile.sourceFor = file.sourceFor;
+			newFile.uniqueId = file.uniqueId;
+
+			return newFile;
+		}
+
+		function getData() {
+			var processData = $q.defer();
+
+			function innerProcess() {
+				process();
+				processData.resolve();
+			}
+
+			if(dirty) {
+				spinnerService.spin();
+				setTimeout(innerProcess, 1);
+			} else {
+				processData.resolve();
+			}
+
+			dirty = false;
+			return processData.promise.then(function () {
+				spinnerService.hide();
+				return {
+					data: data,
+					metadata: metadata,
+					xfilter: xfilter
+				};
+			});
+		}
+
+		function getDataSync() {
+			if(dirty) {
+				process();
+				dirty = false;
+			}
+			
+			return {
+				data: data,
+				metadata: metadata,
+				xfilter: xfilter
+			};
+		}
+
+		function isDirty() {
+			return dirty;
+		}
+
+		function setDirty() {
+			dirty = true;
+		}
+
+		return {
+			getData: getData,
+			getDataSync: getDataSync,
+			addFile: addFile,
+			addFileRaw: addFileRaw,
+			deleteFile: deleteFile,
+			getFiles: getFiles,
+			addLink: addLink,
+			addLinkRaw: addLinkRaw,
+			deleteLink: deleteLink,
+			getLinks: getLinks,
+			isDirty: isDirty,
+			setDirty: setDirty,
+			calcLinkMetadata: calcLinkMetadata,
+			setCountBy: setCountBy
+		};
+
+		// Helper function for munging data with multiple values in a field.
+		// Cribbed from: 
+		// http://stackoverflow.com/questions/15298912/javascript-generating-combinations-from-n-arrays-with-m-elements
+		function cartesian(arg) {
+			var r = [], max = arg.length-1;
+			function helper(arr, i) {
+				for (var j=0, l=arg[i].length; j<l; j++) {
+					var a = arr.slice(0); // clone arr
+					a.push(arg[i][j]);
+					if (i==max) {
+						r.push(a);
+					} else helper(a, i+1);
+				}
+			}
+			helper([], 0);
+			return r;
+		}
+	})
+	.factory("dataPromise", function (dataService) {
+		return dataService.getData();
+	});
+angular.module('palladio.services.date', [])
+	.factory('dateService', function() {
+
+		var posYear = true;
+		var yearLength = 0;
+		var tempDate;
+		var tempStr = "";
+		var yearStr = "";
+		var monthStr = "";
+		var dateStr = "";
+
+		var arr;
+		var isoParser = d3.time.format.iso.parse;
+
+		function padYear(year) {
+			tempStr = "" + year;
+			posYear = ( tempStr[0] !== '-' );
+			yearLength = tempStr.length;
+
+			// Handle 1999, 999, 99, 9, 0, -1, -11, -111, -1111
+			if(posYear && yearLength === 4) return tempStr;
+			if(!posYear && yearLength === 5) return tempStr;
+			if(posYear && yearLength === 3) return "0" + tempStr;
+			if(!posYear && yearLength === 4) return "-0" + tempStr.substr(1,3);
+			if(posYear && yearLength === 2) return "00" + tempStr;
+			if(!posYear && yearLength === 3) return "-00" + tempStr.substr(1,2);
+			if(posYear && yearLength === 1) return "000" + tempStr;
+			if(!posYear && yearLength === 2) return "-000" + tempStr.substr(1,1);
+		}
+
+		function padMonth(month) {
+			tempStr = "" + month;
+			if(tempStr.length === 2) return tempStr;
+			if(tempStr.length === 1) return "0" + tempStr;
+		}
+
+		function padDate(date) {
+			tempStr = "" + date;
+			if(tempStr.length === 2) return tempStr;
+			if(tempStr.length === 1) return "0" + tempStr;
+		}
+
+		function normalizeDateString(s) {
+			if(s && s.length <= 5) {
+				return "" + padYear(s) + "-01-01";
+			} else {
+				// Handle [-YYY]Y-[M]M-[D]D
+				if(s && (s.length > 4 && s.length <= 11 ) && s.indexOf('/') === -1) {
+					arr = s.split('-');
+					if(s[0] === '-') {
+						// We have a negative year
+						return "-" + padYear(arr[1]) + '-' + padMonth(arr[2]) + '-' + padDate(arr[3]);
+					} else {
+						// Positive year
+						return "" + padYear(arr[0]) + '-' + padMonth(arr[1]) + '-' + padDate(arr[2]);
+					}
+				} else {
+					// Handle [M]M/[D]D/[-YYY]Y
+					if(s && (s.length > 4 && s.length <= 11 ) && s.indexOf('/') !== -1) {
+						arr = s.split('/');
+						return "" + padYear(arr[2]) + '-' + padMonth(arr[0]) + '-' + padDate(arr[1]);
+					} else {
+						if(s && s.length > 9 && isoParser(s)) {
+							// ISO formatted date
+							return "" + dimFormat(isoParser(s));
+						} else {
+							return "" + s;
+						}
+					}
+				}
+			}
+			return "";
+		}
+
+		var dimFormat = function (t) {
+			if(t) {
+				return padYear(t.getUTCFullYear()) + "-" +
+					(t.getUTCMonth() > 8 ? t.getUTCMonth() + 1 : '0' + (t.getUTCMonth() + 1)) + "-" +
+					(t.getUTCDate() > 9 ? t.getUTCDate() : '0' + t.getUTCDate());
+			}
+		};
+		
+		dimFormat.parse = function (s) {
+			if(s && s.length === 10 | s.length === 11) {
+				posYear = s.length === 11 ? false : true;
+				yearStr = s.substr(0, posYear ? 4 : 5);
+				monthStr = s.substr(posYear ? 5 : 6, 2);
+				dateStr = s.substr(posYear ? 8 : 9, 2);
+				tempDate = new Date(Date.UTC(+yearStr, (+monthStr - 1), +dateStr));
+				// Date.UTC doesn't work properly for years from 0 - 100
+				// so we have to specifically set the year.
+				tempDate.setUTCFullYear(+yearStr);
+				return tempDate;
+			} else { return ""; }
+		};
+
+		dimFormat.parseExternal = function (s) {
+			return dimFormat.parse(normalizeDateString(s));
+		};
+
+		dimFormat.reformatExternal = normalizeDateString;
+
+		dimFormat.toString = function () { return "%Y-%m-%d"; };
+
+		var dimFormatMonth = function (t) {
+			if(t) {
+				return padYear(t.getUTCFullYear()) + "-" +
+					(t.getUTCMonth() > 8 ? t.getUTCMonth() + 1 : '0' + (t.getUTCMonth() + 1));
+			}
+		};
+		
+		dimFormatMonth.parse = function (s) {
+			if(s && s.length === 7 | s.length === 8) {
+				posYear = s.length === 9 ? false : true;
+				yearStr = s.substr(0, posYear ? 4 : 5);
+				monthStr = s.substr(posYear ? 5 : 6, 2);
+				tempDate = new Date(Date.UTC(+yearStr, (+monthStr - 1), "01"));
+				// Date.UTC doesn't work properly for years from 0 - 100
+				// so we have to specifically set the year.
+				tempDate.setUTCFullYear(+yearStr);
+				return tempDate;
+			} else { return ""; }
+		};
+
+		dimFormatMonth.toString = function () { return "%Y-%m"; };
+
+		var dimFormatYear = function (t) {
+			if(t) {
+				return padYear(t.getUTCFullYear());
+			}
+		};
+		
+		dimFormatYear.parse = function (s) {
+			if(s && s.length === 4 | s.length === 5) {
+				posYear = s.length === 5 ? false : true;
+				yearStr = s.substr(0, posYear ? 4 : 5);
+				tempDate = new Date(Date.UTC(+yearStr, "01", "01"));
+				// Date.UTC doesn't work properly for years from 0 - 100
+				// so we have to specifically set the year.
+				tempDate.setUTCFullYear(+yearStr);
+				return tempDate;
+			} else { return ""; }
+		};
+
+		dimFormatYear.toString = function () { return "%Y"; };
+
+		return {
+			format: dimFormat,
+			formatMonth: dimFormatMonth,
+			formatYear: dimFormatYear
+		};
+	});
+angular.module('palladio.services.export', [])
+	.factory("exportService", function() {
+		return function (source, title) {
+
+			function getBlob() {
+            	return window.Blob || window.WebKitBlob || window.MozBlob;
+          	}
+
+          	var BB = getBlob();
+         
+          	var html = source
+            	.attr("version", 1.1)
+            	.attr("xmlns", "http://www.w3.org/2000/svg")
+            	.attr("style", "")
+            	.node();
+
+            var text = $('<div></div>').html($(html).clone()).html();
+
+          	var isSafari = (navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1);
+
+	        if (isSafari) {
+	            var img = "data:image/svg+xml;utf8," + html;
+	            var newWindow = window.open(img, 'download');
+	        } else {
+	            var blob = new BB([text], { type: "data:image/svg+xml" });
+	            saveAs(blob, title)
+	        }
+        
+		};
+	});
+angular.module('palladio.services.load', ['palladio.services.data'])
+	.factory("loadService", ['dataService', '$q', 'parseService', 'validationService', 
+			function(dataService, $q, parseService, validationService) {
+
+		var visState = {};
+		var layoutState;
+		var visStateDirty = false;
+
+		function loadJson(json) {
+			json.files.forEach(function (f) { 
+
+				// Rebuild autofields
+				f.autoFields = parseService.getFields(f.data);
+
+				// Rebuild unique values and errors for each field.
+				f.fields.forEach(function(g) {
+					if(f.autoFields.filter(function (d) { return d.key === g.key; })[0]) {
+						g.uniques = f.autoFields.filter(function (d) { return d.key === g.key; })[0].uniques;
+						g.errors = validationService(g.uniques.map(function(d) { return d.key; }), g.type);
+					}
+				});
+
+				dataService.addFileRaw(f);
+			});
+			json.links.forEach(function (l) {
+				// First fix the file references.
+				l.lookup.file = dataService.getFiles().filter(function(f) { return f.uniqueId === l.lookup.file.uniqueId; })[0];
+				l.source.file = dataService.getFiles().filter(function(f) { return f.uniqueId === l.source.file.uniqueId; })[0];
+
+				dataService.addLinkRaw(l);
+			});
+
+			// Does this file include visualization state information?
+			if(json.vis && json.vis.length > 0) {
+				visState = json.vis;
+				layoutState = json.layout;
+				visStateDirty = true;
+			}
+		}
+
+		function buildVis(stateFunctions) {
+			if(visStateDirty) {
+
+				// Build a lookup based on type. Multiple visualizations of a type are supported,
+				// but ordering is based on order that the visualizations were originally registered.
+				// We assume a static layout (e.g. that once /visualization loads all visualizations)
+				// are present on the page and have registered their state functions. If further
+				// setup is required (e.g. instantiating filters), then the application itself should
+				// register a state function with appropriate type and then handle the instantiation
+				// of the visualizations as required.
+
+				var stateLookup = d3.map();
+				visState.forEach(function (v) {
+					if(stateLookup.has(v.type)) {
+						stateLookup.get(v.type).push(v.importJson);
+					} else {
+						stateLookup.set(v.type, [v.importJson]);
+					}
+				});
+
+				stateFunctions.forEach(function (s) {
+					if(stateLookup.has(s.type) && stateLookup.get(s.type).length > 0) {
+						// Shift the import off the stack for this type and import it.
+						s.import(stateLookup.get(s.type).shift());
+
+						// If we've imported all the visualizations of this type from the file.
+						if(stateLookup.get(s.type).length === 0) stateLookup.remove(s.type);
+					}
+				});
+
+				// Are there any visualization states saved in the file that we didn't use?
+				stateLookup.keys().forEach(function (k) {
+					console.warn("It looks like this import file includes a visualization with type " + k.type + " that didn't match any visualizations in this application.");
+				});
+			}
+		}
+
+		function getLayout() {
+			return layoutState;
+		}
+
+		return {
+			loadJson: loadJson,
+			build: buildVis,
+			layout: getLayout
+		};
+	}]);
+angular.module('palladio.services.parse', [])
+	.factory('parseService', [ '$http', '$q', function($http, $q){
+
+		var parseColumn = function (prop, data, delimiter, hier, ignore, type) {
+
+			// If the delimiter is an empty string, replace with null.
+			if(delimiter === "") delimiter = null;
+			if(hier === "") hier = null;
+
+			// Note: the three dashes are different even though they don't look different.
+			var specials = ['-', '–', '—', ';', ':', '_', ',', '?', '/', '!', '~'];
+
+			var raw = data.reduce(function(prev, curr, i, a) {
+				if(curr[prop] === null || curr[prop] === undefined || curr[prop] === "") {
+
+					// Count it as a blank.
+					prev.blanks = prev.blanks + 1;
+				} else {
+
+					// Search for special characters depending on the field type.
+					specials.filter(function(s) {
+						// Ignore some specials depending on the data type.
+						return !(type === 'date' && s === '-' ) &&
+								!(type === 'url' && (s === ':' || s === '/' || s === '_' || s === '-' ));
+					}).forEach(function (s) {
+						if(curr[prop].indexOf(s) !== -1) {
+							prev.specials.push(s);
+							// We've already seen this char once so we don't have to check
+							// it again for this column.
+							specials = specials.filter( function(d) { return d !== s; });
+						}
+					});
+
+					// Split at the multi-value delimiter (if it's null, no split)
+					curr[prop].split(delimiter).map(function(d) {
+
+						// Remove characters that should be ignored.
+						if(ignore) {
+							ignore.forEach(function (ig) {
+								d = d.split(ig).join('');
+							});
+						}
+
+						// Trim trailing whitespace (occurs if using a delimiter + space
+						// which is quite common)
+						return d.trim();
+					}).forEach(function (d) {
+
+						// Indicate a hierarchy split.
+						d = d.replace(hier, "&rarr;");
+
+						// Test if we've already counted it.
+						if(!prev.map.has(d)) {
+
+							// If not count it and add it to the map.
+							prev.card = prev.card + 1;
+							prev.map.set(d, 1);
+						} else {
+							prev.map.set(d, prev.map.get(d) + 1);
+						}
+					});
+				}
+				return prev;
+			}, { card: 0, blanks: 0, map: d3.map(), specials: [] });
+
+			var md = {
+				uniques: raw.map.entries(),
+				cardinality: raw.card,
+				blanks: raw.blanks,
+				special: raw.specials,
+				uniqueKey: raw.map.keys().length === data.length
+			};
+
+			return md;
+		};
+
+		return {
+
+			getFields : function(objs) {
+
+				var isBoolean = function(value) {
+					return typeof value == 'boolean';
+				};
+
+				var isString = function(value){
+					return typeof value == 'string';
+				};
+
+				var isArray = function(value){
+					return value.toString() == '[object Array]';
+				};
+
+				var isNumber = function(value){
+					return typeof value == 'number'; //|| !isNaN(parseFloat(value));
+				};
+
+				var isObject = function(value){
+					return value !== null && typeof value == 'object';
+				};
+
+				var isDate = function(value){
+					return value.toString() == '[object Date]';
+				};
+
+				var isFunction = function(value){
+					return typeof value == 'function';
+				};
+
+				var isBooleanLike = function(value){
+					if (value.toLowerCase() === 'true' || value.toLowerCase() === 'yes' || value === 1 ) return true;
+					if (value.toLowerCase() === 'false' || value.toLowerCase() === 'no' || value === 0 ) return true;
+					return false;
+				};
+
+				var isNumberLike = function(value) {
+					return !isNaN(value.replace(',','.'));
+				};
+
+				var isDateLike = function(value){
+					// We allow zero-dates (1999-00-00) even though they aren't technically valid.
+					// We allow negative years in dates
+					var dateTest = RegExp('^[-]\\d\\d\\d\\d($)|([-](0[0-9]|1[012]|[0-9])[-](0[0-9]|[12][0-9]|3[01]|[0-9])$)');
+					if(dateTest.test(value)) return true;
+					return false;
+				};
+
+				var isLatLonLike = function(value){
+					var pieces = value.split(',');
+					if (pieces.length !== 2) return false;
+					if (isNumberLike(pieces[0]) && isNumberLike(pieces[1])) return true;
+					return false;
+				};
+
+				var isUrlLike = function(value){
+					if ( value.indexOf("https://") === 0 || value.indexOf("http://") === 0 || value.indexOf("www.") === 0 ) return true;
+					return false;
+				};
+
+				var sniff = function(value) {
+					if (typeof value === 'undefined' || value === null || value.length === 0) return 'null';
+					if (isObject(value)) return 'object';
+					if (isArray(value)) return 'array';
+					if (isNumber(value)) return 'number';
+					// String
+					if (isUrlLike(value)) return 'url';
+					//if (isBooleanLike(value)) return 'boolean';
+					if (isDateLike(value)) return 'date';
+					if (isNumberLike(value)) return 'number';
+					if (isLatLonLike(value)) return 'latlong';
+					if (isString(value)) return 'text';
+					return null;
+				};
+
+				var maxOnValue = function(obj){
+					var entries = d3.entries(obj).sort(function(a,b){ return a.value < b.value; });
+					return entries[0].key == "null" && entries.length > 1 ? entries[1].key : entries[0].key;
+				};
+
+				var reach = function(obj, path){
+					path = path ? path.split('.') : null;
+					var result = obj;
+					if (!path) return obj;
+					for (var i=0, len=path.length; i<len; i++){
+						result = result[path[i]];
+					}
+					return result;
+				};
+
+				var unique = function(array, path) {
+					var nesting = d3.nest()
+						.key(function(d) { return reach(d,path); })
+						.map(array);
+					return d3.keys(nesting);
+				};
+
+				count = function(array,path) {
+					var nesting = d3.nest()
+						.key(function(d) { return reach(d, path); })
+						.rollup(function(d){return d.length;})
+						.map(array);
+					return nesting;
+				};
+
+				var keys = {};
+
+				d3.keys(objs[0]).forEach(function(d){ keys[d] = []; });
+
+				objs.forEach(function(d){
+					for(var key in keys) {
+						keys[key].push(sniff(d[key]));
+					}
+				});
+
+				return d3.keys(objs[0]).map(function(d){
+					
+					var md = parseColumn(d, objs, '', '', [], maxOnValue(count(keys[d])));
+
+					return {
+						key:d,
+						description:d,
+						type:maxOnValue(count(keys[d])),
+						cardinality: md.cardinality,
+						blanks: md.blanks,
+						countBy: false,
+						uniques: md.uniques,
+						special: md.special,
+						unassignedSpecialChars: md.special,
+						uniqueKey: md.uniqueKey,
+						errors: []
+					};
+				});
+
+			},
+
+			detectDelimiter : function(string, delimiters) {
+
+				if (!arguments.length) return;
+
+				if (!delimiters) delimiters = [",",";",":","\t"];
+				
+				var rows = string.split("\n"),
+					delimitersCount = delimiters.map(function(d){ return 0; }),
+					character,
+					quoted = false,
+					firstChar = true;
+				
+				// only on the header, for now!
+				for (var row=0; row < 1; row++) {
+
+					// ignoring blank rows */
+					if (!rows[row].length) continue;
+
+					for (var characterCount=0; characterCount < rows[row].length - 1; characterCount++) {
+
+						character = rows[row][characterCount];
+
+						switch(character) {
+
+							case '"':
+								if (quoted) {
+									if (rows[row][characterCount+1] != '"') quoted = false;
+									else characterCount++;
+								}
+								else if (firstChar) quoted = true;
+								
+								break;
+								
+							default:
+								if (!quoted) {
+									var index = delimiters.indexOf(character);
+									if (index !== -1)
+									{
+										delimitersCount[index]++;
+										firstChar = true;
+										continue;
+									}
+								}
+								break;
+						}
+						if (firstChar) firstChar = false;
+					}
+				}
+
+				var maxCount = d3.max(delimitersCount);
+				return maxCount === 0 ? '\0' : delimiters[delimitersCount.indexOf(maxCount)];
+			},
+
+			parseText : function(string, delimiter) {
+				
+				if (!delimiter) delimiter = this.detectDelimiter(string);
+				
+				var objPattern = new RegExp(
+					(
+						"(\\" + delimiter + "|\\r?\\n|\\r|^)" +
+						"(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
+						"([^\"\\" + delimiter + "\\r\\n]*))"
+					),
+					"gi"
+				);
+
+				var arrData = [[]],
+					objData = [],
+					header = [];
+						
+				for (var arrMatches = objPattern.exec( string ); arrMatches; arrMatches = objPattern.exec( string )){
+
+					try {
+						var strMatchedDelimiter = arrMatches[ 1 ];
+
+						if (strMatchedDelimiter.length &&
+							(strMatchedDelimiter != delimiter)
+							){
+								arrData.push( [] );
+							}
+						
+						var strMatchedValue;
+						if (arrMatches[ 2 ]){
+							strMatchedValue = arrMatches[ 2 ].replace(
+								new RegExp( "\"\"", "g" ),
+								"\""
+							);
+						} else {
+							strMatchedValue = arrMatches[ 3 ];
+						}
+
+						arrData[ arrData.length - 1 ].push( strMatchedValue );
+					
+					} catch(e) {
+						throw new Error(e.message);
+					}
+				}
+				
+				header = arrData[0];
+					
+				for (var row=1; row<arrData.length; row++) {
+
+					// skipping empty rows
+					if (arrData[row].length == 1 && arrData[row].length != header.length) continue;
+					
+					if(arrData[row].length == header.length) {
+						var obj = {};
+						for (var h in header){
+							obj[header[h]] = arrData[row][h];
+						}
+						objData.push(obj);
+					} else {
+						throw new Error("There's something strange at line " + (row+1) + ". Please review your data." );
+					}
+				}
+				
+				return objData;
+
+			},
+
+			parseUrl : function(url) {
+
+				var deferred = $q.defer();
+
+				$http.get(url).success(function(data){
+					deferred.resolve(data);
+				}).error(function(){
+					deferred.reject("Sorry, an error occured while fetching the data.");
+				});
+        
+				return deferred.promise;
+			},
+
+			parseColumn: parseColumn
+
+		};
+
+	}]);
+angular.module('palladio.services',
+	[	'palladio.services.date',
+		'palladio.services.spinner',
+		'palladio.services.parse',
+		'palladio.services.validation',
+		'palladio.services.export',
+		'palladio.services.data',
+		'palladio.services.date',
+		'palladio.services.load' ]);
+angular.module('palladio.services.spinner', [])
+	.factory("spinnerService", function () {
+
+		var opts = {
+			lines: 13, // The number of lines to draw
+			length: 8, // The length of each line
+			width: 4, // The line thickness
+			radius: 15, // The radius of the inner circle
+			corners: 1, // Corner roundness (0..1)
+			rotate: 0, // The rotation offset
+			direction: 1, // 1: clockwise, -1: counterclockwise
+			color: '#000', // #rgb or #rrggbb or array of colors
+			speed: 1, // Rounds per second
+			trail: 60, // Afterglow percentage
+			shadow: false, // Whether to render a shadow
+			hwaccel: false, // Whether to use hardware acceleration
+			className: 'spinner', // The CSS class to assign to the spinner
+			zIndex: 2e9 // The z-index (defaults to 2000000000)
+		};
+
+		var target, spinner;
+
+		return {
+			spin: function () {
+				if(!target) {
+					// Try to set up if we aren't already.
+					target = document.getElementById('spinner');
+					spinner = new Spinner(opts).spin();
+
+					if(target) {
+						target.appendChild(spinner.el);
+					}
+				}
+
+				if(target) $(target).show();
+				
+			},
+			hide: function () {
+				if(target) $(target).hide();
+			}
+		}
+	});
+angular.module('palladio.services.validation', [])
+
+	.factory("validationService", function() {
+		return function (uniques, type) {
+			var errors = [];
+			var dateTest = RegExp('^([-]?\\d{1,4}|[-]?\\d{1,4}[-](0[1-9]|1[012]|[1-9])[-](0[1-9]|[12][0-9]|3[01]|[1-9]))$');
+			var latlongTest = RegExp('^(\\-?\\d+(\\.\\d+)?),\\s*(\\-?\\d+(\\.\\d+)?)$');
+
+			uniques.forEach(function (d) {
+				switch (type) {
+					case 'number':
+						if(isNaN(+d)) errors.push({ value: d, message: '"' + d + '" is not a number' });
+						break;
+					case 'date':
+						if(!dateTest.test(d)) errors.push({ value: d, message: '"' + d + '" is not a date' });
+						break;
+					case 'latlong':
+						if(!latlongTest.test(d)) errors.push({ value: d, message: '"' + d + '" is not a lat/long pair'});
+						break;
+					case 'url':
+						break;
+				}
+			});
+
+			return errors;
+		};
+	});
 // Palladio data upload component
 
 angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
@@ -64430,6 +64421,7 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 
 			link: function(scope) {
 				scope.exportDataModel = function() {
+
 					// Strip autoFields, uniques, errors from all files/fields
 					var files = dataService.getFiles().map(function(f) {
 						f.autoFields = [];
@@ -64477,7 +64469,7 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 // Palladio data upload component
 
 angular.module('palladioDataUpload', ['palladio.services'])
-	.directive('palladioDataUpload', function (dataService, loadService) {
+	.directive('palladioDataUpload', function (dataService, loadService, spinnerService) {
 		var directiveObj = {
 			scope: {
 				'load': '&onLoad'
@@ -64488,9 +64480,17 @@ angular.module('palladioDataUpload', ['palladio.services'])
 			link: function(scope) {
 
 				scope.loadDataModel = function(input) {
-					loadService.load(input).then(function () {
-						scope.load();
-					});
+					spinnerService.spin();
+					var reader = new FileReader();
+					reader.onload = function() {
+						var json = JSON.parse(reader.result);
+						loadService.loadJson(json);
+						scope.$apply(function(s) { s.load(); });
+					};
+					reader.readAsText(input.files[0]);
+					// We need to clear the input so that we pick up future uploads. This is *not*
+					// cross-browser-compatible.
+					input.value = null;
 				};
 
 				scope.triggerDataModelSelector = function () {
@@ -64501,6 +64501,874 @@ angular.module('palladioDataUpload', ['palladio.services'])
 
 		return directiveObj;
 	});
+// Palladio template component module
+
+angular.module('palladioDurationView', ['palladio', 'palladio.services'])
+	.directive('palladioDurationView', function (dateService, palladioService, dataService) {
+		var directiveObj = {
+			scope: {
+				fullHeight: '@',
+				fullWidth: '@',
+				showControls: '@',
+				showAccordion: '@',
+				view: '@'
+			},
+			templateUrl: 'partials/palladio-duration-view/template.html',
+
+			link: { pre: function(scope) {
+
+					// In the pre-linking function we can use scope.data, scope.metadata, and
+					// scope.xfilter to populate any additional scope values required by the
+					// template.
+
+					// The parent scope must include the following:
+					//   scope.xfilter
+					//   scope.metadata
+
+					// If you need to do any configuration before your visualization is set up,
+					// do it here. DO NOT do anything that changes the DOM here, so don't
+					// programatically instantiate your visualization at this point. That happens
+					// in the 'post' function.
+					//
+					// You might need to do things here especially
+					// if your visualization is contained in another directive that is included
+					// in the template of this directive.
+
+					scope.uniqueToggleId = "durationView" + Math.floor(Math.random() * 10000);
+					scope.uniqueToggleHref = "#" + scope.uniqueToggleId;
+					scope.uniqueModalId = scope.uniqueToggleId + "modal";
+
+					scope.metadata = dataService.getDataSync().metadata;
+					scope.xfilter = dataService.getDataSync().xfilter;
+
+					// Take the first number dimension we find.
+					scope.durationDims = scope.metadata.filter(function (d) { return d.type === 'number'; });
+					// scope.durationDim = scope.durationDims[0];
+
+					// Label dimensions.
+					scope.labelDims = scope.metadata;
+					scope.tooltipLabelDim = scope.labelDims[0];
+					// scope.groupDim = scope.labelDims[0];
+					// scope.xGroupDim = scope.labelDims[0];
+					scope.xSortDim = scope.labelDims[0];
+
+					scope.title = "Duration view";
+
+					scope.modes = ['Constant duration'];
+					if(scope.durationDims.length > 0) scope.modes.push('Actual duration');
+					scope.mode = scope.modes[0];
+
+					scope.showDurationModal = function () {
+						$('#' + scope.uniqueModalId).find('#duration-modal').modal('show');
+					};
+
+					scope.showTooltipLabelModal = function () {
+						$('#' + scope.uniqueModalId).find('#tooltip-label-modal').modal('show');
+					};
+
+					scope.showGroupModal = function () {
+						$('#' + scope.uniqueModalId).find('#group-modal').modal('show');
+					};
+
+					scope.showXGroupModal = function () {
+						$('#' + scope.uniqueModalId).find('#x-group-modal').modal('show');
+					};
+
+					scope.showXSortModal = function () {
+						$('#' + scope.uniqueModalId).find('#x-sort-modal').modal('show');
+					};
+
+				}, post: function(scope, element) {
+
+					// If you are building a d3.js visualization, you can grab the containing
+					// element with:
+					//
+					// d3.select(element[0]);
+
+					var sel, svg, dim, group, x, y, xStart, xEnd, emitFilterText, removeFilterText,
+						topBrush, midBrush, bottomBrush, top, bottom, middle, filter, yStep, tooltip,
+						colors, bottomAxis, topAxis, yAxis;
+
+					var format = dateService.format;
+
+					// Constants...
+					var margin = 25;
+					var leftMargin = 150;
+					var width = scope.fullWidth === 'true' ? $(window).width() - margin*2 : $(window).width()*0.7;
+					var height = scope.height ? +scope.height : 200;
+					height = scope.fullHeight === 'true' ? $(window).height()-200 : height;
+					var filterColor = '#9DBCE4';
+
+					setup();
+					update();
+
+					function setup() {
+						// Check necessary fields are selected.
+						if(!scope.tooltipLabelDim ||
+							!scope.groupDim ||
+							!scope.xGroupDim ||
+							!scope.xSortDim ||
+							(scope.mode === 'Actual duration' && !scope.durationDim)) {
+
+							return false;
+						}
+
+						sel = d3.select(d3.select(element[0]).select(".main-viz")[0][0].children[0]);
+						if(!sel.select('svg').empty()) sel.select('svg').remove();
+						svg = sel.append('svg');
+
+						sel.attr('width', width + margin*2);
+						sel.attr('height', height + margin*2);
+
+						svg.attr('width', width + margin*2);
+						svg.attr('height', height + margin*2);
+
+						if(dim) dim.remove();
+
+						dim = scope.xfilter.dimension(function(d) { return "" + d[scope.groupDim.key]; });
+
+						// For now we keep the grouping simple and just do a naive count. To enable
+						// 'countBy' functionality we need to use the Crossfilter helpers or Reductio.
+						group = dim.group();
+
+						// Use reductio value-lists to track the xGroup for each group.
+						var reducer = reductio().count(true)
+							.nest([function(d) { return d[scope.xGroupDim.key]; }]);
+
+						if(scope.mode === 'Actual duration') {
+							reducer.sum(function(d) { return +d[scope.durationDim.key]; });
+						}
+
+						reducer(group);
+
+						// Scales
+						x = d3.scale.linear().range([0, width - leftMargin]);
+						setXDomain();
+						y = d3.scale.ordinal().rangeBands([height, 0], 0.2)
+								.domain(group.top(Infinity)
+									.filter(function (d) {
+										return d.value.count !== 0;
+									}).map(function(d) { return d.key; }));
+
+						colors = d3.scale.ordinal()
+							.range(colorbrewer.Greys[9])
+							.domain(scope.xGroupDim.uniques);
+
+						bottomAxis = d3.svg.axis().orient("bottom").scale(x);
+						topAxis = d3.svg.axis().orient("top").scale(x);
+						yAxis = d3.svg.axis().orient("left").scale(y);
+
+						// Build the visualization.
+						var g = svg.append('g')
+								.attr("transform", "translate(" + leftMargin + "," + margin + ")");
+
+						bottom = g.append('g')
+							.attr("class", "axis x-axis x-bottom")
+							.attr("transform", "translate(" + 0 + "," + (height) + ")")
+							.call(bottomAxis);
+
+						top = g.append('g')
+							.attr("class", "axis x-axis x-top")
+							.call(topAxis);
+
+						left = g.append('g')
+							.attr("class", "axis y-axis")
+							.call(yAxis);
+
+						tooltip = g.select(".duration-tooltip");
+						// Set up the tooltip.
+						if(tooltip.empty()) {
+							tooltip = g.append("g")
+									.attr("class", "duration-tooltip")
+									.attr("pointer-events", "none")
+									.style("display", "none");
+
+							tooltip.append("foreignObject")
+									.attr("width", 100)
+									.attr("height", 26)
+									.attr("pointer-events", "none")
+								.append("html")
+									.style("background-color", "rgba(0,0,0,0)")
+								.append("div")
+									.style("padding-left", 3)
+									.style("padding-right", 3)
+									.style("text-align", "center")
+									.style("white-space", "nowrap")
+									.style("overflow", "hidden")
+									.style("text-overflow", "ellipsis")
+									.style("border-radius", "5px")
+									.style("background-color", "white")
+									.style("border", "3px solid grey");
+						}
+					}
+
+					function update() {
+						// Check necessary fields are selected.
+						if(!scope.tooltipLabelDim ||
+							!scope.groupDim ||
+							!scope.xGroupDim ||
+							!scope.xSortDim ||
+							(scope.mode === 'Actual duration' && !scope.durationDim)) {
+
+							return false;
+						}
+
+						// Update the x-scale and x-axes
+						setXDomain();
+						bottomAxis.scale(x);
+						topAxis.scale(x);
+						svg.select('.x-bottom').call(bottomAxis);
+						svg.select('.x-top').call(topAxis);
+
+						var groups = svg.select('g').selectAll('.duration-group')
+							.data(group.top(Infinity)
+									.filter(function (d) {
+										return d.value.count !== 0;
+									}),
+								function (d) { return d.key; });
+
+						groups.exit().remove();
+
+						groups.enter()
+								.append('g')
+									.attr('class', 'duration-group')
+									.attr('transform', function(d) {
+										return 'translate(1,' + y(d.key) + ')';
+									});
+
+						var constantDuration = scope.mode === 'Constant duration';
+						var rectWidth = x(1) - x(0);
+
+						function calcWidth(d) {
+							return constantDuration ?
+								rectWidth :
+								(isNaN(+d[scope.durationDim.key]) ?
+									0 :
+									x(+d[scope.durationDim.key]));
+						}
+
+						var rects = groups.selectAll('.duration-bar')
+							.data(function(d, i) {
+								var total = 0;
+
+								// Flatten to basic records
+								return d.value.nest.map(function(n) {
+									return n.values;
+								}).reduce(function(a, b) {
+									return a.concat(b);
+								}).sort(function(a, b) {
+									return d3.ascending(a[scope.xSortDim.key], b[scope.xSortDim.key]);
+								}).map(function(d) {
+									total = total + calcWidth(d);
+									// Build object with information needed to visualize
+									return {
+										name: d[scope.xGroupDim.key],
+										group: i,
+										x: calcWidth(d),
+										offset: (total - calcWidth(d))
+									};
+								});
+							}, function(d, i) { return d.name + '-' + d.group + '-' + i; });
+
+						rects.exit().remove();
+
+						rects.enter()
+								.append('rect')
+									.attr('height', y.rangeBand())
+									.attr('class', 'duration-bar');
+
+						rects
+							.attr('width', function(d) { return d.x ? d.x : 0; })
+							.attr('fill', function(d) { return colors(d.name); })
+							.attr('stroke', function(d) { return colors(d.name); })
+							.attr('transform', function(d) { return 'translate(' + (d.offset ? d.offset : 0) + ',0)'; })
+							.tooltip(function (d){
+								return {
+									text : d.name,
+									displacement : [0,20],
+									position: [0,0],
+									gravity: "right",
+									placement: "mouse",
+									mousemove : true
+								};
+							});
+					}
+
+					function setXDomain() {
+						if(scope.mode === 'Actual duration') {
+							x.domain([ 0, d3.max(group.top(Infinity), function (d) { return d.value.sum; }) ]);
+						} else {
+							x.domain([ 0, d3.max(group.top(Infinity), function (d) { return d.value.count; }) ]);
+						}
+					}
+
+					function reset() {
+						if(dim) {
+							group.remove();
+							dim.remove();
+							svg.remove();
+						}
+					}
+
+					scope.filterReset = function () {
+						reset();
+						setup();
+						update();
+					};
+
+					scope.$watchGroup(['mode', 'durationDim', 'tooltipLabelDim', 'groupDim', 'xGroupDim', 'xSortDim'], function () {
+						reset();
+						setup();
+						update();
+					});
+
+					//
+					// If you are going to programatically instantiate your visualization, do it
+					// here. Your visualization should emit the following events if necessary:
+					//
+					// For new/changed filters:
+					//
+					// scope.$emit('updateFilter', [identifier, description, filter, callback]);
+					//
+					// For removing all filters:
+					//
+					// scope.$emit('updateFilter', [identifier, null]);
+					//
+					// If you apply a filter in this component, notify the Palladio framework.
+					//
+					// identifier: A string unique to this instance of this component. Should
+					//             be randomly generated.
+					//
+					// description: A human-readable description of this component. Should be
+					//              unique to this instance of this component, but not required.
+					//
+					// filter: A human-readable description of the filter that is currently
+					//         applied on this component.
+					//
+					// callback: A function that will remove all filters on this component when
+					//           it is evaluated.
+					//
+					//
+					// Whenever the component needs to trigger an update for all other components
+					// in the application (for example, when a filter is applied or removed):
+					//
+					// scope.$emit('triggerUpdate');
+
+					var deregister = [];
+
+					// You should also handle the following externally triggered events:
+
+					deregister.push(palladioService.onReset(scope.uniqueToggleId, function() {
+
+						// Reset any filters that have been applied through this visualization.
+						// This means running .filterAll() on any Crossfilter dimensions you have
+						// created and updating your visualization as required.
+
+						scope.filterReset();
+
+					}));
+
+					deregister.push(palladioService.onUpdate(scope.uniqueToggleId, function() {
+						// Only update if the table is visible.
+						if(element.is(':visible')) { update(); }
+					}));
+
+					// Update when it becomes visible (updating when not visibile errors out)
+					scope.$watch(function() { return element.is(':visible'); }, update);
+
+					scope.$on('$destroy', function () {
+
+						// Clean up after yourself. Remove dimensions that we have created. If we
+						// created watches on another scope, destroy those as well.
+
+						if(dim) {
+							group.remove();
+							dim.remove();
+							dim = undefined;
+						}
+						deregister.forEach(function(f) { f(); });
+						deregister = [];
+
+					});
+
+
+					// Support save/load. These functions should be able to fully recreate an instance
+					// of this visualization based on the results of the exportState() function. Include
+					// current filters, any type of manipulations the user has done, etc.
+
+					function importState(state) {
+
+						// Load a state object created by exportState().
+						scope.title = state.title;
+						scope.durationDim = scope.durationDims.filter(function(d) { return d.key === state.durationDim; })[0];
+						scope.tooltipLabelDim = scope.labelDims.filter(function(d) { return d.key === state.tooltipLabelDim; })[0];
+						scope.groupDim = scope.labelDims.filter(function(d) { return d.key === state.groupDim; })[0];
+						scope.xGroupDim = scope.labelDims.filter(function(d) { return d.key === state.xGroupDim; })[0];
+						scope.xSortDim = scope.labelDims.filter(function(d) { return d.key === state.xSortDim; })[0];
+
+						scope.mode = state.mode;
+
+					}
+
+					function exportState() {
+
+						// Return a state object that can be consumed by importState().
+						return {
+							title: scope.title,
+							durationDim: scope.durationDim.key,
+							tooltipLabelDim: scope.tooltipLabelDim.key,
+							groupDim: scope.groupDim.key,
+							xGroupDim: scope.xGroupDim.key,
+							xSortDim: scope.xSortDim.key,
+							mode: scope.mode
+						};
+					}
+
+					deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'duration', exportState, importState));
+
+					// Move the modal out of the fixed area.
+					$(element[0]).find('#duration-modal').parent().appendTo('body');
+
+					// Set up the toggle if in view state.
+					if(scope.view === 'true') {
+						$(document).ready(function(){
+							$(element[0]).find('.toggle').click(function() {
+								$(element[0]).find('.settings').toggleClass('open close');
+							});
+						});
+					}
+				}
+			}
+		};
+
+		return directiveObj;
+	});
+
+angular.module('palladioGraphView', ['palladio.services', 'palladio'])
+	// Palladio Timechart View
+	.directive('palladioGraphView', function (palladioService) {
+
+		return {
+
+			scope : {
+				linkDimension: '=',
+				showLinks: '=',
+				showLabels: '=',
+				nodeSize: '=',
+				// circleLayout: '=',
+				highlightSource: '=',
+				highlightTarget: '=',
+				countBy : '@',
+				countDescription: '@',
+				aggregationType: '@',
+				aggregateKey: '@',
+				readInternalState: '=',
+				setInternalState: '=',
+				getSvg: '='
+			},
+
+			link: function (scope, element, attrs) {
+
+				var deregister = [];
+				var uniqueId = "graphView" + Math.floor(Math.random() * 10000);
+
+				scope.readInternalState = function (state) {
+					// Placeholder
+					state.fixedNodes = chart.fixedNodes();
+					return state;
+				};
+
+				scope.setInternalState = function (state) {
+					chart.fixedNodes(state.fixedNodes);
+					return state;
+				};
+
+				scope.getSvg = function () {
+					return chart.getSvg();
+				};
+
+				var search = "";
+
+				var width = element.width() || 1000,
+					height = element.height() || 800;
+
+				var canvas = d3.select(element[0])
+					.append('canvas')
+						.attr('style', 'position: absolute; left: 0; top: 0; z-index: -100');
+
+				var svg = d3.select(element[0])
+					.append('svg:svg')
+					.attr("pointer-events", "all");
+
+				var chart = d3.graph();
+
+				var linkGroup = null;
+
+				function update() {
+
+					if (!scope.linkDimension) return;
+
+					chart
+						.width(width)
+						.height(height)
+						.showLinks(scope.showLinks)
+						.showLabels(scope.showLabels)
+						.nodeSize(scope.nodeSize)
+						.searchText(search)
+						.circle(scope.circleLayout);
+
+					canvas
+						.attr('width', width)
+      					.attr('height', height);
+
+					svg
+						.attr('width', width)
+						.attr('height', height)
+						.datum(links())
+						.call(chart);
+
+					if(scope.highlightSource) chart.highlightSource();
+					if(scope.highlightTarget) chart.highlightTarget();
+
+				}
+
+				function links() {
+
+					if(!linkGroup) {
+
+						var helpers = crossfilterHelpers.countByDimensionWithInitialCountAndData(
+							function(v) { return v[scope.countBy]; },
+							// This function sets up the 'data' attribute of each link
+							function (d, p, t) {
+								if(p === undefined) {
+									p = {
+										source: scope.linkDimension.accessor(d)[0],
+										target: scope.linkDimension.accessor(d)[1],
+										data: d,
+										agg: 0,
+										initialAgg: 0
+									};
+								}
+								if(t === 'add') {
+									// Adding a new record.
+									if(scope.aggregationType === 'COUNT') {
+										p.agg++;
+									} else {
+										p.agg = p.agg + (+d[scope.aggregateKey] ? +d[scope.aggregateKey] : 0); // Make sure to cast or you end up with a String!!!
+									}
+									if(p.agg > p.initialAgg) p.initialAgg = p.agg;
+								} else {
+									// Removing a record.
+									if(scope.aggregationType === 'COUNT') {
+										p.agg--;
+									} else {
+										p.agg = p.agg - (+d[scope.aggregateKey] ? +d[scope.aggregateKey] : 0); // Make sure to cast or you end up with a String!!!
+									}
+								}
+								return p;
+							}
+						);
+
+						linkGroup = scope.linkDimension.group().reduce(
+							helpers.add,
+							helpers.remove,
+							helpers.init
+						).order(function (a) { return a.data.agg; });
+					}
+
+					return linkGroup
+						.top(Infinity)
+						.map(function (d) { return d.value; })
+						// If we want to show 0-count nodes, remove this line.
+						// But we need to do something to indicate the 0-count state in d3.graph.js
+						.filter(function (d) { return d.data.agg > 0; });
+				}
+
+				scope.$on('zoomIn', function(){
+					chart.zoomIn();
+				});
+
+				scope.$on('zoomOut', function(){
+					chart.zoomOut();
+				});
+
+				// update on xfilters events
+				deregister.push(palladioService.onUpdate(uniqueId, function() {
+					// Only update if the table is visible.
+					if(element.is(':visible')) { update(); }
+				}));
+
+				// Update when it becomes visible (updating when not visibile errors out)
+				scope.$watch(function() { return element.is(':visible'); }, update);
+
+				scope.$on('resetNodes', function() {
+					chart.resetNodes();
+				});
+				scope.$watch('linkDimension', function() {
+					chart.reset();
+					if(linkGroup) {
+						linkGroup.remove();
+						linkGroup = null;
+					}
+					update();
+				});
+
+				scope.$watchGroup(['countBy', 'aggregationType',
+					'aggregationKey'], function() {
+					chart.reset();
+					if(linkGroup) {
+						linkGroup.remove();
+						linkGroup = null;
+					}
+					update();
+				});
+
+				scope.$watch('showLinks', update);
+				scope.$watch('showLabels', update);
+				scope.$watch('nodeSize', update);
+				deregister.push(palladioService.onSearch(uniqueId, function(text) { search = text; update(); }));
+				scope.$watch('circleLayout', update);
+				scope.$watch('highlightSource', function (nv, ov) {
+					if(nv !== ov) {
+						if(nv) {
+							scope.highlightTarget = false;
+							chart.highlightSource();
+						} else {
+							if(!scope.highlightTarget) chart.removeHighlight();
+						}
+					}
+				});
+				scope.$watch('highlightTarget', function (nv, ov) {
+					if(nv !== ov) {
+						if(nv) {
+							scope.highlightSource = false;
+							chart.highlightTarget();
+						} else {
+							if(!scope.highlightSource) chart.removeHighlight();
+						}
+					}
+				});
+
+				scope.$on("resize", function(){
+					width = element.width();
+					update();
+				});
+
+				function refresh() {
+					element.height($(window).height());
+				}
+
+				$(document).ready(refresh);
+				$(window).resize(refresh);
+
+			}
+
+		};
+	})
+
+	// Palladio Timechart View with Settings
+	.directive('palladioGraphViewWithSettings', function (exportService, palladioService, dataService) {
+
+		return {
+			scope: true,
+
+			templateUrl : 'partials/palladio-graph-view/template.html',
+
+			link : {
+
+				pre: function (scope, element, attrs) {
+
+					var deregister = [];
+
+					scope.metadata = dataService.getDataSync().metadata;
+					scope.xfilter = dataService.getDataSync().xfilter;
+
+					scope.uniqueToggleId = "graphView" + Math.floor(Math.random() * 10000);
+					scope.uniqueModalId = scope.uniqueToggleId + "modal";
+
+					scope.fields = scope.metadata.sort(function (a, b) { return a.description < b.description ? -1 : 1; });
+
+					scope.dateFields = scope.metadata.filter(function (d) { return d.type === 'date'; });
+
+					scope.mapping = {};
+
+					scope.nodeSize = false;
+					scope.showLabels = true;
+					scope.circleLayout = false;
+
+					scope.highlightSource = false;
+					scope.highlightTarget = false;
+
+					scope.showLinks = true;
+
+					// Set up aggregation selection.
+					scope.getAggDescription = function (field) {
+						if(field.type === 'count') {
+							return 'Number of ' + field.field.countDescription;
+						} else {
+							return 'Sum of ' + field.field.description + ' (from ' + countDims.get(field.fileId).countDescription + ' table)';
+						}
+					};
+
+					var countDims = d3.map();
+						scope.metadata.filter(function (d) { return d.countable === true; })
+							.forEach(function (d) {
+								countDims.set(d.originFileId ? d.originFileId : 0, d);
+							});
+
+					scope.aggDims = scope.metadata.filter(function (d) { return d.countable === true || d.type === 'number'; })
+							.map(function (a) {
+								return {
+									key: a.key,
+									type: a.countable ? 'count' : 'sum',
+									field: a,
+									fileId: a.originFileId ? a.originFileId : 0
+								};
+							})
+							.sort(function (a, b) { return scope.getAggDescription(a) < scope.getAggDescription(b) ? -1 : 1; });
+
+
+					scope.aggDim = scope.aggDims[0];
+					scope.$watch('aggDim', function () {
+						// scope.countBy = scope.aggDim ? scope.countDim.key : scope.countBy;
+						if(!scope.aggDim) {
+							// No aggregation selected - just choose the first one
+							scope.countBy = scope.countDims.get(0).key;
+						} else {
+							// We figure out the unique aggregation dimension based on aggDim
+							if(scope.aggDim.type === 'count') {
+								scope.countBy = scope.aggDim.key;
+								scope.aggregationType = 'COUNT';
+								scope.aggregateKey = null;
+								scope.aggDescription = scope.getAggDescription(scope.aggDim);
+							} else {
+								// We are summing
+								scope.countBy = countDims.get(scope.aggDim.fileId).key;
+								scope.aggregationType = 'SUM';
+								scope.aggregateKey = scope.aggDim.key;
+								scope.aggDescription = scope.getAggDescription(scope.aggDim);
+							}
+						}
+					});
+					scope.showAggModal = function () { $('#' + scope.uniqueModalId).find('#agg-modal').modal('show'); };
+
+					scope.$watch('mapping.sourceDimension', function(){
+						updateLinkDimension();
+					});
+
+					scope.$watch('mapping.targetDimension', function(){
+						updateLinkDimension();
+					});
+
+					function updateLinkDimension() {
+						var sourceAccessor = !scope.mapping.sourceDimension ? null : function(d) { return d[scope.mapping.sourceDimension.key]; };
+						var targetAccessor = !scope.mapping.targetDimension ? null : function(d) { return d[scope.mapping.targetDimension.key]; };
+						if(scope.linkDimension) scope.linkDimension.remove();
+						if(scope.mapping.sourceDimension && scope.mapping.targetDimension) {
+							scope.linkDimension = scope.xfilter.dimension(function(d) { return [ sourceAccessor(d), targetAccessor(d) ]; });
+						}
+					}
+
+					// Clean up after ourselves. Remove dimensions that we have created. If we
+					// created watches on another scope, destroy those as well.
+					scope.$on('$destroy', function () {
+						if(scope.linkDimension) scope.linkDimension.remove();
+						deregister.forEach(function (f) { f(); });
+					});
+
+					scope.resetNodes = function () {
+						scope.$broadcast('resetNodes');
+					};
+
+					scope.showSourceModal = function(){
+						$('#source-modal').modal('show');
+					};
+
+					scope.showTargetModal = function(){
+						$('#target-modal').modal('show');
+					};
+
+					scope.clearDimensions = function () {
+						scope.mapping.sourceDimension = null;
+						scope.mapping.targetDimension = null;
+					};
+
+					scope.zoomIn = function(){
+						scope.$broadcast('zoomIn');
+					};
+
+					scope.zoomOut = function(){
+						scope.$broadcast('zoomOut');
+					};
+
+					// State save/load.
+
+					scope.setInternalState = function (state) {
+						// Placeholder
+						return state;
+					};
+
+					// Add internal state to the state.
+					scope.readInternalState = function (state) {
+						// Placeholder
+						return state;
+					};
+
+					scope.getSvg = function () {
+						// Placeholder
+						return {};
+					}
+
+					scope.exportSvg = function(source, title){
+						exportService(scope.getSvg(), title);
+					};
+
+					function importState(state) {
+						scope.showLinks = state.showLinks;
+						scope.showLabels = state.showLabels;
+						scope.nodeSize = state.nodeSize;
+						scope.highlightSource = state.highlightSource;
+						scope.highlightTarget = state.highlightTarget;
+						scope.countDim = state.countDim;
+						scope.mapping.sourceDimension = scope.fields.filter(function(f) { return f.key === state.sourceDimension; })[0];
+						scope.mapping.targetDimension = scope.fields.filter(function(f) { return f.key === state.targetDimension; })[0];
+						if(state.aggDimKey) scope.aggDim = scope.aggDims.filter(function(f) { return f.key === state.aggDimKey; })[0];
+
+						scope.$digest();
+
+						scope.setInternalState(state);
+					}
+
+					function exportState() {
+						return scope.readInternalState({
+							showLinks: scope.showLinks,
+							showLabels: scope.showLabels,
+							aggregateKey: scope.aggregateKey,
+							aggregationType: scope.aggregationType,
+							nodeSize: scope.nodeSize,
+							highlightSource: scope.highlightSource,
+							highlightTarget: scope.highlightTarget,
+							countDim: scope.countDim,
+							aggDimKey: scope.aggDim.key,
+							sourceDimension: scope.mapping.sourceDimension ? scope.mapping.sourceDimension.key : null,
+							targetDimension: scope.mapping.targetDimension ? scope.mapping.targetDimension.key : null
+						});
+					}
+
+					deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'graphView', exportState, importState));
+
+				},
+
+				post: function(scope, element, attrs) {
+					$(element).find('.toggle').on("click", function() {
+						element.find('.settings').toggleClass('open close');
+					});
+				}
+			}
+
+		};
+	});
+
 function elastic_list() {
 
   // Colors from colorbrewer2.org
@@ -65591,431 +66459,6 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 			}
 		};
 	});
-angular.module('palladioGraphView', ['palladio.services', 'palladio'])
-	// Palladio Timechart View
-	.directive('palladioGraphView', function (palladioService) {
-
-		return {
-
-			scope : {
-				linkDimension: '=',
-				showLinks: '=',
-				showLabels: '=',
-				nodeSize: '=',
-				// circleLayout: '=',
-				highlightSource: '=',
-				highlightTarget: '=',
-				countBy : '@',
-				countDescription: '@',
-				aggregationType: '@',
-				aggregateKey: '@',
-				readInternalState: '=',
-				setInternalState: '=',
-				getSvg: '='
-			},
-
-			link: function (scope, element, attrs) {
-
-				var deregister = [];
-				var uniqueId = "graphView" + Math.floor(Math.random() * 10000);
-
-				scope.readInternalState = function (state) {
-					// Placeholder
-					state.fixedNodes = chart.fixedNodes();
-					return state;
-				};
-
-				scope.setInternalState = function (state) {
-					chart.fixedNodes(state.fixedNodes);
-					return state;
-				};
-
-				scope.getSvg = function () {
-					return chart.getSvg();
-				};
-
-				var search = "";
-
-				var width = element.width() || 1000,
-					height = element.height() || 800;
-
-				var canvas = d3.select(element[0])
-					.append('canvas')
-						.attr('style', 'position: absolute; left: 0; top: 0; z-index: -100');
-
-				var svg = d3.select(element[0])
-					.append('svg:svg')
-					.attr("pointer-events", "all");
-
-				var chart = d3.graph();
-
-				var linkGroup = null;
-
-				function update() {
-
-					if (!scope.linkDimension) return;
-
-					chart
-						.width(width)
-						.height(height)
-						.showLinks(scope.showLinks)
-						.showLabels(scope.showLabels)
-						.nodeSize(scope.nodeSize)
-						.searchText(search)
-						.circle(scope.circleLayout);
-
-					canvas
-						.attr('width', width)
-      					.attr('height', height);
-
-					svg
-						.attr('width', width)
-						.attr('height', height)
-						.datum(links())
-						.call(chart);
-
-					if(scope.highlightSource) chart.highlightSource();
-					if(scope.highlightTarget) chart.highlightTarget();
-
-				}
-
-				function links() {
-
-					if(!linkGroup) {
-
-						var helpers = crossfilterHelpers.countByDimensionWithInitialCountAndData(
-							function(v) { return v[scope.countBy]; },
-							// This function sets up the 'data' attribute of each link
-							function (d, p, t) {
-								if(p === undefined) {
-									p = {
-										source: scope.linkDimension.accessor(d)[0],
-										target: scope.linkDimension.accessor(d)[1],
-										data: d,
-										agg: 0,
-										initialAgg: 0
-									};
-								}
-								if(t === 'add') {
-									// Adding a new record.
-									if(scope.aggregationType === 'COUNT') {
-										p.agg++;
-									} else {
-										p.agg = p.agg + (+d[scope.aggregateKey] ? +d[scope.aggregateKey] : 0); // Make sure to cast or you end up with a String!!!
-									}
-									if(p.agg > p.initialAgg) p.initialAgg = p.agg;
-								} else {
-									// Removing a record.
-									if(scope.aggregationType === 'COUNT') {
-										p.agg--;
-									} else {
-										p.agg = p.agg - (+d[scope.aggregateKey] ? +d[scope.aggregateKey] : 0); // Make sure to cast or you end up with a String!!!
-									}
-								}
-								return p;
-							}
-						);
-
-						linkGroup = scope.linkDimension.group().reduce(
-							helpers.add,
-							helpers.remove,
-							helpers.init
-						).order(function (a) { return a.data.agg; });
-					}
-
-					return linkGroup
-						.top(Infinity)
-						.map(function (d) { return d.value; })
-						// If we want to show 0-count nodes, remove this line.
-						// But we need to do something to indicate the 0-count state in d3.graph.js
-						.filter(function (d) { return d.data.agg > 0; });
-				}
-
-				scope.$on('zoomIn', function(){
-					chart.zoomIn();
-				});
-
-				scope.$on('zoomOut', function(){
-					chart.zoomOut();
-				});
-
-				// update on xfilters events
-				deregister.push(palladioService.onUpdate(uniqueId, function() {
-					// Only update if the table is visible.
-					if(element.is(':visible')) { update(); }
-				}));
-
-				// Update when it becomes visible (updating when not visibile errors out)
-				scope.$watch(function() { return element.is(':visible'); }, update);
-
-				scope.$on('resetNodes', function() {
-					chart.resetNodes();
-				});
-				scope.$watch('linkDimension', function() {
-					chart.reset();
-					if(linkGroup) {
-						linkGroup.remove();
-						linkGroup = null;
-					}
-					update();
-				});
-
-				scope.$watchGroup(['countBy', 'aggregationType',
-					'aggregationKey'], function() {
-					chart.reset();
-					if(linkGroup) {
-						linkGroup.remove();
-						linkGroup = null;
-					}
-					update();
-				});
-
-				scope.$watch('showLinks', update);
-				scope.$watch('showLabels', update);
-				scope.$watch('nodeSize', update);
-				deregister.push(palladioService.onSearch(uniqueId, function(text) { search = text; update(); }));
-				scope.$watch('circleLayout', update);
-				scope.$watch('highlightSource', function (nv, ov) {
-					if(nv !== ov) {
-						if(nv) {
-							scope.highlightTarget = false;
-							chart.highlightSource();
-						} else {
-							if(!scope.highlightTarget) chart.removeHighlight();
-						}
-					}
-				});
-				scope.$watch('highlightTarget', function (nv, ov) {
-					if(nv !== ov) {
-						if(nv) {
-							scope.highlightSource = false;
-							chart.highlightTarget();
-						} else {
-							if(!scope.highlightSource) chart.removeHighlight();
-						}
-					}
-				});
-
-				scope.$on("resize", function(){
-					width = element.width();
-					update();
-				});
-
-				function refresh() {
-					element.height($(window).height());
-				}
-
-				$(document).ready(refresh);
-				$(window).resize(refresh);
-
-			}
-
-		};
-	})
-
-	// Palladio Timechart View with Settings
-	.directive('palladioGraphViewWithSettings', function (exportService, palladioService, dataService) {
-
-		return {
-			scope: true,
-
-			templateUrl : 'partials/palladio-graph-view/template.html',
-
-			link : {
-
-				pre: function (scope, element, attrs) {
-
-					var deregister = [];
-
-					scope.metadata = dataService.getDataSync().metadata;
-					scope.xfilter = dataService.getDataSync().xfilter;
-
-					scope.uniqueToggleId = "graphView" + Math.floor(Math.random() * 10000);
-					scope.uniqueModalId = scope.uniqueToggleId + "modal";
-
-					scope.fields = scope.metadata.sort(function (a, b) { return a.description < b.description ? -1 : 1; });
-
-					scope.dateFields = scope.metadata.filter(function (d) { return d.type === 'date'; });
-
-					scope.mapping = {};
-
-					scope.nodeSize = false;
-					scope.showLabels = true;
-					scope.circleLayout = false;
-
-					scope.highlightSource = false;
-					scope.highlightTarget = false;
-
-					scope.showLinks = true;
-
-					// Set up aggregation selection.
-					scope.getAggDescription = function (field) {
-						if(field.type === 'count') {
-							return 'Number of ' + field.field.countDescription;
-						} else {
-							return 'Sum of ' + field.field.description + ' (from ' + countDims.get(field.fileId).countDescription + ' table)';
-						}
-					};
-
-					var countDims = d3.map();
-						scope.metadata.filter(function (d) { return d.countable === true; })
-							.forEach(function (d) {
-								countDims.set(d.originFileId ? d.originFileId : 0, d);
-							});
-
-					scope.aggDims = scope.metadata.filter(function (d) { return d.countable === true || d.type === 'number'; })
-							.map(function (a) {
-								return {
-									key: a.key,
-									type: a.countable ? 'count' : 'sum',
-									field: a,
-									fileId: a.originFileId ? a.originFileId : 0
-								};
-							})
-							.sort(function (a, b) { return scope.getAggDescription(a) < scope.getAggDescription(b) ? -1 : 1; });
-
-
-					scope.aggDim = scope.aggDims[0];
-					scope.$watch('aggDim', function () {
-						// scope.countBy = scope.aggDim ? scope.countDim.key : scope.countBy;
-						if(!scope.aggDim) {
-							// No aggregation selected - just choose the first one
-							scope.countBy = scope.countDims.get(0).key;
-						} else {
-							// We figure out the unique aggregation dimension based on aggDim
-							if(scope.aggDim.type === 'count') {
-								scope.countBy = scope.aggDim.key;
-								scope.aggregationType = 'COUNT';
-								scope.aggregateKey = null;
-								scope.aggDescription = scope.getAggDescription(scope.aggDim);
-							} else {
-								// We are summing
-								scope.countBy = countDims.get(scope.aggDim.fileId).key;
-								scope.aggregationType = 'SUM';
-								scope.aggregateKey = scope.aggDim.key;
-								scope.aggDescription = scope.getAggDescription(scope.aggDim);
-							}
-						}
-					});
-					scope.showAggModal = function () { $('#' + scope.uniqueModalId).find('#agg-modal').modal('show'); };
-
-					scope.$watch('mapping.sourceDimension', function(){
-						updateLinkDimension();
-					});
-
-					scope.$watch('mapping.targetDimension', function(){
-						updateLinkDimension();
-					});
-
-					function updateLinkDimension() {
-						var sourceAccessor = !scope.mapping.sourceDimension ? null : function(d) { return d[scope.mapping.sourceDimension.key]; };
-						var targetAccessor = !scope.mapping.targetDimension ? null : function(d) { return d[scope.mapping.targetDimension.key]; };
-						if(scope.linkDimension) scope.linkDimension.remove();
-						if(scope.mapping.sourceDimension && scope.mapping.targetDimension) {
-							scope.linkDimension = scope.xfilter.dimension(function(d) { return [ sourceAccessor(d), targetAccessor(d) ]; });
-						}
-					}
-
-					// Clean up after ourselves. Remove dimensions that we have created. If we
-					// created watches on another scope, destroy those as well.
-					scope.$on('$destroy', function () {
-						if(scope.linkDimension) scope.linkDimension.remove();
-						deregister.forEach(function (f) { f(); });
-					});
-
-					scope.resetNodes = function () {
-						scope.$broadcast('resetNodes');
-					};
-
-					scope.showSourceModal = function(){
-						$('#source-modal').modal('show');
-					};
-
-					scope.showTargetModal = function(){
-						$('#target-modal').modal('show');
-					};
-
-					scope.clearDimensions = function () {
-						scope.mapping.sourceDimension = null;
-						scope.mapping.targetDimension = null;
-					};
-
-					scope.zoomIn = function(){
-						scope.$broadcast('zoomIn');
-					};
-
-					scope.zoomOut = function(){
-						scope.$broadcast('zoomOut');
-					};
-
-					// State save/load.
-
-					scope.setInternalState = function (state) {
-						// Placeholder
-						return state;
-					};
-
-					// Add internal state to the state.
-					scope.readInternalState = function (state) {
-						// Placeholder
-						return state;
-					};
-
-					scope.getSvg = function () {
-						// Placeholder
-						return {};
-					}
-
-					scope.exportSvg = function(source, title){
-						exportService(scope.getSvg(), title);
-					};
-
-					function importState(state) {
-						scope.showLinks = state.showLinks;
-						scope.showLabels = state.showLabels;
-						scope.nodeSize = state.nodeSize;
-						scope.highlightSource = state.highlightSource;
-						scope.highlightTarget = state.highlightTarget;
-						scope.countDim = state.countDim;
-						scope.mapping.sourceDimension = scope.fields.filter(function(f) { return f.key === state.sourceDimension; })[0];
-						scope.mapping.targetDimension = scope.fields.filter(function(f) { return f.key === state.targetDimension; })[0];
-						if(state.aggDimKey) scope.aggDim = scope.aggDims.filter(function(f) { return f.key === state.aggDimKey; })[0];
-
-						scope.$digest();
-
-						scope.setInternalState(state);
-					}
-
-					function exportState() {
-						return scope.readInternalState({
-							showLinks: scope.showLinks,
-							showLabels: scope.showLabels,
-							aggregateKey: scope.aggregateKey,
-							aggregationType: scope.aggregationType,
-							nodeSize: scope.nodeSize,
-							highlightSource: scope.highlightSource,
-							highlightTarget: scope.highlightTarget,
-							countDim: scope.countDim,
-							aggDimKey: scope.aggDim.key,
-							sourceDimension: scope.mapping.sourceDimension ? scope.mapping.sourceDimension.key : null,
-							targetDimension: scope.mapping.targetDimension ? scope.mapping.targetDimension.key : null
-						});
-					}
-
-					deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'graphView', exportState, importState));
-
-				},
-
-				post: function(scope, element, attrs) {
-					$(element).find('.toggle').on("click", function() {
-						element.find('.settings').toggleClass('open close');
-					});
-				}
-			}
-
-		};
-	});
-
 // List view module
 
 angular.module('palladioListView', ['palladio', 'palladio.services'])
@@ -66401,8 +66844,202 @@ angular.module('palladioListView', ['palladio', 'palladio.services'])
 	});
 // Palladio template component module
 
-angular.module('palladioDurationView', ['palladio', 'palladio.services'])
-	.directive('palladioDurationView', function (dateService, palladioService, dataService) {
+angular.module('palladioPalette', ['palladio', 'palladio.services']) // Rename this.
+	.directive('palladioPalette', function (palladioService, dataService, $location) { // Rename this.
+		var directiveObj = {
+			scope: true,
+			templateUrl: 'partials/palladio-palette/template.html', // Change this string to update the
+			// template. Don't use a templateUrl, as you won't have control over the relative
+			// URL where this template is deployed.
+
+			link: { pre: function(scope, element, attrs) {
+
+					var metadata;
+					scope.fields = [];
+
+					function loadMetadata() {
+						metadata = dataService.getDataSync().metadata;
+
+						if(metadata) {
+
+							scope.fields = metadata
+								// Only display 'countable' (entity) dimensions at first.
+								.filter(function (d) {
+									return d.countable === true;
+								})
+								.sort(function (a, b) { return a.description < b.description ? -1 : 1; })
+								// Copy them, set their descriptions to be the table names, and populate
+								// their property dimensions.
+								.map(function(f) {
+									var newField = stripDimension(f);
+
+									newField.propertyDimensions = metadata
+										.filter(function (d) { return d.originFileId === newField.originFileId; })
+										.map(function (d) { return stripDimension(d); });
+
+									newField.description = newField.countDescription;
+									
+									// Only keep the basic properties on the dimension that we need.
+									return newField;
+								});
+						} else {
+							scope.fields = [];
+						}
+					}
+
+					function stripDimension(dim) {
+						return {
+							countDescription: dim.countDescription,
+							description: dim.description,
+							key: dim.key,
+							originFileId: dim.originFileId,
+							typeField: dim.typeField,
+							typeFieldUniques: dim.typeFieldUniques
+						};
+					}
+
+					loadMetadata();
+
+					// Handle the situation where this is instantiated before data is loaded.
+					scope.$watch(function () { return $location.path(); }, function (nv, ov) {
+						if(nv !== ov) {
+							loadMetadata();
+						}
+					});
+
+					// If you need to do any configuration before your visualization is set up,
+					// do it here. DO NOT do anything that changes the DOM here, so don't
+					// programatically instantiate your visualization at this point. That happens
+					// in the 'post' function.
+					//
+					// You might need to do things here especially
+					// if your visualization is contained in another directive that is included
+					// in the template of this directive.
+
+				}, post: function(scope, element, attrs) {
+
+					// If you are building a d3.js visualization, you can grab the containing
+					// element with:
+					//
+					// d3.select(element[0]);
+					//
+					//
+					// If you are going to programatically instantiate your visualization, do it
+					// here. Your visualization should emit the following events if necessary:
+					//
+					// For new/changed filters:
+					//
+					// scope.$emit('updateFilter', [identifier, description, filter, callback]);
+					//
+					// For removing all filters:
+					//
+					// scope.$emit('updateFilter', [identifier, null]);
+					//
+					// If you apply a filter in this component, notify the Palladio framework.
+					//
+					// identifier: A string unique to this instance of this component. Should 
+					//             be randomly generated.
+					//
+					// description: A human-readable description of this component. Should be
+					//              unique to this instance of this component, but not required.
+					//
+					// filter: A human-readable description of the filter that is currently
+					//         applied on this component.
+					//
+					// callback: A function that will remove all filters on this component when
+					//           it is evaluated.
+					//
+					//
+					// Whenever the component needs to trigger an update for all other components
+					// in the application (for example, when a filter is applied or removed):
+					//
+					// scope.$emit('triggerUpdate');
+
+					function setup() {
+
+					}
+
+					function update() {
+						// Make this **snappy**
+					}
+
+					function reset() {
+
+					}
+
+					setup();
+					update();
+
+					// You should also handle the following externally triggered events:
+
+					scope.$on('filterReset', function(event) {
+						
+						// Reset any filters that have been applied through this visualization.
+						// This means running .filterAll() on any Crossfilter dimensions you have
+						// created and updating your visualization as required.
+
+						update();
+
+					});
+
+					scope.$on('update', function(event) {
+						
+						// Render an update. It is likely that the data in the Crossfilter or the
+						// filter state of the Crossfilter has changed, so you should re-query
+						// any groups or dimensions you have created.
+
+						// Note: This method gets called a *lot* during a filter operation.
+						// Whenever possible you should make updates incremental and very fast.
+
+						update();
+
+					});
+
+					scope.$on('search', function(event, args) {
+						
+						// The global search term has been updated. The current search term is
+						// found in args.
+
+					});
+
+					scope.$on('$destroy', function () {
+
+						// Clean up after yourself. Remove dimensions that we have created. If we
+						// created watches on another scope, destroy those as well.
+
+					});
+
+
+					// Support save/load. These functions should be able to fully recreate an instance
+					// of this visualization based on the results of the exportState() function. Include
+					// current filters, any type of manipulations the user has done, etc.
+
+					function importState(state) {
+						
+						// Load a state object created by exportState().
+
+					}
+
+					function exportState() {
+
+						// Return a state object that can be consumed by importState().
+						return { };
+					}
+
+					scope.$emit('registerStateFunctions', ['palette', exportState, importState]);
+
+					// Move the modal out of the fixed area. (necessary if you are using modal selectors)
+					// $(element[0]).find('#date-start-modal').parent().appendTo('body');
+				}
+			}
+		};
+
+		return directiveObj;
+	});
+// Palladio template component module
+
+angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
+	.directive('palladioPartimeFilter', function (dateService, palladioService, dataService) {
 		var directiveObj = {
 			scope: {
 				fullHeight: '@',
@@ -66411,7 +67048,7 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 				showAccordion: '@',
 				view: '@'
 			},
-			templateUrl: 'partials/palladio-duration-view/template.html',
+			templateUrl: 'partials/palladio-partime-filter/template.html',
 
 			link: { pre: function(scope) {
 
@@ -66432,7 +67069,7 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 					// if your visualization is contained in another directive that is included
 					// in the template of this directive.
 
-					scope.uniqueToggleId = "durationView" + Math.floor(Math.random() * 10000);
+					scope.uniqueToggleId = "partimeFilter" + Math.floor(Math.random() * 10000);
 					scope.uniqueToggleHref = "#" + scope.uniqueToggleId;
 					scope.uniqueModalId = scope.uniqueToggleId + "modal";
 
@@ -66440,24 +67077,27 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 					scope.xfilter = dataService.getDataSync().xfilter;
 
 					// Take the first number dimension we find.
-					scope.durationDims = scope.metadata.filter(function (d) { return d.type === 'number'; });
-					// scope.durationDim = scope.durationDims[0];
+					scope.dateDims = scope.metadata.filter(function (d) { return d.type === 'date'; });
+					scope.dateStartDim = scope.dateDims[0];
+					scope.dateEndDim = scope.dateDims[1] ? scope.dateDims[1] : scope.dateDims[0];
 
 					// Label dimensions.
 					scope.labelDims = scope.metadata;
 					scope.tooltipLabelDim = scope.labelDims[0];
-					// scope.groupDim = scope.labelDims[0];
-					// scope.xGroupDim = scope.labelDims[0];
-					scope.xSortDim = scope.labelDims[0];
+					scope.groupDim = scope.labelDims[0];
 
-					scope.title = "Duration view";
+					scope.title = "Time Span Filter";
 
-					scope.modes = ['Constant duration'];
-					if(scope.durationDims.length > 0) scope.modes.push('Actual duration');
-					scope.mode = scope.modes[0];
+					scope.stepModes = ['Bars', 'Parallel'];
+					if(scope.view === 'true') scope.stepModes.push('Grouped Bars');
+					scope.stepMode = scope.stepModes[0];
 
-					scope.showDurationModal = function () {
-						$('#' + scope.uniqueModalId).find('#duration-modal').modal('show');
+					scope.showDateStartModal = function () {
+						$('#' + scope.uniqueModalId).find('#date-start-modal').modal('show');
+					};
+
+					scope.showDateEndModal = function () {
+						$('#' + scope.uniqueModalId).find('#date-end-modal').modal('show');
 					};
 
 					scope.showTooltipLabelModal = function () {
@@ -66468,14 +67108,6 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 						$('#' + scope.uniqueModalId).find('#group-modal').modal('show');
 					};
 
-					scope.showXGroupModal = function () {
-						$('#' + scope.uniqueModalId).find('#x-group-modal').modal('show');
-					};
-
-					scope.showXSortModal = function () {
-						$('#' + scope.uniqueModalId).find('#x-sort-modal').modal('show');
-					};
-
 				}, post: function(scope, element) {
 
 					// If you are building a d3.js visualization, you can grab the containing
@@ -66484,14 +67116,12 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 					// d3.select(element[0]);
 
 					var sel, svg, dim, group, x, y, xStart, xEnd, emitFilterText, removeFilterText,
-						topBrush, midBrush, bottomBrush, top, bottom, middle, filter, yStep, tooltip,
-						colors, bottomAxis, topAxis, yAxis;
+						topBrush, midBrush, bottomBrush, top, bottom, middle, filter, yStep, tooltip;
 
 					var format = dateService.format;
 
 					// Constants...
 					var margin = 25;
-					var leftMargin = 150;
 					var width = scope.fullWidth === 'true' ? $(window).width() - margin*2 : $(window).width()*0.7;
 					var height = scope.height ? +scope.height : 200;
 					height = scope.fullHeight === 'true' ? $(window).height()-200 : height;
@@ -66501,16 +67131,6 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 					update();
 
 					function setup() {
-						// Check necessary fields are selected.
-						if(!scope.tooltipLabelDim ||
-							!scope.groupDim ||
-							!scope.xGroupDim ||
-							!scope.xSortDim ||
-							(scope.mode === 'Actual duration' && !scope.durationDim)) {
-
-							return false;
-						}
-
 						sel = d3.select(d3.select(element[0]).select(".main-viz")[0][0].children[0]);
 						if(!sel.select('svg').empty()) sel.select('svg').remove();
 						svg = sel.append('svg');
@@ -66523,61 +67143,183 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 
 						if(dim) dim.remove();
 
-						dim = scope.xfilter.dimension(function(d) { return "" + d[scope.groupDim.key]; });
+						// Dimension has structure [startDate, endDate, label, group]
+						dim = scope.xfilter.dimension(
+							function(d) {
+								if((format.reformatExternal(d[scope.dateStartDim.key]) !== '' &&
+									format.reformatExternal(d[scope.dateEndDim.key]) !== '') ||
+									format.reformatExternal(d[scope.dateStartDim.key]) ===
+									format.reformatExternal(d[scope.dateEndDim.key]) ) {
+										// Both populated OR both equal (i.e. blank)
+										return [ format.reformatExternal(d[scope.dateStartDim.key]),
+												format.reformatExternal(d[scope.dateEndDim.key]),
+												d[scope.tooltipLabelDim.key],
+												d[scope.groupDim.key] ];
+								} else {
+									// Otherwise set the blank one equal to the populated one.
+									if(format.reformatExternal(d[scope.dateStartDim.key]) === '') {
+										return [ format.reformatExternal(d[scope.dateEndDim.key]),
+												format.reformatExternal(d[scope.dateEndDim.key]),
+												d[scope.tooltipLabelDim.key],
+												d[scope.groupDim.key] ];
+									} else {
+										return [ format.reformatExternal(d[scope.dateStartDim.key]),
+												format.reformatExternal(d[scope.dateStartDim.key]),
+												d[scope.tooltipLabelDim.key],
+												d[scope.groupDim.key] ];
+									}
+								}
+							}
+						);
 
 						// For now we keep the grouping simple and just do a naive count. To enable
 						// 'countBy' functionality we need to use the Crossfilter helpers or Reductio.
 						group = dim.group();
 
-						// Use reductio value-lists to track the xGroup for each group.
-						var reducer = reductio().count(true)
-							.nest([function(d) { return d[scope.xGroupDim.key]; }]);
-
-						if(scope.mode === 'Actual duration') {
-							reducer.sum(function(d) { return +d[scope.durationDim.key]; });
-						}
-
-						reducer(group);
+						var startValues = dim.top(Infinity).map(function (d) { return format.reformatExternal(d[scope.dateStartDim.key]); })
+								// Check for invalid dates
+								.filter(function (d) { return format.parse(d).valueOf(); });
+						var endValues = dim.top(Infinity).map(function (d) { return format.reformatExternal(d[scope.dateEndDim.key]); })
+								// Check for invalid dates
+								.filter(function (d) { return format.parse(d).valueOf(); });
+						var allValues = startValues.concat(endValues);
 
 						// Scales
-						x = d3.scale.linear().range([0, width - leftMargin]);
-						setXDomain();
-						y = d3.scale.ordinal().rangeBands([height, 0], 0.2)
-								.domain(group.top(Infinity)
+						x = d3.time.scale().range([0, width])
+								.domain([ format.parse(d3.min(allValues)), format.parse(d3.max(allValues)) ]);
+						xStart = d3.time.scale().range([0, width])
+								.domain([ format.parse(d3.min(allValues)), format.parse(d3.max(allValues)) ]);
+						xEnd = d3.time.scale().range([0, width])
+								.domain([ format.parse(d3.min(allValues)), format.parse(d3.max(allValues)) ]);
+						y = d3.scale.linear().range([height, 0])
+								.domain([0, 1]);
+						yStep = d3.scale.linear().range([height, 0])
+								.domain([-1, group.top(Infinity)
 									.filter(function (d) {
-										return d.value.count !== 0;
-									}).map(function(d) { return d.key; }));
+										return d.key[0] !== "" && d.key[1] !== "" && d.value !== 0;
+									}).length]);
 
-						colors = d3.scale.ordinal()
-							.range(colorbrewer.Greys[9])
-							.domain(scope.xGroupDim.uniques);
+						var xAxisStart = d3.svg.axis().orient("bottom")
+								.scale(x);
+						var xAxisEnd = d3.svg.axis().orient("top")
+								.scale(x);
 
-						bottomAxis = d3.svg.axis().orient("bottom").scale(x);
-						topAxis = d3.svg.axis().orient("top").scale(x);
-						yAxis = d3.svg.axis().orient("left").scale(y);
+						var topExtent = xEnd.domain();
+						var bottomExtent = xStart.domain();
+						var midExtent = [];
+
+						filter = function(d) {
+							return (topExtent.length === 0 ||
+									(format(topExtent[0]) <= d[1] && d[1] <= format(topExtent[1]))) &&
+								(bottomExtent.length === 0 ||
+									(format(bottomExtent[0]) <= d[0] && d[0] <= format(bottomExtent[1]))) &&
+								(midExtent.length === 0 ||
+									(!(format(midExtent[0]) > d[0] && format(midExtent[0]) > d[1]) &&
+										!(format(midExtent[1]) < d[0] && format(midExtent[1]) < d[1])));
+						};
+
+						emitFilterText = function() {
+							var texts = [];
+							
+							if(bottomExtent.length) {
+								texts.push(scope.dateStartDim.description + " from " + format(bottomExtent[0]) + " to " + format(bottomExtent[1]));
+							}
+							if(midExtent.length) {
+								texts.push("between " + format(midExtent[0]) + " and  " + format(midExtent[1]));
+							}
+							if(topExtent.length) {
+								texts.push(scope.dateEndDim.description + " from " + format(topExtent[0]) + " to " + format(topExtent[1]));
+							}
+
+							if(texts.length) {
+								deregister.push(palladioService.setFilter(scope.uniqueToggleId, scope.title, texts.join(", "), scope.filterReset));
+								palladioService.update();
+							} else {
+								removeFilterText();
+							}
+						};
+
+						removeFilterText = function() {
+							palladioService.removeFilter(scope.uniqueToggleId);
+							palladioService.update();
+						};
+
+						// Brush on end date
+						topBrush = d3.svg.brush()
+							.x(xEnd);
+						topBrush.on('brush', function () {
+							topExtent = topBrush.empty() ? [] : topBrush.extent();
+							dim.filterFunction(filter);
+							palladioService.update();
+						});
+						topBrush.on('brushend', function () {
+							emitFilterText();
+						});
+
+						// Brush on start date
+						bottomBrush = d3.svg.brush()
+							.x(xStart);
+						bottomBrush.on('brush', function () {
+							bottomExtent = bottomBrush.empty() ? [] : bottomBrush.extent();
+							dim.filterFunction(filter);
+							palladioService.update();
+						});
+						bottomBrush.on('brushend', function () {
+							emitFilterText();
+						});
+
+						// Brush to select current events
+						midBrush = d3.svg.brush()
+							.x(x);
+						midBrush.on('brush', function () {
+							midExtent = midBrush.empty() ? [] : midBrush.extent();
+							dim.filterFunction(filter);
+							palladioService.update();
+						});
+						midBrush.on('brushend', function () {
+							emitFilterText();
+						});
 
 						// Build the visualization.
+
+
 						var g = svg.append('g')
-								.attr("transform", "translate(" + leftMargin + "," + margin + ")");
+								.attr("transform", "translate(" + 10 + "," + margin + ")");
 
 						bottom = g.append('g')
-							.attr("class", "axis x-axis x-bottom")
+							.attr("class", "axis x-axis")
 							.attr("transform", "translate(" + 0 + "," + (height) + ")")
-							.call(bottomAxis);
+							.call(bottomBrush)
+							.call(xAxisStart);
+
+						bottom.selectAll('rect').attr('height', margin);
 
 						top = g.append('g')
-							.attr("class", "axis x-axis x-top")
-							.call(topAxis);
+							.attr("class", "axis x-axis")
+							.call(topBrush)
+							.call(xAxisEnd);
 
-						left = g.append('g')
-							.attr("class", "axis y-axis")
-							.call(yAxis);
+						top.selectAll('rect')
+							.attr('height', margin)
+							.attr('transform', "translate(0,-" + margin +")");
 
-						tooltip = g.select(".duration-tooltip");
+						middle = g.append('g')
+							.attr("transform", "translate(" + 0 + "," + (margin + 0.5) + ")")
+							.call(midBrush);
+
+						middle.selectAll('rect')
+							.attr('height', height - 1)
+							.attr('transform', "translate(0,-" + margin + ")");
+
+						g.selectAll('.extent')
+							.attr('fill', filterColor)
+							.attr('opacity', 0.6);
+
+						tooltip = g.select(".timespan-tooltip");
 						// Set up the tooltip.
 						if(tooltip.empty()) {
 							tooltip = g.append("g")
-									.attr("class", "duration-tooltip")
+									.attr("class", "timespan-tooltip")
 									.attr("pointer-events", "none")
 									.style("display", "none");
 
@@ -66601,88 +67343,33 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 					}
 
 					function update() {
-						// Check necessary fields are selected.
-						if(!scope.tooltipLabelDim ||
-							!scope.groupDim ||
-							!scope.xGroupDim ||
-							!scope.xSortDim ||
-							(scope.mode === 'Actual duration' && !scope.durationDim)) {
-
-							return false;
-						}
-
-						// Update the x-scale and x-axes
-						setXDomain();
-						bottomAxis.scale(x);
-						topAxis.scale(x);
-						svg.select('.x-bottom').call(bottomAxis);
-						svg.select('.x-top').call(topAxis);
-
-						var groups = svg.select('g').selectAll('.duration-group')
+						var paths = svg.select('g').selectAll('.path')
 							.data(group.top(Infinity)
 									.filter(function (d) {
-										return d.value.count !== 0;
+										// Require start OR end date.
+										return (d.key[0] !== "" || d.key[1] !== "") && d.value !== 0;
+									}).sort(function (a, b) {
+										if(scope.stepMode !== 'Grouped Bars' || a.key[3] === b.key[3]) {
+											return a.key[0] < b.key[0] ? -1 : 1;
+										} else {
+											return a.key[3] < b.key[3] ? -1 : 1;
+										}
 									}),
-								function (d) { return d.key; });
+								function (d) { return d.key[0] + " - " + d.key[1] + " - " + d.key[3]; });
 
-						groups.exit().remove();
-
-						groups.enter()
-								.append('g')
-									.attr('class', 'duration-group')
-									.attr('transform', function(d) {
-										return 'translate(1,' + y(d.key) + ')';
-									});
-
-						var constantDuration = scope.mode === 'Constant duration';
-						var rectWidth = x(1) - x(0);
-
-						function calcWidth(d) {
-							return constantDuration ?
-								rectWidth :
-								(isNaN(+d[scope.durationDim.key]) ?
-									0 :
-									x(+d[scope.durationDim.key]));
+						function fill(d) {
+							return filter(d.key) ? "#555555" : "#CCCCCC";
 						}
 
-						var rects = groups.selectAll('.duration-bar')
-							.data(function(d, i) {
-								var total = 0;
+						paths.exit().remove();
+						var newPaths = paths.enter()
+								.append('g')
+									.attr('class', 'path');
 
-								// Flatten to basic records
-								return d.value.nest.map(function(n) {
-									return n.values;
-								}).reduce(function(a, b) {
-									return a.concat(b);
-								}).sort(function(a, b) {
-									return d3.ascending(a[scope.xSortDim.key], b[scope.xSortDim.key]);
-								}).map(function(d) {
-									total = total + calcWidth(d);
-									// Build object with information needed to visualize
-									return {
-										name: d[scope.xGroupDim.key],
-										group: i,
-										x: calcWidth(d),
-										offset: (total - calcWidth(d))
-									};
-								});
-							}, function(d, i) { return d.name + '-' + d.group + '-' + i; });
-
-						rects.exit().remove();
-
-						rects.enter()
-								.append('rect')
-									.attr('height', y.rangeBand())
-									.attr('class', 'duration-bar');
-
-						rects
-							.attr('width', function(d) { return d.x ? d.x : 0; })
-							.attr('fill', function(d) { return colors(d.name); })
-							.attr('stroke', function(d) { return colors(d.name); })
-							.attr('transform', function(d) { return 'translate(' + (d.offset ? d.offset : 0) + ',0)'; })
+						newPaths
 							.tooltip(function (d){
 								return {
-									text : d.name,
+									text : d.key[2] + ": " + d.key[0] + " - " + d.key[1],
 									displacement : [0,20],
 									position: [0,0],
 									gravity: "right",
@@ -66690,22 +67377,91 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 									mousemove : true
 								};
 							});
-					}
 
-					function setXDomain() {
-						if(scope.mode === 'Actual duration') {
-							x.domain([ 0, d3.max(group.top(Infinity), function (d) { return d.value.sum; }) ]);
+						newPaths
+								.append('circle')
+									.attr('class', 'path-start')
+									.attr('r', 1)
+									.attr('fill-opacity', 0.8)
+									.attr('stroke-opacity', 0.8)
+									.attr('stroke-width', 0.8)
+									.style("display", "none");
+
+						newPaths
+								.append('circle')
+									.attr('class', 'path-end')
+									.attr('r', 1)
+									.attr('fill-opacity', 0.8)
+									.attr('stroke-opacity', 0.8)
+									.attr('stroke-width', 0.8)
+									.style("display", "none");
+
+						newPaths
+								.append('line')
+									.attr('stroke-width', 1)
+									.attr('stroke-opacity', 0.8);
+
+						var lines = paths.selectAll('line');
+						var circles = paths.selectAll('circle');
+						var startCircles = paths.selectAll('.path-start');
+						var endCircles = paths.selectAll('.path-end');
+
+						if(scope.stepMode === "Bars" || scope.stepMode === 'Grouped Bars') {
+							// We need to refigure the yStep scale since the number of groups can change.
+							yStep.domain([-1, group.top(Infinity)
+									.filter(function (d) {
+										// Require start OR end date.
+										return (d.key[0] !== "" || d.key[1] !== "") && d.value !== 0;
+									}).length]);
+
+							// Calculate fille based on selection.
+							lines.attr('stroke', fill);
+							circles.attr('stroke', fill);
+							circles.attr('fill', fill);
+
+							lines
+								.transition()
+									.attr('x1', function (d) { return x(format.parse(d.key[0])); } )
+									.attr('y1', 0)
+									.attr('x2', function (d) { return x(format.parse(d.key[1])); })
+									.attr('y2', 0);
+
+							startCircles.attr('cx', function (d) { return x(format.parse(d.key[0])); });
+							endCircles.attr('cx', function (d) { return x(format.parse(d.key[1])); });
+
+							// Translate the paths to their proper height.
+							paths
+								.transition()
+									.attr("transform", function (d, i) { return "translate(0," + yStep(i) + ")"; });
+
+							// Show the circles.
+							circles.style("display", "inline");
 						} else {
-							x.domain([ 0, d3.max(group.top(Infinity), function (d) { return d.value.count; }) ]);
+							// Hide the circles.
+							circles.style("display", "none");
+
+							lines.attr('stroke', fill);
+							lines
+								.transition()
+									.attr('x1', function (d) { return x(format.parse(d.key[0])); })
+									.attr('y1', y(0))
+									.attr('x2', function (d) { return x(format.parse(d.key[1])); })
+									.attr('y2', y(1));
+
+							// All parallel bars start at 0.
+							paths
+								.transition()
+									.attr("transform", "translate(0,0)");
 						}
 					}
 
 					function reset() {
-						if(dim) {
-							group.remove();
-							dim.remove();
-							svg.remove();
-						}
+						group.remove();
+						dim.filterAll();
+						dim.remove();
+						svg.remove();
+						removeFilterText();
+						palladioService.update();
 					}
 
 					scope.filterReset = function () {
@@ -66714,10 +67470,16 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 						update();
 					};
 
-					scope.$watchGroup(['mode', 'durationDim', 'tooltipLabelDim', 'groupDim', 'xGroupDim', 'xSortDim'], function () {
+					scope.$watchGroup(['dateStartDim', 'dateEndDim', 'tooltipLabelDim', 'groupDim'], function () {
 						reset();
 						setup();
 						update();
+					});
+
+					scope.$watch('stepMode', function (nv, ov) {
+						if(nv !== undefined) {
+							update();
+						}
 					});
 
 					//
@@ -66768,11 +67530,8 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 
 					deregister.push(palladioService.onUpdate(scope.uniqueToggleId, function() {
 						// Only update if the table is visible.
-						if(element.is(':visible')) { update(); }
+						update();
 					}));
-
-					// Update when it becomes visible (updating when not visibile errors out)
-					scope.$watch(function() { return element.is(':visible'); }, update);
 
 					scope.$on('$destroy', function () {
 
@@ -66780,6 +67539,7 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 						// created watches on another scope, destroy those as well.
 
 						if(dim) {
+							dim.filterAll();
 							group.remove();
 							dim.remove();
 							dim = undefined;
@@ -66798,13 +67558,22 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 
 						// Load a state object created by exportState().
 						scope.title = state.title;
-						scope.durationDim = scope.durationDims.filter(function(d) { return d.key === state.durationDim; })[0];
+						scope.dateStartDim = scope.dateDims.filter(function(d) { return d.key === state.dateStartDim; })[0];
+						scope.dateEndDim = scope.dateDims.filter(function(d) { return d.key === state.dateEndDim; })[0];
 						scope.tooltipLabelDim = scope.labelDims.filter(function(d) { return d.key === state.tooltipLabelDim; })[0];
-						scope.groupDim = scope.labelDims.filter(function(d) { return d.key === state.groupDim; })[0];
-						scope.xGroupDim = scope.labelDims.filter(function(d) { return d.key === state.xGroupDim; })[0];
-						scope.xSortDim = scope.labelDims.filter(function(d) { return d.key === state.xSortDim; })[0];
+						topBrush.extent(state.topExtent.map(function(d) { return dateService.format.parse(d); }));
+						midBrush.extent(state.midExtent.map(function(d) { return dateService.format.parse(d); }));
+						bottomBrush.extent(state.bottomExtent.map(function(d) { return dateService.format.parse(d); }));
 
-						scope.mode = state.mode;
+						topBrush.event(top);
+						midBrush.event(middle);
+						bottomBrush.event(bottom);
+
+						top.call(topBrush);
+						middle.call(midBrush);
+						bottom.call(bottomBrush);
+
+						scope.stepMode = state.mode;
 
 					}
 
@@ -66813,19 +67582,20 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 						// Return a state object that can be consumed by importState().
 						return {
 							title: scope.title,
-							durationDim: scope.durationDim.key,
+							dateStartDim: scope.dateStartDim.key,
+							dateEndDim: scope.dateEndDim.key,
 							tooltipLabelDim: scope.tooltipLabelDim.key,
-							groupDim: scope.groupDim.key,
-							xGroupDim: scope.xGroupDim.key,
-							xSortDim: scope.xSortDim.key,
-							mode: scope.mode
+							topExtent: topBrush.extent().map(function(d) { return dateService.format(d); }),
+							midExtent: midBrush.extent().map(function(d) { return dateService.format(d); }),
+							bottomExtent: bottomBrush.extent().map(function(d) { return dateService.format(d); }),
+							mode: scope.stepMode
 						};
 					}
 
-					deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'duration', exportState, importState));
+					deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'partime', exportState, importState));
 
 					// Move the modal out of the fixed area.
-					$(element[0]).find('#duration-modal').parent().appendTo('body');
+					$(element[0]).find('#date-start-modal').parent().appendTo('body');
 
 					// Set up the toggle if in view state.
 					if(scope.view === 'true') {
@@ -66842,6 +67612,405 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 		return directiveObj;
 	});
 
+// Selection view module
+
+angular.module('palladioSelectionView', ['palladio'])
+	.directive('palladioSelectionView', function (palladioService) {
+
+		var directiveDefObj = {
+			scope: true,
+			link: function (scope, element) {
+
+				var uniqueId = "selectionView" + Math.floor(Math.random() * 10000);
+				var deregister = [];
+
+				deregister.push(palladioService.onUpdate(uniqueId, function() {
+					buildSelection();
+				}));
+
+				scope.$on('$destroy', function () {
+
+					// Clean up after yourself. Remove dimensions that we have created. If we
+					// created watches on another scope, destroy those as well.
+
+					deregister.forEach(function(f) { f(); });
+				});
+
+				function buildSelection() {
+					var sel = d3.select(element[0]);
+
+					if(sel.select("ul").empty()) {
+						sel.append("ul").attr("class", "selection-display");
+					}
+
+					var ul = sel.select("ul");
+
+					/*if(ul.select("span").empty()) {
+						ul.append("span").attr("class", "selection-title").text("Filters");
+					}*/
+
+					sel.selectAll("span.muted").remove();
+
+					if (palladioService.getFilters().entries().length === 0) {
+						sel.append("span")
+							.attr("class","muted small")
+							.style("margin-left", "5px")
+							.text("No active filters");
+					}
+
+					var pills = ul.selectAll("li")
+						.data(palladioService.getFilters().entries(), function (d) { return d.key; });
+
+					pills.enter().call(function (selection) {
+							var li = selection.append("li")
+									.attr("class", "selection-pill");
+							li.append("span")
+									.attr("class", "selection-label");
+							li.append("span")
+									.attr("class", "selection-text");
+							li.append("a")
+									.attr("class","remove")
+									.html('&times;')
+									.on("click", function (d) { d.value[2](); });
+						});
+
+					pills.exit().remove();
+
+					pills.call(function (selection) {
+							selection.select("span.selection-label")
+									.text(function (d) { return d.value[0]; });
+							selection.select("span.selection-text")
+									.text(function (d) { return d.value[1]; })
+									.attr("title", function (d) { return d.value[1]; });
+						});
+
+				}
+
+				buildSelection();
+
+			}
+		};
+
+		return directiveDefObj;
+	});
+angular.module('palladioTableView', ['palladio', 'palladio.services'])
+	// Palladio Table View
+	.directive('palladioTableView', function (palladioService) {
+
+		return {
+
+			scope : {
+				dimensions : '=',
+				dimension : '=',
+				height: '@',
+				xfilter: '=',
+				exportFunc: '='
+			},
+
+			link: function (scope, element, attrs) {
+
+				function refresh() {
+					if(!scope.height) {
+						scope.calcHeight = $(window).height();
+					} else {
+						scope.calcHeight = scope.height;
+					}
+
+					element.height(scope.calcHeight);
+					$(element[0].nextElementSibling).height(scope.calcHeight);
+				}
+
+				$(document).ready(refresh);
+				$(window).resize(refresh);
+
+				var uniqueDimension;
+				var sortFunc = function() { };
+
+				var sorting, desc = true;
+
+				var search = '';
+
+				var dims = [];
+
+				var table, headers, rows, cells;
+
+				scope.exportFunc = function () {
+
+					var text =
+						d3.csv.format(
+							cells.map(function (r) {
+								// Build rows
+								var obj = {};
+								r.forEach(function (c) { obj[c.__data__.key] = c.__data__.value; });
+								return obj;
+							})
+						);
+
+					var title = 'Palladio table export.csv';
+
+					function getBlob() {
+						return window.Blob || window.WebKitBlob || window.MozBlob;
+					}
+
+					var BB = getBlob();;
+
+					var isSafari = (navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1);
+
+					if (isSafari) {
+						var csv = "data:text/csv," + text;
+						var newWindow = window.open(csv, 'download');
+					} else {
+						var blob = new BB([text], { type: "data:text/csv" });
+						saveAs(blob, title)
+					}
+
+				};
+
+				function update() {
+					if (!uniqueDimension || dims.length === 0) return;
+
+					if (!sorting) sorting = dims[0].key;
+
+					table = d3.select(element[0]).select("table");
+
+					if(table.empty()) {
+						table = d3.select(element[0]).append("table")
+								.attr("class","table table-striped");
+
+						table.append("thead").append("tr");
+						table.append("tbody");
+					}
+
+					headers = table.select("tr")
+						.selectAll("th")
+						.data(dims, function (d) { return d.key; });
+		
+					headers.exit().remove();
+					headers.enter().append("th")
+						.text(function(d){ return d.key + " "; })
+						.style("cursor","pointer")
+						.on("click", function(d) {
+								desc = sorting == d.key ? !desc : desc;
+								sorting = d.key;
+								sortFunc = function (a, b) { return desc ? a[sorting] < b[sorting] ? 1 : -1 : a[sorting] < b[sorting] ? -1 : 1; };
+								update();
+							})
+						.append("i")
+						.style("margin-left","5px");
+
+					headers.select("i")
+						.attr("class", function(){ return desc ? "fa fa-sort-asc" : "fa fa-sort-desc"; })
+						.style("opacity", function(d){ return d.key == sorting ? 1 : 0; });
+
+					headers.order();
+
+					var tempArr = [];
+					var nested = d3.nest()
+							.key(uniqueDimension.accessor)
+							.rollup(function(arr) {
+								// Build arrays of unique elements for each scope dimension
+								return dims.map(function (d) {
+									tempArr = [];
+									arr.forEach(function (a) {
+										if(tempArr.indexOf(a[d.key]) === -1 && a[d.key]) {
+											tempArr.push(a[d.key]);
+										}
+									});
+									return { key: d.key, values: tempArr };
+								}).reduce(function(prev, curr) {
+									// Then build an object like the original object concatenating those values
+									// Currently we just comma-delimit them, which can be a problem with some data sets.
+									prev[curr.key] = curr.values.join(', ');
+									return prev;
+								}, {});
+							})
+							.entries(uniqueDimension.top(Infinity))
+							.map(function (d) {
+								d.values[scope.dimension.key] = d.key;
+								return d.values;
+							});
+
+					rows = table.select("tbody")
+							.selectAll("tr")
+							.data(nested.filter(function (d){
+									if(search) {
+										return dims.map(function (m) {
+											return d[m.key];
+										}).join().toUpperCase().indexOf(search.toUpperCase()) !== -1;
+									} else {
+										return true;
+									}
+								}).sort(sortFunc), function (d) {
+									return dims.map(function(m){
+										return d[m.key];
+									}).join() + uniqueDimension.accessor(d);
+							});
+						
+					rows.exit().remove();
+					rows.enter().append("tr");
+
+					rows.order();
+
+					cells = rows.selectAll("td")
+						.data(function(d){ return dims.map(function(m){ return { key: m.key, value: d[m.key] }; }); },
+								function(d) { return d.key; });
+
+					cells.exit().remove();
+					cells.enter().append("td");
+					cells.html(function(d){
+						// if URL let's create a link
+						if ( d.value.indexOf("https://") === 0 || d.value.indexOf("http://") === 0 || d.value.indexOf("www.") === 0 ) {
+							return "<a target='_blank' href='" + d.value + "'>" + d.value + "</a>";
+						}
+						return d.value;
+					});
+
+					cells.order();
+
+				}
+
+				var uniqueId = "tableView" + Math.floor(Math.random() * 10000);
+				var deregister = [];
+
+				deregister.push(palladioService.onUpdate(uniqueId, function() {
+					// Only update if the table is visible.
+					if(element.is(':visible')) { update(); }
+				}));
+
+				// Update when it becomes visible (updating when not visibile errors out)
+				scope.$watch(function() { return element.is(':visible'); }, update);
+
+				scope.$watchCollection('dimensions', function() {
+					updateDims();
+					update();
+				});
+
+				scope.$watch('dimension', function () {
+					updateDims();
+					if(scope.dimension) {
+						if(uniqueDimension) uniqueDimension.remove();
+						uniqueDimension = scope.xfilter.dimension(function (d) { return "" + d[scope.dimension.key]; });
+					}
+					update();
+				});
+
+				function updateDims() {
+					if(scope.dimension) {
+						dims = [scope.dimension].concat(scope.dimensions);
+					}
+				}
+
+				
+				scope.$on('$destroy', function () {
+					if(uniqueDimension) uniqueDimension.remove();
+					deregister.forEach(function(f) { f(); });
+				});
+
+				deregister.push(palladioService.onSearch(uniqueId, function(text) {
+					search = text;
+					update();
+				}));
+			}
+		};
+	})
+
+	// Palladio Table View with Settings
+	.directive('palladioTableViewWithSettings', function (palladioService, dataService) {
+
+		return {
+			scope: {
+				height: '@'
+			},
+			templateUrl : 'partials/palladio-table-view/template.html',
+			link: {
+
+				pre: function (scope, element, attrs) {
+
+					// In the pre-linking function we can use scope.data, scope.metadata, and
+					// scope.xfilter to populate any additional scope values required by the
+					// template.
+
+					var deregister = [];
+
+					scope.metadata = dataService.getDataSync().metadata;
+					scope.xfilter = dataService.getDataSync().xfilter;
+
+					scope.uniqueToggleId = "mapView" + Math.floor(Math.random() * 10000);
+					scope.uniqueModalId = scope.uniqueToggleId + "modal";
+
+					scope.fields = scope.metadata.sort(function (a, b) { return a.description < b.description ? -1 : 1; });
+					scope.tableDimensions = [];
+
+					// Set up count selection.
+					// scope.countDims = scope.metadata.filter(function (d) { return d.countable === true; })
+					// 		.sort(function (a, b) { return a.countDescription < b.countDescription ? -1 : 1; });
+					scope.countDims = scope.metadata
+							.sort(function (a, b) { return a.description < b.description ? -1 : 1; });
+					scope.countDim = null;
+					scope.getCountDescription = function (field) {
+						// return field.countDescription;
+						return field.description;
+					};
+					scope.showCountModal = function () { $('#' + scope.uniqueModalId).find('#count-modal').modal('show'); };
+
+					scope.showModal = function(){
+						$('#table-modal').modal('show');
+					};
+
+					scope.fieldDescriptions = function () {
+						return scope.tableDimensions.map( function (d) { return d.description; }).join(", ");
+					};
+
+					// State save/load.
+
+					scope.setInternalState = function (state) {
+						// Placeholder
+						return state;
+					};
+
+					// Add internal state to the state.
+					scope.readInternalState = function (state) {
+						// Placeholder
+						return state;
+					};
+
+					scope.exportCsv = function () {};
+
+					function importState(state) {
+						scope.$apply(function () {
+							scope.tableDimensions = state.tableDimensions;
+							scope.countDim = state.countDim;
+							
+							scope.setInternalState(state);
+						});
+					}
+
+					function exportState() {
+						return scope.readInternalState({
+							tableDimensions: scope.tableDimensions,
+							countDim: scope.countDim
+						});
+					}
+
+					deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'tableView', exportState, importState));
+
+					scope.$on('$destroy', function () {
+						deregister.forEach(function (f) { f(); });
+					});
+
+				},
+
+				post: function(scope, element, attrs) {
+
+					$(element).find('.toggle').on("click", function() {
+						element.find('.settings').toggleClass('open close');
+					});
+
+					
+				}
+			}
+		};
+	});
 angular.module('palladioMapView', ['palladio', 'palladio.services'])
 	.directive('palladioMapView', function (palladioService) {
 
@@ -68073,1175 +69242,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 		};
 	});
 
-// Palladio template component module
-
-angular.module('palladioPalette', ['palladio', 'palladio.services']) // Rename this.
-	.directive('palladioPalette', function (palladioService, dataService, $location) { // Rename this.
-		var directiveObj = {
-			scope: true,
-			templateUrl: 'partials/palladio-palette/template.html', // Change this string to update the
-			// template. Don't use a templateUrl, as you won't have control over the relative
-			// URL where this template is deployed.
-
-			link: { pre: function(scope, element, attrs) {
-
-					var metadata;
-					scope.fields = [];
-
-					function loadMetadata() {
-						metadata = dataService.getDataSync().metadata;
-
-						if(metadata) {
-
-							scope.fields = metadata
-								// Only display 'countable' (entity) dimensions at first.
-								.filter(function (d) {
-									return d.countable === true;
-								})
-								.sort(function (a, b) { return a.description < b.description ? -1 : 1; })
-								// Copy them, set their descriptions to be the table names, and populate
-								// their property dimensions.
-								.map(function(f) {
-									var newField = stripDimension(f);
-
-									newField.propertyDimensions = metadata
-										.filter(function (d) { return d.originFileId === newField.originFileId; })
-										.map(function (d) { return stripDimension(d); });
-
-									newField.description = newField.countDescription;
-									
-									// Only keep the basic properties on the dimension that we need.
-									return newField;
-								});
-						} else {
-							scope.fields = [];
-						}
-					}
-
-					function stripDimension(dim) {
-						return {
-							countDescription: dim.countDescription,
-							description: dim.description,
-							key: dim.key,
-							originFileId: dim.originFileId,
-							typeField: dim.typeField,
-							typeFieldUniques: dim.typeFieldUniques
-						};
-					}
-
-					loadMetadata();
-
-					// Handle the situation where this is instantiated before data is loaded.
-					scope.$watch(function () { return $location.path(); }, function (nv, ov) {
-						if(nv !== ov) {
-							loadMetadata();
-						}
-					});
-
-					// If you need to do any configuration before your visualization is set up,
-					// do it here. DO NOT do anything that changes the DOM here, so don't
-					// programatically instantiate your visualization at this point. That happens
-					// in the 'post' function.
-					//
-					// You might need to do things here especially
-					// if your visualization is contained in another directive that is included
-					// in the template of this directive.
-
-				}, post: function(scope, element, attrs) {
-
-					// If you are building a d3.js visualization, you can grab the containing
-					// element with:
-					//
-					// d3.select(element[0]);
-					//
-					//
-					// If you are going to programatically instantiate your visualization, do it
-					// here. Your visualization should emit the following events if necessary:
-					//
-					// For new/changed filters:
-					//
-					// scope.$emit('updateFilter', [identifier, description, filter, callback]);
-					//
-					// For removing all filters:
-					//
-					// scope.$emit('updateFilter', [identifier, null]);
-					//
-					// If you apply a filter in this component, notify the Palladio framework.
-					//
-					// identifier: A string unique to this instance of this component. Should 
-					//             be randomly generated.
-					//
-					// description: A human-readable description of this component. Should be
-					//              unique to this instance of this component, but not required.
-					//
-					// filter: A human-readable description of the filter that is currently
-					//         applied on this component.
-					//
-					// callback: A function that will remove all filters on this component when
-					//           it is evaluated.
-					//
-					//
-					// Whenever the component needs to trigger an update for all other components
-					// in the application (for example, when a filter is applied or removed):
-					//
-					// scope.$emit('triggerUpdate');
-
-					function setup() {
-
-					}
-
-					function update() {
-						// Make this **snappy**
-					}
-
-					function reset() {
-
-					}
-
-					setup();
-					update();
-
-					// You should also handle the following externally triggered events:
-
-					scope.$on('filterReset', function(event) {
-						
-						// Reset any filters that have been applied through this visualization.
-						// This means running .filterAll() on any Crossfilter dimensions you have
-						// created and updating your visualization as required.
-
-						update();
-
-					});
-
-					scope.$on('update', function(event) {
-						
-						// Render an update. It is likely that the data in the Crossfilter or the
-						// filter state of the Crossfilter has changed, so you should re-query
-						// any groups or dimensions you have created.
-
-						// Note: This method gets called a *lot* during a filter operation.
-						// Whenever possible you should make updates incremental and very fast.
-
-						update();
-
-					});
-
-					scope.$on('search', function(event, args) {
-						
-						// The global search term has been updated. The current search term is
-						// found in args.
-
-					});
-
-					scope.$on('$destroy', function () {
-
-						// Clean up after yourself. Remove dimensions that we have created. If we
-						// created watches on another scope, destroy those as well.
-
-					});
-
-
-					// Support save/load. These functions should be able to fully recreate an instance
-					// of this visualization based on the results of the exportState() function. Include
-					// current filters, any type of manipulations the user has done, etc.
-
-					function importState(state) {
-						
-						// Load a state object created by exportState().
-
-					}
-
-					function exportState() {
-
-						// Return a state object that can be consumed by importState().
-						return { };
-					}
-
-					scope.$emit('registerStateFunctions', ['palette', exportState, importState]);
-
-					// Move the modal out of the fixed area. (necessary if you are using modal selectors)
-					// $(element[0]).find('#date-start-modal').parent().appendTo('body');
-				}
-			}
-		};
-
-		return directiveObj;
-	});
-// Palladio template component module
-
-angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
-	.directive('palladioPartimeFilter', function (dateService, palladioService, dataService) {
-		var directiveObj = {
-			scope: {
-				fullHeight: '@',
-				fullWidth: '@',
-				showControls: '@',
-				showAccordion: '@',
-				view: '@'
-			},
-			templateUrl: 'partials/palladio-partime-filter/template.html',
-
-			link: { pre: function(scope) {
-
-					// In the pre-linking function we can use scope.data, scope.metadata, and
-					// scope.xfilter to populate any additional scope values required by the
-					// template.
-
-					// The parent scope must include the following:
-					//   scope.xfilter
-					//   scope.metadata
-
-					// If you need to do any configuration before your visualization is set up,
-					// do it here. DO NOT do anything that changes the DOM here, so don't
-					// programatically instantiate your visualization at this point. That happens
-					// in the 'post' function.
-					//
-					// You might need to do things here especially
-					// if your visualization is contained in another directive that is included
-					// in the template of this directive.
-
-					scope.uniqueToggleId = "partimeFilter" + Math.floor(Math.random() * 10000);
-					scope.uniqueToggleHref = "#" + scope.uniqueToggleId;
-					scope.uniqueModalId = scope.uniqueToggleId + "modal";
-
-					scope.metadata = dataService.getDataSync().metadata;
-					scope.xfilter = dataService.getDataSync().xfilter;
-
-					// Take the first number dimension we find.
-					scope.dateDims = scope.metadata.filter(function (d) { return d.type === 'date'; });
-					scope.dateStartDim = scope.dateDims[0];
-					scope.dateEndDim = scope.dateDims[1] ? scope.dateDims[1] : scope.dateDims[0];
-
-					// Label dimensions.
-					scope.labelDims = scope.metadata;
-					scope.tooltipLabelDim = scope.labelDims[0];
-					scope.groupDim = scope.labelDims[0];
-
-					scope.title = "Time Span Filter";
-
-					scope.stepModes = ['Bars', 'Parallel'];
-					if(scope.view === 'true') scope.stepModes.push('Grouped Bars');
-					scope.stepMode = scope.stepModes[0];
-
-					scope.showDateStartModal = function () {
-						$('#' + scope.uniqueModalId).find('#date-start-modal').modal('show');
-					};
-
-					scope.showDateEndModal = function () {
-						$('#' + scope.uniqueModalId).find('#date-end-modal').modal('show');
-					};
-
-					scope.showTooltipLabelModal = function () {
-						$('#' + scope.uniqueModalId).find('#tooltip-label-modal').modal('show');
-					};
-
-					scope.showGroupModal = function () {
-						$('#' + scope.uniqueModalId).find('#group-modal').modal('show');
-					};
-
-				}, post: function(scope, element) {
-
-					// If you are building a d3.js visualization, you can grab the containing
-					// element with:
-					//
-					// d3.select(element[0]);
-
-					var sel, svg, dim, group, x, y, xStart, xEnd, emitFilterText, removeFilterText,
-						topBrush, midBrush, bottomBrush, top, bottom, middle, filter, yStep, tooltip;
-
-					var format = dateService.format;
-
-					// Constants...
-					var margin = 25;
-					var width = scope.fullWidth === 'true' ? $(window).width() - margin*2 : $(window).width()*0.7;
-					var height = scope.height ? +scope.height : 200;
-					height = scope.fullHeight === 'true' ? $(window).height()-200 : height;
-					var filterColor = '#9DBCE4';
-
-					setup();
-					update();
-
-					function setup() {
-						sel = d3.select(d3.select(element[0]).select(".main-viz")[0][0].children[0]);
-						if(!sel.select('svg').empty()) sel.select('svg').remove();
-						svg = sel.append('svg');
-
-						sel.attr('width', width + margin*2);
-						sel.attr('height', height + margin*2);
-
-						svg.attr('width', width + margin*2);
-						svg.attr('height', height + margin*2);
-
-						if(dim) dim.remove();
-
-						// Dimension has structure [startDate, endDate, label, group]
-						dim = scope.xfilter.dimension(
-							function(d) {
-								if((format.reformatExternal(d[scope.dateStartDim.key]) !== '' &&
-									format.reformatExternal(d[scope.dateEndDim.key]) !== '') ||
-									format.reformatExternal(d[scope.dateStartDim.key]) ===
-									format.reformatExternal(d[scope.dateEndDim.key]) ) {
-										// Both populated OR both equal (i.e. blank)
-										return [ format.reformatExternal(d[scope.dateStartDim.key]),
-												format.reformatExternal(d[scope.dateEndDim.key]),
-												d[scope.tooltipLabelDim.key],
-												d[scope.groupDim.key] ];
-								} else {
-									// Otherwise set the blank one equal to the populated one.
-									if(format.reformatExternal(d[scope.dateStartDim.key]) === '') {
-										return [ format.reformatExternal(d[scope.dateEndDim.key]),
-												format.reformatExternal(d[scope.dateEndDim.key]),
-												d[scope.tooltipLabelDim.key],
-												d[scope.groupDim.key] ];
-									} else {
-										return [ format.reformatExternal(d[scope.dateStartDim.key]),
-												format.reformatExternal(d[scope.dateStartDim.key]),
-												d[scope.tooltipLabelDim.key],
-												d[scope.groupDim.key] ];
-									}
-								}
-							}
-						);
-
-						// For now we keep the grouping simple and just do a naive count. To enable
-						// 'countBy' functionality we need to use the Crossfilter helpers or Reductio.
-						group = dim.group();
-
-						var startValues = dim.top(Infinity).map(function (d) { return format.reformatExternal(d[scope.dateStartDim.key]); })
-								// Check for invalid dates
-								.filter(function (d) { return format.parse(d).valueOf(); });
-						var endValues = dim.top(Infinity).map(function (d) { return format.reformatExternal(d[scope.dateEndDim.key]); })
-								// Check for invalid dates
-								.filter(function (d) { return format.parse(d).valueOf(); });
-						var allValues = startValues.concat(endValues);
-
-						// Scales
-						x = d3.time.scale().range([0, width])
-								.domain([ format.parse(d3.min(allValues)), format.parse(d3.max(allValues)) ]);
-						xStart = d3.time.scale().range([0, width])
-								.domain([ format.parse(d3.min(allValues)), format.parse(d3.max(allValues)) ]);
-						xEnd = d3.time.scale().range([0, width])
-								.domain([ format.parse(d3.min(allValues)), format.parse(d3.max(allValues)) ]);
-						y = d3.scale.linear().range([height, 0])
-								.domain([0, 1]);
-						yStep = d3.scale.linear().range([height, 0])
-								.domain([-1, group.top(Infinity)
-									.filter(function (d) {
-										return d.key[0] !== "" && d.key[1] !== "" && d.value !== 0;
-									}).length]);
-
-						var xAxisStart = d3.svg.axis().orient("bottom")
-								.scale(x);
-						var xAxisEnd = d3.svg.axis().orient("top")
-								.scale(x);
-
-						var topExtent = xEnd.domain();
-						var bottomExtent = xStart.domain();
-						var midExtent = [];
-
-						filter = function(d) {
-							return (topExtent.length === 0 ||
-									(format(topExtent[0]) <= d[1] && d[1] <= format(topExtent[1]))) &&
-								(bottomExtent.length === 0 ||
-									(format(bottomExtent[0]) <= d[0] && d[0] <= format(bottomExtent[1]))) &&
-								(midExtent.length === 0 ||
-									(!(format(midExtent[0]) > d[0] && format(midExtent[0]) > d[1]) &&
-										!(format(midExtent[1]) < d[0] && format(midExtent[1]) < d[1])));
-						};
-
-						emitFilterText = function() {
-							var texts = [];
-							
-							if(bottomExtent.length) {
-								texts.push(scope.dateStartDim.description + " from " + format(bottomExtent[0]) + " to " + format(bottomExtent[1]));
-							}
-							if(midExtent.length) {
-								texts.push("between " + format(midExtent[0]) + " and  " + format(midExtent[1]));
-							}
-							if(topExtent.length) {
-								texts.push(scope.dateEndDim.description + " from " + format(topExtent[0]) + " to " + format(topExtent[1]));
-							}
-
-							if(texts.length) {
-								deregister.push(palladioService.setFilter(scope.uniqueToggleId, scope.title, texts.join(", "), scope.filterReset));
-								palladioService.update();
-							} else {
-								removeFilterText();
-							}
-						};
-
-						removeFilterText = function() {
-							palladioService.removeFilter(scope.uniqueToggleId);
-							palladioService.update();
-						};
-
-						// Brush on end date
-						topBrush = d3.svg.brush()
-							.x(xEnd);
-						topBrush.on('brush', function () {
-							topExtent = topBrush.empty() ? [] : topBrush.extent();
-							dim.filterFunction(filter);
-							palladioService.update();
-						});
-						topBrush.on('brushend', function () {
-							emitFilterText();
-						});
-
-						// Brush on start date
-						bottomBrush = d3.svg.brush()
-							.x(xStart);
-						bottomBrush.on('brush', function () {
-							bottomExtent = bottomBrush.empty() ? [] : bottomBrush.extent();
-							dim.filterFunction(filter);
-							palladioService.update();
-						});
-						bottomBrush.on('brushend', function () {
-							emitFilterText();
-						});
-
-						// Brush to select current events
-						midBrush = d3.svg.brush()
-							.x(x);
-						midBrush.on('brush', function () {
-							midExtent = midBrush.empty() ? [] : midBrush.extent();
-							dim.filterFunction(filter);
-							palladioService.update();
-						});
-						midBrush.on('brushend', function () {
-							emitFilterText();
-						});
-
-						// Build the visualization.
-
-
-						var g = svg.append('g')
-								.attr("transform", "translate(" + 10 + "," + margin + ")");
-
-						bottom = g.append('g')
-							.attr("class", "axis x-axis")
-							.attr("transform", "translate(" + 0 + "," + (height) + ")")
-							.call(bottomBrush)
-							.call(xAxisStart);
-
-						bottom.selectAll('rect').attr('height', margin);
-
-						top = g.append('g')
-							.attr("class", "axis x-axis")
-							.call(topBrush)
-							.call(xAxisEnd);
-
-						top.selectAll('rect')
-							.attr('height', margin)
-							.attr('transform', "translate(0,-" + margin +")");
-
-						middle = g.append('g')
-							.attr("transform", "translate(" + 0 + "," + (margin + 0.5) + ")")
-							.call(midBrush);
-
-						middle.selectAll('rect')
-							.attr('height', height - 1)
-							.attr('transform', "translate(0,-" + margin + ")");
-
-						g.selectAll('.extent')
-							.attr('fill', filterColor)
-							.attr('opacity', 0.6);
-
-						tooltip = g.select(".timespan-tooltip");
-						// Set up the tooltip.
-						if(tooltip.empty()) {
-							tooltip = g.append("g")
-									.attr("class", "timespan-tooltip")
-									.attr("pointer-events", "none")
-									.style("display", "none");
-
-							tooltip.append("foreignObject")
-									.attr("width", 100)
-									.attr("height", 26)
-									.attr("pointer-events", "none")
-								.append("html")
-									.style("background-color", "rgba(0,0,0,0)")
-								.append("div")
-									.style("padding-left", 3)
-									.style("padding-right", 3)
-									.style("text-align", "center")
-									.style("white-space", "nowrap")
-									.style("overflow", "hidden")
-									.style("text-overflow", "ellipsis")
-									.style("border-radius", "5px")
-									.style("background-color", "white")
-									.style("border", "3px solid grey");
-						}
-					}
-
-					function update() {
-						var paths = svg.select('g').selectAll('.path')
-							.data(group.top(Infinity)
-									.filter(function (d) {
-										// Require start OR end date.
-										return (d.key[0] !== "" || d.key[1] !== "") && d.value !== 0;
-									}).sort(function (a, b) {
-										if(scope.stepMode !== 'Grouped Bars' || a.key[3] === b.key[3]) {
-											return a.key[0] < b.key[0] ? -1 : 1;
-										} else {
-											return a.key[3] < b.key[3] ? -1 : 1;
-										}
-									}),
-								function (d) { return d.key[0] + " - " + d.key[1] + " - " + d.key[3]; });
-
-						function fill(d) {
-							return filter(d.key) ? "#555555" : "#CCCCCC";
-						}
-
-						paths.exit().remove();
-						var newPaths = paths.enter()
-								.append('g')
-									.attr('class', 'path');
-
-						newPaths
-							.tooltip(function (d){
-								return {
-									text : d.key[2] + ": " + d.key[0] + " - " + d.key[1],
-									displacement : [0,20],
-									position: [0,0],
-									gravity: "right",
-									placement: "mouse",
-									mousemove : true
-								};
-							});
-
-						newPaths
-								.append('circle')
-									.attr('class', 'path-start')
-									.attr('r', 1)
-									.attr('fill-opacity', 0.8)
-									.attr('stroke-opacity', 0.8)
-									.attr('stroke-width', 0.8)
-									.style("display", "none");
-
-						newPaths
-								.append('circle')
-									.attr('class', 'path-end')
-									.attr('r', 1)
-									.attr('fill-opacity', 0.8)
-									.attr('stroke-opacity', 0.8)
-									.attr('stroke-width', 0.8)
-									.style("display", "none");
-
-						newPaths
-								.append('line')
-									.attr('stroke-width', 1)
-									.attr('stroke-opacity', 0.8);
-
-						var lines = paths.selectAll('line');
-						var circles = paths.selectAll('circle');
-						var startCircles = paths.selectAll('.path-start');
-						var endCircles = paths.selectAll('.path-end');
-
-						if(scope.stepMode === "Bars" || scope.stepMode === 'Grouped Bars') {
-							// We need to refigure the yStep scale since the number of groups can change.
-							yStep.domain([-1, group.top(Infinity)
-									.filter(function (d) {
-										// Require start OR end date.
-										return (d.key[0] !== "" || d.key[1] !== "") && d.value !== 0;
-									}).length]);
-
-							// Calculate fille based on selection.
-							lines.attr('stroke', fill);
-							circles.attr('stroke', fill);
-							circles.attr('fill', fill);
-
-							lines
-								.transition()
-									.attr('x1', function (d) { return x(format.parse(d.key[0])); } )
-									.attr('y1', 0)
-									.attr('x2', function (d) { return x(format.parse(d.key[1])); })
-									.attr('y2', 0);
-
-							startCircles.attr('cx', function (d) { return x(format.parse(d.key[0])); });
-							endCircles.attr('cx', function (d) { return x(format.parse(d.key[1])); });
-
-							// Translate the paths to their proper height.
-							paths
-								.transition()
-									.attr("transform", function (d, i) { return "translate(0," + yStep(i) + ")"; });
-
-							// Show the circles.
-							circles.style("display", "inline");
-						} else {
-							// Hide the circles.
-							circles.style("display", "none");
-
-							lines.attr('stroke', fill);
-							lines
-								.transition()
-									.attr('x1', function (d) { return x(format.parse(d.key[0])); })
-									.attr('y1', y(0))
-									.attr('x2', function (d) { return x(format.parse(d.key[1])); })
-									.attr('y2', y(1));
-
-							// All parallel bars start at 0.
-							paths
-								.transition()
-									.attr("transform", "translate(0,0)");
-						}
-					}
-
-					function reset() {
-						group.remove();
-						dim.filterAll();
-						dim.remove();
-						svg.remove();
-						removeFilterText();
-						palladioService.update();
-					}
-
-					scope.filterReset = function () {
-						reset();
-						setup();
-						update();
-					};
-
-					scope.$watchGroup(['dateStartDim', 'dateEndDim', 'tooltipLabelDim', 'groupDim'], function () {
-						reset();
-						setup();
-						update();
-					});
-
-					scope.$watch('stepMode', function (nv, ov) {
-						if(nv !== undefined) {
-							update();
-						}
-					});
-
-					//
-					// If you are going to programatically instantiate your visualization, do it
-					// here. Your visualization should emit the following events if necessary:
-					//
-					// For new/changed filters:
-					//
-					// scope.$emit('updateFilter', [identifier, description, filter, callback]);
-					//
-					// For removing all filters:
-					//
-					// scope.$emit('updateFilter', [identifier, null]);
-					//
-					// If you apply a filter in this component, notify the Palladio framework.
-					//
-					// identifier: A string unique to this instance of this component. Should
-					//             be randomly generated.
-					//
-					// description: A human-readable description of this component. Should be
-					//              unique to this instance of this component, but not required.
-					//
-					// filter: A human-readable description of the filter that is currently
-					//         applied on this component.
-					//
-					// callback: A function that will remove all filters on this component when
-					//           it is evaluated.
-					//
-					//
-					// Whenever the component needs to trigger an update for all other components
-					// in the application (for example, when a filter is applied or removed):
-					//
-					// scope.$emit('triggerUpdate');
-
-					var deregister = [];
-
-					// You should also handle the following externally triggered events:
-
-					deregister.push(palladioService.onReset(scope.uniqueToggleId, function() {
-
-						// Reset any filters that have been applied through this visualization.
-						// This means running .filterAll() on any Crossfilter dimensions you have
-						// created and updating your visualization as required.
-
-						scope.filterReset();
-
-					}));
-
-					deregister.push(palladioService.onUpdate(scope.uniqueToggleId, function() {
-						// Only update if the table is visible.
-						update();
-					}));
-
-					scope.$on('$destroy', function () {
-
-						// Clean up after yourself. Remove dimensions that we have created. If we
-						// created watches on another scope, destroy those as well.
-
-						if(dim) {
-							dim.filterAll();
-							group.remove();
-							dim.remove();
-							dim = undefined;
-						}
-						deregister.forEach(function(f) { f(); });
-						deregister = [];
-
-					});
-
-
-					// Support save/load. These functions should be able to fully recreate an instance
-					// of this visualization based on the results of the exportState() function. Include
-					// current filters, any type of manipulations the user has done, etc.
-
-					function importState(state) {
-
-						// Load a state object created by exportState().
-						scope.title = state.title;
-						scope.dateStartDim = scope.dateDims.filter(function(d) { return d.key === state.dateStartDim; })[0];
-						scope.dateEndDim = scope.dateDims.filter(function(d) { return d.key === state.dateEndDim; })[0];
-						scope.tooltipLabelDim = scope.labelDims.filter(function(d) { return d.key === state.tooltipLabelDim; })[0];
-						topBrush.extent(state.topExtent.map(function(d) { return dateService.format.parse(d); }));
-						midBrush.extent(state.midExtent.map(function(d) { return dateService.format.parse(d); }));
-						bottomBrush.extent(state.bottomExtent.map(function(d) { return dateService.format.parse(d); }));
-
-						topBrush.event(top);
-						midBrush.event(middle);
-						bottomBrush.event(bottom);
-
-						top.call(topBrush);
-						middle.call(midBrush);
-						bottom.call(bottomBrush);
-
-						scope.stepMode = state.mode;
-
-					}
-
-					function exportState() {
-
-						// Return a state object that can be consumed by importState().
-						return {
-							title: scope.title,
-							dateStartDim: scope.dateStartDim.key,
-							dateEndDim: scope.dateEndDim.key,
-							tooltipLabelDim: scope.tooltipLabelDim.key,
-							topExtent: topBrush.extent().map(function(d) { return dateService.format(d); }),
-							midExtent: midBrush.extent().map(function(d) { return dateService.format(d); }),
-							bottomExtent: bottomBrush.extent().map(function(d) { return dateService.format(d); }),
-							mode: scope.stepMode
-						};
-					}
-
-					deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'partime', exportState, importState));
-
-					// Move the modal out of the fixed area.
-					$(element[0]).find('#date-start-modal').parent().appendTo('body');
-
-					// Set up the toggle if in view state.
-					if(scope.view === 'true') {
-						$(document).ready(function(){
-							$(element[0]).find('.toggle').click(function() {
-								$(element[0]).find('.settings').toggleClass('open close');
-							});
-						});
-					}
-				}
-			}
-		};
-
-		return directiveObj;
-	});
-
-// Selection view module
-
-angular.module('palladioSelectionView', ['palladio'])
-	.directive('palladioSelectionView', function (palladioService) {
-
-		var directiveDefObj = {
-			scope: true,
-			link: function (scope, element) {
-
-				var uniqueId = "selectionView" + Math.floor(Math.random() * 10000);
-				var deregister = [];
-
-				deregister.push(palladioService.onUpdate(uniqueId, function() {
-					buildSelection();
-				}));
-
-				scope.$on('$destroy', function () {
-
-					// Clean up after yourself. Remove dimensions that we have created. If we
-					// created watches on another scope, destroy those as well.
-
-					deregister.forEach(function(f) { f(); });
-				});
-
-				function buildSelection() {
-					var sel = d3.select(element[0]);
-
-					if(sel.select("ul").empty()) {
-						sel.append("ul").attr("class", "selection-display");
-					}
-
-					var ul = sel.select("ul");
-
-					/*if(ul.select("span").empty()) {
-						ul.append("span").attr("class", "selection-title").text("Filters");
-					}*/
-
-					sel.selectAll("span.muted").remove();
-
-					if (palladioService.getFilters().entries().length === 0) {
-						sel.append("span")
-							.attr("class","muted small")
-							.style("margin-left", "5px")
-							.text("No active filters");
-					}
-
-					var pills = ul.selectAll("li")
-						.data(palladioService.getFilters().entries(), function (d) { return d.key; });
-
-					pills.enter().call(function (selection) {
-							var li = selection.append("li")
-									.attr("class", "selection-pill");
-							li.append("span")
-									.attr("class", "selection-label");
-							li.append("span")
-									.attr("class", "selection-text");
-							li.append("a")
-									.attr("class","remove")
-									.html('&times;')
-									.on("click", function (d) { d.value[2](); });
-						});
-
-					pills.exit().remove();
-
-					pills.call(function (selection) {
-							selection.select("span.selection-label")
-									.text(function (d) { return d.value[0]; });
-							selection.select("span.selection-text")
-									.text(function (d) { return d.value[1]; })
-									.attr("title", function (d) { return d.value[1]; });
-						});
-
-				}
-
-				buildSelection();
-
-			}
-		};
-
-		return directiveDefObj;
-	});
-angular.module('palladioTableView', ['palladio', 'palladio.services'])
-	// Palladio Table View
-	.directive('palladioTableView', function (palladioService) {
-
-		return {
-
-			scope : {
-				dimensions : '=',
-				dimension : '=',
-				height: '@',
-				xfilter: '=',
-				exportFunc: '='
-			},
-
-			link: function (scope, element, attrs) {
-
-				function refresh() {
-					if(!scope.height) {
-						scope.calcHeight = $(window).height();
-					} else {
-						scope.calcHeight = scope.height;
-					}
-
-					element.height(scope.calcHeight);
-					$(element[0].nextElementSibling).height(scope.calcHeight);
-				}
-
-				$(document).ready(refresh);
-				$(window).resize(refresh);
-
-				var uniqueDimension;
-				var sortFunc = function() { };
-
-				var sorting, desc = true;
-
-				var search = '';
-
-				var dims = [];
-
-				var table, headers, rows, cells;
-
-				scope.exportFunc = function () {
-
-					var text =
-						d3.csv.format(
-							cells.map(function (r) {
-								// Build rows
-								var obj = {};
-								r.forEach(function (c) { obj[c.__data__.key] = c.__data__.value; });
-								return obj;
-							})
-						);
-
-					var title = 'Palladio table export.csv';
-
-					function getBlob() {
-						return window.Blob || window.WebKitBlob || window.MozBlob;
-					}
-
-					var BB = getBlob();;
-
-					var isSafari = (navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1);
-
-					if (isSafari) {
-						var csv = "data:text/csv," + text;
-						var newWindow = window.open(csv, 'download');
-					} else {
-						var blob = new BB([text], { type: "data:text/csv" });
-						saveAs(blob, title)
-					}
-
-				};
-
-				function update() {
-					if (!uniqueDimension || dims.length === 0) return;
-
-					if (!sorting) sorting = dims[0].key;
-
-					table = d3.select(element[0]).select("table");
-
-					if(table.empty()) {
-						table = d3.select(element[0]).append("table")
-								.attr("class","table table-striped");
-
-						table.append("thead").append("tr");
-						table.append("tbody");
-					}
-
-					headers = table.select("tr")
-						.selectAll("th")
-						.data(dims, function (d) { return d.key; });
-		
-					headers.exit().remove();
-					headers.enter().append("th")
-						.text(function(d){ return d.key + " "; })
-						.style("cursor","pointer")
-						.on("click", function(d) {
-								desc = sorting == d.key ? !desc : desc;
-								sorting = d.key;
-								sortFunc = function (a, b) { return desc ? a[sorting] < b[sorting] ? 1 : -1 : a[sorting] < b[sorting] ? -1 : 1; };
-								update();
-							})
-						.append("i")
-						.style("margin-left","5px");
-
-					headers.select("i")
-						.attr("class", function(){ return desc ? "fa fa-sort-asc" : "fa fa-sort-desc"; })
-						.style("opacity", function(d){ return d.key == sorting ? 1 : 0; });
-
-					headers.order();
-
-					var tempArr = [];
-					var nested = d3.nest()
-							.key(uniqueDimension.accessor)
-							.rollup(function(arr) {
-								// Build arrays of unique elements for each scope dimension
-								return dims.map(function (d) {
-									tempArr = [];
-									arr.forEach(function (a) {
-										if(tempArr.indexOf(a[d.key]) === -1 && a[d.key]) {
-											tempArr.push(a[d.key]);
-										}
-									});
-									return { key: d.key, values: tempArr };
-								}).reduce(function(prev, curr) {
-									// Then build an object like the original object concatenating those values
-									// Currently we just comma-delimit them, which can be a problem with some data sets.
-									prev[curr.key] = curr.values.join(', ');
-									return prev;
-								}, {});
-							})
-							.entries(uniqueDimension.top(Infinity))
-							.map(function (d) {
-								d.values[scope.dimension.key] = d.key;
-								return d.values;
-							});
-
-					rows = table.select("tbody")
-							.selectAll("tr")
-							.data(nested.filter(function (d){
-									if(search) {
-										return dims.map(function (m) {
-											return d[m.key];
-										}).join().toUpperCase().indexOf(search.toUpperCase()) !== -1;
-									} else {
-										return true;
-									}
-								}).sort(sortFunc), function (d) {
-									return dims.map(function(m){
-										return d[m.key];
-									}).join() + uniqueDimension.accessor(d);
-							});
-						
-					rows.exit().remove();
-					rows.enter().append("tr");
-
-					rows.order();
-
-					cells = rows.selectAll("td")
-						.data(function(d){ return dims.map(function(m){ return { key: m.key, value: d[m.key] }; }); },
-								function(d) { return d.key; });
-
-					cells.exit().remove();
-					cells.enter().append("td");
-					cells.html(function(d){
-						// if URL let's create a link
-						if ( d.value.indexOf("https://") === 0 || d.value.indexOf("http://") === 0 || d.value.indexOf("www.") === 0 ) {
-							return "<a target='_blank' href='" + d.value + "'>" + d.value + "</a>";
-						}
-						return d.value;
-					});
-
-					cells.order();
-
-				}
-
-				var uniqueId = "tableView" + Math.floor(Math.random() * 10000);
-				var deregister = [];
-
-				deregister.push(palladioService.onUpdate(uniqueId, function() {
-					// Only update if the table is visible.
-					if(element.is(':visible')) { update(); }
-				}));
-
-				// Update when it becomes visible (updating when not visibile errors out)
-				scope.$watch(function() { return element.is(':visible'); }, update);
-
-				scope.$watchCollection('dimensions', function() {
-					updateDims();
-					update();
-				});
-
-				scope.$watch('dimension', function () {
-					updateDims();
-					if(scope.dimension) {
-						if(uniqueDimension) uniqueDimension.remove();
-						uniqueDimension = scope.xfilter.dimension(function (d) { return "" + d[scope.dimension.key]; });
-					}
-					update();
-				});
-
-				function updateDims() {
-					if(scope.dimension) {
-						dims = [scope.dimension].concat(scope.dimensions);
-					}
-				}
-
-				
-				scope.$on('$destroy', function () {
-					if(uniqueDimension) uniqueDimension.remove();
-					deregister.forEach(function(f) { f(); });
-				});
-
-				deregister.push(palladioService.onSearch(uniqueId, function(text) {
-					search = text;
-					update();
-				}));
-			}
-		};
-	})
-
-	// Palladio Table View with Settings
-	.directive('palladioTableViewWithSettings', function (palladioService, dataService) {
-
-		return {
-			scope: {
-				height: '@'
-			},
-			templateUrl : 'partials/palladio-table-view/template.html',
-			link: {
-
-				pre: function (scope, element, attrs) {
-
-					// In the pre-linking function we can use scope.data, scope.metadata, and
-					// scope.xfilter to populate any additional scope values required by the
-					// template.
-
-					var deregister = [];
-
-					scope.metadata = dataService.getDataSync().metadata;
-					scope.xfilter = dataService.getDataSync().xfilter;
-
-					scope.uniqueToggleId = "mapView" + Math.floor(Math.random() * 10000);
-					scope.uniqueModalId = scope.uniqueToggleId + "modal";
-
-					scope.fields = scope.metadata.sort(function (a, b) { return a.description < b.description ? -1 : 1; });
-					scope.tableDimensions = [];
-
-					// Set up count selection.
-					// scope.countDims = scope.metadata.filter(function (d) { return d.countable === true; })
-					// 		.sort(function (a, b) { return a.countDescription < b.countDescription ? -1 : 1; });
-					scope.countDims = scope.metadata
-							.sort(function (a, b) { return a.description < b.description ? -1 : 1; });
-					scope.countDim = null;
-					scope.getCountDescription = function (field) {
-						// return field.countDescription;
-						return field.description;
-					};
-					scope.showCountModal = function () { $('#' + scope.uniqueModalId).find('#count-modal').modal('show'); };
-
-					scope.showModal = function(){
-						$('#table-modal').modal('show');
-					};
-
-					scope.fieldDescriptions = function () {
-						return scope.tableDimensions.map( function (d) { return d.description; }).join(", ");
-					};
-
-					// State save/load.
-
-					scope.setInternalState = function (state) {
-						// Placeholder
-						return state;
-					};
-
-					// Add internal state to the state.
-					scope.readInternalState = function (state) {
-						// Placeholder
-						return state;
-					};
-
-					scope.exportCsv = function () {};
-
-					function importState(state) {
-						scope.$apply(function () {
-							scope.tableDimensions = state.tableDimensions;
-							scope.countDim = state.countDim;
-							
-							scope.setInternalState(state);
-						});
-					}
-
-					function exportState() {
-						return scope.readInternalState({
-							tableDimensions: scope.tableDimensions,
-							countDim: scope.countDim
-						});
-					}
-
-					deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'tableView', exportState, importState));
-
-					scope.$on('$destroy', function () {
-						deregister.forEach(function (f) { f(); });
-					});
-
-				},
-
-				post: function(scope, element, attrs) {
-
-					$(element).find('.toggle').on("click", function() {
-						element.find('.settings').toggleClass('open close');
-					});
-
-					
-				}
-			}
-		};
-	});
 // Timeline filter module
 
 angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
@@ -70657,237 +70657,6 @@ angular.module('palladioComponentTemplate', []) // Rename this.
 	});
 // Palladio template component module
 
-angular.module('palladioHistogramFilter', [])
-	.directive('palladioHistogramFilter', function () {
-		var directiveObj = {
-			scope: true,
-			templateUrl: 'partials/palladio-histogram-filter/template.html',
-
-			link: { pre: function(scope, element, attrs) {
-
-					// In the pre-linking function we can use scope.data, scope.metadata, and
-					// scope.xfilter to populate any additional scope values required by the
-					// template.
-
-					// The parent scope must include the following:
-					//   scope.xfilter
-					//   scope.metadata
-
-					// If you need to do any configuration before your visualization is set up,
-					// do it here. DO NOT do anything that changes the DOM here, so don't
-					// programatically instantiate your visualization at this point. That happens
-					// in the 'post' function.
-					//
-					// You might need to do things here especially
-					// if your visualization is contained in another directive that is included
-					// in the template of this directive.
-
-					scope.uniqueToggleId = "histogramFilter" + Math.floor(Math.random() * 10000);
-					scope.uniqueToggleHref = "#" + scope.uniqueToggleId;
-					scope.uniqueModalId = scope.uniqueToggleId + "modal";
-					
-					// Take the first number dimension we find.
-					scope.numDims = scope.metadata.filter(function (d) { return d.type === 'number'; });
-					scope.numDim = scope.numDims[0];
-
-					scope.title = "Histogram Filter";
-
-					scope.showNumberModal = function () { $('#' + scope.uniqueModalId).find('#num-modal').modal('show'); };
-
-				}, post: function(scope, element, attrs) {
-
-					// If you are building a d3.js visualization, you can grab the containing
-					// element with:
-					//
-					// d3.select(element[0]);
-
-					var sel, svg, dim, group, x, y, xAxis, yAxis, area;
-
-					// Constants...
-					var width = 800;
-					var height = 150;
-					var margin = 25;
-
-					setup();
-					update();
-
-					function setup() {
-						sel = d3.select(d3.select(element[0]).select(".main-viz")[0][0].children[0]);
-						svg = sel.append('svg');
-
-						sel.attr('width', width + margin*2);
-						sel.attr('height', height + margin*2);
-
-						svg.attr('width', width + margin*2);
-						svg.attr('height', height + margin*2);
-
-						dim = scope.xfilter.dimension(function(d) { return +d[scope.numDim.key]; });
-
-						// For now we keep the grouping simple and just do a naive count. To enable
-						// 'countBy' functionality we need to use the Crossfilter helpers.
-						group = dim.group();
-
-						// Scales
-						x = d3.scale.linear().range([0, width])
-								.domain([+dim.bottom(1)[0][scope.numDim.key], +dim.top(1)[0][scope.numDim.key]]);
-						y = d3.scale.linear().range([height, 0])
-								.domain([0, group.top(1)[0].value]);
-
-						xAxis = d3.svg.axis().orient("bottom")
-								.scale(x);
-
-						yAxis = d3.svg.axis().orient("right")
-								.scale(y)
-								.ticks(5);
-
-						area = d3.svg.area()
-								.x(function (d) { return x(d.key); })
-								.y0(function (d) { return height; })
-								.y1(function (d) { return y(d.value); });
-
-						// Build the visualization.
-
-						var g = svg.append('g')
-								.attr("transform", "translate(" + margin + "," + margin + ")");
-
-						g.append('g')
-							.attr("class", "axis x-axis")
-							.attr("transform", "translate(" + 0 + "," + (height) + ")")
-							.call(xAxis);
-
-						g.append('g')
-							.attr("class", "axis y-axis")
-							.attr("transform", "translate(" + width + ", " + 0 + ")")
-							.call(yAxis);
-
-						var histogram = g.append('g')
-								.attr("class", "histogram")
-								// Sort by the x-axis value - required for the area layout
-								.datum(group.top(Infinity).sort(function(a,b) { return a.key < b.key ? 1 : -1; }));
-
-						histogram.append('path')
-								.attr('d', function (d) { return area(d); })
-								.attr('transform', "translate(-0.5, -0.5)");
-					}
-
-					function update() {
-						svg.select('g').select('.histogram').select('path')
-								.attr('d', function (d) { return area(d); });
-					}
-
-					function reset() {
-						group.remove();
-						dim.remove();
-						svg.remove();
-					}
-
-					scope.$watch('numDim', function () {
-						reset();
-						setup();
-						update();
-					});
-
-					//
-					// If you are going to programatically instantiate your visualization, do it
-					// here. Your visualization should emit the following events if necessary:
-					//
-					// For new/changed filters:
-					//
-					// scope.$emit('updateFilter', [identifier, description, filter, callback]);
-					//
-					// For removing all filters:
-					//
-					// scope.$emit('updateFilter', [identifier, null]);
-					//
-					// If you apply a filter in this component, notify the Palladio framework.
-					//
-					// identifier: A string unique to this instance of this component. Should 
-					//             be randomly generated.
-					//
-					// description: A human-readable description of this component. Should be
-					//              unique to this instance of this component, but not required.
-					//
-					// filter: A human-readable description of the filter that is currently
-					//         applied on this component.
-					//
-					// callback: A function that will remove all filters on this component when
-					//           it is evaluated.
-					//
-					//
-					// Whenever the component needs to trigger an update for all other components
-					// in the application (for example, when a filter is applied or removed):
-					//
-					// scope.$emit('triggerUpdate');
-
-
-					// You should also handle the following externally triggered events:
-
-					scope.$on('filterReset', function(event) {
-						
-						// Reset any filters that have been applied through this visualization.
-						// This means running .filterAll() on any Crossfilter dimensions you have
-						// created and updating your visualization as required.
-
-						update();
-
-					});
-
-					scope.$on('update', function(event) {
-						
-						// Render an update. It is likely that the data in the Crossfilter or the
-						// filter state of the Crossfilter has changed, so you should re-query
-						// any groups or dimensions you have created.
-
-						// Note: This method gets called a *lot* during a filter operation.
-						// Whenever possible you should make updates incremental and very fast.
-
-						update();
-
-					});
-
-					scope.$on('search', function(event, args) {
-						
-						// The global search term has been updated. The current search term is
-						// found in args.
-
-					});
-
-					scope.$on('$destroy', function () {
-
-						// Clean up after yourself. Remove dimensions that we have created. If we
-						// created watches on another scope, destroy those as well.
-
-						group.remove();
-						dim.remove();
-
-					});
-
-
-					// Support save/load. These functions should be able to fully recreate an instance
-					// of this visualization based on the results of the exportState() function. Include
-					// current filters, any type of manipulations the user has done, etc.
-
-					function importState(state) {
-						
-						// Load a state object created by exportState().
-
-					}
-
-					function exportState() {
-
-						// Return a state object that can be consumed by importState().
-						return { };
-					}
-
-					scope.$emit('registerStateFunctions', ['visualizationName', exportState, importState]);
-				}
-			}
-		};
-
-		return directiveObj;
-	});
-// Palladio template component module
-
 angular.module('palladioPardurationFilter', ['palladio.services.date'])
 	.directive('palladioPardurationFilter', function (dateService) {
 		var directiveObj = {
@@ -71161,6 +70930,237 @@ angular.module('palladioPardurationFilter', ['palladio.services.date'])
 
 					// Move the modal out of the fixed area.
 					$(element[0]).find('#date-start-modal').parent().appendTo('body');
+				}
+			}
+		};
+
+		return directiveObj;
+	});
+// Palladio template component module
+
+angular.module('palladioHistogramFilter', [])
+	.directive('palladioHistogramFilter', function () {
+		var directiveObj = {
+			scope: true,
+			templateUrl: 'partials/palladio-histogram-filter/template.html',
+
+			link: { pre: function(scope, element, attrs) {
+
+					// In the pre-linking function we can use scope.data, scope.metadata, and
+					// scope.xfilter to populate any additional scope values required by the
+					// template.
+
+					// The parent scope must include the following:
+					//   scope.xfilter
+					//   scope.metadata
+
+					// If you need to do any configuration before your visualization is set up,
+					// do it here. DO NOT do anything that changes the DOM here, so don't
+					// programatically instantiate your visualization at this point. That happens
+					// in the 'post' function.
+					//
+					// You might need to do things here especially
+					// if your visualization is contained in another directive that is included
+					// in the template of this directive.
+
+					scope.uniqueToggleId = "histogramFilter" + Math.floor(Math.random() * 10000);
+					scope.uniqueToggleHref = "#" + scope.uniqueToggleId;
+					scope.uniqueModalId = scope.uniqueToggleId + "modal";
+					
+					// Take the first number dimension we find.
+					scope.numDims = scope.metadata.filter(function (d) { return d.type === 'number'; });
+					scope.numDim = scope.numDims[0];
+
+					scope.title = "Histogram Filter";
+
+					scope.showNumberModal = function () { $('#' + scope.uniqueModalId).find('#num-modal').modal('show'); };
+
+				}, post: function(scope, element, attrs) {
+
+					// If you are building a d3.js visualization, you can grab the containing
+					// element with:
+					//
+					// d3.select(element[0]);
+
+					var sel, svg, dim, group, x, y, xAxis, yAxis, area;
+
+					// Constants...
+					var width = 800;
+					var height = 150;
+					var margin = 25;
+
+					setup();
+					update();
+
+					function setup() {
+						sel = d3.select(d3.select(element[0]).select(".main-viz")[0][0].children[0]);
+						svg = sel.append('svg');
+
+						sel.attr('width', width + margin*2);
+						sel.attr('height', height + margin*2);
+
+						svg.attr('width', width + margin*2);
+						svg.attr('height', height + margin*2);
+
+						dim = scope.xfilter.dimension(function(d) { return +d[scope.numDim.key]; });
+
+						// For now we keep the grouping simple and just do a naive count. To enable
+						// 'countBy' functionality we need to use the Crossfilter helpers.
+						group = dim.group();
+
+						// Scales
+						x = d3.scale.linear().range([0, width])
+								.domain([+dim.bottom(1)[0][scope.numDim.key], +dim.top(1)[0][scope.numDim.key]]);
+						y = d3.scale.linear().range([height, 0])
+								.domain([0, group.top(1)[0].value]);
+
+						xAxis = d3.svg.axis().orient("bottom")
+								.scale(x);
+
+						yAxis = d3.svg.axis().orient("right")
+								.scale(y)
+								.ticks(5);
+
+						area = d3.svg.area()
+								.x(function (d) { return x(d.key); })
+								.y0(function (d) { return height; })
+								.y1(function (d) { return y(d.value); });
+
+						// Build the visualization.
+
+						var g = svg.append('g')
+								.attr("transform", "translate(" + margin + "," + margin + ")");
+
+						g.append('g')
+							.attr("class", "axis x-axis")
+							.attr("transform", "translate(" + 0 + "," + (height) + ")")
+							.call(xAxis);
+
+						g.append('g')
+							.attr("class", "axis y-axis")
+							.attr("transform", "translate(" + width + ", " + 0 + ")")
+							.call(yAxis);
+
+						var histogram = g.append('g')
+								.attr("class", "histogram")
+								// Sort by the x-axis value - required for the area layout
+								.datum(group.top(Infinity).sort(function(a,b) { return a.key < b.key ? 1 : -1; }));
+
+						histogram.append('path')
+								.attr('d', function (d) { return area(d); })
+								.attr('transform', "translate(-0.5, -0.5)");
+					}
+
+					function update() {
+						svg.select('g').select('.histogram').select('path')
+								.attr('d', function (d) { return area(d); });
+					}
+
+					function reset() {
+						group.remove();
+						dim.remove();
+						svg.remove();
+					}
+
+					scope.$watch('numDim', function () {
+						reset();
+						setup();
+						update();
+					});
+
+					//
+					// If you are going to programatically instantiate your visualization, do it
+					// here. Your visualization should emit the following events if necessary:
+					//
+					// For new/changed filters:
+					//
+					// scope.$emit('updateFilter', [identifier, description, filter, callback]);
+					//
+					// For removing all filters:
+					//
+					// scope.$emit('updateFilter', [identifier, null]);
+					//
+					// If you apply a filter in this component, notify the Palladio framework.
+					//
+					// identifier: A string unique to this instance of this component. Should 
+					//             be randomly generated.
+					//
+					// description: A human-readable description of this component. Should be
+					//              unique to this instance of this component, but not required.
+					//
+					// filter: A human-readable description of the filter that is currently
+					//         applied on this component.
+					//
+					// callback: A function that will remove all filters on this component when
+					//           it is evaluated.
+					//
+					//
+					// Whenever the component needs to trigger an update for all other components
+					// in the application (for example, when a filter is applied or removed):
+					//
+					// scope.$emit('triggerUpdate');
+
+
+					// You should also handle the following externally triggered events:
+
+					scope.$on('filterReset', function(event) {
+						
+						// Reset any filters that have been applied through this visualization.
+						// This means running .filterAll() on any Crossfilter dimensions you have
+						// created and updating your visualization as required.
+
+						update();
+
+					});
+
+					scope.$on('update', function(event) {
+						
+						// Render an update. It is likely that the data in the Crossfilter or the
+						// filter state of the Crossfilter has changed, so you should re-query
+						// any groups or dimensions you have created.
+
+						// Note: This method gets called a *lot* during a filter operation.
+						// Whenever possible you should make updates incremental and very fast.
+
+						update();
+
+					});
+
+					scope.$on('search', function(event, args) {
+						
+						// The global search term has been updated. The current search term is
+						// found in args.
+
+					});
+
+					scope.$on('$destroy', function () {
+
+						// Clean up after yourself. Remove dimensions that we have created. If we
+						// created watches on another scope, destroy those as well.
+
+						group.remove();
+						dim.remove();
+
+					});
+
+
+					// Support save/load. These functions should be able to fully recreate an instance
+					// of this visualization based on the results of the exportState() function. Include
+					// current filters, any type of manipulations the user has done, etc.
+
+					function importState(state) {
+						
+						// Load a state object created by exportState().
+
+					}
+
+					function exportState() {
+
+						// Return a state object that can be consumed by importState().
+						return { };
+					}
+
+					scope.$emit('registerStateFunctions', ['visualizationName', exportState, importState]);
 				}
 			}
 		};
