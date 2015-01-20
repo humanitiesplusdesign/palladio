@@ -37,6 +37,7 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 
 					scope.metadata = dataService.getDataSync().metadata;
 					scope.xfilter = dataService.getDataSync().xfilter;
+					scope.data = dataService.getDataSync().data;
 
 					// Take the first number dimension we find.
 					scope.durationDims = scope.metadata.filter(function (d) { return d.type === 'number'; });
@@ -82,19 +83,19 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 					//
 					// d3.select(element[0]);
 
-					var sel, svg, dim, group, x, y, xStart, xEnd, emitFilterText, removeFilterText,
-						topBrush, midBrush, bottomBrush, top, bottom, middle, filter, yStep, tooltip,
-						colors, bottomAxis, topAxis, yAxis;
-
-					var format = dateService.format;
+					var sel, svg, dim, group, x, y,
+						top, bottom, left, filter, yStep, tooltip,
+						colors, bottomAxis, topAxis, yAxis, uniques, height, lineHeight;
 
 					// Constants...
 					var margin = 25;
+					var lineHeight = 20;
 					var leftMargin = 150;
+					var bottomOffset = 50;
 					var width = scope.fullWidth === 'true' ? $(window).width() - margin*2 : $(window).width()*0.7;
-					var height = scope.height ? +scope.height : 200;
-					height = scope.fullHeight === 'true' ? $(window).height()-200 : height;
-					var filterColor = '#9DBCE4';
+					// var height = scope.height ? +scope.height : 200;
+					// height = scope.fullHeight === 'true' ? $(window).height()-200 : height;
+					var highlightColor = '#67D6E5';
 
 					setup();
 					update();
@@ -109,6 +110,18 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 
 							return false;
 						}
+
+						// Calculate uniques for use in y scale and height.
+						uniques = [];
+						scope.data.forEach(function(d) {
+							if(uniques.indexOf("" + d[scope.groupDim.key]) === -1) {
+								uniques.push("" + d[scope.groupDim.key]);
+							}
+						});
+						uniques.sort(d3.descending);
+
+						// Figure height based on uniques and a minimum height.
+						height = uniques.length * lineHeight;
 
 						sel = d3.select(d3.select(element[0]).select(".main-viz")[0][0].children[0]);
 						if(!sel.select('svg').empty()) sel.select('svg').remove();
@@ -141,11 +154,12 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 						// Scales
 						x = d3.scale.linear().range([0, width - leftMargin]);
 						setXDomain();
-						y = d3.scale.ordinal().rangeBands([height, 0], 0.2)
-								.domain(group.top(Infinity)
-									.filter(function (d) {
-										return d.value.count !== 0;
-									}).map(function(d) { return d.key; }));
+						y = d3.scale.ordinal().rangeBands([height - bottomOffset, 0], 0.2)
+								// .domain(group.top(Infinity)
+								// 	.filter(function (d) {
+								// 		return d.value.count !== 0;
+								// 	}).map(function(d) { return d.key; }));
+								.domain(uniques);
 
 						colors = d3.scale.ordinal()
 							.range(colorbrewer.Greys[9])
@@ -161,7 +175,7 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 
 						bottom = g.append('g')
 							.attr("class", "axis x-axis x-bottom")
-							.attr("transform", "translate(" + 0 + "," + (height) + ")")
+							.attr("transform", "translate(" + 0 + "," + (height - bottomOffset) + ")")
 							.call(bottomAxis);
 
 						top = g.append('g')
@@ -279,6 +293,26 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 							.attr('fill', function(d) { return colors(d.name); })
 							.attr('stroke', function(d) { return colors(d.name); })
 							.attr('transform', function(d) { return 'translate(' + (d.offset ? d.offset : 0) + ',0)'; })
+							.on('mouseover', function(d) {
+								rects.attr('fill', function(f) {
+										if(d.name === f.name) {
+											return highlightColor;
+										} else {
+											return colors(f.name);
+										}})
+									.attr('stroke', function(f) {
+										if(d.name === f.name) {
+											return highlightColor;
+										} else {
+											return colors(f.name);
+										}
+									});
+							})
+							.on('mouseout', function(d) {
+								rects
+									.attr('fill', function(d) { return colors(d.name); })
+									.attr('stroke', function(d) { return colors(d.name); });
+							})
 							.tooltip(function (d){
 								return {
 									text : d.name,
