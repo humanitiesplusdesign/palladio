@@ -232,10 +232,10 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 						svg.select('.x-top').call(topAxis);
 
 						var groups = svg.select('g').selectAll('.duration-group')
-							.data(group.top(Infinity)
-									.filter(function (d) {
-										return d.value.count !== 0;
-									}),
+							.data(group.top(Infinity),
+									// .filter(function (d) {
+									// 	return d.value.count !== 0;
+									// }),
 								function (d) { return d.key; });
 
 						groups.exit().remove();
@@ -274,6 +274,7 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 									// Build object with information needed to visualize
 									return {
 										name: d[scope.xGroupDim.key],
+										label: d[scope.tooltipLabelDim.key],
 										group: i,
 										x: calcWidth(d),
 										offset: (total - calcWidth(d))
@@ -308,14 +309,14 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 										}
 									});
 							})
-							.on('mouseout', function(d) {
+							.on('mouseout', function() {
 								rects
 									.attr('fill', function(d) { return colors(d.name); })
 									.attr('stroke', function(d) { return colors(d.name); });
 							})
 							.tooltip(function (d){
 								return {
-									text : d.name,
+									text : d.label,
 									displacement : [0,20],
 									position: [0,0],
 									gravity: "right",
