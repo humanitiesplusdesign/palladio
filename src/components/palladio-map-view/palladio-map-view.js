@@ -732,6 +732,10 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						}
 
 						if(ts.layer) {
+							// As we cycle through the layers, bring them to the front in order,
+							// resulting in them being re-ordered according to the current sort.
+							ts.layer.bringToFront();
+							
 							// Update remove function to the current index.
 							ts.remove = function() {
 								m.removeLayer(ts.layer);

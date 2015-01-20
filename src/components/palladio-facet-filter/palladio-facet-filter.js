@@ -187,7 +187,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 							.append('div')
 								.classed('facet-header', true)
 								.style('height', headerHeight)
-								.text(function(d) { return d.description; })
+								.text(function(d) { return d.description + " (" + d.group.size() + ")"; })
 							.append("span")
 								.attr("class", "mode-buttons")
 							.append("div").attr("class", "btn-group");

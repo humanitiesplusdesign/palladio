@@ -147,9 +147,10 @@
 			<div class="setting">
 				<label class="text">Layers</label>
 				<div class="row-fluid">
-					<ul class="layer-list">
+					<ul class="layer-list" ui-sortable data-ng-model="tileSets">
 
 						<li class="layer-item" data-ng-repeat="layer in tileSets | orderBy:index">
+							<i class="icon-move"></i>
 							<i class="fa fa-eye-slash" data-ng-click="layer.toggle()" ng-show="!layer.enabled" data-toggle="tooltip" data-original-title="Show"></i>
 							<i class="fa fa-eye" data-ng-click="layer.toggle()" ng-show="layer.enabled" data-toggle="tooltip" data-original-title="Hide"></i>
 							<span style="margin-left: 10px">{{layer.description}}</span>
