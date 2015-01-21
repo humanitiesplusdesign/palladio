@@ -6947,6 +6947,136 @@ div.CodeMirror-cursors {
 	border: 1px solid #666;
 	}
 
+/* 
+ * Leaflet Control Search v1.5.6 - 2014-11-29 
+ * 
+ * Copyright 2014 Stefano Cudini 
+ * stefano.cudini@gmail.com 
+ * http://labs.easyblog.it/ 
+ * 
+ * Licensed under the MIT license. 
+ * 
+ * Demo: 
+ * http://labs.easyblog.it/maps/leaflet-search/ 
+ * 
+ * Source: 
+ * git@github.com:stefanocudini/leaflet-search.git 
+ * 
+ */
+ 
+.leaflet-container .leaflet-control-search {
+	position:relative;
+	float:left;
+	background:#fff;
+	color:#1978cf;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+	background-color: rgba(255, 255, 255, 0.8);
+	z-index:1000;	
+	box-shadow: 0 1px 7px rgba(0,0,0,0.65);
+	margin-left: 10px;
+	margin-top: 10px;
+}
+.leaflet-control-search.search-exp {/*expanded*/
+	box-shadow: 0 1px 7px #999;
+	background: #fff;
+}
+.leaflet-control-search .search-input {
+	display:block;
+	float:left;
+	background: #fff;
+	border:1px solid #666;
+	border-radius:2px;
+	height:18px;
+	padding:0 18px 0 2px;
+	margin:3px 0 3px 3px;
+}
+.leaflet-control-search.search-load .search-input {
+	background: url('../images/loader.gif') no-repeat center right #fff;
+}
+.leaflet-control-search.search-load .search-cancel {
+	visibility:hidden;
+}
+.leaflet-control-search .search-cancel {
+	display:block;
+	width:22px;
+	height:18px;
+	position:absolute;
+	right:22px;
+	margin:3px 0;
+	background: url('../images/search-icon.png') no-repeat 0 -46px;
+	text-decoration:none;
+	filter: alpha(opacity=80);
+	opacity: 0.8;		
+}
+.leaflet-control-search .search-cancel:hover {
+	filter: alpha(opacity=100);
+	opacity: 1;
+}
+.leaflet-control-search .search-cancel span {
+	display:none;/* comment for cancel button imageless */
+	font-size:18px;
+	line-height:20px;
+	color:#ccc;
+	font-weight:bold;
+}
+.leaflet-control-search .search-cancel:hover span {
+	color:#aaa;
+}
+.leaflet-control-search .search-button {
+	display:block;
+	float:left;
+	width:26px;
+	height:26px;	
+	background: url('../images/search-icon.png') no-repeat 2px 2px;
+	border-radius:4px;
+}
+.leaflet-control-search .search-button:hover {
+	background: url('../images/search-icon.png') no-repeat 2px -22px;
+}
+.leaflet-control-search .search-tooltip {
+	position:absolute;
+	top:100%;
+	left:0;
+	float:left;
+	min-width:120px;
+	max-height:122px;
+	box-shadow: 1px 1px 6px rgba(0,0,0,0.4);
+	background-color: rgba(0, 0, 0, 0.25);
+	z-index:1010;
+	overflow-y:auto;
+	overflow-x:hidden;	
+}
+.leaflet-control-search .search-tip {
+	margin:2px;
+	padding:2px 4px;
+	display:block;
+	color:black;
+	background: #eee;
+	border-radius:.25em;
+	text-decoration:none;	
+	white-space:nowrap;
+	vertical-align:center;
+}
+.leaflet-control-search .search-tip-select,
+.leaflet-control-search .search-tip:hover,
+.leaflet-control-search .search-button:hover {
+	background-color: #fff;
+}
+.leaflet-control-search .search-alert {
+	cursor:pointer;
+	clear:both;
+	font-size:.75em;
+	margin-bottom:5px;
+	padding:0 .25em;
+	color:#e00;
+	font-weight:bold;
+	border-radius:.25em;
+}
+
+
+
 /*!
  * Datepicker for Bootstrap
  *
@@ -6962,9 +7092,6 @@ div.CodeMirror-cursors {
   -moz-border-radius: 4px;
   border-radius: 4px;
   direction: ltr;
-  /*.dow {
-		border-top: 1px solid #ddd !important;
-	}*/
 }
 .datepicker-inline {
   width: 220px;
@@ -7451,12 +7578,13 @@ div.CodeMirror-cursors {
   *border-right-width: 2px;
   *border-bottom-width: 2px;
   color: #333333;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 13px;
   line-height: 20px;
 }
 .datepicker.dropdown-menu th,
-.datepicker.dropdown-menu td {
+.datepicker.datepicker-inline th,
+.datepicker.dropdown-menu td,
+.datepicker.datepicker-inline td {
   padding: 4px 5px;
 }
 
@@ -7473,9 +7601,6 @@ div.CodeMirror-cursors {
   padding: 4px;
   border-radius: 4px;
   direction: ltr;
-  /*.dow {
-		border-top: 1px solid #ddd !important;
-	}*/
 }
 .datepicker-inline {
   width: 220px;
@@ -8193,8 +8318,6 @@ fieldset[disabled] .datepicker table tr td span.active.disabled:hover.active {
 }
 .input-group.date .input-group-addon i {
   cursor: pointer;
-  width: 16px;
-  height: 16px;
 }
 .input-daterange input {
   text-align: center;
@@ -8210,7 +8333,7 @@ fieldset[disabled] .datepicker table tr td span.active.disabled:hover.active {
   min-width: 16px;
   padding: 4px 5px;
   font-weight: normal;
-  line-height: 1.428571429;
+  line-height: 1.42857143;
   text-align: center;
   text-shadow: 0 1px 0 #fff;
   vertical-align: middle;
@@ -8242,13 +8365,14 @@ fieldset[disabled] .datepicker table tr td span.active.disabled:hover.active {
   *border-right-width: 2px;
   *border-bottom-width: 2px;
   color: #333333;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 13px;
-  line-height: 1.428571429;
+  line-height: 1.42857143;
 }
 .datepicker.dropdown-menu th,
-.datepicker.dropdown-menu td {
-  padding: 4px 5px;
+.datepicker.datepicker-inline th,
+.datepicker.dropdown-menu td,
+.datepicker.datepicker-inline td {
+  padding: 0px 5px;
 }
 
 /*!
@@ -9043,9 +9167,9 @@ th {
   margin-left: 7px;
 }
 
-@import url('http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,300,400,700');
-@import url('http://fonts.googleapis.com/css?family=Lato:300,400,700,900,400italic');
-@import url('http://fonts.googleapis.com/css?family=Fenix');
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,300,400,700');
+@import url('https://fonts.googleapis.com/css?family=Lato:300,400,700,900,400italic');
+@import url('https://fonts.googleapis.com/css?family=Fenix');
 
 
 body {
@@ -9245,6 +9369,10 @@ strong {
 .remove,
 .danger {
   color: #F8607E;
+}
+
+.file-download {
+  margin-right: 10px;
 }
 
 .primary {
@@ -10194,7 +10322,7 @@ input[type="checkbox"] {
 
 .home {
 
-  background: url(/img/home.png);
+  background: url(img/home.png);
   background-size: cover;
   background-position: 50%;
   height: 500px;
@@ -10734,6 +10862,20 @@ pre.CodeMirror-placeholder {
 
 .palette-displayed #footer {
   right: 200px;
+}
+
+[data-palladio-duration-view] path {
+	fill: #dddddd;
+}
+
+[data-palladio-duration-view] .axis path, [data-palladio-duration-view] .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-duration-view] .axis text {
+	font: 10px Merriweather, Helvetica, Arial, sans-serif;
 }
 
 [data-palladio-facet-filter] .selection-title {

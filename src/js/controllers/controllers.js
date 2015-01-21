@@ -107,19 +107,36 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		$scope.onLoad = function() {
 			// Only move on to the visualization if the save file has a visualization part, in
 			// which case it would have a layout specified.
-			if(!loadService.layout()) $location.path('/upload');
-			if(loadService.layout()) $location.path('/visualization');
+			if(!loadService.layout()) {
+				$location.path('/upload');
+				spinnerService.hide();
+			}
+			// if(loadService.layout()) setTimeout(function() { $location.path('/visualization'); }, 1000);
+			if(loadService.layout()) {
+				$location.path('/visualization');
+			}
 		};
 
-		// Auto-load file auto-load.json if it exists.
-		$http.get('auto-load.json')
-			.success(function(data) {
-				loadService.loadJson(data);
-				$scope.onLoad();
-			})
-			.error(function() {
-				console.log("Attempted to load auto-load.json but it did not exist. This is not usually a problem.");
-			});
+		function loadFile(path) {
+			spinnerService.spin();
+			$http.get(path)
+				.success(function(data) {
+					loadService.loadJson(data);
+					$scope.onLoad();
+				})
+				.error(function() {
+					spinnerService.hide();
+					console.log("Attempted to load auto-load.json but it did not exist. This is not usually a problem.");
+				});
+		}
+
+		if($location.search().file) {
+			// Load the file from the path on the URL.
+			loadFile($location.search().file);
+		} else {
+			// Otherwise auto-load file auto-load.json if it exists.
+			loadFile('auto-load.json');
+		}
 
 		// Alert when leaving
 		$(window).bind('beforeunload', function(){
@@ -449,7 +466,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		$scope.removeFilter = function (event) {
 			// '$destroy' event isn't getting fired properly with just .remove(), so we do it
 			// ourselves.
-			angular.element(event.currentTarget.parentElement.parentElement).scope().$broadcast('$destroy');
+			angular.element(event.currentTarget.parentElement).scope().$broadcast('$destroy');
 			angular.element(event.currentTarget.parentElement.parentElement.parentElement).remove();
 			palladioService.update();
 			$('.tooltip').remove();
@@ -464,12 +481,12 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 						$('#filters').prepend($compile('<li><div data-palladio-timeline-filter-with-settings></div></li>')($scope));
 					}
 					break;
-				case 'timespan':
-					$('#filters').prepend($compile('<li><div data-palladio-timespan-filter></div></li>')($scope));
-					break;
-				case 'timestep':
-					$('#filters').prepend($compile('<li><div data-palladio-timestep-filter></div></li>')($scope));
-					break;
+				// case 'timespan':
+				// 	$('#filters').prepend($compile('<li><div data-palladio-timespan-filter></div></li>')($scope));
+				// 	break;
+				// case 'timestep':
+				// 	$('#filters').prepend($compile('<li><div data-palladio-timestep-filter></div></li>')($scope));
+				// 	break;
 				case 'partime':
 					if(!$scope.blurTimeSpan) {
 						$('#filters').prepend($compile('<li><div data-palladio-partime-filter></div></li>')($scope));
@@ -480,12 +497,12 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 						$('#filters').prepend($compile('<li><div data-palladio-facet-filter show-controls="true" show-accordion="true" show-drop-area="false" show-settings="true"></div></li>')($scope));
 					}
 					break;
-				case 'histogram':
-					$('#filters').prepend($compile('<li><div data-palladio-histogram-filter-with-settings></div></li>')($scope));
-					break;
-				case 'arctime':
-					$('#filters').prepend($compile('<li><div data-palladio-arctime-filter-with-settings></div></li>')($scope));
-					break;
+				// case 'histogram':
+				// 	$('#filters').prepend($compile('<li><div data-palladio-histogram-filter-with-settings></div></li>')($scope));
+				// 	break;
+				// case 'arctime':
+				// 	$('#filters').prepend($compile('<li><div data-palladio-arctime-filter-with-settings></div></li>')($scope));
+				// 	break;
 			}
 			$scope.showAddFilter = false;
 		};
@@ -550,7 +567,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			timestepExportFunctions = [];
 
 		function importState(state) {
-			if(state.facets) {
+			if(state.facets.length > 0) {
 				state.facets.forEach(function (f, i) {
 					if(!facetImportFunctions[i]) $scope.addFilter('facet');
 
@@ -562,21 +579,21 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 				});
 			}
 
-			if(state.timelines) {
+			if(state.timelines.length > 0) {
 				state.timelines.forEach(function (f, i) {
 					if(!timelineImportFunctions[i]) $scope.addFilter('timeline');
-					timelineImportFunctions[i](f);
+					window.setTimeout(function () { timelineImportFunctions[i](f); }, 300);
 				});
 			}
 
-			if(state.partimes) {
+			if(state.partimes.length > 0) {
 				state.partimes.forEach(function (f, i) {
 					if(!partimeImportFunctions[i]) $scope.addFilter('partime');
 					window.setTimeout(function() { partimeImportFunctions[i](f); }, 300);
 				});
 			}
 
-			if(state.timesteps) {
+			if(state.timesteps.length > 0) {
 				state.timesteps.forEach(function (f, i) {
 					if(!timestepImportFunctions[i]) $scope.addFilter('timestep');
 					window.setTimeout(function() { timestepImportFunctions[i](f); }, 300);

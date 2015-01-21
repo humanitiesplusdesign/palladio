@@ -1,6 +1,6 @@
-@import url('http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,300,400,700');
-@import url('http://fonts.googleapis.com/css?family=Lato:300,400,700,900,400italic');
-@import url('http://fonts.googleapis.com/css?family=Fenix');
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,300,400,700');
+@import url('https://fonts.googleapis.com/css?family=Lato:300,400,700,900,400italic');
+@import url('https://fonts.googleapis.com/css?family=Fenix');
 
 
 body {
@@ -200,6 +200,10 @@ strong {
 .remove,
 .danger {
   color: #F8607E;
+}
+
+.file-download {
+  margin-right: 10px;
 }
 
 .primary {
@@ -1149,7 +1153,7 @@ input[type="checkbox"] {
 
 .home {
 
-  background: url(/img/home.png);
+  background: url(img/home.png);
   background-size: cover;
   background-position: 50%;
   height: 500px;

@@ -668,6 +668,9 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 			       		[ 1, d3.max(nodes.features, function(d){ return d.properties.value.data.agg; }) ]).range([3,26]);
 		        }
 
+		        // Set up HTTPS URLS for 1.0 API
+		        L.mapbox.config.HTTP_URLS = ["https://a.tiles.mapbox.com/v3/", "https://b.tiles.mapbox.com/v3/", "https://c.tiles.mapbox.com/v3/", "https://d.tiles.mapbox.com/v3/"]
+
 				// init map
 				var node,
 					link,
@@ -729,6 +732,10 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						}
 
 						if(ts.layer) {
+							// As we cycle through the layers, bring them to the front in order,
+							// resulting in them being re-ordered according to the current sort.
+							ts.layer.bringToFront();
+							
 							// Update remove function to the current index.
 							ts.remove = function() {
 								m.removeLayer(ts.layer);

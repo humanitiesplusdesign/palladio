@@ -8,12 +8,32 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 			templateUrl: 'partials/palladio-data-download/template.html',
 
 			link: function(scope) {
-
 				scope.exportDataModel = function() {
+
+					// Strip autoFields, uniques, errors from all files/fields
+					var files = dataService.getFiles().map(function(f) {
+						f.autoFields = [];
+
+						f.fields.forEach(function(g) {
+							g.uniques = [];
+							g.errors = [];
+						});
+
+						return f;
+					});
+
+					// Strip everything but the unique file id from links
+					var links = dataService.getLinks().map(function(l) {
+						l.lookup.file = { uniqueId: l.lookup.file.uniqueId };
+						l.source.file = { uniqueId: l.source.file.uniqueId };
+
+						return l;
+					});
+
 					var ex = {
 						version: version,
-						files: dataService.getFiles(),
-						links: dataService.getLinks(),
+						files: files,
+						links: links,
 						layout: scope.layout,
 						vis: palladioService.getStateFunctions().map(function(s) {
 							return {

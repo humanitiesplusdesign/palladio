@@ -3,7 +3,13 @@
 angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 	.directive('palladioPartimeFilter', function (dateService, palladioService, dataService) {
 		var directiveObj = {
-			scope: true,
+			scope: {
+				fullHeight: '@',
+				fullWidth: '@',
+				showControls: '@',
+				showAccordion: '@',
+				view: '@'
+			},
 			templateUrl: 'partials/palladio-partime-filter/template.html',
 
 			link: { pre: function(scope) {
@@ -37,9 +43,15 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 					scope.dateStartDim = scope.dateDims[0];
 					scope.dateEndDim = scope.dateDims[1] ? scope.dateDims[1] : scope.dateDims[0];
 
+					// Label dimensions.
+					scope.labelDims = scope.metadata;
+					scope.tooltipLabelDim = scope.labelDims[0];
+					scope.groupDim = scope.labelDims[0];
+
 					scope.title = "Time Span Filter";
 
-					scope.stepModes = ['Parallel', 'Bars'];
+					scope.stepModes = ['Bars', 'Parallel'];
+					if(scope.view === 'true') scope.stepModes.push('Grouped Bars');
 					scope.stepMode = scope.stepModes[0];
 
 					scope.showDateStartModal = function () {
@@ -50,6 +62,14 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						$('#' + scope.uniqueModalId).find('#date-end-modal').modal('show');
 					};
 
+					scope.showTooltipLabelModal = function () {
+						$('#' + scope.uniqueModalId).find('#tooltip-label-modal').modal('show');
+					};
+
+					scope.showGroupModal = function () {
+						$('#' + scope.uniqueModalId).find('#group-modal').modal('show');
+					};
+
 				}, post: function(scope, element) {
 
 					// If you are building a d3.js visualization, you can grab the containing
@@ -58,14 +78,15 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 					// d3.select(element[0]);
 
 					var sel, svg, dim, group, x, y, xStart, xEnd, emitFilterText, removeFilterText,
-						topBrush, midBrush, bottomBrush, top, bottom, middle, filter, yStep;
+						topBrush, midBrush, bottomBrush, top, bottom, middle, filter, yStep, tooltip;
 
 					var format = dateService.format;
 
 					// Constants...
-					var width = $(window).width()*0.7;
-					var height = 150;
 					var margin = 25;
+					var width = scope.fullWidth === 'true' ? $(window).width() - margin*2 : $(window).width()*0.7;
+					var height = scope.height ? +scope.height : 200;
+					height = scope.fullHeight === 'true' ? $(window).height()-200 : height;
 					var filterColor = '#9DBCE4';
 
 					setup();
@@ -84,13 +105,37 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 
 						if(dim) dim.remove();
 
+						// Dimension has structure [startDate, endDate, label, group]
 						dim = scope.xfilter.dimension(
 							function(d) {
-								return [ format.reformatExternal(d[scope.dateStartDim.key]),
-										format.reformatExternal(d[scope.dateEndDim.key]) ]; });
+								if((format.reformatExternal(d[scope.dateStartDim.key]) !== '' &&
+									format.reformatExternal(d[scope.dateEndDim.key]) !== '') ||
+									format.reformatExternal(d[scope.dateStartDim.key]) ===
+									format.reformatExternal(d[scope.dateEndDim.key]) ) {
+										// Both populated OR both equal (i.e. blank)
+										return [ format.reformatExternal(d[scope.dateStartDim.key]),
+												format.reformatExternal(d[scope.dateEndDim.key]),
+												d[scope.tooltipLabelDim.key],
+												d[scope.groupDim.key] ];
+								} else {
+									// Otherwise set the blank one equal to the populated one.
+									if(format.reformatExternal(d[scope.dateStartDim.key]) === '') {
+										return [ format.reformatExternal(d[scope.dateEndDim.key]),
+												format.reformatExternal(d[scope.dateEndDim.key]),
+												d[scope.tooltipLabelDim.key],
+												d[scope.groupDim.key] ];
+									} else {
+										return [ format.reformatExternal(d[scope.dateStartDim.key]),
+												format.reformatExternal(d[scope.dateStartDim.key]),
+												d[scope.tooltipLabelDim.key],
+												d[scope.groupDim.key] ];
+									}
+								}
+							}
+						);
 
 						// For now we keep the grouping simple and just do a naive count. To enable
-						// 'countBy' functionality we need to use the Crossfilter helpers.
+						// 'countBy' functionality we need to use the Crossfilter helpers or Reductio.
 						group = dim.group();
 
 						var startValues = dim.top(Infinity).map(function (d) { return format.reformatExternal(d[scope.dateStartDim.key]); })
@@ -168,6 +213,8 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 							topExtent = topBrush.empty() ? [] : topBrush.extent();
 							dim.filterFunction(filter);
 							palladioService.update();
+						});
+						topBrush.on('brushend', function () {
 							emitFilterText();
 						});
 
@@ -178,6 +225,8 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 							bottomExtent = bottomBrush.empty() ? [] : bottomBrush.extent();
 							dim.filterFunction(filter);
 							palladioService.update();
+						});
+						bottomBrush.on('brushend', function () {
 							emitFilterText();
 						});
 
@@ -188,6 +237,8 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 							midExtent = midBrush.empty() ? [] : midBrush.extent();
 							dim.filterFunction(filter);
 							palladioService.update();
+						});
+						midBrush.on('brushend', function () {
 							emitFilterText();
 						});
 
@@ -225,50 +276,144 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						g.selectAll('.extent')
 							.attr('fill', filterColor)
 							.attr('opacity', 0.6);
+
+						tooltip = g.select(".timespan-tooltip");
+						// Set up the tooltip.
+						if(tooltip.empty()) {
+							tooltip = g.append("g")
+									.attr("class", "timespan-tooltip")
+									.attr("pointer-events", "none")
+									.style("display", "none");
+
+							tooltip.append("foreignObject")
+									.attr("width", 100)
+									.attr("height", 26)
+									.attr("pointer-events", "none")
+								.append("html")
+									.style("background-color", "rgba(0,0,0,0)")
+								.append("div")
+									.style("padding-left", 3)
+									.style("padding-right", 3)
+									.style("text-align", "center")
+									.style("white-space", "nowrap")
+									.style("overflow", "hidden")
+									.style("text-overflow", "ellipsis")
+									.style("border-radius", "5px")
+									.style("background-color", "white")
+									.style("border", "3px solid grey");
+						}
 					}
 
 					function update() {
 						var paths = svg.select('g').selectAll('.path')
 							.data(group.top(Infinity)
 									.filter(function (d) {
-										return d.key[0] !== "" && d.key[1] !== "" && d.value !== 0;
-									}).sort(function (a, b) { return a.key[0] < b.key[0] ? -1 : 1; }),
-								function (d) { return d.key[0] + " - " + d.key[1]; });
+										// Require start OR end date.
+										return (d.key[0] !== "" || d.key[1] !== "") && d.value !== 0;
+									}).sort(function (a, b) {
+										if(scope.stepMode !== 'Grouped Bars' || a.key[3] === b.key[3]) {
+											return a.key[0] < b.key[0] ? -1 : 1;
+										} else {
+											return a.key[3] < b.key[3] ? -1 : 1;
+										}
+									}),
+								function (d) { return d.key[0] + " - " + d.key[1] + " - " + d.key[3]; });
 
 						function fill(d) {
 							return filter(d.key) ? "#555555" : "#CCCCCC";
 						}
 
 						paths.exit().remove();
-						paths.enter()
+						var newPaths = paths.enter()
+								.append('g')
+									.attr('class', 'path');
+
+						newPaths
+							.tooltip(function (d){
+								return {
+									text : d.key[2] + ": " + d.key[0] + " - " + d.key[1],
+									displacement : [0,20],
+									position: [0,0],
+									gravity: "right",
+									placement: "mouse",
+									mousemove : true
+								};
+							});
+
+						newPaths
+								.append('circle')
+									.attr('class', 'path-start')
+									.attr('r', 1)
+									.attr('fill-opacity', 0.8)
+									.attr('stroke-opacity', 0.8)
+									.attr('stroke-width', 0.8)
+									.style("display", "none");
+
+						newPaths
+								.append('circle')
+									.attr('class', 'path-end')
+									.attr('r', 1)
+									.attr('fill-opacity', 0.8)
+									.attr('stroke-opacity', 0.8)
+									.attr('stroke-width', 0.8)
+									.style("display", "none");
+
+						newPaths
 								.append('line')
-									.attr('class', 'path')
 									.attr('stroke-width', 1)
 									.attr('stroke-opacity', 0.8);
 
-						if(scope.stepMode == "Bars") {
+						var lines = paths.selectAll('line');
+						var circles = paths.selectAll('circle');
+						var startCircles = paths.selectAll('.path-start');
+						var endCircles = paths.selectAll('.path-end');
+
+						if(scope.stepMode === "Bars" || scope.stepMode === 'Grouped Bars') {
 							// We need to refigure the yStep scale since the number of groups can change.
 							yStep.domain([-1, group.top(Infinity)
 									.filter(function (d) {
-										return d.key[0] !== "" && d.key[1] !== "" && d.value !== 0;
+										// Require start OR end date.
+										return (d.key[0] !== "" || d.key[1] !== "") && d.value !== 0;
 									}).length]);
 
-							paths.attr('stroke', fill);
+							// Calculate fille based on selection.
+							lines.attr('stroke', fill);
+							circles.attr('stroke', fill);
+							circles.attr('fill', fill);
 
-							paths
+							lines
 								.transition()
 									.attr('x1', function (d) { return x(format.parse(d.key[0])); } )
-									.attr('y1', function (d, i) { return yStep(i); })
+									.attr('y1', 0)
 									.attr('x2', function (d) { return x(format.parse(d.key[1])); })
-									.attr('y2', function (d, i) { return yStep(i); });
-						} else {
-							paths.attr('stroke', fill);
+									.attr('y2', 0);
+
+							startCircles.attr('cx', function (d) { return x(format.parse(d.key[0])); });
+							endCircles.attr('cx', function (d) { return x(format.parse(d.key[1])); });
+
+							// Translate the paths to their proper height.
 							paths
+								.transition()
+									.attr("transform", function (d, i) { return "translate(0," + yStep(i) + ")"; });
+
+							// Show the circles.
+							circles.style("display", "inline");
+						} else {
+							// Hide the circles.
+							circles.style("display", "none");
+
+							lines.attr('stroke', fill);
+							lines
 								.transition()
 									.attr('x1', function (d) { return x(format.parse(d.key[0])); })
 									.attr('y1', y(0))
 									.attr('x2', function (d) { return x(format.parse(d.key[1])); })
 									.attr('y2', y(1));
+
+							// All parallel bars start at 0.
+							paths
+								.transition()
+									.attr("transform", "translate(0,0)");
 						}
 					}
 
@@ -287,13 +432,13 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						update();
 					};
 
-					scope.$watchGroup(['dateStartDim', 'dateEndDim'], function () {
+					scope.$watchGroup(['dateStartDim', 'dateEndDim', 'tooltipLabelDim', 'groupDim'], function () {
 						reset();
 						setup();
 						update();
 					});
 
-					scope.$watch('stepMode', function (ov, nv) {
+					scope.$watch('stepMode', function (nv, ov) {
 						if(nv !== undefined) {
 							update();
 						}
@@ -355,10 +500,14 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						// Clean up after yourself. Remove dimensions that we have created. If we
 						// created watches on another scope, destroy those as well.
 
-						dim.filterAll();
-						group.remove();
-						dim.remove();
+						if(dim) {
+							dim.filterAll();
+							group.remove();
+							dim.remove();
+							dim = undefined;
+						}
 						deregister.forEach(function(f) { f(); });
+						deregister = [];
 
 					});
 
@@ -373,6 +522,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						scope.title = state.title;
 						scope.dateStartDim = scope.dateDims.filter(function(d) { return d.key === state.dateStartDim; })[0];
 						scope.dateEndDim = scope.dateDims.filter(function(d) { return d.key === state.dateEndDim; })[0];
+						scope.tooltipLabelDim = scope.labelDims.filter(function(d) { return d.key === state.tooltipLabelDim; })[0];
 						topBrush.extent(state.topExtent.map(function(d) { return dateService.format.parse(d); }));
 						midBrush.extent(state.midExtent.map(function(d) { return dateService.format.parse(d); }));
 						bottomBrush.extent(state.bottomExtent.map(function(d) { return dateService.format.parse(d); }));
@@ -396,6 +546,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 							title: scope.title,
 							dateStartDim: scope.dateStartDim.key,
 							dateEndDim: scope.dateEndDim.key,
+							tooltipLabelDim: scope.tooltipLabelDim.key,
 							topExtent: topBrush.extent().map(function(d) { return dateService.format(d); }),
 							midExtent: midBrush.extent().map(function(d) { return dateService.format(d); }),
 							bottomExtent: bottomBrush.extent().map(function(d) { return dateService.format(d); }),
@@ -407,6 +558,15 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 
 					// Move the modal out of the fixed area.
 					$(element[0]).find('#date-start-modal').parent().appendTo('body');
+
+					// Set up the toggle if in view state.
+					if(scope.view === 'true') {
+						$(document).ready(function(){
+							$(element[0]).find('.toggle').click(function() {
+								$(element[0]).find('.settings').toggleClass('open close');
+							});
+						});
+					}
 				}
 			}
 		};

@@ -1,6 +1,6 @@
 <div class="row-fluid">
-	<div class="span3">
-		<div class="accordion-heading row-fluid">
+	<div data-ng-class="{span3: view !== 'true', settings: view === 'true', open: view === 'true'}">
+		<div ng-if="showAccordion !== 'false'" class="accordion-heading row-fluid">
 			<a class="span1 text-center angle" data-toggle="collapse" data-ng-click="collapse=!collapse" data-ng-init="collapse=false" data-parent="#filters" href="{{uniqueToggleHref}}" target="_self">
 				<span data-ng-show="!collapse"><i class="fa fa-angle-down"></i></span>
 				<span data-ng-show="collapse"><i class="fa fa-angle-right"></i></span>
@@ -14,7 +14,7 @@
 				<label class="span4 inline">Layout</label>
 				<span class="span8" style="margin-left:0px">
 					<select bs-select ng-model="stepMode" ng-options="mode for mode in stepModes"
-							data-size="2" class="span12 form-control show-tick">
+							data-size="3" class="span12 form-control show-tick">
 					</select>
 				</span>
 			</div>
@@ -33,25 +33,35 @@
 				<p class="tiny muted offset4 span8">In bar layout, the Lower Date determines order of the bars.</p>
 			</div>
 
+			<div class="setting row-fluid">
+				<label class="span4 inline">Tooltip Label</label>
+				<span class="field span8" ng-click="showTooltipLabelModal()">{{tooltipLabelDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>
+			</div>
 
-			<!--<div class="setting row-fluid">
-				<label class="span4 inline">Toggle Layout</label>
-				<span class="span8">
-					<input type="checkbox" data-ng-checked="stepMode" data-ng-model="stepMode">
-				</span>
-			</div>-->
+			<div data-ng-show="stepMode === 'Grouped Bars'" class="setting row-fluid">
+				<label class="span4 inline">Grouping</label>
+				<span class="field span8" ng-click="showGroupModal()">{{groupDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>
+			</div>
 		</div>
 
 	</div>
 
-	<div class="span9 main-viz">
-		<div id="{{uniqueToggleId}}" class="row-fluid accordion-body collapse in component"></div>
+	<div class="main-viz" data-ng-class = "{ view: view === 'true', span9: view !== 'true', span12: view === 'true' }">
+		<div id="{{uniqueToggleId}}" class="row-fluid accordion-body collapse in component">
+			<!-- SVG inserted here -->
+		</div>
 		<div id="{{uniqueModalId}}">
 			<div id="date-start-modal" data-modal dimensions="dateDims" model="dateStartDim"></div>
 			<div id="date-end-modal" data-modal dimensions="dateDims" model="dateEndDim"></div>
+			<div id="tooltip-label-modal" data-modal dimensions="labelDims" model="tooltipLabelDim"></div>
+			<div id="group-modal" data-modal dimensions="labelDims" model="groupDim"></div>
 		</div>
 	</div>
 
-	<a class="remove fa fa-trash-o" data-ng-click="removeFilter($event)" data-toggle="tooltip" data-title="Delete"></a>
-	<a class="reset fa fa-eraser" style="line-height:40px" data-ng-click="filterReset()" data-toggle="tooltip" data-title="Clear"></a>
+	<a data-ng-show="showControls !== 'false'" class="remove fa fa-trash-o"
+		data-ng-click="$parent.removeFilter($event)" data-toggle="tooltip" data-title="Delete"></a>
+	<a data-ng-show="showControls !== 'false'" class="reset fa fa-eraser" style="line-height:40px"
+		data-ng-click="filterReset()" data-toggle="tooltip" data-title="Clear"></a>
+	<a data-ng-show="view === 'true'" class="toggle" data-toggle="tooltip" data-original-title="Settings"
+		data-placement="bottom"><i class="fa fa-cog"></i></a>
 </div>
