@@ -15,8 +15,8 @@ angular.module('palladio.directives.modal', [])
 			    	'<h4 style="line-height: normal">Choose the dimensions</h4>' +
 			  	'</div>' +
 			  	'<div class="modal-body">' +
-			    	'<ul ui-sortable="sortableOptions" class="unstyled" data-ng-model="dimensions">' +
-			    		'<li ng-repeat="field in dimensions" class="pill" data-ng-class="{checked: check(field)}">' +
+			    	'<ul ui-sortable="sortableOptions" class="unstyled" data-ng-model="internalDimensions">' +
+			    		'<li ng-repeat="field in internalDimensions" class="pill" data-ng-class="{checked: check(field)}">' +
 			    			'<i data-ng-show="!sortableOptions.disabled" class="icon-move"></i>' +
 			    			'<label class="checkbox">' +
 		    					'<input type="checkbox" ng-checked="check(field)" ng-click="change(field)"> {{getDescription(field)}}' +
@@ -30,6 +30,8 @@ angular.module('palladio.directives.modal', [])
 			'</div>',
 
 			link: function postLink(scope, elements, attrs) {
+
+				scope.internalDimensions = scope.dimensions.map(copyDimension);
 				
 				scope.change = function(field) {
 					if(Array.isArray(scope.model)) {
@@ -50,9 +52,13 @@ angular.module('palladio.directives.modal', [])
 				};
 
 				scope.$watchCollection('dimensions', function() {
+					// Rebuild the internalDimensions (copied dimensions) by re-ordering, inserting,
+					// or deleting as appropriate. For now we can be naive about it. TODO.
+					scope.internalDimensions = scope.dimensions.map(copyDimension);
+
 					// Reorder the model if the order of dimensions changes and model is an array
 					if(Array.isArray(scope.model)) {
-						scope.model = scope.dimensions.filter(function(d) {
+						scope.model = scope.internalDimensions.filter(function(d) {
 							// Does it exist in the model?
 							return scope.model.filter( function (m) { return d.key === m.key; }).length;
 						});
@@ -80,6 +86,37 @@ angular.module('palladio.directives.modal', [])
 						return d.description;
 					}
 				};
+
+				function copyDimension(dimension) {
+					if(dimension.field) {
+						// Agg dim
+						return dimension;
+					} else {
+						return {
+							blanks: dimension.blanks,
+							cardinality: dimension.cardinality,
+							confirmed: dimension.confirmed,
+							countBy: dimension.countBy,
+							countDescription: dimension.countDescription,
+							countable: dimension.countable,
+							delete: dimension.delete,
+							description: dimension.description,
+							descriptiveField: dimension.descriptiveField,
+							errors: dimension.errors.slice(0),
+							hierDelimiter: dimension.hierDelimiter,
+							ignore: dimension.ignore,
+							key: dimension.key,
+							mvDelimiter: dimension.mvDelimiter,
+							originFileId: dimension.originFileId,
+							special: dimension.special.slice(0),
+							type: dimension.type,
+							typeField: dimension.typeField,
+							unassignedSpecialChars: dimension.unassignedSpecialChars? dimension.unassignedSpecialChars.slice(0) : undefined,
+							uniqueKey: dimension.uniqueKey,
+							uniques: dimension.uniques.slice(0),
+						};
+					}
+				}
 
 				scope.sortableOptions = {
 					disabled: scope.sortable === 'true' ? false : true

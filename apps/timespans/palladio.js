@@ -60631,6 +60631,36 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		}, 1000);
 	});
 
+angular.module('palladio.filters', [])
+  .filter('titleCase', function () {
+		return function (str) {
+			return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+		};
+	})
+
+  .filter('confirmed', function () {
+    return function (fields) {
+      return fields.filter(function(d){ return d.confirmed; }).length;
+    };
+  })
+
+  .filter('special', function () {
+    return function (fields) {
+      return fields.filter(function(d){ return d.special.length; }).length;
+    };
+  })
+
+  .filter('unique', function () {
+    return function (fields) {
+        return fields.filter(function(d){ return d.uniqueKey; }).length;
+    };
+  })
+
+  .filter('notSameFile', function () {
+    return function (files, fileId) {
+        return files.filter(function (d){ return d.id !== fileId; });
+    };
+  });
 angular.module('palladio.directives.dimension', ['palladio'])
 	.directive('palladioDimension', ['palladioService', function(ps) {
 		return {
@@ -60973,8 +61003,8 @@ angular.module('palladio.directives.modal', [])
 			    	'<h4 style="line-height: normal">Choose the dimensions</h4>' +
 			  	'</div>' +
 			  	'<div class="modal-body">' +
-			    	'<ul ui-sortable="sortableOptions" class="unstyled" data-ng-model="dimensions">' +
-			    		'<li ng-repeat="field in dimensions" class="pill" data-ng-class="{checked: check(field)}">' +
+			    	'<ul ui-sortable="sortableOptions" class="unstyled" data-ng-model="internalDimensions">' +
+			    		'<li ng-repeat="field in internalDimensions" class="pill" data-ng-class="{checked: check(field)}">' +
 			    			'<i data-ng-show="!sortableOptions.disabled" class="icon-move"></i>' +
 			    			'<label class="checkbox">' +
 		    					'<input type="checkbox" ng-checked="check(field)" ng-click="change(field)"> {{getDescription(field)}}' +
@@ -60988,6 +61018,8 @@ angular.module('palladio.directives.modal', [])
 			'</div>',
 
 			link: function postLink(scope, elements, attrs) {
+
+				scope.internalDimensions = scope.dimensions.map(copyDimension);
 				
 				scope.change = function(field) {
 					if(Array.isArray(scope.model)) {
@@ -61008,9 +61040,13 @@ angular.module('palladio.directives.modal', [])
 				};
 
 				scope.$watchCollection('dimensions', function() {
+					// Rebuild the internalDimensions (copied dimensions) by re-ordering, inserting,
+					// or deleting as appropriate. For now we can be naive about it. TODO.
+					scope.internalDimensions = scope.dimensions.map(copyDimension);
+
 					// Reorder the model if the order of dimensions changes and model is an array
 					if(Array.isArray(scope.model)) {
-						scope.model = scope.dimensions.filter(function(d) {
+						scope.model = scope.internalDimensions.filter(function(d) {
 							// Does it exist in the model?
 							return scope.model.filter( function (m) { return d.key === m.key; }).length;
 						});
@@ -61038,6 +61074,37 @@ angular.module('palladio.directives.modal', [])
 						return d.description;
 					}
 				};
+
+				function copyDimension(dimension) {
+					if(dimension.field) {
+						// Agg dim
+						return dimension;
+					} else {
+						return {
+							blanks: dimension.blanks,
+							cardinality: dimension.cardinality,
+							confirmed: dimension.confirmed,
+							countBy: dimension.countBy,
+							countDescription: dimension.countDescription,
+							countable: dimension.countable,
+							delete: dimension.delete,
+							description: dimension.description,
+							descriptiveField: dimension.descriptiveField,
+							errors: dimension.errors.slice(0),
+							hierDelimiter: dimension.hierDelimiter,
+							ignore: dimension.ignore,
+							key: dimension.key,
+							mvDelimiter: dimension.mvDelimiter,
+							originFileId: dimension.originFileId,
+							special: dimension.special.slice(0),
+							type: dimension.type,
+							typeField: dimension.typeField,
+							unassignedSpecialChars: dimension.unassignedSpecialChars? dimension.unassignedSpecialChars.slice(0) : undefined,
+							uniqueKey: dimension.uniqueKey,
+							uniques: dimension.uniques.slice(0),
+						};
+					}
+				}
 
 				scope.sortableOptions = {
 					disabled: scope.sortable === 'true' ? false : true
@@ -61422,36 +61489,6 @@ angular.module('palladio.directives.yasgui', [
 			}
 		};
 	});
-angular.module('palladio.filters', [])
-  .filter('titleCase', function () {
-		return function (str) {
-			return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
-		};
-	})
-
-  .filter('confirmed', function () {
-    return function (fields) {
-      return fields.filter(function(d){ return d.confirmed; }).length;
-    };
-  })
-
-  .filter('special', function () {
-    return function (fields) {
-      return fields.filter(function(d){ return d.special.length; }).length;
-    };
-  })
-
-  .filter('unique', function () {
-    return function (fields) {
-        return fields.filter(function(d){ return d.uniqueKey; }).length;
-    };
-  })
-
-  .filter('notSameFile', function () {
-    return function (files, fileId) {
-        return files.filter(function (d){ return d.id !== fileId; });
-    };
-  });
 var crossfilterHelpers = {
 
 	///////////////////////////////////////////////////////////////////////
@@ -65804,7 +65841,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 							.append("div").attr("class", "btn-group");
 
 						var cells = facets.selectAll('.cell')
-								.data(function (d) { console.log(d); return d.group.top(Infinity)
+								.data(function (d) { return d.group.top(Infinity)
 											.map(function(g) {
 												return buildCellData(g,d);
 											}); },
@@ -65894,8 +65931,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 									.style('width').substring(0, d3.select(element[0]).select('.mid-facet-container')
 										.style('width').length - 2) - 205) + 'px');
 							palladioService.removeFilter(scope.uniqueToggleId + d.key);
-							d.dimension.filterAll();
-							d.dimension.remove();
+							removeFacetData(d);
 							palladioService.update();
 						});
 
@@ -65937,6 +65973,18 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 
 						data.domKey = calculateDomKey(data.key);
 						data.filters = [];
+					}
+
+					function removeFacetData(data) {
+						if(data.dimension) {
+							data.dimension.filterAll();
+							data.dimension.remove();
+						}
+						data.dimension = undefined;
+						data.group = undefined;
+						data.scale = undefined;
+						data.domKey = undefined;
+						data.filters = undefined;
 					}
 
 					function updateCell(sel) {
@@ -66031,10 +66079,9 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 					// Clean up after ourselves. Remove dimensions that we have created. If we
 					// created watches on another scope, destroy those as well.
 					scope.$on('$destroy', function () {
-						console.log("Destroying...");
-						scope.dimensions.map(function(d) {
-							d.dimension.filterAll();
-							d.dimension.remove();
+						console.log(scope.dims.length);
+						scope.dims.map(function(d) {
+							removeFacetData(d);
 						});
 
 						deregister.forEach(function (f) { f(); });
@@ -66095,17 +66142,6 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 					};
 
 					deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'facet', exportState, importState));
-
-					function stripDimension(dim) {
-						return {
-							countDescription: dim.countDescription,
-							description: dim.description,
-							key: dim.key,
-							originFileId: dim.originFileId,
-							typeField: dim.typeField,
-							typeFieldUniques: dim.typeFieldUniques
-						};
-					}
 				},
 
 				post : function(scope, element, attrs) {
@@ -68944,8 +68980,6 @@ angular.module('palladioSelectionView', ['palladio'])
 		var directiveDefObj = {
 			scope: true,
 			link: function (scope, element) {
-
-				console.log("Linking selection");
 
 				var uniqueId = "selectionView" + Math.floor(Math.random() * 10000);
 				var deregister = [];

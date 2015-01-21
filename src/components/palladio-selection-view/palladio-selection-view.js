@@ -7,8 +7,6 @@ angular.module('palladioSelectionView', ['palladio'])
 			scope: true,
 			link: function (scope, element) {
 
-				console.log("Linking selection");
-
 				var uniqueId = "selectionView" + Math.floor(Math.random() * 10000);
 				var deregister = [];
 

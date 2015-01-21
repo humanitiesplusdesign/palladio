@@ -195,7 +195,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 							.append("div").attr("class", "btn-group");
 
 						var cells = facets.selectAll('.cell')
-								.data(function (d) { console.log(d); return d.group.top(Infinity)
+								.data(function (d) { return d.group.top(Infinity)
 											.map(function(g) {
 												return buildCellData(g,d);
 											}); },
@@ -285,8 +285,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 									.style('width').substring(0, d3.select(element[0]).select('.mid-facet-container')
 										.style('width').length - 2) - 205) + 'px');
 							palladioService.removeFilter(scope.uniqueToggleId + d.key);
-							d.dimension.filterAll();
-							d.dimension.remove();
+							removeFacetData(d);
 							palladioService.update();
 						});
 
@@ -328,6 +327,18 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 
 						data.domKey = calculateDomKey(data.key);
 						data.filters = [];
+					}
+
+					function removeFacetData(data) {
+						if(data.dimension) {
+							data.dimension.filterAll();
+							data.dimension.remove();
+						}
+						data.dimension = undefined;
+						data.group = undefined;
+						data.scale = undefined;
+						data.domKey = undefined;
+						data.filters = undefined;
 					}
 
 					function updateCell(sel) {
@@ -422,10 +433,9 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 					// Clean up after ourselves. Remove dimensions that we have created. If we
 					// created watches on another scope, destroy those as well.
 					scope.$on('$destroy', function () {
-						console.log("Destroying...");
-						scope.dimensions.map(function(d) {
-							d.dimension.filterAll();
-							d.dimension.remove();
+						console.log(scope.dims.length);
+						scope.dims.map(function(d) {
+							removeFacetData(d);
 						});
 
 						deregister.forEach(function (f) { f(); });
