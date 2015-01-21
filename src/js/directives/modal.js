@@ -41,6 +41,7 @@ angular.module('palladio.directives.modal', [])
 						} else {
 							scope.model = scope.model.concat(field);
 						}
+						reorderModel();
 					} else {
 						if(scope.check(field)) {
 							// Field is already checked (uncheck).
@@ -55,15 +56,14 @@ angular.module('palladio.directives.modal', [])
 					// Rebuild the internalDimensions (copied dimensions) by re-ordering, inserting,
 					// or deleting as appropriate. For now we can be naive about it. TODO.
 					scope.internalDimensions = scope.dimensions.map(copyDimension);
-
-					// Reorder the model if the order of dimensions changes and model is an array
-					if(Array.isArray(scope.model)) {
-						scope.model = scope.internalDimensions.filter(function(d) {
-							// Does it exist in the model?
-							return scope.model.filter( function (m) { return d.key === m.key; }).length;
-						});
-					}
 				});
+
+				scope.$watchCollection('internalDimensions', function () {
+					// Reorder the model if the order of dimensions changes and model is an array
+					reorderModel();
+				})
+
+
 
 				scope.check = function(field) {
 					if(Array.isArray(scope.model)) {
@@ -86,6 +86,16 @@ angular.module('palladio.directives.modal', [])
 						return d.description;
 					}
 				};
+
+				function reorderModel() {
+					// Only reorder if we are in array and sorting mode
+					if(Array.isArray(scope.model) && scope.sortable === 'true') {
+						scope.model = scope.internalDimensions.filter(function(d) {
+							// Does it exist in the model?
+							return scope.model.filter( function (m) { return d.key === m.key; }).length;
+						});
+					}
+				}
 
 				function copyDimension(dimension) {
 					if(dimension.field) {
