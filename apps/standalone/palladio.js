@@ -64497,6 +64497,171 @@ angular.module('palladio.services.validation', [])
 			return errors;
 		};
 	});
+// Palladio template component module
+
+angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
+	.directive('palladioIdiographView', function (palladioService, dataService) {
+		var directiveObj = {
+			scope: true,
+			templateUrl: 'partials/idiograph-view/template.html',
+
+			link: { pre: function(scope) {
+
+					// In the pre-linking function we can use scope.data, scope.metadata, and
+					// scope.xfilter to populate any additional scope values required by the
+					// template.
+
+					// The parent scope must include the following:
+					//   scope.xfilter
+					//   scope.metadata
+
+					// If you need to do any configuration before your visualization is set up,
+					// do it here. DO NOT do anything that changes the DOM here, so don't
+					// programatically instantiate your visualization at this point. That happens
+					// in the 'post' function.
+					//
+					// You might need to do things here especially
+					// if your visualization is contained in another directive that is included
+					// in the template of this directive.
+
+					scope.uniqueToggleId = "idiographView" + Math.floor(Math.random() * 10000);
+
+					scope.metadata = dataService.getDataSync().metadata;
+					scope.xfilter = dataService.getDataSync().xfilter;
+					scope.data = dataService.getDataSync().data;
+
+				}, post: function(scope, element) {
+
+					// If you are building a d3.js visualization, you can grab the containing
+					// element with:
+					//
+					// d3.select(element[0]);
+
+					setup();
+					update();
+
+					function setup() {
+						// Called when the entire visualization should be rebuilt.
+						
+					}
+
+					function update() {
+						// Incremental updates to existing visualization.
+						
+					}
+
+					function reset() {
+						// Tear down visualization.
+
+					}
+
+					// Watch scope elements that should trigger a full rebuild.
+					scope.$watchGroup([], function () {
+						reset();
+						setup();
+						update();
+					});
+
+
+					//
+					// If you are going to programatically instantiate your visualization, do it
+					// here. Your visualization should emit the following events if necessary:
+					//
+					// For new/changed filters:
+					//
+					// scope.$emit('updateFilter', [identifier, description, filter, callback]);
+					//
+					// For removing all filters:
+					//
+					// scope.$emit('updateFilter', [identifier, null]);
+					//
+					// If you apply a filter in this component, notify the Palladio framework.
+					//
+					// identifier: A string unique to this instance of this component. Should
+					//             be randomly generated.
+					//
+					// description: A human-readable description of this component. Should be
+					//              unique to this instance of this component, but not required.
+					//
+					// filter: A human-readable description of the filter that is currently
+					//         applied on this component.
+					//
+					// callback: A function that will remove all filters on this component when
+					//           it is evaluated.
+					//
+					//
+					// Whenever the component needs to trigger an update for all other components
+					// in the application (for example, when a filter is applied or removed):
+					//
+					// scope.$emit('triggerUpdate');
+
+					var deregister = [];
+
+					// You should also handle the following externally triggered events:
+
+					deregister.push(palladioService.onReset(scope.uniqueToggleId, function() {
+
+						// Reset any filters that have been applied through this visualization.
+						// This means running .filterAll() on any Crossfilter dimensions you have
+						// created and updating your visualization as required.
+
+						reset();
+
+					}));
+
+					deregister.push(palladioService.onUpdate(scope.uniqueToggleId, function() {
+						// Only update if the table is visible.
+						if(element.is(':visible')) { update(); }
+					}));
+
+					// Update when it becomes visible (updating when not visibile errors out)
+					scope.$watch(function() { return element.is(':visible'); }, update);
+
+					scope.$on('$destroy', function () {
+
+						// Clean up after yourself. Remove dimensions that we have created. If we
+						// created watches on another scope, destroy those as well.
+
+						deregister.forEach(function(f) { f(); });
+						deregister = [];
+
+					});
+
+
+					// Support save/load. These functions should be able to fully recreate an instance
+					// of this visualization based on the results of the exportState() function. Include
+					// current filters, any type of manipulations the user has done, etc.
+
+					function importState(state) {
+
+						// Load a state object created by exportState().
+						
+
+					}
+
+					function exportState() {
+
+						// Return a state object that can be consumed by importState().
+						return {
+							
+						};
+					}
+
+					deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'idiograph', exportState, importState));
+
+					// Set up the toggle.
+					$(document).ready(function(){
+						$(element[0]).find('.toggle').click(function() {
+							$(element[0]).find('.settings').toggleClass('open close');
+						});
+					});
+				}
+			}
+		};
+
+		return directiveObj;
+	});
+
 // Palladio data upload component
 
 angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
@@ -64587,6 +64752,1587 @@ angular.module('palladioDataUpload', ['palladio.services'])
 		};
 
 		return directiveObj;
+	});
+// Palladio template component module
+
+angular.module('palladioDurationView', ['palladio', 'palladio.services'])
+	.directive('palladioDurationView', function (dateService, palladioService, dataService) {
+		var directiveObj = {
+			scope: {
+				fullHeight: '@',
+				fullWidth: '@',
+				showControls: '@',
+				showAccordion: '@',
+				view: '@'
+			},
+			templateUrl: 'partials/palladio-duration-view/template.html',
+
+			link: { pre: function(scope) {
+
+					// In the pre-linking function we can use scope.data, scope.metadata, and
+					// scope.xfilter to populate any additional scope values required by the
+					// template.
+
+					// The parent scope must include the following:
+					//   scope.xfilter
+					//   scope.metadata
+
+					// If you need to do any configuration before your visualization is set up,
+					// do it here. DO NOT do anything that changes the DOM here, so don't
+					// programatically instantiate your visualization at this point. That happens
+					// in the 'post' function.
+					//
+					// You might need to do things here especially
+					// if your visualization is contained in another directive that is included
+					// in the template of this directive.
+
+					scope.uniqueToggleId = "durationView" + Math.floor(Math.random() * 10000);
+					scope.uniqueToggleHref = "#" + scope.uniqueToggleId;
+					scope.uniqueModalId = scope.uniqueToggleId + "modal";
+
+					scope.metadata = dataService.getDataSync().metadata;
+					scope.xfilter = dataService.getDataSync().xfilter;
+					scope.data = dataService.getDataSync().data;
+
+					// Take the first number dimension we find.
+					scope.durationDims = scope.metadata.filter(function (d) { return d.type === 'number'; });
+					// scope.durationDim = scope.durationDims[0];
+
+					// Label dimensions.
+					scope.labelDims = scope.metadata;
+					scope.tooltipLabelDim = scope.labelDims[0];
+					// scope.groupDim = scope.labelDims[0];
+					// scope.xGroupDim = scope.labelDims[0];
+					scope.xSortDim = scope.labelDims[0];
+
+					scope.title = "Duration view";
+
+					scope.modes = ['Constant duration'];
+					if(scope.durationDims.length > 0) scope.modes.push('Actual duration');
+					scope.mode = scope.modes[0];
+
+					scope.showDurationModal = function () {
+						$('#' + scope.uniqueModalId).find('#duration-modal').modal('show');
+					};
+
+					scope.showTooltipLabelModal = function () {
+						$('#' + scope.uniqueModalId).find('#tooltip-label-modal').modal('show');
+					};
+
+					scope.showGroupModal = function () {
+						$('#' + scope.uniqueModalId).find('#group-modal').modal('show');
+					};
+
+					scope.showXGroupModal = function () {
+						$('#' + scope.uniqueModalId).find('#x-group-modal').modal('show');
+					};
+
+					scope.showXSortModal = function () {
+						$('#' + scope.uniqueModalId).find('#x-sort-modal').modal('show');
+					};
+
+				}, post: function(scope, element) {
+
+					// If you are building a d3.js visualization, you can grab the containing
+					// element with:
+					//
+					// d3.select(element[0]);
+
+					var sel, svg, dim, group, x, y,
+						top, bottom, left, filter, yStep, tooltip,
+						colors, bottomAxis, topAxis, yAxis, uniques, height, lineHeight;
+
+					// Constants...
+					var margin = 25;
+					var lineHeight = 20;
+					var leftMargin = 150;
+					var bottomOffset = 50;
+					var width = scope.fullWidth === 'true' ? $(window).width() - margin*2 : $(window).width()*0.7;
+					// var height = scope.height ? +scope.height : 200;
+					// height = scope.fullHeight === 'true' ? $(window).height()-200 : height;
+					var highlightColor = '#67D6E5';
+
+					setup();
+					update();
+
+					function setup() {
+						// Check necessary fields are selected.
+						if(!scope.tooltipLabelDim ||
+							!scope.groupDim ||
+							!scope.xGroupDim ||
+							!scope.xSortDim ||
+							(scope.mode === 'Actual duration' && !scope.durationDim)) {
+
+							return false;
+						}
+
+						// Calculate uniques for use in y scale and height.
+						uniques = [];
+						scope.data.forEach(function(d) {
+							if(uniques.indexOf("" + d[scope.groupDim.key]) === -1) {
+								uniques.push("" + d[scope.groupDim.key]);
+							}
+						});
+						uniques.sort(d3.descending);
+
+						// Figure height based on uniques and a minimum height.
+						height = uniques.length * lineHeight;
+
+						sel = d3.select(d3.select(element[0]).select(".main-viz")[0][0].children[0]);
+						if(!sel.select('svg').empty()) sel.select('svg').remove();
+						svg = sel.append('svg');
+
+						sel.attr('width', width + margin*2);
+						sel.attr('height', height + margin*2);
+
+						svg.attr('width', width + margin*2);
+						svg.attr('height', height + margin*2);
+
+						if(dim) dim.remove();
+
+						dim = scope.xfilter.dimension(function(d) { return "" + d[scope.groupDim.key]; });
+
+						// For now we keep the grouping simple and just do a naive count. To enable
+						// 'countBy' functionality we need to use the Crossfilter helpers or Reductio.
+						group = dim.group();
+
+						// Use reductio value-lists to track the xGroup for each group.
+						var reducer = reductio().count(true)
+							.nest([function(d) { return d[scope.xGroupDim.key]; }]);
+
+						if(scope.mode === 'Actual duration') {
+							reducer.sum(function(d) { return +d[scope.durationDim.key]; });
+						}
+
+						reducer(group);
+
+						// Scales
+						x = d3.scale.linear().range([0, width - leftMargin]);
+						setXDomain();
+						y = d3.scale.ordinal().rangeBands([height - bottomOffset, 0], 0.2)
+								// .domain(group.top(Infinity)
+								// 	.filter(function (d) {
+								// 		return d.value.count !== 0;
+								// 	}).map(function(d) { return d.key; }));
+								.domain(uniques);
+
+						colors = d3.scale.ordinal()
+							.range(colorbrewer.Greys[9])
+							.domain(scope.xGroupDim.uniques);
+
+						bottomAxis = d3.svg.axis().orient("bottom").scale(x);
+						topAxis = d3.svg.axis().orient("top").scale(x);
+						yAxis = d3.svg.axis().orient("left").scale(y);
+
+						// Build the visualization.
+						var g = svg.append('g')
+								.attr("transform", "translate(" + leftMargin + "," + margin + ")");
+
+						bottom = g.append('g')
+							.attr("class", "axis x-axis x-bottom")
+							.attr("transform", "translate(" + 0 + "," + (height - bottomOffset) + ")")
+							.call(bottomAxis);
+
+						top = g.append('g')
+							.attr("class", "axis x-axis x-top")
+							.call(topAxis);
+
+						left = g.append('g')
+							.attr("class", "axis y-axis")
+							.call(yAxis);
+
+						tooltip = g.select(".duration-tooltip");
+						// Set up the tooltip.
+						if(tooltip.empty()) {
+							tooltip = g.append("g")
+									.attr("class", "duration-tooltip")
+									.attr("pointer-events", "none")
+									.style("display", "none");
+
+							tooltip.append("foreignObject")
+									.attr("width", 100)
+									.attr("height", 26)
+									.attr("pointer-events", "none")
+								.append("html")
+									.style("background-color", "rgba(0,0,0,0)")
+								.append("div")
+									.style("padding-left", 3)
+									.style("padding-right", 3)
+									.style("text-align", "center")
+									.style("white-space", "nowrap")
+									.style("overflow", "hidden")
+									.style("text-overflow", "ellipsis")
+									.style("border-radius", "5px")
+									.style("background-color", "white")
+									.style("border", "3px solid grey");
+						}
+					}
+
+					function update() {
+						// Check necessary fields are selected.
+						if(!scope.tooltipLabelDim ||
+							!scope.groupDim ||
+							!scope.xGroupDim ||
+							!scope.xSortDim ||
+							(scope.mode === 'Actual duration' && !scope.durationDim)) {
+
+							return false;
+						}
+
+						// Update the x-scale and x-axes
+						setXDomain();
+						bottomAxis.scale(x);
+						topAxis.scale(x);
+						svg.select('.x-bottom').call(bottomAxis);
+						svg.select('.x-top').call(topAxis);
+
+						var groups = svg.select('g').selectAll('.duration-group')
+							.data(group.top(Infinity),
+									// .filter(function (d) {
+									// 	return d.value.count !== 0;
+									// }),
+								function (d) { return d.key; });
+
+						groups.exit().remove();
+
+						groups.enter()
+								.append('g')
+									.attr('class', 'duration-group')
+									.attr('transform', function(d) {
+										return 'translate(1,' + y(d.key) + ')';
+									});
+
+						var constantDuration = scope.mode === 'Constant duration';
+						var rectWidth = x(1) - x(0);
+
+						function calcWidth(d) {
+							return constantDuration ?
+								rectWidth :
+								(isNaN(+d[scope.durationDim.key]) ?
+									0 :
+									x(+d[scope.durationDim.key]));
+						}
+
+						var rects = groups.selectAll('.duration-bar')
+							.data(function(d, i) {
+								var total = 0;
+
+								// Flatten to basic records
+								return d.value.nest.map(function(n) {
+									return n.values;
+								}).reduce(function(a, b) {
+									return a.concat(b);
+								}).sort(function(a, b) {
+									return d3.ascending(a[scope.xSortDim.key], b[scope.xSortDim.key]);
+								}).map(function(d) {
+									total = total + calcWidth(d);
+									// Build object with information needed to visualize
+									return {
+										name: d[scope.xGroupDim.key],
+										label: d[scope.tooltipLabelDim.key],
+										group: i,
+										x: calcWidth(d),
+										offset: (total - calcWidth(d))
+									};
+								});
+							}, function(d, i) { return d.name + '-' + d.group + '-' + i; });
+
+						rects.exit().remove();
+
+						rects.enter()
+								.append('rect')
+									.attr('height', y.rangeBand())
+									.attr('class', 'duration-bar');
+
+						rects
+							.attr('width', function(d) { return d.x ? d.x : 0; })
+							.attr('fill', function(d) { return colors(d.name); })
+							.attr('stroke', function(d) { return colors(d.name); })
+							.attr('transform', function(d) { return 'translate(' + (d.offset ? d.offset : 0) + ',0)'; })
+							.on('mouseover', function(d) {
+								rects.attr('fill', function(f) {
+										if(d.name === f.name) {
+											return highlightColor;
+										} else {
+											return colors(f.name);
+										}})
+									.attr('stroke', function(f) {
+										if(d.name === f.name) {
+											return highlightColor;
+										} else {
+											return colors(f.name);
+										}
+									});
+							})
+							.on('mouseout', function() {
+								rects
+									.attr('fill', function(d) { return colors(d.name); })
+									.attr('stroke', function(d) { return colors(d.name); });
+							})
+							.tooltip(function (d){
+								return {
+									text : d.label,
+									displacement : [0,20],
+									position: [0,0],
+									gravity: "right",
+									placement: "mouse",
+									mousemove : true
+								};
+							});
+					}
+
+					function setXDomain() {
+						if(scope.mode === 'Actual duration') {
+							x.domain([ 0, d3.max(group.top(Infinity), function (d) { return d.value.sum; }) ]);
+						} else {
+							x.domain([ 0, d3.max(group.top(Infinity), function (d) { return d.value.count; }) ]);
+						}
+					}
+
+					function reset() {
+						if(dim) {
+							group.remove();
+							dim.remove();
+							svg.remove();
+						}
+					}
+
+					scope.filterReset = function () {
+						reset();
+						setup();
+						update();
+					};
+
+					scope.$watchGroup(['mode', 'durationDim', 'tooltipLabelDim', 'groupDim', 'xGroupDim', 'xSortDim'], function () {
+						reset();
+						setup();
+						update();
+					});
+
+					//
+					// If you are going to programatically instantiate your visualization, do it
+					// here. Your visualization should emit the following events if necessary:
+					//
+					// For new/changed filters:
+					//
+					// scope.$emit('updateFilter', [identifier, description, filter, callback]);
+					//
+					// For removing all filters:
+					//
+					// scope.$emit('updateFilter', [identifier, null]);
+					//
+					// If you apply a filter in this component, notify the Palladio framework.
+					//
+					// identifier: A string unique to this instance of this component. Should
+					//             be randomly generated.
+					//
+					// description: A human-readable description of this component. Should be
+					//              unique to this instance of this component, but not required.
+					//
+					// filter: A human-readable description of the filter that is currently
+					//         applied on this component.
+					//
+					// callback: A function that will remove all filters on this component when
+					//           it is evaluated.
+					//
+					//
+					// Whenever the component needs to trigger an update for all other components
+					// in the application (for example, when a filter is applied or removed):
+					//
+					// scope.$emit('triggerUpdate');
+
+					var deregister = [];
+
+					// You should also handle the following externally triggered events:
+
+					deregister.push(palladioService.onReset(scope.uniqueToggleId, function() {
+
+						// Reset any filters that have been applied through this visualization.
+						// This means running .filterAll() on any Crossfilter dimensions you have
+						// created and updating your visualization as required.
+
+						scope.filterReset();
+
+					}));
+
+					deregister.push(palladioService.onUpdate(scope.uniqueToggleId, function() {
+						// Only update if the table is visible.
+						if(element.is(':visible')) { update(); }
+					}));
+
+					// Update when it becomes visible (updating when not visibile errors out)
+					scope.$watch(function() { return element.is(':visible'); }, update);
+
+					scope.$on('$destroy', function () {
+
+						// Clean up after yourself. Remove dimensions that we have created. If we
+						// created watches on another scope, destroy those as well.
+
+						if(dim) {
+							group.remove();
+							dim.remove();
+							dim = undefined;
+						}
+						deregister.forEach(function(f) { f(); });
+						deregister = [];
+
+					});
+
+
+					// Support save/load. These functions should be able to fully recreate an instance
+					// of this visualization based on the results of the exportState() function. Include
+					// current filters, any type of manipulations the user has done, etc.
+
+					function importState(state) {
+
+						// Load a state object created by exportState().
+						scope.title = state.title;
+						scope.durationDim = scope.durationDims.filter(function(d) { return d.key === state.durationDim; })[0];
+						scope.tooltipLabelDim = scope.labelDims.filter(function(d) { return d.key === state.tooltipLabelDim; })[0];
+						scope.groupDim = scope.labelDims.filter(function(d) { return d.key === state.groupDim; })[0];
+						scope.xGroupDim = scope.labelDims.filter(function(d) { return d.key === state.xGroupDim; })[0];
+						scope.xSortDim = scope.labelDims.filter(function(d) { return d.key === state.xSortDim; })[0];
+
+						scope.mode = state.mode;
+
+					}
+
+					function exportState() {
+
+						// Return a state object that can be consumed by importState().
+						return {
+							title: scope.title,
+							durationDim: scope.durationDim.key,
+							tooltipLabelDim: scope.tooltipLabelDim.key,
+							groupDim: scope.groupDim.key,
+							xGroupDim: scope.xGroupDim.key,
+							xSortDim: scope.xSortDim.key,
+							mode: scope.mode
+						};
+					}
+
+					deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'duration', exportState, importState));
+
+					// Move the modal out of the fixed area.
+					$(element[0]).find('#duration-modal').parent().appendTo('body');
+
+					// Set up the toggle if in view state.
+					if(scope.view === 'true') {
+						$(document).ready(function(){
+							$(element[0]).find('.toggle').click(function() {
+								$(element[0]).find('.settings').toggleClass('open close');
+							});
+						});
+					}
+				}
+			}
+		};
+
+		return directiveObj;
+	});
+
+function elastic_list() {
+
+  // Colors from colorbrewer2.org
+
+	var height = 350,
+			width = 200,
+			group = null,
+      all = null,
+      dimension = null,
+      filter = d3.map(),
+      mode = 0,  // 0 = filter, 1 = global, 2 = lock
+      maxCells = Infinity,
+      resort = false,
+      selection = null,
+      minCellHeight = 20,
+      emptyCellHeight = 2,
+      scrollbarWidth = 0,
+      scrollbarElement = null,
+      cellMargin = 2,
+      cellWidth = function() {
+        return width - scrollbarWidth;
+      },
+      backgroundColor = "white",
+      initialGroupMetaData = { },
+      initialGroups = [ ],
+      initialAgg = 0,
+      initialCardinality = 0,
+      uniqueDimension = null,
+      aggregationType = null,
+      aggregateKey = null,
+
+      groupValue = function(v) { return v; },
+      groupDisplayValue = function(v) { return v; },
+
+      // Sort ordering - g and h are groups (g.key and g.value are available)
+      // By default, sort descending by value.
+      compareFunction = function(g, h) {
+        return h.value.data.agg - g.value.data.agg;
+      },
+
+      // Call this after filter selection/deselection
+      callback = function() { return true; },
+
+      // drawCell context
+      cellColorScale = d3.scale.quantize().range(["#EFF3FF", "#BDD7E7", "#6BAED6", "#DDDDDD"]).domain([1,0]),
+      cellSizeScale = null,
+      emptyCellColor = "#D9D9D9",
+      filterColor = "#A8DDB5",
+      totalAgg = 0,
+
+      // cells.each(drawcell) - "this" is a svg "g" DOM object
+      // default function can be over-ridden for fanciness
+      redrawCell = function(sel) {
+        var g = d3.select(sel);
+        var rect = g.select("rect");
+        var labelText = g.select(".label");
+        var elementsText = g.select(".elements");
+
+        g.classed("empty", function (d) { return d.group.value.data.agg === 0; });
+
+        rect
+          .classed("filtered", function (d) {
+              return filter.has(d.group.key);
+            })
+          .transition(500).delay(500).attr("height", function(d) {
+              // Make sure cells have a minimum height.
+              return cellHeight(cellSizeScale(d.group.value.data.agg), d.group.value.data.agg); })
+            .attr("fill", function(d) {
+              if(filter.has(d.group.key)) {
+                return filterColor;
+              } else {
+                if(d.group.value.data.agg === 0) {
+                  return emptyCellColor;
+                } else {
+                  // Show the local profile by comparing the current % of the total for the group value to the
+                  // initial % of total for the group value.
+                  return cellColorScale(Math.abs((d.group.value.data.agg / totalAgg) - initialGroupMetaData[d.group.key].percentage));
+                }
+              }
+            });
+            
+
+        g.transition(500).delay(1000).attr("transform", function(d, i) {
+            return "translate(0, " + d.heightbefore + ")"; });
+
+        labelText.text(function(d) { if(d.group.value.data.agg !== 0) return groupDisplayValue(d.group.key); });
+        elementsText
+          .text(function(d) { if(d.group.value.data.agg !== 0) return "" + d.group.value.data.agg + " / " + initialGroupMetaData[d.group.key].value; });
+      },
+
+      // cells.each(drawcell) - "this" is a svg "g" DOM object
+      // default function can be over-ridden for fanciness
+      initializeCell = function(sel) {
+
+        var g = d3.select(sel);
+        var rect = g.select("rect");
+        var labelText = g.select(".label");
+        var elementsText = g.select(".elements");
+
+        if(rect.empty()) {
+          g.on("click", function(d) {
+            if(!g.classed("empty")) {
+              if(filter.has(d.group.key)) {
+                filter.remove(d.group.key);
+              } else {
+                filter.set(d.group.key, true);
+              }
+              dimension.filter(function(v) {
+                return filter.has(groupValue(v)) || filter.keys().length === 0;
+              });
+              updateInternal();
+              callback();
+            }
+          });
+
+          rect = g.append("rect")
+              .attr("width", cellWidth());
+              
+        }
+
+        if(labelText.empty()) {
+          labelText = g.append("text")
+              .attr("class", "label")
+              .attr("x", cellMargin)
+              .attr("y", "1em")
+              .attr("dx","2px")
+              .attr("dy","2px")
+          //    .attr("font-family", "Helvetica")
+              .attr("font-size", "0.8em");
+        }
+
+        if(elementsText.empty()) {
+          elementsText = g.append("text")
+            .attr("class", "elements")
+            .attr("x", cellWidth() - cellMargin)
+            .attr("y", "1em")
+            .attr("dx","-2px")
+            .attr("dy","2px")
+          //  .attr("font-family", "Helvetica")
+            .attr("font-size", "0.8em")
+            .attr("text-anchor", "end");
+        }
+      };
+
+  // "sel" should be an "svg" or "g" element.
+  function my(sel) {
+    selection = sel;
+    selection.style("height", height).style("width", width);
+
+    group = dimension.group(groupValue);
+
+    // Custom reducers to handle situations where there are multiple records for single "entity"
+    // For example, we might have a data set of people and a person can have multiple occupations.
+    // This is modeled with multiple records per person to show the mulitple occupations.
+
+    var helpers = crossfilterHelpers.countByDimensionWithInitialCountAndData(
+      function (v) { return v[uniqueDimension]; },
+      function (d, p, t) {
+        if(p === undefined) {
+          p = { agg: 0, initialAgg: 0 };
+        }
+        if(t === 'add') {
+          // Adding a new record.
+          if(aggregationType === 'COUNT') {
+            p.agg++;
+          } else {
+            p.agg = p.agg + (+d[aggregateKey] ? +d[aggregateKey] : 0); // Make sure to cast or you end up with a String!!!
+          }
+          if(p.agg > p.initialAgg) p.initialAgg = p.agg;
+        } else {
+          // Removing a record.
+          if(aggregationType === 'COUNT') {
+            p.agg--;
+          } else {
+            p.agg = p.agg - (+d[aggregateKey] ? +d[aggregateKey] : 0); // Make sure to cast or you end up with a String!!!
+          }
+        }
+        return p;
+      }
+    );
+
+    var reduceAdd = helpers.add;
+    var reduceRemove = helpers.remove;
+    var reduceInitial = helpers.init;
+
+    function orderValue(p) {
+      return p.data.agg;
+    }
+
+    // If uniqueDimension is defined, use it for counting.
+    if(uniqueDimension !== undefined && aggregationType) {
+      group.reduce(reduceAdd, reduceRemove, reduceInitial);
+      group.order(orderValue);
+    } else {
+    // Otherwise, use default counting.
+      group.reduce(
+        function(p, v) {
+          ++p.data.agg;
+          if(p.data.agg > p.data.initialAgg) p.data.initialAgg = p.data.agg;
+          return p;
+        }, function(p, v) {
+          --p.data.agg;
+          return p;
+        }, function() {
+          return { count: 0, initialCount: 0, data: { agg: 0, initialAgg: 0 } };
+        }
+      );
+    }
+
+    all = group.top(Infinity);
+
+    // Save the initial count to calculate proportions for local profile.
+    initialAgg = all.reduce(function(prev, curr) { return prev + curr.value.data.initialAgg; }, 0);
+
+    // Save hash of initial grouping values and percentages for local profile display.
+    all.map(function(g){
+      initialGroupMetaData[g.key] = { "value": g.value.data.initialAgg, "percentage": g.value.data.initialAgg / initialAgg };
+    });
+
+    // Save off initial group values for global display, locking counts with deep-ish copy.
+    all.map(function(g){
+      initialGroups.push({ "key": g.key, "value": { "count": g.value.initialCount, data: { agg: g.value.data.initialAgg } } });
+    });
+
+    // Set sort order - default to frequency ordering
+    initialGroups.sort(compareFunction);
+    all.sort(compareFunction);
+
+    // Save the initial cardinality for the cell height scale calculation.
+    initialCardinality = all.length;
+
+    initialize();
+
+    return {  update: updateInternal,
+              selection: selection,
+              resetFilter: resetFilter,
+              lockMode: lockMode,
+              filter: getFilterText,
+              filterInternal: filterInternal,
+              globalMode: globalMode,
+              filterMode: filterMode,
+              mode: my.mode,
+              toggleResort: toggleResort,
+              toggleLabelSort: toggleLabelSort,
+              selectAll: selectAll,
+              deselectAll: deselectAll };
+  }
+
+  function initialize() {
+
+    // Cells    
+    var cells = selection.selectAll(".cell")
+        .data(generate_cell_data(all),
+              function(d) { return d.group.key; });
+
+    cells.enter().append("g")
+        .attr("class", "cell");
+
+    // Use queue.js for delayed execution.
+    var q = queue();
+    function enqueueCellInitialize() { q.defer(initializeCell, this); }
+
+    // Initialize the cells (this can be user-specified).
+    cells.each(enqueueCellInitialize);
+
+    q.defer(function() {
+      // Scrollbars
+      if(scrollbarElement !== null) {
+        scrollbarElement.height(height);
+        //scrollbarElement.jScrollPane();
+      }
+    });
+
+  }
+
+  function updateInternal() {
+
+    if(resort) {
+      all.sort(compareFunction);
+    }
+
+    if(mode != 2) {
+      if(mode === 0){
+        updateWithGroups(all);
+      } else {
+        updateWithGroups(initialGroups);
+      }
+    }
+
+    function updateWithGroups(groups) {
+
+      var cspacing = 5,
+          ctopmargin = cspacing,
+          cleftmargin = cspacing;
+
+      // Update global parameters with values based on new filters.
+      totalAgg = groups.reduce(function(prev, curr) { return prev + curr.value.data.agg; }, 0); // Count of all groups
+
+      // Set up the scale we use to calculate cell height.
+      cellSizeScale = d3.scale.linear()
+        .range([0, height - ((initialCardinality + 1) * cellMargin)])
+        .domain([0, totalAgg]);
+
+      // Cells    
+      var cells = selection.selectAll(".cell")
+          .data(generate_cell_data(groups),
+                function(d) { return d.group.key; });
+
+      if(resort) {
+        cells.order();
+      }
+
+      // <nastiness>
+      // Accumulator for totalHeight to which we'll stretch the selection
+      var totalHeight = cellMargin; // Start with 0 height
+
+      cells.each(function(){
+        var cell = d3.select(this);
+        var d = cell.datum();
+        d.heightbefore = totalHeight; // Override to use scaled height for display
+        totalHeight = totalHeight + cellHeight(cellSizeScale(d.group.value.data.agg), d.group.value.data.agg) + cellMargin;
+        cell.datum(d); // Reset the data on the cell with the new height.
+      });
+      // </nastiness>
+
+      // Use queue.js for delayed execution.
+      var q = queue();
+      function enqueueCellRedraw() {
+        q.defer(redrawCell, this);
+      }
+
+      // Draw the cells (this can be user-specified).
+      // Variables available:
+      //
+      //    totalAgg = dimension.groupAll().value();
+      cells.each(enqueueCellRedraw);
+
+      // Stretch the height of the selection to the totalHeight.
+      q.defer(function() {
+        selection.style("height", totalHeight);
+      });
+
+      // Update scrollbars after all the cells finish rendering.
+      q.defer(function() {
+        if(scrollbarElement && scrollbarElement.data('jsp')) {
+          //scrollbarElement.data('jsp').reinitialise();
+        }
+      });
+
+    }
+  }
+
+  // We generate an array of the data elements needed for cell in format
+  // {  "group": a crossfilter group as represented as an element of group.all()
+  //    "heightbefore": the number of elements in groups larger than this one }
+  function generate_cell_data(groups) {
+
+    var heightBefore = 0; // Accumulator for the size of the group before the current element.
+
+    return groups.map(function(a, i) {
+      heightBefore = heightBefore + a.value.value;
+
+      return {
+        "group": a,
+        // This is raw size, but we'll scale to the real display height later
+        "heightbefore": heightBefore - a.value.data.agg
+      };
+    });
+  }
+
+  // Ensure that cells have a minimum height after being scaled however we're scaling them.
+  function cellHeight(scaled, value) {
+    if(scaled < minCellHeight) {
+      if(value === 0) {
+        return emptyCellHeight;
+      } else {
+        return minCellHeight;
+      }
+    } else {
+      return scaled;
+    }
+  }
+
+  function resetFilter() {
+    filter = d3.map();
+    dimension.filterAll();
+    callback();
+  }
+
+  function lockMode() {
+    mode = 2;
+  }
+
+  function filterMode() {
+    mode = 0;
+    updateInternal();
+  }
+
+  function globalMode() {
+    mode = 1;
+    updateInternal();
+  }
+
+  function toggleResort() {
+    if(resort === false) {
+      resort = true;
+      compareFunction = function(g, h) {
+        return h.value.data.agg - g.value.data.agg;
+      };
+      updateInternal();
+    } else {
+      compareFunction = function(g, h) {
+        return initialGroupMetaData[h.key].value - initialGroupMetaData[g.key].value;
+      };
+      updateInternal();
+      resort = false;
+    }
+  }
+
+  var labelSort = false;
+  function toggleLabelSort() {
+    if(labelSort === false) {
+      compareFunction = function(g, h) {
+        if(h.key > g.key) { return -1; } else { return 1; }
+      };
+      labelSort = true;
+    } else {
+      if(resort === false) {
+        compareFunction = function(g, h) {
+          return initialGroupMetaData[h.key].value - initialGroupMetaData[g.key].value;
+        };
+      } else {
+        compareFunction = function(g, h) {
+          return h.value.data.agg - g.value.data.agg;
+        };
+      }
+      labelSort = false;
+    }
+
+    if(resort === false) {
+      resort = true;
+      updateInternal();
+      resort = false;
+    } else { updateInternal(); }
+  }
+
+  function getFilterText() {
+    return filter.keys().map(function(f) {
+      return groupDisplayValue(f);
+    }).join(", ");
+  }
+
+  function filterInternal(value) {
+    if (!arguments.length) return filter.entries();
+    filter = d3.map();
+    value.forEach(function(e) { filter.set(e.key, e.value); });
+
+    dimension.filter(function(v) {
+      return filter.has(groupValue(v)) || filter.keys().length === 0;
+    });
+
+    callback();
+  }
+
+  function selectAll() {
+    filter = d3.map();
+    
+    all.forEach(function (a) {
+      filter.set(a.key, true);
+    });
+    
+    dimension.filter(function(v) {
+      return filter.has(groupValue(v)) || filter.keys().length === 0;
+    });
+    
+    callback();
+  }
+
+  function deselectAll() {
+    filter = d3.map();
+    dimension.filterAll();
+    callback();
+  }
+
+  my.width = function(value) {
+    if (!arguments.length) return width;
+    width = value;
+    return my;
+  };
+
+  my.height = function(value) {
+    if (!arguments.length) return height;
+    height = value;
+    return my;
+  };
+
+  my.dimension = function(value) {
+    if (!arguments.length) return dimension;
+    dimension = value;
+    return my;
+  };
+
+  my.callback = function(value) {
+    if (!arguments.length) return callback;
+    callback = value;
+    return my;
+  };
+
+  my.redrawCell = function(value) {
+    if (!arguments.length) return drawCell;
+    drawCell = value;
+    return my;
+  };
+
+  my.initializeCell = function(value) {
+    if (!arguments.length) return initializeCell;
+    initializeCell = value;
+    return my;
+  };
+
+  my.groupValue = function(value) {
+    if (!arguments.length) return groupValue;
+    groupValue = value;
+    return my;
+  };
+
+  my.groupDisplayValue = function(value) {
+    if (!arguments.length) return groupDisplayValue;
+    groupDisplayValue = value;
+    return my;
+  };
+
+  my.compareFunction = function(value) {
+    if (!arguments.length) return compareFunction;
+    compareFunction = value;
+    return my;
+  };
+
+  my.minCellHeight = function(value) {
+    if (!arguments.length) return minCellHeight;
+    minCellHeight = value;
+    return my;
+  };
+
+  my.mode = function(value) {
+    if (!arguments.length) return mode;
+    mode = value;
+    return my;
+  };
+
+  my.resort = function(value) {
+    if (!arguments.length) return resort;
+    resort = value;
+    return my;
+  };
+
+  my.scrollbarWidth = function(value) {
+    if (!arguments.length) return scrollbarWidth;
+    scrollbarWidth = value;
+    return my;
+  };
+
+  my.scrollbarElement = function(value) {
+    if (!arguments.length) return scrollbarElement;
+    scrollbarElement = value;
+    return my;
+  };
+
+  my.uniqueDimension = function(value) {
+    if (!arguments.length) return uniqueDimension;
+    uniqueDimension = value;
+    return my;
+  };
+
+  my.aggregateKey = function(value) {
+    if (!arguments.length) return aggregateKey;
+    aggregateKey = value;
+    return my;
+  };
+
+  my.aggregationType = function(value) {
+    if (!arguments.length) return aggregationType;
+    aggregationType = value;
+    return my;
+  };
+
+  return my;
+}
+// Facet filter module
+
+angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
+	.directive('palladioFacetFilter', function (palladioService, dataService) {
+		return {
+			scope : {
+				height: '@',
+				showControls: '@',
+				showAccordion: '@',
+				showDropArea: '@',
+				showSettings: '@',
+				configDimensions: '=',
+				configAggregation: '='
+			},
+			templateUrl : 'partials/palladio-facet-filter/template.html',
+			link : {
+				pre : function(scope, element) {
+
+					var numericHeight;
+					var headerHeight = 30;
+					var minCellHeight = 20;
+
+					if(!scope.height) {
+						scope.calcHeight = "200px";
+						numericHeight = 200;
+					} else {
+						scope.calcHeight = scope.height;
+						numericHeight = +scope.calcHeight.substring(0, (scope.calcHeight.length - 2));
+					}
+
+					numericHeight = numericHeight - headerHeight;
+					scope.dropMarginTop = (numericHeight - 100)/3 + 'px';
+
+					// In the pre-linking function we can use scope.data, scope.metadata, and
+					// scope.xfilter to populate any additional scope values required by the
+					// template.
+
+					var deregister = [];
+
+					scope.metadata = dataService.getDataSync().metadata;
+					scope.xfilter = dataService.getDataSync().xfilter;
+
+					scope.uniqueToggleId = "facetFilter" + Math.floor(Math.random() * 10000);
+					scope.uniqueToggleHref = "#" + scope.uniqueToggleId;
+					scope.uniqueModalId = scope.uniqueToggleId + "modal";
+
+					scope.dimensions = [];
+					scope.config = {};
+					scope.title = "Facet Filter";
+
+					scope.dropModel = false;
+
+					scope.$watch('dropModel', function() {
+						if(scope.dropModel) {
+							scope.dims = scope.dims.concat(scope.dropModel);
+							scope.dropModel = false;
+						}
+					});
+
+					// Set up aggregation selection.
+					scope.getAggDescription = function (field) {
+						if(field.type === 'count') {
+							return 'Number of ' + field.field.countDescription;
+						} else {
+							return 'Sum of ' + field.field.description + ' (from ' + countDims.get(field.fileId).countDescription + ' table)';
+						}
+					};
+
+					var countDims = d3.map();
+					scope.metadata.filter(function (d) { return d.countable === true; })
+						.forEach(function (d) {
+							countDims.set(d.originFileId ? d.originFileId : 0, d);
+						});
+
+					scope.aggDims = scope.metadata.filter(function (d) { return d.countable === true || d.type === 'number'; })
+						.map(function (a) {
+							return {
+								key: a.key,
+								type: a.countable ? 'count' : 'sum',
+								field: a,
+								fileId: a.originFileId ? a.originFileId : 0
+							};
+						})
+						.sort(function (a, b) { return scope.getAggDescription(a) < scope.getAggDescription(b) ? -1 : 1; });
+
+							
+					scope.aggDim = scope.configAggregation ? scope.configAggregation : scope.aggDims[0];
+					scope.$watch('aggDim', function () {
+						if(scope.aggDim.key) {
+
+							// Rebuild the facets with the new grouping.
+							var selection = d3.select(element[0]).select('.inner-facet-container');
+							var facets = selection
+								.selectAll('.facet')
+									.data(scope.dims, function(d) { return calculateDomKey(d.key); });
+
+							facets.each(function (d) {
+								buildFacetData(d);
+							});
+
+							updateFacets();
+						}
+					});
+					scope.showAggModal = function () { $('#' + scope.uniqueModalId).find('#facet-agg-modal').modal('show'); };
+
+					scope.showModal = function () { $('#' + scope.uniqueModalId).find('#facet-modal').modal('show'); };
+					
+					scope.fieldDescriptions = function () {
+						return scope.dims.map( function (d) { return d.description; }).join(", ");
+					};
+
+					scope.countDescription = function () {
+						if(scope.uniqueDimension) {
+							return scope.uniqueDimension.countDescription;
+						} else {
+							return false;
+						}
+					};
+
+					scope.getCountDescription = function (field) {
+						return field.countDescription;
+					};
+
+					scope.uniqueDimension = undefined;
+
+					// There can be only one unique key, so no selection for this one.
+					if(scope.metadata.filter(function (d) { return d.countBy === true; })[0]) {
+						scope.uniqueDimension = scope.metadata.filter(function (d) { return d.countBy === true; })[0];
+						scope.config.uniqueDimension = scope.uniqueDimension.key;
+					}
+
+					scope.fields = scope.metadata.filter(function () {
+						return true;
+					}).sort(function (a, b) { return a.description < b.description ? -1 : 1; });
+
+					// Get the countable fields.
+					scope.countFields = scope.metadata.sort(function (a, b) { return a.countDescription < b.countDescription ? -1 : 1; });
+
+					// If configuration dimensions are provided, default to those.
+					if(scope.configDimensions) {
+						scope.dims = scope.configDimensions;
+					} else {
+						scope.dims = [];
+					}
+
+					scope.check = function (d) {
+						return scope.dims.map(function (g) { return g.key; }).indexOf(d.key) !== -1;
+					};
+
+					scope.$watch('dims', function () {
+
+						scope.dims.forEach(function(d) {
+							// If the dim has not already been updated with dimensions/groups,
+							// update it.
+							if(d.dimension === undefined) {
+								buildFacetData(d);
+							}
+						});
+
+						var selection = d3.select(element[0]).select('.inner-facet-container');
+
+						var facets = selection
+							.selectAll('.facet')
+								.data(scope.dims, function(d) { return calculateDomKey(d.key); });
+
+						// Build dimensions, groups
+						facets.enter()
+							.call(function(sel) {
+								var count = 0;
+								sel[0].forEach(function(d) {
+									count++; // Count added elements (sel[0].length is not reliable)
+								});
+
+								if(count > 0) {
+									// Extend the width of the inner- and mid-facet-container
+									selection.transition().style('width', (+selection.style('width').substring(0, selection.style('width').length - 2) + (205 * count)) + 'px');
+									d3.select(element[0]).select('.mid-facet-container').transition()
+										.style('width', (+d3.select(element[0]).select('.mid-facet-container')
+											.style('width').substring(0, d3.select(element[0]).select('.mid-facet-container')
+												.style('width').length - 2) + (205 * count)) + 'px');
+								}
+							});
+
+						// Build facets and button group
+						var buttonGroup = facets.enter()
+							.append('div')
+								.classed('facet', true)
+								.style('height', function() { return scope.calcHeight; })
+							.append('div')
+								.classed('facet-header', true)
+								.style('height', headerHeight)
+								.text(function(d) { return d.description + " (" + d.group.size() + ")"; })
+							.append("span")
+								.attr("class", "mode-buttons")
+							.append("div").attr("class", "btn-group");
+
+						var cells = facets.selectAll('.cell')
+								.data(function (d) { return d.group.top(Infinity)
+											.map(function(g) {
+												return buildCellData(g,d);
+											}); },
+										function (d) { return d.key; });
+
+						// Sort options twiddle the cells.
+						buttonGroup.append("a").attr("class", "btn-mini")
+								.on("click", function(d) {
+									$(this).button('toggle');
+									// Remove all current filter values.
+									d.filters.splice(0, d.filters.length);
+									if(d3.select(this).classed("active")) {
+										d.group.all().forEach(function (g) {
+											d.filters.push(g.key);
+										});
+										d.dimension.filterFunction(function() { return true; });
+										palladioService.setFilter(
+											scope.uniqueToggleId + d.key,
+											d.description,
+											d.filters.join(', '),
+											function() {
+												d.filters.splice(0, d.filters.length); // Maintain the reference
+												d.dimension.filterAll();
+												palladioService.removeFilter(scope.uniqueToggleId + d.key);
+												palladioService.update();
+											}
+										);
+									} else {
+										d.dimension.filterAll();
+										palladioService.removeFilter(scope.uniqueToggleId + d.key);
+									}
+									palladioService.update();
+								})
+								.append("i").attr("class", "fa fa-check-square-o");
+
+						buttonGroup.append("a").attr("class", "btn-mini")
+								.on("click", function(d, i) {
+									$(this).button('toggle');
+									// Note that we have to reselect just the cells in this facet.
+									if(d3.select(this).classed("active")) {
+										d3.selectAll(cells[i]).sort(function(a,b) {
+											return d3.ascending(a.key, b.key);
+										});
+										// Switch icon
+										d3.select(this).select('i').classed('fa-sort-alpha-asc', false);
+										d3.select(this).select('i').classed('fa-sort-numeric-desc', true);
+									} else {
+										d3.selectAll(cells[i]).sort(function(a,b) {
+											return d3.descending(a.displayValue, b.displayValue);
+										});
+										// Switch icon
+										d3.select(this).select('i').classed('fa-sort-alpha-asc', true);
+										d3.select(this).select('i').classed('fa-sort-numeric-desc', false);
+									}
+								})
+								.append("i").attr("class", "fa fa-sort-alpha-asc");
+
+						buttonGroup.append("a").attr("class", "btn-mini")
+								.on("click", function (d) {
+									scope.$apply(function(s) {
+										s.dims = s.dims.filter(function (g) {
+											return g.key !== d.key;
+										});
+									});
+								})
+								.append("i").attr("class", "fa fa-times");
+
+						var newCells = cells.enter()
+							.append('div')
+								.classed('cell', true)
+								.on('click', filterCell );
+
+						newCells.append('div')
+								.classed('cell-text', true);
+
+						newCells.append('div')
+								.classed('cell-value', true);
+
+						newCells.call(updateCell);
+
+						// Remove facets.
+						facets.exit().each(function(d) {
+							// Collapse the width of the inner-facet-container
+							selection.transition().style('width', (+selection.style('width').substring(0, selection.style('width').length - 2) - 205) + 'px');
+							d3.select(element[0]).select('.mid-facet-container').transition()
+								.style('width', (+d3.select(element[0]).select('.mid-facet-container')
+									.style('width').substring(0, d3.select(element[0]).select('.mid-facet-container')
+										.style('width').length - 2) - 205) + 'px');
+							palladioService.removeFilter(scope.uniqueToggleId + d.key);
+							removeFacetData(d);
+							palladioService.update();
+						});
+
+						facets.exit().remove();
+					});
+
+
+					function buildFacetData(data) {
+						if(data.dimension) {
+							data.dimension.filterAll();
+							data.dimension.remove();
+						}
+						data.dimension = scope.xfilter.dimension(function (l) { return "" + l[data.key]; });
+						var exceptionKey = scope.aggDim.key;
+						var summationKey = countDims.get(scope.aggDim.fileId).key;
+						data.group = scope.aggDim.type === "count" ?
+							reductio().exception(function (d) { return d[exceptionKey]; })
+								.exceptionCount(true)(data.dimension.group()) :
+							reductio().exception(function (d) { return d[exceptionKey]; })
+								.exceptionSum(function(d) { return d[summationKey]; });
+						if(scope.aggDim.type === "count") {
+							data.group.order(function (d) { return d.exceptionCount; });
+						} else {
+							data.group.order(function (d) { return d.exceptionSum; });
+						}
+						var topValue = scope.aggDim.type === "count" ?
+							data.group.top(1)[0].value.exceptionCount :
+							data.group.top(1)[0].value.exceptionSum;
+						var total = scope.aggDim.type === "count" ?
+							d3.sum(data.group.all(), function (d) { return d.value.exceptionCount; }) :
+							d3.sum(data.group.all(), function (d) { return d.value.exceptionSum; });
+						var topRange = topValue / total * numericHeight > minCellHeight*2 ? topValue / total * numericHeight : minCellHeight*2;
+
+						topRange = Math.floor(topRange) - 2;
+						
+						data.scale = d3.scale.linear()
+							.domain([1, topValue])
+							.range([minCellHeight, topRange]);
+
+						data.domKey = calculateDomKey(data.key);
+						data.filters = [];
+					}
+
+					function removeFacetData(data) {
+						if(data.dimension) {
+							data.dimension.filterAll();
+							data.dimension.remove();
+						}
+						data.dimension = undefined;
+						data.group = undefined;
+						data.scale = undefined;
+						data.domKey = undefined;
+						data.filters = undefined;
+					}
+
+					function updateCell(sel) {
+						sel.classed('filter-value', function(d) { return d.inFilter; })
+							.transition()
+								// .style('height', function (d) { return d.displayValue > 0 ? d.scale(d.displayValue) + 'px' : '3px'; });
+								.style('height', function (d) { return d.displayValue > 0 ? minCellHeight + 'px' : '3px'; });
+
+						sel.select('.cell-text')
+							.text(function(d) { return d.displayValue > 0 ? d.key : ''; });
+
+						sel.select('.cell-value')
+							.text(function(d) { return d.displayValue > 0 ? d.displayValue : ''; });
+					}
+
+					function buildCellData(cellData, facetData) {
+						cellData.scale = facetData.scale;
+						cellData.facetKey = facetData.key;
+						cellData.facetDescription = facetData.description;
+						cellData.dimension = facetData.dimension;
+						cellData.filters = facetData.filters;
+						cellData.inFilter = cellData.filters.indexOf(cellData.key) !== -1;
+						if(scope.aggDim.type === "count") {
+							cellData.displayValue = cellData.value.exceptionCount;
+						} else {
+							cellData.displayValue = cellData.value.exceptionSum;
+						}
+						return cellData;
+					}
+
+					function filterCell(d) {
+						if(d.filters.indexOf(d.key) !== -1) {
+							// It's already in the filter.
+							d.filters.splice(d.filters.indexOf(d.key),1);
+						} else {
+							// It's not in the filter.
+							d.filters.push(d.key);
+						}
+
+						d.dimension.filterFunction(filterFunction.bind(null, d));
+
+						if(d.filters.length > 0) {
+							deregister.push(
+								palladioService.setFilter(
+									scope.uniqueToggleId + d.facetKey,
+									d.facetDescription,
+									d.filters.join(', '),
+									function() {
+										d.filters.splice(0, d.filters.length); // Maintain the reference
+										d.dimension.filterAll();
+										palladioService.removeFilter(scope.uniqueToggleId + d.facetKey);
+										palladioService.update();
+									}
+								)
+							);
+						} else {
+							palladioService.removeFilter(scope.uniqueToggleId + d.facetKey);
+						}
+
+						palladioService.update();
+					}
+
+					function filterFunction(d, v) {
+						return d.filters.indexOf(v) !== -1 || d.filters.length === 0;
+					}
+
+					function calculateDomKey(key) {
+						return key.split("\n").join("").split('?').join("").split('"').join("").split(")").join("").split("(").join("").split(" ").join("").split(".").join("").split("#").join("").split("/").join("").split(",").join("").split("[").join("").split("]").join("").split("{").join("").split("}").join("");
+					}
+
+					function updateFacets() {
+						var selection = d3.select(element[0]).select('.inner-facet-container');
+
+						var facets = selection
+							.selectAll('.facet')
+								.data(scope.dims, function(d) { return calculateDomKey(d.key); });
+
+						var cells = facets.selectAll('.cell')
+							.data(function (d) { return d.group.top(Infinity)
+											.map(function(g) {
+												return buildCellData(g,d);
+											}); },
+										function (d) { return d.key; });
+
+						cells.call(updateCell);
+					}
+
+					var updateCallback = palladioService.onUpdate(scope.uniqueToggleId, updateFacets);
+
+					deregister.push(updateCallback);
+
+					// Clean up after ourselves. Remove dimensions that we have created. If we
+					// created watches on another scope, destroy those as well.
+					scope.$on('$destroy', function () {
+						console.log(scope.dims.length);
+						scope.dims.map(function(d) {
+							removeFacetData(d);
+						});
+
+						deregister.forEach(function (f) { f(); });
+
+						// Get rid of the modal.
+						$('#' + scope.uniqueModalId).remove();
+					});
+
+					scope.filterReset = function () {
+						scope.dims.forEach(function(d) {
+							d.filters = [];
+							d.dimension.filterAll();
+							palladioService.removeFilter(scope.uniqueToggleId + calculateDomKey(d.key));
+						});
+						palladioService.update();
+					};
+
+					// State save/load.
+
+					var importState = function(state) {
+						scope.config = state.config;
+						scope.$digest();
+
+						// Remove default dims. We have to copy the array to do this in order to trigger
+						// our watcher.
+						while(scope.dims.length > 0) {
+							if(scope.dims.length > 1) {
+								scope.dims = scope.dims.slice(0, scope.dims.length - 1);
+							} else {
+								scope.dims = [];
+							}
+							scope.$digest();
+						}
+
+						// Need to do this one-by-one because of the way we watch for changes.
+						scope.fields.filter(function(f) { return state.dimKeys.indexOf(f.key) !== -1; })
+							.forEach(function(d) {
+								scope.dims = scope.dims.concat(d);
+								scope.$digest();
+							});
+
+						// Set the aggregation.
+						if(state.aggDimKey) scope.aggDim = scope.aggDims.filter(function(f) { return f.key === state.aggDimKey; })[0];
+
+						// Recalculate domKeys (in case we change format)
+						state.domKeys = state.dimKeys.map(function(k) { return calculateDomKey(k); });
+
+						scope.$digest();
+					};
+
+					var exportState = function() {
+						return {
+							config: scope.config,
+							aggDimKey: scope.aggDim.key,
+							dimKeys: scope.dims.map(function(d) { return d.key; }),
+							domKeys: scope.dims.map(function(d) { return calculateDomKey(d.key); })
+						};
+					};
+
+					deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'facet', exportState, importState));
+				},
+
+				post : function(scope, element, attrs) {
+
+					$(element[0]).find('.toggle').on("click", function() {
+						$(element[0]).find('.settings-panel').toggle(0, function() {
+							$(element[0]).find('.view').toggleClass('span12');
+							$(element[0]).find('.view').toggleClass('span10');
+						});
+					});
+
+					// Move the modal out of the fixed area.
+					$(element[0]).find('#facet-modal').parent().appendTo('body');
+				}
+			}
+		};
 	});
 angular.module('palladioGraphView', ['palladio.services', 'palladio'])
 	// Palladio Timechart View
@@ -67800,1587 +69546,6 @@ angular.module('palladioTableView', ['palladio', 'palladio.services'])
 			}
 		};
 	});
-function elastic_list() {
-
-  // Colors from colorbrewer2.org
-
-	var height = 350,
-			width = 200,
-			group = null,
-      all = null,
-      dimension = null,
-      filter = d3.map(),
-      mode = 0,  // 0 = filter, 1 = global, 2 = lock
-      maxCells = Infinity,
-      resort = false,
-      selection = null,
-      minCellHeight = 20,
-      emptyCellHeight = 2,
-      scrollbarWidth = 0,
-      scrollbarElement = null,
-      cellMargin = 2,
-      cellWidth = function() {
-        return width - scrollbarWidth;
-      },
-      backgroundColor = "white",
-      initialGroupMetaData = { },
-      initialGroups = [ ],
-      initialAgg = 0,
-      initialCardinality = 0,
-      uniqueDimension = null,
-      aggregationType = null,
-      aggregateKey = null,
-
-      groupValue = function(v) { return v; },
-      groupDisplayValue = function(v) { return v; },
-
-      // Sort ordering - g and h are groups (g.key and g.value are available)
-      // By default, sort descending by value.
-      compareFunction = function(g, h) {
-        return h.value.data.agg - g.value.data.agg;
-      },
-
-      // Call this after filter selection/deselection
-      callback = function() { return true; },
-
-      // drawCell context
-      cellColorScale = d3.scale.quantize().range(["#EFF3FF", "#BDD7E7", "#6BAED6", "#DDDDDD"]).domain([1,0]),
-      cellSizeScale = null,
-      emptyCellColor = "#D9D9D9",
-      filterColor = "#A8DDB5",
-      totalAgg = 0,
-
-      // cells.each(drawcell) - "this" is a svg "g" DOM object
-      // default function can be over-ridden for fanciness
-      redrawCell = function(sel) {
-        var g = d3.select(sel);
-        var rect = g.select("rect");
-        var labelText = g.select(".label");
-        var elementsText = g.select(".elements");
-
-        g.classed("empty", function (d) { return d.group.value.data.agg === 0; });
-
-        rect
-          .classed("filtered", function (d) {
-              return filter.has(d.group.key);
-            })
-          .transition(500).delay(500).attr("height", function(d) {
-              // Make sure cells have a minimum height.
-              return cellHeight(cellSizeScale(d.group.value.data.agg), d.group.value.data.agg); })
-            .attr("fill", function(d) {
-              if(filter.has(d.group.key)) {
-                return filterColor;
-              } else {
-                if(d.group.value.data.agg === 0) {
-                  return emptyCellColor;
-                } else {
-                  // Show the local profile by comparing the current % of the total for the group value to the
-                  // initial % of total for the group value.
-                  return cellColorScale(Math.abs((d.group.value.data.agg / totalAgg) - initialGroupMetaData[d.group.key].percentage));
-                }
-              }
-            });
-            
-
-        g.transition(500).delay(1000).attr("transform", function(d, i) {
-            return "translate(0, " + d.heightbefore + ")"; });
-
-        labelText.text(function(d) { if(d.group.value.data.agg !== 0) return groupDisplayValue(d.group.key); });
-        elementsText
-          .text(function(d) { if(d.group.value.data.agg !== 0) return "" + d.group.value.data.agg + " / " + initialGroupMetaData[d.group.key].value; });
-      },
-
-      // cells.each(drawcell) - "this" is a svg "g" DOM object
-      // default function can be over-ridden for fanciness
-      initializeCell = function(sel) {
-
-        var g = d3.select(sel);
-        var rect = g.select("rect");
-        var labelText = g.select(".label");
-        var elementsText = g.select(".elements");
-
-        if(rect.empty()) {
-          g.on("click", function(d) {
-            if(!g.classed("empty")) {
-              if(filter.has(d.group.key)) {
-                filter.remove(d.group.key);
-              } else {
-                filter.set(d.group.key, true);
-              }
-              dimension.filter(function(v) {
-                return filter.has(groupValue(v)) || filter.keys().length === 0;
-              });
-              updateInternal();
-              callback();
-            }
-          });
-
-          rect = g.append("rect")
-              .attr("width", cellWidth());
-              
-        }
-
-        if(labelText.empty()) {
-          labelText = g.append("text")
-              .attr("class", "label")
-              .attr("x", cellMargin)
-              .attr("y", "1em")
-              .attr("dx","2px")
-              .attr("dy","2px")
-          //    .attr("font-family", "Helvetica")
-              .attr("font-size", "0.8em");
-        }
-
-        if(elementsText.empty()) {
-          elementsText = g.append("text")
-            .attr("class", "elements")
-            .attr("x", cellWidth() - cellMargin)
-            .attr("y", "1em")
-            .attr("dx","-2px")
-            .attr("dy","2px")
-          //  .attr("font-family", "Helvetica")
-            .attr("font-size", "0.8em")
-            .attr("text-anchor", "end");
-        }
-      };
-
-  // "sel" should be an "svg" or "g" element.
-  function my(sel) {
-    selection = sel;
-    selection.style("height", height).style("width", width);
-
-    group = dimension.group(groupValue);
-
-    // Custom reducers to handle situations where there are multiple records for single "entity"
-    // For example, we might have a data set of people and a person can have multiple occupations.
-    // This is modeled with multiple records per person to show the mulitple occupations.
-
-    var helpers = crossfilterHelpers.countByDimensionWithInitialCountAndData(
-      function (v) { return v[uniqueDimension]; },
-      function (d, p, t) {
-        if(p === undefined) {
-          p = { agg: 0, initialAgg: 0 };
-        }
-        if(t === 'add') {
-          // Adding a new record.
-          if(aggregationType === 'COUNT') {
-            p.agg++;
-          } else {
-            p.agg = p.agg + (+d[aggregateKey] ? +d[aggregateKey] : 0); // Make sure to cast or you end up with a String!!!
-          }
-          if(p.agg > p.initialAgg) p.initialAgg = p.agg;
-        } else {
-          // Removing a record.
-          if(aggregationType === 'COUNT') {
-            p.agg--;
-          } else {
-            p.agg = p.agg - (+d[aggregateKey] ? +d[aggregateKey] : 0); // Make sure to cast or you end up with a String!!!
-          }
-        }
-        return p;
-      }
-    );
-
-    var reduceAdd = helpers.add;
-    var reduceRemove = helpers.remove;
-    var reduceInitial = helpers.init;
-
-    function orderValue(p) {
-      return p.data.agg;
-    }
-
-    // If uniqueDimension is defined, use it for counting.
-    if(uniqueDimension !== undefined && aggregationType) {
-      group.reduce(reduceAdd, reduceRemove, reduceInitial);
-      group.order(orderValue);
-    } else {
-    // Otherwise, use default counting.
-      group.reduce(
-        function(p, v) {
-          ++p.data.agg;
-          if(p.data.agg > p.data.initialAgg) p.data.initialAgg = p.data.agg;
-          return p;
-        }, function(p, v) {
-          --p.data.agg;
-          return p;
-        }, function() {
-          return { count: 0, initialCount: 0, data: { agg: 0, initialAgg: 0 } };
-        }
-      );
-    }
-
-    all = group.top(Infinity);
-
-    // Save the initial count to calculate proportions for local profile.
-    initialAgg = all.reduce(function(prev, curr) { return prev + curr.value.data.initialAgg; }, 0);
-
-    // Save hash of initial grouping values and percentages for local profile display.
-    all.map(function(g){
-      initialGroupMetaData[g.key] = { "value": g.value.data.initialAgg, "percentage": g.value.data.initialAgg / initialAgg };
-    });
-
-    // Save off initial group values for global display, locking counts with deep-ish copy.
-    all.map(function(g){
-      initialGroups.push({ "key": g.key, "value": { "count": g.value.initialCount, data: { agg: g.value.data.initialAgg } } });
-    });
-
-    // Set sort order - default to frequency ordering
-    initialGroups.sort(compareFunction);
-    all.sort(compareFunction);
-
-    // Save the initial cardinality for the cell height scale calculation.
-    initialCardinality = all.length;
-
-    initialize();
-
-    return {  update: updateInternal,
-              selection: selection,
-              resetFilter: resetFilter,
-              lockMode: lockMode,
-              filter: getFilterText,
-              filterInternal: filterInternal,
-              globalMode: globalMode,
-              filterMode: filterMode,
-              mode: my.mode,
-              toggleResort: toggleResort,
-              toggleLabelSort: toggleLabelSort,
-              selectAll: selectAll,
-              deselectAll: deselectAll };
-  }
-
-  function initialize() {
-
-    // Cells    
-    var cells = selection.selectAll(".cell")
-        .data(generate_cell_data(all),
-              function(d) { return d.group.key; });
-
-    cells.enter().append("g")
-        .attr("class", "cell");
-
-    // Use queue.js for delayed execution.
-    var q = queue();
-    function enqueueCellInitialize() { q.defer(initializeCell, this); }
-
-    // Initialize the cells (this can be user-specified).
-    cells.each(enqueueCellInitialize);
-
-    q.defer(function() {
-      // Scrollbars
-      if(scrollbarElement !== null) {
-        scrollbarElement.height(height);
-        //scrollbarElement.jScrollPane();
-      }
-    });
-
-  }
-
-  function updateInternal() {
-
-    if(resort) {
-      all.sort(compareFunction);
-    }
-
-    if(mode != 2) {
-      if(mode === 0){
-        updateWithGroups(all);
-      } else {
-        updateWithGroups(initialGroups);
-      }
-    }
-
-    function updateWithGroups(groups) {
-
-      var cspacing = 5,
-          ctopmargin = cspacing,
-          cleftmargin = cspacing;
-
-      // Update global parameters with values based on new filters.
-      totalAgg = groups.reduce(function(prev, curr) { return prev + curr.value.data.agg; }, 0); // Count of all groups
-
-      // Set up the scale we use to calculate cell height.
-      cellSizeScale = d3.scale.linear()
-        .range([0, height - ((initialCardinality + 1) * cellMargin)])
-        .domain([0, totalAgg]);
-
-      // Cells    
-      var cells = selection.selectAll(".cell")
-          .data(generate_cell_data(groups),
-                function(d) { return d.group.key; });
-
-      if(resort) {
-        cells.order();
-      }
-
-      // <nastiness>
-      // Accumulator for totalHeight to which we'll stretch the selection
-      var totalHeight = cellMargin; // Start with 0 height
-
-      cells.each(function(){
-        var cell = d3.select(this);
-        var d = cell.datum();
-        d.heightbefore = totalHeight; // Override to use scaled height for display
-        totalHeight = totalHeight + cellHeight(cellSizeScale(d.group.value.data.agg), d.group.value.data.agg) + cellMargin;
-        cell.datum(d); // Reset the data on the cell with the new height.
-      });
-      // </nastiness>
-
-      // Use queue.js for delayed execution.
-      var q = queue();
-      function enqueueCellRedraw() {
-        q.defer(redrawCell, this);
-      }
-
-      // Draw the cells (this can be user-specified).
-      // Variables available:
-      //
-      //    totalAgg = dimension.groupAll().value();
-      cells.each(enqueueCellRedraw);
-
-      // Stretch the height of the selection to the totalHeight.
-      q.defer(function() {
-        selection.style("height", totalHeight);
-      });
-
-      // Update scrollbars after all the cells finish rendering.
-      q.defer(function() {
-        if(scrollbarElement && scrollbarElement.data('jsp')) {
-          //scrollbarElement.data('jsp').reinitialise();
-        }
-      });
-
-    }
-  }
-
-  // We generate an array of the data elements needed for cell in format
-  // {  "group": a crossfilter group as represented as an element of group.all()
-  //    "heightbefore": the number of elements in groups larger than this one }
-  function generate_cell_data(groups) {
-
-    var heightBefore = 0; // Accumulator for the size of the group before the current element.
-
-    return groups.map(function(a, i) {
-      heightBefore = heightBefore + a.value.value;
-
-      return {
-        "group": a,
-        // This is raw size, but we'll scale to the real display height later
-        "heightbefore": heightBefore - a.value.data.agg
-      };
-    });
-  }
-
-  // Ensure that cells have a minimum height after being scaled however we're scaling them.
-  function cellHeight(scaled, value) {
-    if(scaled < minCellHeight) {
-      if(value === 0) {
-        return emptyCellHeight;
-      } else {
-        return minCellHeight;
-      }
-    } else {
-      return scaled;
-    }
-  }
-
-  function resetFilter() {
-    filter = d3.map();
-    dimension.filterAll();
-    callback();
-  }
-
-  function lockMode() {
-    mode = 2;
-  }
-
-  function filterMode() {
-    mode = 0;
-    updateInternal();
-  }
-
-  function globalMode() {
-    mode = 1;
-    updateInternal();
-  }
-
-  function toggleResort() {
-    if(resort === false) {
-      resort = true;
-      compareFunction = function(g, h) {
-        return h.value.data.agg - g.value.data.agg;
-      };
-      updateInternal();
-    } else {
-      compareFunction = function(g, h) {
-        return initialGroupMetaData[h.key].value - initialGroupMetaData[g.key].value;
-      };
-      updateInternal();
-      resort = false;
-    }
-  }
-
-  var labelSort = false;
-  function toggleLabelSort() {
-    if(labelSort === false) {
-      compareFunction = function(g, h) {
-        if(h.key > g.key) { return -1; } else { return 1; }
-      };
-      labelSort = true;
-    } else {
-      if(resort === false) {
-        compareFunction = function(g, h) {
-          return initialGroupMetaData[h.key].value - initialGroupMetaData[g.key].value;
-        };
-      } else {
-        compareFunction = function(g, h) {
-          return h.value.data.agg - g.value.data.agg;
-        };
-      }
-      labelSort = false;
-    }
-
-    if(resort === false) {
-      resort = true;
-      updateInternal();
-      resort = false;
-    } else { updateInternal(); }
-  }
-
-  function getFilterText() {
-    return filter.keys().map(function(f) {
-      return groupDisplayValue(f);
-    }).join(", ");
-  }
-
-  function filterInternal(value) {
-    if (!arguments.length) return filter.entries();
-    filter = d3.map();
-    value.forEach(function(e) { filter.set(e.key, e.value); });
-
-    dimension.filter(function(v) {
-      return filter.has(groupValue(v)) || filter.keys().length === 0;
-    });
-
-    callback();
-  }
-
-  function selectAll() {
-    filter = d3.map();
-    
-    all.forEach(function (a) {
-      filter.set(a.key, true);
-    });
-    
-    dimension.filter(function(v) {
-      return filter.has(groupValue(v)) || filter.keys().length === 0;
-    });
-    
-    callback();
-  }
-
-  function deselectAll() {
-    filter = d3.map();
-    dimension.filterAll();
-    callback();
-  }
-
-  my.width = function(value) {
-    if (!arguments.length) return width;
-    width = value;
-    return my;
-  };
-
-  my.height = function(value) {
-    if (!arguments.length) return height;
-    height = value;
-    return my;
-  };
-
-  my.dimension = function(value) {
-    if (!arguments.length) return dimension;
-    dimension = value;
-    return my;
-  };
-
-  my.callback = function(value) {
-    if (!arguments.length) return callback;
-    callback = value;
-    return my;
-  };
-
-  my.redrawCell = function(value) {
-    if (!arguments.length) return drawCell;
-    drawCell = value;
-    return my;
-  };
-
-  my.initializeCell = function(value) {
-    if (!arguments.length) return initializeCell;
-    initializeCell = value;
-    return my;
-  };
-
-  my.groupValue = function(value) {
-    if (!arguments.length) return groupValue;
-    groupValue = value;
-    return my;
-  };
-
-  my.groupDisplayValue = function(value) {
-    if (!arguments.length) return groupDisplayValue;
-    groupDisplayValue = value;
-    return my;
-  };
-
-  my.compareFunction = function(value) {
-    if (!arguments.length) return compareFunction;
-    compareFunction = value;
-    return my;
-  };
-
-  my.minCellHeight = function(value) {
-    if (!arguments.length) return minCellHeight;
-    minCellHeight = value;
-    return my;
-  };
-
-  my.mode = function(value) {
-    if (!arguments.length) return mode;
-    mode = value;
-    return my;
-  };
-
-  my.resort = function(value) {
-    if (!arguments.length) return resort;
-    resort = value;
-    return my;
-  };
-
-  my.scrollbarWidth = function(value) {
-    if (!arguments.length) return scrollbarWidth;
-    scrollbarWidth = value;
-    return my;
-  };
-
-  my.scrollbarElement = function(value) {
-    if (!arguments.length) return scrollbarElement;
-    scrollbarElement = value;
-    return my;
-  };
-
-  my.uniqueDimension = function(value) {
-    if (!arguments.length) return uniqueDimension;
-    uniqueDimension = value;
-    return my;
-  };
-
-  my.aggregateKey = function(value) {
-    if (!arguments.length) return aggregateKey;
-    aggregateKey = value;
-    return my;
-  };
-
-  my.aggregationType = function(value) {
-    if (!arguments.length) return aggregationType;
-    aggregationType = value;
-    return my;
-  };
-
-  return my;
-}
-// Facet filter module
-
-angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
-	.directive('palladioFacetFilter', function (palladioService, dataService) {
-		return {
-			scope : {
-				height: '@',
-				showControls: '@',
-				showAccordion: '@',
-				showDropArea: '@',
-				showSettings: '@',
-				configDimensions: '=',
-				configAggregation: '='
-			},
-			templateUrl : 'partials/palladio-facet-filter/template.html',
-			link : {
-				pre : function(scope, element) {
-
-					var numericHeight;
-					var headerHeight = 30;
-					var minCellHeight = 20;
-
-					if(!scope.height) {
-						scope.calcHeight = "200px";
-						numericHeight = 200;
-					} else {
-						scope.calcHeight = scope.height;
-						numericHeight = +scope.calcHeight.substring(0, (scope.calcHeight.length - 2));
-					}
-
-					numericHeight = numericHeight - headerHeight;
-					scope.dropMarginTop = (numericHeight - 100)/3 + 'px';
-
-					// In the pre-linking function we can use scope.data, scope.metadata, and
-					// scope.xfilter to populate any additional scope values required by the
-					// template.
-
-					var deregister = [];
-
-					scope.metadata = dataService.getDataSync().metadata;
-					scope.xfilter = dataService.getDataSync().xfilter;
-
-					scope.uniqueToggleId = "facetFilter" + Math.floor(Math.random() * 10000);
-					scope.uniqueToggleHref = "#" + scope.uniqueToggleId;
-					scope.uniqueModalId = scope.uniqueToggleId + "modal";
-
-					scope.dimensions = [];
-					scope.config = {};
-					scope.title = "Facet Filter";
-
-					scope.dropModel = false;
-
-					scope.$watch('dropModel', function() {
-						if(scope.dropModel) {
-							scope.dims = scope.dims.concat(scope.dropModel);
-							scope.dropModel = false;
-						}
-					});
-
-					// Set up aggregation selection.
-					scope.getAggDescription = function (field) {
-						if(field.type === 'count') {
-							return 'Number of ' + field.field.countDescription;
-						} else {
-							return 'Sum of ' + field.field.description + ' (from ' + countDims.get(field.fileId).countDescription + ' table)';
-						}
-					};
-
-					var countDims = d3.map();
-					scope.metadata.filter(function (d) { return d.countable === true; })
-						.forEach(function (d) {
-							countDims.set(d.originFileId ? d.originFileId : 0, d);
-						});
-
-					scope.aggDims = scope.metadata.filter(function (d) { return d.countable === true || d.type === 'number'; })
-						.map(function (a) {
-							return {
-								key: a.key,
-								type: a.countable ? 'count' : 'sum',
-								field: a,
-								fileId: a.originFileId ? a.originFileId : 0
-							};
-						})
-						.sort(function (a, b) { return scope.getAggDescription(a) < scope.getAggDescription(b) ? -1 : 1; });
-
-							
-					scope.aggDim = scope.configAggregation ? scope.configAggregation : scope.aggDims[0];
-					scope.$watch('aggDim', function () {
-						if(scope.aggDim.key) {
-
-							// Rebuild the facets with the new grouping.
-							var selection = d3.select(element[0]).select('.inner-facet-container');
-							var facets = selection
-								.selectAll('.facet')
-									.data(scope.dims, function(d) { return calculateDomKey(d.key); });
-
-							facets.each(function (d) {
-								buildFacetData(d);
-							});
-
-							updateFacets();
-						}
-					});
-					scope.showAggModal = function () { $('#' + scope.uniqueModalId).find('#facet-agg-modal').modal('show'); };
-
-					scope.showModal = function () { $('#' + scope.uniqueModalId).find('#facet-modal').modal('show'); };
-					
-					scope.fieldDescriptions = function () {
-						return scope.dims.map( function (d) { return d.description; }).join(", ");
-					};
-
-					scope.countDescription = function () {
-						if(scope.uniqueDimension) {
-							return scope.uniqueDimension.countDescription;
-						} else {
-							return false;
-						}
-					};
-
-					scope.getCountDescription = function (field) {
-						return field.countDescription;
-					};
-
-					scope.uniqueDimension = undefined;
-
-					// There can be only one unique key, so no selection for this one.
-					if(scope.metadata.filter(function (d) { return d.countBy === true; })[0]) {
-						scope.uniqueDimension = scope.metadata.filter(function (d) { return d.countBy === true; })[0];
-						scope.config.uniqueDimension = scope.uniqueDimension.key;
-					}
-
-					scope.fields = scope.metadata.filter(function () {
-						return true;
-					}).sort(function (a, b) { return a.description < b.description ? -1 : 1; });
-
-					// Get the countable fields.
-					scope.countFields = scope.metadata.sort(function (a, b) { return a.countDescription < b.countDescription ? -1 : 1; });
-
-					// If configuration dimensions are provided, default to those.
-					if(scope.configDimensions) {
-						scope.dims = scope.configDimensions;
-					} else {
-						scope.dims = [];
-					}
-
-					scope.check = function (d) {
-						return scope.dims.map(function (g) { return g.key; }).indexOf(d.key) !== -1;
-					};
-
-					scope.$watch('dims', function () {
-
-						scope.dims.forEach(function(d) {
-							// If the dim has not already been updated with dimensions/groups,
-							// update it.
-							if(d.dimension === undefined) {
-								buildFacetData(d);
-							}
-						});
-
-						var selection = d3.select(element[0]).select('.inner-facet-container');
-
-						var facets = selection
-							.selectAll('.facet')
-								.data(scope.dims, function(d) { return calculateDomKey(d.key); });
-
-						// Build dimensions, groups
-						facets.enter()
-							.call(function(sel) {
-								var count = 0;
-								sel[0].forEach(function(d) {
-									count++; // Count added elements (sel[0].length is not reliable)
-								});
-
-								if(count > 0) {
-									// Extend the width of the inner- and mid-facet-container
-									selection.transition().style('width', (+selection.style('width').substring(0, selection.style('width').length - 2) + (205 * count)) + 'px');
-									d3.select(element[0]).select('.mid-facet-container').transition()
-										.style('width', (+d3.select(element[0]).select('.mid-facet-container')
-											.style('width').substring(0, d3.select(element[0]).select('.mid-facet-container')
-												.style('width').length - 2) + (205 * count)) + 'px');
-								}
-							});
-
-						// Build facets and button group
-						var buttonGroup = facets.enter()
-							.append('div')
-								.classed('facet', true)
-								.style('height', function() { return scope.calcHeight; })
-							.append('div')
-								.classed('facet-header', true)
-								.style('height', headerHeight)
-								.text(function(d) { return d.description + " (" + d.group.size() + ")"; })
-							.append("span")
-								.attr("class", "mode-buttons")
-							.append("div").attr("class", "btn-group");
-
-						var cells = facets.selectAll('.cell')
-								.data(function (d) { return d.group.top(Infinity)
-											.map(function(g) {
-												return buildCellData(g,d);
-											}); },
-										function (d) { return d.key; });
-
-						// Sort options twiddle the cells.
-						buttonGroup.append("a").attr("class", "btn-mini")
-								.on("click", function(d) {
-									$(this).button('toggle');
-									// Remove all current filter values.
-									d.filters.splice(0, d.filters.length);
-									if(d3.select(this).classed("active")) {
-										d.group.all().forEach(function (g) {
-											d.filters.push(g.key);
-										});
-										d.dimension.filterFunction(function() { return true; });
-										palladioService.setFilter(
-											scope.uniqueToggleId + d.key,
-											d.description,
-											d.filters.join(', '),
-											function() {
-												d.filters.splice(0, d.filters.length); // Maintain the reference
-												d.dimension.filterAll();
-												palladioService.removeFilter(scope.uniqueToggleId + d.key);
-												palladioService.update();
-											}
-										);
-									} else {
-										d.dimension.filterAll();
-										palladioService.removeFilter(scope.uniqueToggleId + d.key);
-									}
-									palladioService.update();
-								})
-								.append("i").attr("class", "fa fa-check-square-o");
-
-						buttonGroup.append("a").attr("class", "btn-mini")
-								.on("click", function(d, i) {
-									$(this).button('toggle');
-									// Note that we have to reselect just the cells in this facet.
-									if(d3.select(this).classed("active")) {
-										d3.selectAll(cells[i]).sort(function(a,b) {
-											return d3.ascending(a.key, b.key);
-										});
-										// Switch icon
-										d3.select(this).select('i').classed('fa-sort-alpha-asc', false);
-										d3.select(this).select('i').classed('fa-sort-numeric-desc', true);
-									} else {
-										d3.selectAll(cells[i]).sort(function(a,b) {
-											return d3.descending(a.displayValue, b.displayValue);
-										});
-										// Switch icon
-										d3.select(this).select('i').classed('fa-sort-alpha-asc', true);
-										d3.select(this).select('i').classed('fa-sort-numeric-desc', false);
-									}
-								})
-								.append("i").attr("class", "fa fa-sort-alpha-asc");
-
-						buttonGroup.append("a").attr("class", "btn-mini")
-								.on("click", function (d) {
-									scope.$apply(function(s) {
-										s.dims = s.dims.filter(function (g) {
-											return g.key !== d.key;
-										});
-									});
-								})
-								.append("i").attr("class", "fa fa-times");
-
-						var newCells = cells.enter()
-							.append('div')
-								.classed('cell', true)
-								.on('click', filterCell );
-
-						newCells.append('div')
-								.classed('cell-text', true);
-
-						newCells.append('div')
-								.classed('cell-value', true);
-
-						newCells.call(updateCell);
-
-						// Remove facets.
-						facets.exit().each(function(d) {
-							// Collapse the width of the inner-facet-container
-							selection.transition().style('width', (+selection.style('width').substring(0, selection.style('width').length - 2) - 205) + 'px');
-							d3.select(element[0]).select('.mid-facet-container').transition()
-								.style('width', (+d3.select(element[0]).select('.mid-facet-container')
-									.style('width').substring(0, d3.select(element[0]).select('.mid-facet-container')
-										.style('width').length - 2) - 205) + 'px');
-							palladioService.removeFilter(scope.uniqueToggleId + d.key);
-							removeFacetData(d);
-							palladioService.update();
-						});
-
-						facets.exit().remove();
-					});
-
-
-					function buildFacetData(data) {
-						if(data.dimension) {
-							data.dimension.filterAll();
-							data.dimension.remove();
-						}
-						data.dimension = scope.xfilter.dimension(function (l) { return "" + l[data.key]; });
-						var exceptionKey = scope.aggDim.key;
-						var summationKey = countDims.get(scope.aggDim.fileId).key;
-						data.group = scope.aggDim.type === "count" ?
-							reductio().exception(function (d) { return d[exceptionKey]; })
-								.exceptionCount(true)(data.dimension.group()) :
-							reductio().exception(function (d) { return d[exceptionKey]; })
-								.exceptionSum(function(d) { return d[summationKey]; });
-						if(scope.aggDim.type === "count") {
-							data.group.order(function (d) { return d.exceptionCount; });
-						} else {
-							data.group.order(function (d) { return d.exceptionSum; });
-						}
-						var topValue = scope.aggDim.type === "count" ?
-							data.group.top(1)[0].value.exceptionCount :
-							data.group.top(1)[0].value.exceptionSum;
-						var total = scope.aggDim.type === "count" ?
-							d3.sum(data.group.all(), function (d) { return d.value.exceptionCount; }) :
-							d3.sum(data.group.all(), function (d) { return d.value.exceptionSum; });
-						var topRange = topValue / total * numericHeight > minCellHeight*2 ? topValue / total * numericHeight : minCellHeight*2;
-
-						topRange = Math.floor(topRange) - 2;
-						
-						data.scale = d3.scale.linear()
-							.domain([1, topValue])
-							.range([minCellHeight, topRange]);
-
-						data.domKey = calculateDomKey(data.key);
-						data.filters = [];
-					}
-
-					function removeFacetData(data) {
-						if(data.dimension) {
-							data.dimension.filterAll();
-							data.dimension.remove();
-						}
-						data.dimension = undefined;
-						data.group = undefined;
-						data.scale = undefined;
-						data.domKey = undefined;
-						data.filters = undefined;
-					}
-
-					function updateCell(sel) {
-						sel.classed('filter-value', function(d) { return d.inFilter; })
-							.transition()
-								// .style('height', function (d) { return d.displayValue > 0 ? d.scale(d.displayValue) + 'px' : '3px'; });
-								.style('height', function (d) { return d.displayValue > 0 ? minCellHeight + 'px' : '3px'; });
-
-						sel.select('.cell-text')
-							.text(function(d) { return d.displayValue > 0 ? d.key : ''; });
-
-						sel.select('.cell-value')
-							.text(function(d) { return d.displayValue > 0 ? d.displayValue : ''; });
-					}
-
-					function buildCellData(cellData, facetData) {
-						cellData.scale = facetData.scale;
-						cellData.facetKey = facetData.key;
-						cellData.facetDescription = facetData.description;
-						cellData.dimension = facetData.dimension;
-						cellData.filters = facetData.filters;
-						cellData.inFilter = cellData.filters.indexOf(cellData.key) !== -1;
-						if(scope.aggDim.type === "count") {
-							cellData.displayValue = cellData.value.exceptionCount;
-						} else {
-							cellData.displayValue = cellData.value.exceptionSum;
-						}
-						return cellData;
-					}
-
-					function filterCell(d) {
-						if(d.filters.indexOf(d.key) !== -1) {
-							// It's already in the filter.
-							d.filters.splice(d.filters.indexOf(d.key),1);
-						} else {
-							// It's not in the filter.
-							d.filters.push(d.key);
-						}
-
-						d.dimension.filterFunction(filterFunction.bind(null, d));
-
-						if(d.filters.length > 0) {
-							deregister.push(
-								palladioService.setFilter(
-									scope.uniqueToggleId + d.facetKey,
-									d.facetDescription,
-									d.filters.join(', '),
-									function() {
-										d.filters.splice(0, d.filters.length); // Maintain the reference
-										d.dimension.filterAll();
-										palladioService.removeFilter(scope.uniqueToggleId + d.facetKey);
-										palladioService.update();
-									}
-								)
-							);
-						} else {
-							palladioService.removeFilter(scope.uniqueToggleId + d.facetKey);
-						}
-
-						palladioService.update();
-					}
-
-					function filterFunction(d, v) {
-						return d.filters.indexOf(v) !== -1 || d.filters.length === 0;
-					}
-
-					function calculateDomKey(key) {
-						return key.split("\n").join("").split('?').join("").split('"').join("").split(")").join("").split("(").join("").split(" ").join("").split(".").join("").split("#").join("").split("/").join("").split(",").join("").split("[").join("").split("]").join("").split("{").join("").split("}").join("");
-					}
-
-					function updateFacets() {
-						var selection = d3.select(element[0]).select('.inner-facet-container');
-
-						var facets = selection
-							.selectAll('.facet')
-								.data(scope.dims, function(d) { return calculateDomKey(d.key); });
-
-						var cells = facets.selectAll('.cell')
-							.data(function (d) { return d.group.top(Infinity)
-											.map(function(g) {
-												return buildCellData(g,d);
-											}); },
-										function (d) { return d.key; });
-
-						cells.call(updateCell);
-					}
-
-					var updateCallback = palladioService.onUpdate(scope.uniqueToggleId, updateFacets);
-
-					deregister.push(updateCallback);
-
-					// Clean up after ourselves. Remove dimensions that we have created. If we
-					// created watches on another scope, destroy those as well.
-					scope.$on('$destroy', function () {
-						console.log(scope.dims.length);
-						scope.dims.map(function(d) {
-							removeFacetData(d);
-						});
-
-						deregister.forEach(function (f) { f(); });
-
-						// Get rid of the modal.
-						$('#' + scope.uniqueModalId).remove();
-					});
-
-					scope.filterReset = function () {
-						scope.dims.forEach(function(d) {
-							d.filters = [];
-							d.dimension.filterAll();
-							palladioService.removeFilter(scope.uniqueToggleId + calculateDomKey(d.key));
-						});
-						palladioService.update();
-					};
-
-					// State save/load.
-
-					var importState = function(state) {
-						scope.config = state.config;
-						scope.$digest();
-
-						// Remove default dims. We have to copy the array to do this in order to trigger
-						// our watcher.
-						while(scope.dims.length > 0) {
-							if(scope.dims.length > 1) {
-								scope.dims = scope.dims.slice(0, scope.dims.length - 1);
-							} else {
-								scope.dims = [];
-							}
-							scope.$digest();
-						}
-
-						// Need to do this one-by-one because of the way we watch for changes.
-						scope.fields.filter(function(f) { return state.dimKeys.indexOf(f.key) !== -1; })
-							.forEach(function(d) {
-								scope.dims = scope.dims.concat(d);
-								scope.$digest();
-							});
-
-						// Set the aggregation.
-						if(state.aggDimKey) scope.aggDim = scope.aggDims.filter(function(f) { return f.key === state.aggDimKey; })[0];
-
-						// Recalculate domKeys (in case we change format)
-						state.domKeys = state.dimKeys.map(function(k) { return calculateDomKey(k); });
-
-						scope.$digest();
-					};
-
-					var exportState = function() {
-						return {
-							config: scope.config,
-							aggDimKey: scope.aggDim.key,
-							dimKeys: scope.dims.map(function(d) { return d.key; }),
-							domKeys: scope.dims.map(function(d) { return calculateDomKey(d.key); })
-						};
-					};
-
-					deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'facet', exportState, importState));
-				},
-
-				post : function(scope, element, attrs) {
-
-					$(element[0]).find('.toggle').on("click", function() {
-						$(element[0]).find('.settings-panel').toggle(0, function() {
-							$(element[0]).find('.view').toggleClass('span12');
-							$(element[0]).find('.view').toggleClass('span10');
-						});
-					});
-
-					// Move the modal out of the fixed area.
-					$(element[0]).find('#facet-modal').parent().appendTo('body');
-				}
-			}
-		};
-	});
-// Palladio template component module
-
-angular.module('palladioDurationView', ['palladio', 'palladio.services'])
-	.directive('palladioDurationView', function (dateService, palladioService, dataService) {
-		var directiveObj = {
-			scope: {
-				fullHeight: '@',
-				fullWidth: '@',
-				showControls: '@',
-				showAccordion: '@',
-				view: '@'
-			},
-			templateUrl: 'partials/palladio-duration-view/template.html',
-
-			link: { pre: function(scope) {
-
-					// In the pre-linking function we can use scope.data, scope.metadata, and
-					// scope.xfilter to populate any additional scope values required by the
-					// template.
-
-					// The parent scope must include the following:
-					//   scope.xfilter
-					//   scope.metadata
-
-					// If you need to do any configuration before your visualization is set up,
-					// do it here. DO NOT do anything that changes the DOM here, so don't
-					// programatically instantiate your visualization at this point. That happens
-					// in the 'post' function.
-					//
-					// You might need to do things here especially
-					// if your visualization is contained in another directive that is included
-					// in the template of this directive.
-
-					scope.uniqueToggleId = "durationView" + Math.floor(Math.random() * 10000);
-					scope.uniqueToggleHref = "#" + scope.uniqueToggleId;
-					scope.uniqueModalId = scope.uniqueToggleId + "modal";
-
-					scope.metadata = dataService.getDataSync().metadata;
-					scope.xfilter = dataService.getDataSync().xfilter;
-					scope.data = dataService.getDataSync().data;
-
-					// Take the first number dimension we find.
-					scope.durationDims = scope.metadata.filter(function (d) { return d.type === 'number'; });
-					// scope.durationDim = scope.durationDims[0];
-
-					// Label dimensions.
-					scope.labelDims = scope.metadata;
-					scope.tooltipLabelDim = scope.labelDims[0];
-					// scope.groupDim = scope.labelDims[0];
-					// scope.xGroupDim = scope.labelDims[0];
-					scope.xSortDim = scope.labelDims[0];
-
-					scope.title = "Duration view";
-
-					scope.modes = ['Constant duration'];
-					if(scope.durationDims.length > 0) scope.modes.push('Actual duration');
-					scope.mode = scope.modes[0];
-
-					scope.showDurationModal = function () {
-						$('#' + scope.uniqueModalId).find('#duration-modal').modal('show');
-					};
-
-					scope.showTooltipLabelModal = function () {
-						$('#' + scope.uniqueModalId).find('#tooltip-label-modal').modal('show');
-					};
-
-					scope.showGroupModal = function () {
-						$('#' + scope.uniqueModalId).find('#group-modal').modal('show');
-					};
-
-					scope.showXGroupModal = function () {
-						$('#' + scope.uniqueModalId).find('#x-group-modal').modal('show');
-					};
-
-					scope.showXSortModal = function () {
-						$('#' + scope.uniqueModalId).find('#x-sort-modal').modal('show');
-					};
-
-				}, post: function(scope, element) {
-
-					// If you are building a d3.js visualization, you can grab the containing
-					// element with:
-					//
-					// d3.select(element[0]);
-
-					var sel, svg, dim, group, x, y,
-						top, bottom, left, filter, yStep, tooltip,
-						colors, bottomAxis, topAxis, yAxis, uniques, height, lineHeight;
-
-					// Constants...
-					var margin = 25;
-					var lineHeight = 20;
-					var leftMargin = 150;
-					var bottomOffset = 50;
-					var width = scope.fullWidth === 'true' ? $(window).width() - margin*2 : $(window).width()*0.7;
-					// var height = scope.height ? +scope.height : 200;
-					// height = scope.fullHeight === 'true' ? $(window).height()-200 : height;
-					var highlightColor = '#67D6E5';
-
-					setup();
-					update();
-
-					function setup() {
-						// Check necessary fields are selected.
-						if(!scope.tooltipLabelDim ||
-							!scope.groupDim ||
-							!scope.xGroupDim ||
-							!scope.xSortDim ||
-							(scope.mode === 'Actual duration' && !scope.durationDim)) {
-
-							return false;
-						}
-
-						// Calculate uniques for use in y scale and height.
-						uniques = [];
-						scope.data.forEach(function(d) {
-							if(uniques.indexOf("" + d[scope.groupDim.key]) === -1) {
-								uniques.push("" + d[scope.groupDim.key]);
-							}
-						});
-						uniques.sort(d3.descending);
-
-						// Figure height based on uniques and a minimum height.
-						height = uniques.length * lineHeight;
-
-						sel = d3.select(d3.select(element[0]).select(".main-viz")[0][0].children[0]);
-						if(!sel.select('svg').empty()) sel.select('svg').remove();
-						svg = sel.append('svg');
-
-						sel.attr('width', width + margin*2);
-						sel.attr('height', height + margin*2);
-
-						svg.attr('width', width + margin*2);
-						svg.attr('height', height + margin*2);
-
-						if(dim) dim.remove();
-
-						dim = scope.xfilter.dimension(function(d) { return "" + d[scope.groupDim.key]; });
-
-						// For now we keep the grouping simple and just do a naive count. To enable
-						// 'countBy' functionality we need to use the Crossfilter helpers or Reductio.
-						group = dim.group();
-
-						// Use reductio value-lists to track the xGroup for each group.
-						var reducer = reductio().count(true)
-							.nest([function(d) { return d[scope.xGroupDim.key]; }]);
-
-						if(scope.mode === 'Actual duration') {
-							reducer.sum(function(d) { return +d[scope.durationDim.key]; });
-						}
-
-						reducer(group);
-
-						// Scales
-						x = d3.scale.linear().range([0, width - leftMargin]);
-						setXDomain();
-						y = d3.scale.ordinal().rangeBands([height - bottomOffset, 0], 0.2)
-								// .domain(group.top(Infinity)
-								// 	.filter(function (d) {
-								// 		return d.value.count !== 0;
-								// 	}).map(function(d) { return d.key; }));
-								.domain(uniques);
-
-						colors = d3.scale.ordinal()
-							.range(colorbrewer.Greys[9])
-							.domain(scope.xGroupDim.uniques);
-
-						bottomAxis = d3.svg.axis().orient("bottom").scale(x);
-						topAxis = d3.svg.axis().orient("top").scale(x);
-						yAxis = d3.svg.axis().orient("left").scale(y);
-
-						// Build the visualization.
-						var g = svg.append('g')
-								.attr("transform", "translate(" + leftMargin + "," + margin + ")");
-
-						bottom = g.append('g')
-							.attr("class", "axis x-axis x-bottom")
-							.attr("transform", "translate(" + 0 + "," + (height - bottomOffset) + ")")
-							.call(bottomAxis);
-
-						top = g.append('g')
-							.attr("class", "axis x-axis x-top")
-							.call(topAxis);
-
-						left = g.append('g')
-							.attr("class", "axis y-axis")
-							.call(yAxis);
-
-						tooltip = g.select(".duration-tooltip");
-						// Set up the tooltip.
-						if(tooltip.empty()) {
-							tooltip = g.append("g")
-									.attr("class", "duration-tooltip")
-									.attr("pointer-events", "none")
-									.style("display", "none");
-
-							tooltip.append("foreignObject")
-									.attr("width", 100)
-									.attr("height", 26)
-									.attr("pointer-events", "none")
-								.append("html")
-									.style("background-color", "rgba(0,0,0,0)")
-								.append("div")
-									.style("padding-left", 3)
-									.style("padding-right", 3)
-									.style("text-align", "center")
-									.style("white-space", "nowrap")
-									.style("overflow", "hidden")
-									.style("text-overflow", "ellipsis")
-									.style("border-radius", "5px")
-									.style("background-color", "white")
-									.style("border", "3px solid grey");
-						}
-					}
-
-					function update() {
-						// Check necessary fields are selected.
-						if(!scope.tooltipLabelDim ||
-							!scope.groupDim ||
-							!scope.xGroupDim ||
-							!scope.xSortDim ||
-							(scope.mode === 'Actual duration' && !scope.durationDim)) {
-
-							return false;
-						}
-
-						// Update the x-scale and x-axes
-						setXDomain();
-						bottomAxis.scale(x);
-						topAxis.scale(x);
-						svg.select('.x-bottom').call(bottomAxis);
-						svg.select('.x-top').call(topAxis);
-
-						var groups = svg.select('g').selectAll('.duration-group')
-							.data(group.top(Infinity),
-									// .filter(function (d) {
-									// 	return d.value.count !== 0;
-									// }),
-								function (d) { return d.key; });
-
-						groups.exit().remove();
-
-						groups.enter()
-								.append('g')
-									.attr('class', 'duration-group')
-									.attr('transform', function(d) {
-										return 'translate(1,' + y(d.key) + ')';
-									});
-
-						var constantDuration = scope.mode === 'Constant duration';
-						var rectWidth = x(1) - x(0);
-
-						function calcWidth(d) {
-							return constantDuration ?
-								rectWidth :
-								(isNaN(+d[scope.durationDim.key]) ?
-									0 :
-									x(+d[scope.durationDim.key]));
-						}
-
-						var rects = groups.selectAll('.duration-bar')
-							.data(function(d, i) {
-								var total = 0;
-
-								// Flatten to basic records
-								return d.value.nest.map(function(n) {
-									return n.values;
-								}).reduce(function(a, b) {
-									return a.concat(b);
-								}).sort(function(a, b) {
-									return d3.ascending(a[scope.xSortDim.key], b[scope.xSortDim.key]);
-								}).map(function(d) {
-									total = total + calcWidth(d);
-									// Build object with information needed to visualize
-									return {
-										name: d[scope.xGroupDim.key],
-										label: d[scope.tooltipLabelDim.key],
-										group: i,
-										x: calcWidth(d),
-										offset: (total - calcWidth(d))
-									};
-								});
-							}, function(d, i) { return d.name + '-' + d.group + '-' + i; });
-
-						rects.exit().remove();
-
-						rects.enter()
-								.append('rect')
-									.attr('height', y.rangeBand())
-									.attr('class', 'duration-bar');
-
-						rects
-							.attr('width', function(d) { return d.x ? d.x : 0; })
-							.attr('fill', function(d) { return colors(d.name); })
-							.attr('stroke', function(d) { return colors(d.name); })
-							.attr('transform', function(d) { return 'translate(' + (d.offset ? d.offset : 0) + ',0)'; })
-							.on('mouseover', function(d) {
-								rects.attr('fill', function(f) {
-										if(d.name === f.name) {
-											return highlightColor;
-										} else {
-											return colors(f.name);
-										}})
-									.attr('stroke', function(f) {
-										if(d.name === f.name) {
-											return highlightColor;
-										} else {
-											return colors(f.name);
-										}
-									});
-							})
-							.on('mouseout', function() {
-								rects
-									.attr('fill', function(d) { return colors(d.name); })
-									.attr('stroke', function(d) { return colors(d.name); });
-							})
-							.tooltip(function (d){
-								return {
-									text : d.label,
-									displacement : [0,20],
-									position: [0,0],
-									gravity: "right",
-									placement: "mouse",
-									mousemove : true
-								};
-							});
-					}
-
-					function setXDomain() {
-						if(scope.mode === 'Actual duration') {
-							x.domain([ 0, d3.max(group.top(Infinity), function (d) { return d.value.sum; }) ]);
-						} else {
-							x.domain([ 0, d3.max(group.top(Infinity), function (d) { return d.value.count; }) ]);
-						}
-					}
-
-					function reset() {
-						if(dim) {
-							group.remove();
-							dim.remove();
-							svg.remove();
-						}
-					}
-
-					scope.filterReset = function () {
-						reset();
-						setup();
-						update();
-					};
-
-					scope.$watchGroup(['mode', 'durationDim', 'tooltipLabelDim', 'groupDim', 'xGroupDim', 'xSortDim'], function () {
-						reset();
-						setup();
-						update();
-					});
-
-					//
-					// If you are going to programatically instantiate your visualization, do it
-					// here. Your visualization should emit the following events if necessary:
-					//
-					// For new/changed filters:
-					//
-					// scope.$emit('updateFilter', [identifier, description, filter, callback]);
-					//
-					// For removing all filters:
-					//
-					// scope.$emit('updateFilter', [identifier, null]);
-					//
-					// If you apply a filter in this component, notify the Palladio framework.
-					//
-					// identifier: A string unique to this instance of this component. Should
-					//             be randomly generated.
-					//
-					// description: A human-readable description of this component. Should be
-					//              unique to this instance of this component, but not required.
-					//
-					// filter: A human-readable description of the filter that is currently
-					//         applied on this component.
-					//
-					// callback: A function that will remove all filters on this component when
-					//           it is evaluated.
-					//
-					//
-					// Whenever the component needs to trigger an update for all other components
-					// in the application (for example, when a filter is applied or removed):
-					//
-					// scope.$emit('triggerUpdate');
-
-					var deregister = [];
-
-					// You should also handle the following externally triggered events:
-
-					deregister.push(palladioService.onReset(scope.uniqueToggleId, function() {
-
-						// Reset any filters that have been applied through this visualization.
-						// This means running .filterAll() on any Crossfilter dimensions you have
-						// created and updating your visualization as required.
-
-						scope.filterReset();
-
-					}));
-
-					deregister.push(palladioService.onUpdate(scope.uniqueToggleId, function() {
-						// Only update if the table is visible.
-						if(element.is(':visible')) { update(); }
-					}));
-
-					// Update when it becomes visible (updating when not visibile errors out)
-					scope.$watch(function() { return element.is(':visible'); }, update);
-
-					scope.$on('$destroy', function () {
-
-						// Clean up after yourself. Remove dimensions that we have created. If we
-						// created watches on another scope, destroy those as well.
-
-						if(dim) {
-							group.remove();
-							dim.remove();
-							dim = undefined;
-						}
-						deregister.forEach(function(f) { f(); });
-						deregister = [];
-
-					});
-
-
-					// Support save/load. These functions should be able to fully recreate an instance
-					// of this visualization based on the results of the exportState() function. Include
-					// current filters, any type of manipulations the user has done, etc.
-
-					function importState(state) {
-
-						// Load a state object created by exportState().
-						scope.title = state.title;
-						scope.durationDim = scope.durationDims.filter(function(d) { return d.key === state.durationDim; })[0];
-						scope.tooltipLabelDim = scope.labelDims.filter(function(d) { return d.key === state.tooltipLabelDim; })[0];
-						scope.groupDim = scope.labelDims.filter(function(d) { return d.key === state.groupDim; })[0];
-						scope.xGroupDim = scope.labelDims.filter(function(d) { return d.key === state.xGroupDim; })[0];
-						scope.xSortDim = scope.labelDims.filter(function(d) { return d.key === state.xSortDim; })[0];
-
-						scope.mode = state.mode;
-
-					}
-
-					function exportState() {
-
-						// Return a state object that can be consumed by importState().
-						return {
-							title: scope.title,
-							durationDim: scope.durationDim.key,
-							tooltipLabelDim: scope.tooltipLabelDim.key,
-							groupDim: scope.groupDim.key,
-							xGroupDim: scope.xGroupDim.key,
-							xSortDim: scope.xSortDim.key,
-							mode: scope.mode
-						};
-					}
-
-					deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'duration', exportState, importState));
-
-					// Move the modal out of the fixed area.
-					$(element[0]).find('#duration-modal').parent().appendTo('body');
-
-					// Set up the toggle if in view state.
-					if(scope.view === 'true') {
-						$(document).ready(function(){
-							$(element[0]).find('.toggle').click(function() {
-								$(element[0]).find('.settings').toggleClass('open close');
-							});
-						});
-					}
-				}
-			}
-		};
-
-		return directiveObj;
-	});
-
 // Timeline filter module
 
 angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
@@ -71648,19 +71813,23 @@ angular.module('palladio').run(['$templateCache', function($templateCache) {
 }]);
 angular.module('palladio').run(['$templateCache', function($templateCache) {
     $templateCache.put('partials/visualization.html',
-        "<div id=\"visualization\">\n  <div class=\"row-fluid\" data-ng-show=\"layout==='geo'\">\n    <div class=\"with-settings\" data-palladio-map-view-with-settings></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='time'\">\n    <div class=\"with-settings\" data-full-height=\"true\" data-full-width=\"true\"\n      data-show-controls = \"false\" data-show-accordion = \"false\"\n      data-view = \"true\"\n      data-palladio-partime-filter></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='graph'\">\n    <div class=\"with-settings\" data-palladio-graph-view-with-settings></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='table'\">\n    <div style=\"position: absolute; right: 40px; top:10px; z-index:20\" data-palladio-download-widget></div>\n    <div class=\"with-settings\" data-palladio-table-view-with-settings></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='grid'\">\n    <div style=\"position: absolute; right: 40px; top:10px; z-index:20\" data-palladio-download-widget></div>\n    <div class=\"with-settings\" data-palladio-list-view-with-settings></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='duration'\">\n    <div class=\"with-settings\" data-full-height=\"true\" data-full-width=\"true\"\n      data-show-controls = \"false\" data-show-accordion = \"false\"\n      data-view = \"true\"\n      data-palladio-duration-view></div>\n  </div>\n</div>\n<div id=\"footer\" data-ng-show=\"showFilters()\">\n                <div class=\"\">\n                    <div id=\"filters-wrapper\" class=\"\">\n                        <div class=\"row-fluid filters-header\">\n                            <a style=\"line-height:30px\" data-ng-click=\"expandedFilters = !expandedFilters\" data-ng-init=\"expandedFilters = true\" class=\"pull-left\">\n                                <span data-ng-show=\"expandedFilters\"><i class=\"fa fa-angle-down text-center\" style=\"width:10px\"></i></span>\n                                <span data-ng-show=\"!expandedFilters\"><i class=\"fa fa-angle-right text-center\" style=\"width:10px\"></i></span>\n                            </a>\n\n                            <div class=\"row-fluid\" style=\"padding: 0px 10px 0px 20px;\">\n                                <a  data-toggle=\"tooltip\"\n                                    data-original-title=\"Add a new Facet Filter\"\n                                    class=\"view-link selected alert alert-info\"\n                                    data-ng-click=\"addFilter('facet')\"\n                                    data-ng-class=\"{selected: filter.indexOf('facet') !== -1, blur: blurFacet}\">Facet</a>\n\n                                <a  data-toggle=\"tooltip\"\n                                    data-original-title=\"Add a new Timeline Filter\"\n                                    class=\"view-link selected alert alert-info\"\n                                    data-ng-click=\"addFilter('timeline')\"\n                                    data-ng-class=\"{selected: filter.indexOf('timeline') !== -1, blur: blurTimeline}\">TimeLine</a>\n\n                                <a  data-toggle=\"tooltip\"\n                                    data-original-title=\"Add a new Time Spans Filter\"\n                                    class=\"view-link selected alert alert-info\"\n                                    data-ng-click=\"addFilter('partime')\"\n                                    data-ng-class=\"{selected: filter.indexOf('partime') !== -1, blur: blurTimeSpan}\">TimeSpan</a>\n\n                                <div class=\"\" data-palladio-selection-view></div>\n                            </div>\n\n\n                            <div class=\"clearfix\"></div>\n                        </div>\n\n\n\n                        <div class=\"row-fluid\" data-ng-show=\"expandedFilters\"></div>\n                        <ul data-ng-show=\"expandedFilters\" class=\"unstyled accordion\" id=\"filters\"></ul>\n                    </div>\n                </div>\n            </div>\n");
+        "<div id=\"visualization\">\n  <div class=\"row-fluid\" data-ng-show=\"layout==='geo'\">\n    <div class=\"with-settings\" data-palladio-map-view-with-settings></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='time'\">\n    <div class=\"with-settings\" data-full-height=\"true\" data-full-width=\"true\"\n      data-show-controls = \"false\" data-show-accordion = \"false\"\n      data-view = \"true\"\n      data-palladio-partime-filter></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='graph'\">\n    <div class=\"with-settings\" data-palladio-graph-view-with-settings></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='table'\">\n    <div style=\"position: absolute; right: 40px; top:10px; z-index:20\" data-palladio-download-widget></div>\n    <div class=\"with-settings\" data-palladio-table-view-with-settings></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='grid'\">\n    <div style=\"position: absolute; right: 40px; top:10px; z-index:20\" data-palladio-download-widget></div>\n    <div class=\"with-settings\" data-palladio-list-view-with-settings></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='duration'\">\n    <div class=\"with-settings\" data-full-height=\"true\" data-full-width=\"true\"\n      data-show-controls = \"false\" data-show-accordion = \"false\"\n      data-view = \"true\"\n      data-palladio-duration-view></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='idiograph'\">\n    <div data-palladio-idiograph-view></div>\n  </div>\n</div>\n<div id=\"footer\" data-ng-show=\"showFilters()\">\n                <div class=\"\">\n                    <div id=\"filters-wrapper\" class=\"\">\n                        <div class=\"row-fluid filters-header\">\n                            <a style=\"line-height:30px\" data-ng-click=\"expandedFilters = !expandedFilters\" data-ng-init=\"expandedFilters = true\" class=\"pull-left\">\n                                <span data-ng-show=\"expandedFilters\"><i class=\"fa fa-angle-down text-center\" style=\"width:10px\"></i></span>\n                                <span data-ng-show=\"!expandedFilters\"><i class=\"fa fa-angle-right text-center\" style=\"width:10px\"></i></span>\n                            </a>\n\n                            <div class=\"row-fluid\" style=\"padding: 0px 10px 0px 20px;\">\n                                <a  data-toggle=\"tooltip\"\n                                    data-original-title=\"Add a new Facet Filter\"\n                                    class=\"view-link selected alert alert-info\"\n                                    data-ng-click=\"addFilter('facet')\"\n                                    data-ng-class=\"{selected: filter.indexOf('facet') !== -1, blur: blurFacet}\">Facet</a>\n\n                                <a  data-toggle=\"tooltip\"\n                                    data-original-title=\"Add a new Timeline Filter\"\n                                    class=\"view-link selected alert alert-info\"\n                                    data-ng-click=\"addFilter('timeline')\"\n                                    data-ng-class=\"{selected: filter.indexOf('timeline') !== -1, blur: blurTimeline}\">TimeLine</a>\n\n                                <a  data-toggle=\"tooltip\"\n                                    data-original-title=\"Add a new Time Spans Filter\"\n                                    class=\"view-link selected alert alert-info\"\n                                    data-ng-click=\"addFilter('partime')\"\n                                    data-ng-class=\"{selected: filter.indexOf('partime') !== -1, blur: blurTimeSpan}\">TimeSpan</a>\n\n                                <div class=\"\" data-palladio-selection-view></div>\n                            </div>\n\n\n                            <div class=\"clearfix\"></div>\n                        </div>\n\n\n\n                        <div class=\"row-fluid\" data-ng-show=\"expandedFilters\"></div>\n                        <ul data-ng-show=\"expandedFilters\" class=\"unstyled accordion\" id=\"filters\"></ul>\n                    </div>\n                </div>\n            </div>\n");
+}]);
+angular.module('palladio').run(['$templateCache', function($templateCache) {
+    $templateCache.put('partials/idiograph-view/template.html',
+        "<div class=\"row-fluid\">\n\t<div class=\"span3 settings open\">\n\t\t<div class=\"settings-panel\" ng-show=\"!collapse\">\n\n\t\t</div>\n\t</div>\n\n\t<div class=\"view span12\">\n\t\t<div id=\"{{uniqueToggleId}}\" class=\"row-fluid\">\n\t\t\t<!-- SVG inserted here -->\n\t\t\tIDIOGRAPH\n\t\t</div>\n\t</div>\n\n\t<a class=\"toggle\" data-toggle=\"tooltip\" data-original-title=\"Settings\"\n\t\tdata-placement=\"bottom\"><i class=\"fa fa-cog\"></i></a>\n</div>\n");
 }]);
 angular.module('palladio').run(['$templateCache', function($templateCache) {
     $templateCache.put('partials/palladio-data-download/template.html',
         "<span data-ng-click=\"exportDataModel()\" >\n\t<span ng-transclude></span>\n</span>");
 }]);
 angular.module('palladio').run(['$templateCache', function($templateCache) {
-    $templateCache.put('partials/palladio-data-upload/template.html',
-        "<span data-ng-click=\"triggerDataModelSelector()\" >\n\t<span ng-transclude></span>\n</span>\n\n<input \ttype=\"file\" id=\"dataModelSelector\" \n\t\tstyle=\"display:none\" \n\t\tonchange=\"angular.element(this).scope().loadDataModel(this)\" />");
-}]);
-angular.module('palladio').run(['$templateCache', function($templateCache) {
     $templateCache.put('partials/link.html',
         "<div class=\"container-fluid\">\n\t<div class=\"row-fluid\" data-ng-controller=\"LinkCtrl\">\n\t\t\n\t\t<div id=\"linking-files\" class=\"span8 step\">\n\t\t\t<div class=\"header\">\n\t\t\t\t<h4>Tables <span class=\"muted small\">({{files.length}}) &middot; Drag a dimension over another to create a link</span></h4> \n\t\t\t</div>\n\t\t\t\n\t\t\t<!--<div data-ng-repeat=\"file in files\" class=\"file-info\">\n\t\t\t\t<p>This data set contains <b>{{file.data.length}}</b> valid lines</p>\n\t\t\t\t<h3>{{file.label}}</h3>\n\t\t\t\t<ul class=\"unstyled inline row-fluid fields-row\" group every=\"4\" watch=\"file.fields\">\n\t\t\t\t\t<li data-ng-repeat=\"field in file.fields\" class=\"span3 field\" \n\t\t\t\t\t\tdata-ng-class=\"{confirmed: field.confirmed, unique: field.uniqueKey}\" \n\t\t\t\t\t\tdata-draggable data-droppable data-droppable-callback=\"onDrop\" >\n\t\t\t\t\t\t<span class=\"\">{{field.description}}</span>\n\t\t\t\t\t\t<span class=\"type\" ng-show=\"field.type\" data-toggle=\"tooltip\" data-original-title=\"{{types[field.type]}}\">{{types[field.type][0].toUpperCase()}}</span>\n\t\t\t\t\t\t<span class=\"notification\">\n\t\t\t\t\t\t\t<span data-ng-show=\"field.special.length\" data-toggle=\"tooltip\" data-original-title=\"Special chars found\">\n\t\t\t\t\t\t\t\t<i data-ng-class=\"field.confirmed ? 'icon-ok-sign' : 'icon-exclamation-sign'\"></i>\n\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t<span data-ng-show=\"field.countBy\" data-toggle=\"tooltip\" data-original-title=\"Count records by this field\">\n\t\t\t\t\t\t\t\t<i class=\"icon-star\"></i>\n\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t</span>\n\t\t\t\t\t\t<span class=\"link-notification\" data-ng-show=\"hasLinks(field)\" data-toggle=\"tooltip\" data-original-title=\"Linked\"><i class=\"icon-magnet\"></i></span>\n\t\t\t\t\t</li>\n\t\t\t\t</ul>\n\t\t\t</div>-->\n\n\t\t\t<ul class=\"unstyled row-fluid\">\n\t\t\t\t<!-- Each file -->\n\t\t\t\t<li data-ng-repeat=\"file in files\" class=\"file-info span4\">\n\t\t\t\t\t<p class=\"pull-left small muted\"><strong>{{file.data.length}}</strong> rows</p>\n\t\t\t\t\t<!--<a class=\"pull-right danger\" ng-click=\"deleteFile(file, $index)\">Delete</a>-->\n\t\t\t\t\t<input type=\"text\" class=\"editable span12\" ng-model=\"file.label\"></input>\n\n\t\t\t\t\t<ul class=\"unstyled inline row-fluid fields-row\" group every=\"1\" watch=\"file.fields\">\n\n\t\t\t\t\t\t<li data-ng-repeat=\"field in file.fields\" class=\"span12 field\"\n\t\t\t\t\t\t\tdata-ng-class=\"{confirmed: field.confirmed, unique: field.uniqueKey}\"\n\t\t\t\t\t\t\tdata-draggable data-droppable data-droppable-callback=\"onDrop\">\n\t\t\t\t\t\t\t<span class=\"\">{{field.description}}</span>\n\n\t\t\t\t\t\t\t<p class=\"type\">\n\t\t\t\t\t\t\t\t<span ng-show=\"field.type\">{{types[field.type]}}</span>\n\t\t\t\t\t\t\t\t<span ng-show=\"!field.type\">No type assigned</span>\n\t\t\t\t\t\t\t\t<span> &middot; {{field.cardinality}} unique values</span>\n\t\t\t\t\t\t\t\t<span ng-show=\"field.errors.length\" class=\"error\"> &middot; {{field.errors.length}} errors</span>\n\t\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t\t<span class=\"notification\">\n\t\t\t\t\t\t\t\t<span data-ng-show=\"field.special.length\" data-toggle=\"tooltip\" data-original-title=\"Special chars found\">*</span>\n\t\t\t\t\t\t\t\t<!--<span data-ng-show=\"field.countBy\" data-toggle=\"tooltip\" data-original-title=\"Count records by this field\">\n\t\t\t\t\t\t\t\t\t<i class=\"icon-star\"></i>\n\t\t\t\t\t\t\t\t</span>-->\n\t\t\t\t\t\t\t</span>\n\n\t\t\t\t\t\t</li>\n\t\t\t\t\t</ul>\n\n\t\t\t\t\t<div class=\"with-border\">\n\t\t\t\t\t\t<!---<div class=\"\">\n\t\t\t\t\t\t\t<input type=\"checkbox\" data-ng-model=\"selectedFieldMetadata.countBy\"\n\t\t\t\t\t\t\tdata-ng-change=\"selectedFieldMetadata.countBy ? setCountBy(selectedFieldMetadata) : false\">\n\t\t\t\t\t\t\t<label>Primary</label>\n\t\t\t\t\t\t</div>-->\n\n\t\t\t\t\t\t<!--<p class=\"pull-left small muted\"><i class=\"icon-exclamation-sign\"></i> Review for special characters</p>-->\n\t\t\t\t\t\t<span data-ng-show=\"hasSpecial(file)\" class=\"small muted\">* Special characters found, please review</span>\n\t\t\t\t\t\t<a data-ng-show=\"file.fields != file.autoFields\" data-ng-click=\"autoRecognize(file)\">Auto-recognize types and values</a>\n\n\t\t\t\t\t</div>\t</li>\n\t\t\t</ul>\n\t\t</div>\n\n\t\t<div id=\"linking-links\" class=\"span4\">\n\t\t\t<div class=\"header\">\n\t\t\t\t<h4>Links <span class=\"muted small\">({{links.length}})</span></h4> \n\t\t\t</div>\n\n\t\t\t<ul class=\"unstyled panel\" data-ng-hide=\"!links.length\">\n\t\t\t\t<li data-ng-repeat=\"link in links\">\n\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t<a class=\"pull-right danger small\" \n\t\t\t\t\t\t   ng-click=\"deleteLink(link, $index)\">Delete</a>\n\t\t\t\t\t\t<div class=\"clearfix\"></div>\n\t\t\t\t\t</div>\n\t\t\t\t\t<div class=\"link\">\n\t\t\t\t\t\t<div class=\"link-info\">\n\t\t\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t\t\t<span class=\"span10\">{{link.source.field.description}}<span class=\"small\"> in {{link.source.file.label}}</span></span>\n\t\t\t\t\t\t\t\t<!--<span class=\"span2 text-right\">{{link.source.file.data.length}}</span>-->\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t<div class=\"link-info\">\n\t\t\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t\t\t<span class=\"span10\">{{link.lookup.field.description}}<span class=\"small\"> in {{link.lookup.file.label}}</span></span>\n\t\t\t\t\t\t\t\t<!--<span class=\"span2 text-right\">{{link.lookup.file.data.length}}</span>-->\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t<div class=\"last-link-info text-right\" ng-style=\"{ 'background-color': link.metadata.background }\">\n\t\t\t\t\t\t\t<span class=\"\">{{link.metadata.matches}} / {{link.metadata.total}} matches</span>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</div>\n\t\t\t\t</li>\n\t\t\t</ul>\t\n\t\t</div>\n\t</div>\n</div>");
+}]);
+angular.module('palladio').run(['$templateCache', function($templateCache) {
+    $templateCache.put('partials/palladio-duration-view/template.html',
+        "<div class=\"row-fluid\">\n\t<div class=\"span3 settings open\">\n\t\t<div class=\"settings-panel\" ng-show=\"!collapse\">\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Layout</label>\n\t\t\t\t<span class=\"span8\" style=\"margin-left:0px\">\n\t\t\t\t\t<select bs-select ng-model=\"mode\" ng-options=\"mode for mode in modes\"\n\t\t\t\t\t\t\tdata-size=\"3\" class=\"span12 form-control show-tick\">\n\t\t\t\t\t</select>\n\t\t\t\t</span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\" data-ng-show=\"mode === 'Actual duration'\">\n\t\t\t\t<label class=\"span4 inline\">Duration</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showDurationModal()\">{{durationDim.description || \"Choose...\"}}<i class=\"fa fa-bars pull-right\"></i></span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Tooltip Label</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showTooltipLabelModal()\">{{tooltipLabelDim.description || \"Choose...\"}}<i class=\"fa fa-bars pull-right\"></i></span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Y-Grouping</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showGroupModal()\">{{groupDim.description || \"Choose...\"}}<i class=\"fa fa-bars pull-right\"></i></span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">X-Grouping</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showXGroupModal()\">{{xGroupDim.description || \"Choose...\"}}<i class=\"fa fa-bars pull-right\"></i></span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">X-Sort</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showXSortModal()\">{{xSortDim.description || \"Choose...\"}}<i class=\"fa fa-bars pull-right\"></i></span>\n\t\t\t</div>\n\t\t</div>\n\n\t</div>\n\n\t<div class=\"main-viz\" class=\"view span12\">\n\t\t<div id=\"{{uniqueToggleId}}\" class=\"row-fluid\">\n\t\t\t<!-- SVG inserted here -->\n\t\t</div>\n\t\t<div id=\"{{uniqueModalId}}\">\n\t\t\t<div id=\"duration-modal\" data-modal dimensions=\"durationDims\" model=\"durationDim\"></div>\n\t\t\t<div id=\"tooltip-label-modal\" data-modal dimensions=\"labelDims\" model=\"tooltipLabelDim\"></div>\n\t\t\t<div id=\"group-modal\" data-modal dimensions=\"labelDims\" model=\"groupDim\"></div>\n\t\t\t<div id=\"x-group-modal\" data-modal dimensions=\"labelDims\" model=\"xGroupDim\"></div>\n\t\t\t<div id=\"x-sort-modal\" data-modal dimensions=\"labelDims\" model=\"xSortDim\"></div>\n\t\t</div>\n\t</div>\n\n\t<a data-ng-show=\"view === 'true'\" class=\"toggle\" data-toggle=\"tooltip\" data-original-title=\"Settings\"\n\t\tdata-placement=\"bottom\"><i class=\"fa fa-cog\"></i></a>\n</div>\n");
 }]);
 angular.module('palladio').run(['$templateCache', function($templateCache) {
     $templateCache.put('partials/palladio-facet-filter/template.html',
@@ -71691,6 +71860,6 @@ angular.module('palladio').run(['$templateCache', function($templateCache) {
         "<div class=\"row-fluid\">\n\t<div class=\"span3\">\n\t\t<div class=\"accordion-heading row-fluid\">\n\t\t\t<a class=\"span1 text-center angle\" data-toggle=\"collapse\" \n\t\t\t\tdata-ng-click=\"collapse=!collapse\" data-ng-init=\"collapse=false\"\n\t\t\t\tdata-parent=\"#filters\" href=\"{{uniqueToggleHref}}\" target=\"_self\">\n\n\t\t\t\t<span data-ng-show=\"!collapse\"><i class=\"fa fa-angle-down\"></i></span>\n\t\t\t\t<span data-ng-show=\"collapse\"><i class=\"fa fa-angle-right\"></i></span>\n\t\t\t</a>\n\t\t\t<input type=\"text\" class=\"editable span11\" data-ng-model=\"title\"></input>\n\t\t</div>\n\t\t<div class=\"settings-panel accordion-body\" ng-show=\"!collapse && !shortVersion\">\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Dates</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showDateModal()\">\n\t\t\t\t\t{{dateProp.description || \"Choose...\"}}\n\t\t\t\t\t<i class=\"fa fa-bars pull-right\"></i>\n\t\t\t\t</span>\n\t\t\t</div>\n\t\t\t<div class=\"setting row-fluid\" data-ng-show=\"!shortVersion\">\n\t\t\t\t<label class=\"span4 inline\">Group by</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showGroupModal()\">\n\t\t\t\t\t{{groupProp.description || \"Choose...\"}}\n\t\t\t\t\t<i class=\"fa fa-bars pull-right\"></i>\n\t\t\t\t</span>\n\t\t\t</div>\n\t\t\t<div class=\"setting row-fluid\" data-ng-show=\"!shortVersion\">\n\t\t\t\t<label class=\"span4 inline\">Height shows</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showAggModal()\">\n\t\t\t\t\t{{getAggDescription(aggDim) || \"Choose...\"}}\n\t\t\t\t\t<i class=\"fa fa-bars pull-right\"></i>\n\t\t\t\t</span>\n\t\t\t</div>\n\t\t\t<div class=\"setting row-fluid\" data-ng-show=\"!shortVersion\">\n\t\t\t\t<span class=\"span4\"></span>\n\t\t\t\t<span class=\"\">\n\t\t\t\t\t<a class=\"\" data-ng-click=\"zoomToFilter()\">Zoom to filter</a>\n\t\t\t\t</span>\n\t\t\t</div>\n\t\t</div>\n\t</div>\n\n\t<div class=\"span9\">\n\t<!-- View -->\n\t\t<div id=\"{{uniqueToggleId}}\" class=\"row-fluid accordion-body collapse in component\">\n\t\t\t<div class=\"span12 view\">\n\t\t\t\t<a class=\"toggle\" class=\"close\"></a>\n\t\t\t\t<div data-palladio-timeline-filter \n\t\t\t\t\tdata-dimension=\"dateDim\" \n\t\t\t\t\tdata-group-accessor=\"groupAccessor\" \n\t\t\t\t\tdata-xfilter=\"xfilter\" \n\t\t\t\t\tdata-type=\"date\"\n\t\t\t\t\tdata-short=\"shortVersion\"\n\t\t\t\t\tdata-title=\"{{title}}\" \n\t\t\t\t\tdata-height=\"200\" \n\t\t\t\t\tdata-mode=\"{{mode}}\" \n\t\t\t\t\tdata-count-by=\"{{countBy}} \"\n\t\t\t\t\tdata-aggregation-type=\"{{aggregationType}}\"\n\t\t\t\t\tdata-aggregate-key=\"{{aggregateKey}}\"\n\t\t\t\t\tdata-set-filter=\"setFilter\" \n\t\t\t\t\tdata-get-filter=\"getFilter\" \n\t\t\t\t\tdata-extent-override=\"extentOverride\" >\n\t\t\t\t</div>\n\t\t\t</div> \n\t\t</div>\n\t\t<div id=\"{{uniqueModalId}}\">\n\t\t\t<div id=\"date-modal\" data-modal dimensions=\"dateDims\" model=\"dateProp\"></div>\n\t\t\t<div id=\"group-modal\" data-modal dimensions=\"groupDims\" model=\"groupProp\"></div>\n\t\t\t<div id=\"agg-modal\" data-modal dimensions=\"aggDims\" model=\"aggDim\" \n\t\t\t\tdescription-accessor=\"getAggDescription\"></div>\n\t\t</div>\n\t</div>\n\n\t<a class=\"remove fa fa-trash-o\" data-ng-click=\"$parent.removeFilter($event)\"\n\t\tdata-toggle=\"tooltip\" data-title=\"Delete\"></a>\n\t<a class=\"reset fa fa-eraser\" style=\"line-height:40px\" data-ng-click=\"filterReset()\"\n\t\tdata-toggle=\"tooltip\" data-title=\"Clear\"></a>\n\t<a data-ng-show=\"!shortVersion && !collapse\" class=\"short fa fa-compress\" style=\"line-height:40px\"\n\t\tdata-ng-click=\"shortVersion = !shortVersion\" data-toggle=\"tooltip\"\n\t\tdata-title=\"Compress\"></a>\n\t<a data-ng-show=\"shortVersion && !collapse\" class=\"short fa fa-expand\" style=\"line-height:40px\"\n\t\tdata-ng-click=\"shortVersion = !shortVersion\" data-toggle=\"tooltip\" \n\t\tdata-title=\"Expand\"></a>\n\n</div>");
 }]);
 angular.module('palladio').run(['$templateCache', function($templateCache) {
-    $templateCache.put('partials/palladio-duration-view/template.html',
-        "<div class=\"row-fluid\">\n\t<div class=\"span3 settings open\">\n\t\t<div class=\"settings-panel\" ng-show=\"!collapse\">\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Layout</label>\n\t\t\t\t<span class=\"span8\" style=\"margin-left:0px\">\n\t\t\t\t\t<select bs-select ng-model=\"mode\" ng-options=\"mode for mode in modes\"\n\t\t\t\t\t\t\tdata-size=\"3\" class=\"span12 form-control show-tick\">\n\t\t\t\t\t</select>\n\t\t\t\t</span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\" data-ng-show=\"mode === 'Actual duration'\">\n\t\t\t\t<label class=\"span4 inline\">Duration</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showDurationModal()\">{{durationDim.description || \"Choose...\"}}<i class=\"fa fa-bars pull-right\"></i></span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Tooltip Label</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showTooltipLabelModal()\">{{tooltipLabelDim.description || \"Choose...\"}}<i class=\"fa fa-bars pull-right\"></i></span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">Y-Grouping</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showGroupModal()\">{{groupDim.description || \"Choose...\"}}<i class=\"fa fa-bars pull-right\"></i></span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">X-Grouping</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showXGroupModal()\">{{xGroupDim.description || \"Choose...\"}}<i class=\"fa fa-bars pull-right\"></i></span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\">\n\t\t\t\t<label class=\"span4 inline\">X-Sort</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showXSortModal()\">{{xSortDim.description || \"Choose...\"}}<i class=\"fa fa-bars pull-right\"></i></span>\n\t\t\t</div>\n\t\t</div>\n\n\t</div>\n\n\t<div class=\"main-viz\" class=\"view span12\">\n\t\t<div id=\"{{uniqueToggleId}}\" class=\"row-fluid\">\n\t\t\t<!-- SVG inserted here -->\n\t\t</div>\n\t\t<div id=\"{{uniqueModalId}}\">\n\t\t\t<div id=\"duration-modal\" data-modal dimensions=\"durationDims\" model=\"durationDim\"></div>\n\t\t\t<div id=\"tooltip-label-modal\" data-modal dimensions=\"labelDims\" model=\"tooltipLabelDim\"></div>\n\t\t\t<div id=\"group-modal\" data-modal dimensions=\"labelDims\" model=\"groupDim\"></div>\n\t\t\t<div id=\"x-group-modal\" data-modal dimensions=\"labelDims\" model=\"xGroupDim\"></div>\n\t\t\t<div id=\"x-sort-modal\" data-modal dimensions=\"labelDims\" model=\"xSortDim\"></div>\n\t\t</div>\n\t</div>\n\n\t<a data-ng-show=\"view === 'true'\" class=\"toggle\" data-toggle=\"tooltip\" data-original-title=\"Settings\"\n\t\tdata-placement=\"bottom\"><i class=\"fa fa-cog\"></i></a>\n</div>\n");
+    $templateCache.put('partials/palladio-data-upload/template.html',
+        "<span data-ng-click=\"triggerDataModelSelector()\" >\n\t<span ng-transclude></span>\n</span>\n\n<input \ttype=\"file\" id=\"dataModelSelector\" \n\t\tstyle=\"display:none\" \n\t\tonchange=\"angular.element(this).scope().loadDataModel(this)\" />");
 }]);

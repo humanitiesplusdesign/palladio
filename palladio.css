@@ -10864,6 +10864,9 @@ pre.CodeMirror-placeholder {
   right: 200px;
 }
 
+[data-palladio-ideograph-view] {
+
+}
 [data-palladio-duration-view] path {
 	fill: #dddddd;
 }

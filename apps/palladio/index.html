@@ -70,6 +70,10 @@
                         data-ng-class="{'active' : location.path() == '/visualization' && layout=='duration'}"><a ui-sref="/visualization" ui-sref-opts="{reload: reload}" data-ng-click="setLayout('duration')" class="short">Duration</a>
                     </li>
 
+                    <li data-ng-show="files.length"
+                        data-ng-class="{'active' : location.path() == '/visualization' && layout=='idiograph'}"><a ui-sref="/visualization" ui-sref-opts="{reload: reload}" data-ng-click="setLayout('idiograph')" class="short">Idiograph</a>
+                    </li>
+
                     <li data-ng-show="files.length">
                         <span><button palladio-data-download class="btn" style="margin-top:0px">Save</button></span>
                     </li>

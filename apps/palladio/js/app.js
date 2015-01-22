@@ -24,7 +24,8 @@ var app = angular.module('palladioApp', [
 	'palladioTableView',
 	'palladioSelectionView',
 	'palladioGraphView',
-	'palladioDurationView']
+	'palladioDurationView',
+	'palladioIdiographView']
 	)
 	.config(function($stateProvider, $urlRouterProvider) {
 
