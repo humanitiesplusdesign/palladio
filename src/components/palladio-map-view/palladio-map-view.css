@@ -125,3 +125,7 @@
 [data-palladio-map-view-with-settings] .layer-item:first-child {
 	border: none;
 }
+
+[data-palladio-map-view-with-settings] .CodeMirror {
+	height: 100px;
+}

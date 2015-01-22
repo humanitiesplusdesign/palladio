@@ -59973,664 +59973,6 @@ angular.module('palladio', [])
 			facetFilter: facetFilter
 		};
 	}]);
-angular.module('palladio.controllers', ['palladio.services', 'palladio'])
-	.controller('WorkflowCtrl', function (version, $rootScope, $scope, $location, $controller, $compile, $timeout, dataService, spinnerService, loadService, palladioService, $http) {
-
-		// Show/hide filters on panel
-		$scope.$watch(function(){ return $location.path(); }, function (path){
-			// If we don't have data, redirect to the 'start' page.
-			if( ( path !== '/' && path !== '/upload' ) && dataService.getFiles().length === 0) {
-			//	$location.path('/upload');
-			}
-
-			if (path == "/visualization") {
-				$('#filter-buttons').show();
-				$('#search-top').show();
-			}
-			else {
-				$('#filter-buttons').hide();
-				$('#search-top').hide();
-			}
-
-			$scope.reload = $location.path() === '/upload';
-		});
-
-		$scope.searchText = "";
-
-		$scope.$watch('searchText', function (nv, ov) {
-			if(nv !== ov) {
-				palladioService.search(nv);
-			}
-		});
-
-		// Control display of the individual visualizations.
-		$scope.showGrid = false;
-		$scope.showTable = false;
-		$scope.showGeo = false;
-		$scope.showTime = false;
-		$scope.showGraph = true;
-
-		$scope.files = dataService.getFiles();
-
-		$scope.data = [];
-
-		// let access location from template
-		$rootScope.location = $location;
-
-		// Property (in addition to the above 3) required by the visualization stage.
-		$scope.layout = 'geo';
-
-		// Initialize the scope element that controls filter visibility.
-		$scope.expandedFilters = true;
-
-		$scope.types = {
-			text : 'Text',
-			number : 'Number',
-			date : 'Date',
-			latlong : 'Coordinates',
-			url : 'URL'
-		};
-
-		$scope.$watch(function(){ return $('#footer').html(); }, function(){
-			$('*[data-toggle="tooltip"]').tooltip({container:'body'});
-		});
-
-
-		// TODO: Remove - this is no longer required as we don't run off of data on $scope.
-		$scope.refreshData = function (data) {
-			// Data setup.
-			if(dataService.isDirty() || data === undefined) {
-				// If data has been added/deleted/changed, we need to wipe out the existing
-				// filters that rely on the old data...
-				if(angular.element("#filters").scope()) {
-					angular.element("#filters").scope().$broadcast('$destroy');
-					angular.element("#filters").children().remove();
-					$scope.$emit('triggerFilterReset');
-				}
-
-				// ... then we reload the data.
-				dataService.getData().then(function (resolvedData) {
-					$scope.data = resolvedData.data;
-					$scope.metadata = resolvedData.metadata;
-					$scope.xfilter = resolvedData.xfilter;
-
-					$scope.$emit('triggerUpdate');
-				});
-			} else {
-				if (data !== undefined) {
-					$scope.data = data.data;
-					$scope.metadata = data.metadata;
-					$scope.xfilter = data.xfilter;
-
-					$scope.$emit('triggerUpdate');
-				}
-			}
-		};
-
-		$scope.setLayout = function (layout) {
-			$scope.layout = layout;
-		};
-
-		$scope.refreshData();
-
-		$scope.clearFiles = function () {
-			while(dataService.getFiles().length > 0) {
-				dataService.deleteFile(dataService.getFiles()[0], 0);
-			}
-		};
-
-		$scope.onLoad = function() {
-			// Only move on to the visualization if the save file has a visualization part, in
-			// which case it would have a layout specified.
-			if(!loadService.layout()) {
-				$location.path('/upload');
-				spinnerService.hide();
-			}
-			// if(loadService.layout()) setTimeout(function() { $location.path('/visualization'); }, 1000);
-			if(loadService.layout()) {
-				$location.path('/visualization');
-			}
-		};
-
-		function loadFile(path) {
-			spinnerService.spin();
-			$http.get(path)
-				.success(function(data) {
-					loadService.loadJson(data);
-					$scope.onLoad();
-				})
-				.error(function() {
-					spinnerService.hide();
-					console.log("Attempted to load auto-load.json but it did not exist. This is not usually a problem.");
-				});
-		}
-
-		if($location.search().file) {
-			// Load the file from the path on the URL.
-			loadFile($location.search().file);
-		} else {
-			// Otherwise auto-load file auto-load.json if it exists.
-			loadFile('auto-load.json');
-		}
-
-		// Alert when leaving
-		$(window).bind('beforeunload', function(){
-			return 'By leaving this page you will loose your work.';
-		});
-
-	})
-	
-	.controller('UploadRefineCtrl', function ($scope, $location, parseService, dataService, validationService, $controller) {
-
-		// Instantiate the WorkflowCtrl controller in scope if it is not already.
-		if($scope.refreshData === undefined) {
-			$controller('WorkflowCtrl', { '$scope': $scope });
-		}
-		
-		$scope.selectedFieldMetadata = null;
-		$scope.selectedFile = null;
-		$scope.sparqlEndpoint = "";
-
-		$scope.sortOptions = [
-			{ label:'Sort by Value', value:'key' },
-			{ label:'Sort by Frequency', value:'value'}
-		];
-
-		$scope.sortBy = $scope.sortOptions[0];
-
-		$scope.onDrop = function(obj, e){
-			$scope.lastFileName = e.dataTransfer.files[0].name.replace(/\.[^/.]+$/, "") || null;
-		};
-
-		$scope.addFile = function (file) {
-			dataService.addFile(file);
-		};
-
-		$scope.deleteFile = function(file) {
-			dataService.deleteFile(file);
-			$scope.selectedFieldMetadata = null;
-			$scope.selectedFile = null;
-		};
-
-		$scope.hasSpecial = function(file) {
-
-			return file.fields.filter(function (field){
-				return field.special.length;
-			}).length > 0;
-		};
-
-		$scope.setSelected = function(field, file) {
-			$scope.showSpecialCharDetail = false;
-			
-			// This is screwy: Don't update links if this is true, which we
-			// only have to do if the augmentID is not null or undefined.
-			if(field.augmentId !== null && field.augmentId !== undefined) field.initial = true;
-			
-			$scope.selectedFieldMetadata = field;
-			$scope.selectedFile = file;
-			$scope.selectedSpecialChar = null;
-
-			var autoFields = file.autoFields.filter(function (d) { return d.key === field.key; })[0];
-
-			// If 'type' isn't set, grab the auto-recognized type.
-			if(field.type === undefined) {
-				field.type = autoFields.type;
-			}
-
-			if(field.uniqueKey === undefined) {
-				field.uniqueKey = autoFields.uniqueKey;
-			}
-
-			field.unassignedSpecialChars = calcUnassignedSpecialCharacters();
-
-			// Update unique values and detect errors.
-			$scope.updateUniques();
-
-			// Set field as confirmed once user has looked at it.
-			field.confirmed = true;
-		};
-
-		$scope.setCountBy = function (field) {
-			dataService.setCountBy(field);
-			dataService.setDirty();
-		};
-
-		$scope.updateMetadata = function () {
-			$scope.updateUniques();
-			dataService.setDirty();
-		};
-
-		$scope.autoRecognize = function(file) {
-			file.fields = file.autoFields;
-			dataService.setDirty();
-		};
-
-		$scope.updateUniques = function() {
-
-			var ignore = [];
-
-			if($scope.selectedFieldMetadata.ignore)
-				ignore = $scope.selectedFieldMetadata.ignore;
-			// Recalculate metadata with delimiter.
-
-			var md = parseService.parseColumn($scope.selectedFieldMetadata.key,
-					$scope.selectedFile.data, $scope.selectedFieldMetadata.mvDelimiter,
-					$scope.selectedFieldMetadata.hierDelimiter, ignore, $scope.selectedFieldMetadata.type);
-
-			// Reassign metadata that might change due to delimiter.
-			$scope.selectedFieldMetadata.cardinality = md.cardinality;
-			$scope.selectedFieldMetadata.blanks = md.blanks;
-			$scope.selectedFieldMetadata.unassignedSpecialChars = calcUnassignedSpecialCharacters();
-			$scope.selectedFieldMetadata.uniqueKey = md.uniqueKey;
-
-			// Check to make sure that the currently selected special character is in the list
-			// of unassigned special characters. If not, remove the current selection.
-			if($scope.selectedFieldMetadata.unassignedSpecialChars.indexOf($scope.selectedSpecialChar) === -1) {
-				$scope.selectedSpecialChar = null;
-			}
-
-			$scope.selectedFieldMetadata.errors = validationService($scope.selectedFieldMetadata.uniques.map(function (d) { return d.key; }), $scope.selectedFieldMetadata.type);
-
-			$scope.selectedFieldMetadata.uniques = md.uniques.filter( function(d) {
-				// Display only uniques with the selected special character (if selected).
-				return $scope.selectedSpecialChar === null || d.key.indexOf($scope.selectedSpecialChar) !== -1;
-			}).sort(function (a, b) {
-				var sortBy = $scope.sortBy.value;
-				if($scope.findError(a.key) && $scope.findError(b.key)) return a[sortBy] > b[sortBy] ? 1 : -1;
-				if($scope.findError(a.key)) return -1;
-				if($scope.findError(b.key)) return 1;
-				return a[sortBy] > b[sortBy] ? 1 : -1;
-			});
-
-			// Animate unique values table on change here.
-			var tab = d3.select(".refine-values-table");
-			tab.transition().delay(100).style('opacity', '.2');
-			tab.transition().delay(500).style('opacity', '');
-		};
-
-		$scope.findError = function (val) {
-			var errors = $scope.selectedFieldMetadata.errors.filter(function (d) {
-				return d.value === val;
-			});
-
-			if(errors.length > 0) return errors[0];
-
-			return false;
-		};
-
-		function calcUnassignedSpecialCharacters() {
-			var inMv, inHier, inIgnore;
-
-			return $scope.selectedFieldMetadata.special.filter(function (d) {
-				if(typeof $scope.selectedFieldMetadata.mvDelimiter === 'string') {
-					inMv = $scope.selectedFieldMetadata.mvDelimiter.indexOf(d) !== -1;
-				} else { inMv = false; }
-
-				if(typeof $scope.selectedFieldMetadata.hierDelimiter === 'string') {
-					inHier = $scope.selectedFieldMetadata.hierDelimiter.indexOf(d) !== -1;
-				} else { inHier = false; }
-
-				if($scope.selectedFieldMetadata.ignore) {
-					inIgnore = $scope.selectedFieldMetadata.ignore.join("").indexOf(d) !== -1;
-				} else { inIgnore = false; }
-
-				return !inMv && !inHier && !inIgnore;
-			});
-		}
-
-		$scope.downloadUniques = function(filter) {
-			var blob = new Blob(
-				$scope.selectedFieldMetadata.uniques.map(function (d) { return d.key; }).filter(function (d) {
-					if(filter) {
-						return d.toLowerCase().indexOf(filter.toLowerCase()) !== -1;
-					} else {
-						return true;
-					}
-				}).map(function (d) {
-					return d + "\n";
-				}),
-				{type: "text/plain;charset=utf-8"}
-			);
-			var fileName = filter ? $scope.selectedFieldMetadata.description + " (unique values filtered).txt" : $scope.selectedFieldMetadata.description + " (unique values).txt";
-			saveAs(blob, fileName);
-		};
-
-		$scope.downloadErrors = function() {
-			var blob = new Blob(
-				[d3.csv.format($scope.selectedFieldMetadata.errors.map(function (d) {
-					return [d.value, d.message];
-				}))],
-				{type: "text/plain;charset=utf-8"}
-			);
-			var fileName = $scope.selectedFieldMetadata.description + " (errors).txt";
-			saveAs(blob, fileName);
-		};
-
-		$scope.allowedTypes = [
-			{id: 'text', name: 'Text'},
-			{id: 'number', name: 'Number'},
-			{id: 'date', name: 'Year or Date (YYYY-MM-DD)'},
-			{id: 'latlong', name: 'Coordinates'},
-			{id: 'url', name: 'URL'}
-		];
-
-		$scope.hasLinks = function (field) {
-			var found = false;
-			if(field) {
-				dataService.getLinks().forEach(function (d){
-					if (d.source.field.key === field.key) found = d;
-				});
-			}
-			return found;
-		};
-
-		$scope.isLinked = function (field) {
-			var found = false;
-			if(field) {
-				dataService.getLinks().forEach(function (d){
-					if (d.source.field.key === field.key || d.lookup.field.key === field.key) found = true;
-				});
-			}
-			return found;
-		}
-
-		$scope.highlightLink = function (link, source) {
-			if (!link) {
-				$('.file-info').css("opacity","1");
-				return;
-			}
-
-			$('.file-info').css("opacity",".2");
-			$('#file-info-' + source.id).css("opacity","1");
-			$('#file-info-' + link.lookup.file.id).css("opacity","1");
-		};
-
-		$scope.showNewTableAndSelect = function(field,file) {
-			$scope.parseError = null;
-			$scope.fromFileView = true;
-			$scope.addingTable = true;
-			$scope.text = "";
-			$scope.lastFileName = null;
-			$scope.setSelected(field, file);
-		};
-
-		$scope.showNewTable = function() {
-			$scope.parseError = null;
-			$scope.addingTable = true;
-			$scope.text = "";
-			$scope.lastFileName = null;
-		};
-	})
-
-	.controller("LinkCtrl", function ($scope, dataService) {
-		$scope.links = dataService.getLinks();
-
-		$scope.onDrop = function (event, ui) {
-			var dragged = angular.element(ui.draggable);
-			var dropped = angular.element(event.target);
-
-			$scope.$apply( function (scope) {
-				var source = {
-					file: dragged.scope().file,
-					field: dragged.scope().field
-				};
-
-				var lookup = {
-					file: dropped.scope().file,
-					field: dropped.scope().field
-				};
-
-				var metadata = dataService.calcLinkMetadata(source, lookup);
-
-				dataService.addLink({
-					source: source,
-					lookup: lookup,
-					metadata: metadata
-				});
-			});
-
-			
-		};
-
-		$scope.hasLinks = function (field) {
-			var found = false;
-			if(field) {
-				dataService.getLinks().forEach(function(d){
-					if (d.lookup.field.key === field.key || d.source.field.key === field.key) found = true;
-				});
-			}
-			return found;
-		};
-
-		$scope.deleteLink = function (link, index) {
-			dataService.deleteLink(link, index);
-		};
-
-		$scope.$watch(function(){ return $('.file-info').html(); }, function(){
-			$('.notification').tooltip({container:'body'});
-			$('.type').tooltip({container:'body'});
-		});
-
-		/* Resizing links 
-
-		function resizeLinks() {
-			var height = $('#linking-files').height();
-			var sumHeight=0;
-			$('#linking-links .link').each( function(){ sumHeight += $(this).height(); });
-			if (sumHeight > height) {
-				$('#linking-links').css("height", "auto");
-				return;
-			}
-			var h = d3.max( [ height, $(window).height() ] ) + 20;
-			$('#linking-links').css("height",h+"px");
-		}
-
-		$scope.$watch(function(){ return $('#linking-files').height(); }, resizeLinks);
-		$scope.$watch(function(){ return $('#linking-links').html(); }, resizeLinks);
-		$(window).resize(resizeLinks);*/
-	})
-
-	.controller("VisualizationCtrl", function ($scope, data, $controller, $window, $location, $compile, exportService, loadService, palladioService) {
-
-		$scope.showFilters = function () {
-			if($location.path() === '/upload' || $location.path() === '/link' || $location.path() === '/' || $location.path() === '/index.html') {
-				return false;
-			} else { return true; }
-		};
-
-		$scope.removeFilter = function (event) {
-			// '$destroy' event isn't getting fired properly with just .remove(), so we do it
-			// ourselves.
-			angular.element(event.currentTarget.parentElement).scope().$broadcast('$destroy');
-			angular.element(event.currentTarget.parentElement.parentElement.parentElement).remove();
-			palladioService.update();
-			$('.tooltip').remove();
-		};
-
-		// Compile new filters, add them to the WorkflowCtrl scope (parent)
-		// and then append them to the DOM.
-		$scope.addFilter = function(filter) {
-			switch (filter) {
-				case 'timeline':
-					if(!$scope.blurTimeline) {
-						$('#filters').prepend($compile('<li><div data-palladio-timeline-filter-with-settings></div></li>')($scope));
-					}
-					break;
-				// case 'timespan':
-				// 	$('#filters').prepend($compile('<li><div data-palladio-timespan-filter></div></li>')($scope));
-				// 	break;
-				// case 'timestep':
-				// 	$('#filters').prepend($compile('<li><div data-palladio-timestep-filter></div></li>')($scope));
-				// 	break;
-				case 'partime':
-					if(!$scope.blurTimeSpan) {
-						$('#filters').prepend($compile('<li><div data-palladio-partime-filter></div></li>')($scope));
-					}
-					break;
-				case 'facet':
-					if(!$scope.blurFacet) {
-						$('#filters').prepend($compile('<li><div data-palladio-facet-filter show-controls="true" show-accordion="true" show-drop-area="false" show-settings="true"></div></li>')($scope));
-					}
-					break;
-				// case 'histogram':
-				// 	$('#filters').prepend($compile('<li><div data-palladio-histogram-filter-with-settings></div></li>')($scope));
-				// 	break;
-				// case 'arctime':
-				// 	$('#filters').prepend($compile('<li><div data-palladio-arctime-filter-with-settings></div></li>')($scope));
-				// 	break;
-			}
-			$scope.showAddFilter = false;
-		};
-
-		// Instantiate the WorkflowCtrl controller in scope if it is not already.
-		if($scope.refreshData === undefined) {
-			$controller('WorkflowCtrl', { '$scope': $scope });
-		}
-
-		// We need to get the data onto the higher-level WorkflowCtrl scope.
-		$scope.refreshData(data);
-
-		// If the data is undefined, redirect back to '/'
-		if(data.metadata === undefined) {
-			$window.location = '#/';
-			return;
-		}
-
-		$scope.exportSvg = function(source, title){
-			exportService(d3.select('svg'), title);
-		};
-
-		$scope.$watch('layout', function(){
-			$('*[data-toggle="tooltip"]').tooltip({container:'body'});
-		});
-
-		var metadata = data.metadata;
-
-		$scope.blurTimeline = true;
-		$scope.blurTimeSpan = true;
-		$scope.blurFacet = true;
-		$scope.blurHistogram = true;
-
-		$scope.showAddFilter = false;
-
-		if(metadata.filter(function (d) { return d.type === 'number'; }).length > 0) {
-			$scope.blurHistogram = false;
-		}
-
-		if(metadata.filter(function (d) { return d.type === 'date'; }).length > 1) {
-			$scope.blurTimeSpan = false;
-		}
-
-		if(metadata.filter(function (d) { return d.type === 'date'; }).length > 0) {
-			$scope.blurTimeline = false;
-		}
-
-		if(metadata.filter(function (d) {
-				return d.type === 'text' && !d.uniqueKey && d.cardinality < 1000; }).length > 0) {
-			$scope.blurFacet = false;
-		}
-
-		// Handle save/load for Palladio-specific way we dynamically add and remove filters.
-
-		var facetImportFunctions = [],
-			facetExportFunctions = [],
-			timelineImportFunctions = [],
-			timelineExportFunctions = [],
-			partimeImportFunctions = [],
-			partimeExportFunctions = [],
-			timestepImportFunctions = [],
-			timestepExportFunctions = [];
-
-		function importState(state) {
-			if(state.facets.length > 0) {
-				state.facets.forEach(function (f, i) {
-					if(!facetImportFunctions[i]) $scope.addFilter('facet');
-
-					// This is related to having to wait for the facets to build themselves.
-					// Unfortunately this includes a 100ms setTimeout call in the facet building, which
-					// needs to be fixed, but until then we need to artificially wait until that
-					// call completes.
-					window.setTimeout(function () { facetImportFunctions[i](f); }, 300);
-				});
-			}
-
-			if(state.timelines.length > 0) {
-				state.timelines.forEach(function (f, i) {
-					if(!timelineImportFunctions[i]) $scope.addFilter('timeline');
-					window.setTimeout(function () { timelineImportFunctions[i](f); }, 300);
-				});
-			}
-
-			if(state.partimes.length > 0) {
-				state.partimes.forEach(function (f, i) {
-					if(!partimeImportFunctions[i]) $scope.addFilter('partime');
-					window.setTimeout(function() { partimeImportFunctions[i](f); }, 300);
-				});
-			}
-
-			if(state.timesteps.length > 0) {
-				state.timesteps.forEach(function (f, i) {
-					if(!timestepImportFunctions[i]) $scope.addFilter('timestep');
-					window.setTimeout(function() { timestepImportFunctions[i](f); }, 300);
-				});
-			}
-		}
-
-		function exportState() {
-			return {
-				facets: facetExportFunctions.map(function (f) { return f(); }).filter(function(s) { return s; }),
-				timelines: timelineExportFunctions.map(function (f) { return f(); }).filter(function(s) { return s; }),
-				partimes: partimeExportFunctions.map(function (f) { return f(); }).filter(function(s) { return s; }),
-				timesteps: timestepExportFunctions.map(function (f) { return f(); }).filter(function(s) { return s; })
-			};
-		}
-
-		var handler = function(id, type, exp, imp) {
-			// Intercept 'facet' and 'timeline' type registrations and handle them ourselves.
-			if(type === 'facet' || type === 'timeline' ||
-				type === 'partime' || type === 'timestep') {
-				
-				if(type === 'facet') {
-					facetExportFunctions.push(exp);
-					facetImportFunctions.push(imp);
-				}
-
-				if(type === 'timeline') {
-					timelineExportFunctions.push(exp);
-					timelineImportFunctions.push(imp);
-				}
-
-				if(type === 'partime') {
-					partimeExportFunctions.push(exp);
-					partimeImportFunctions.push(imp);
-				}
-
-				if(type === 'timestep') {
-					timestepExportFunctions.push(exp);
-					timestepImportFunctions.push(imp);
-				}
-			}
-
-			return function () {};
-		};
-
-		var deregister = [];
-
-		deregister.push(
-			palladioService.registerStateFunctions('filters', 'palladioFilters', exportState, importState, ['facet', 'timeline', 'partime', 'timestep'], handler)
-		);
-
-		$scope.$on('$destroy', function () {
-			deregister.forEach(function(f) { f(); });
-		});
-
-		// Total hack, but we need to give the directives time to finish registering themselves.
-		setTimeout(function() {
-			if(loadService.layout()) $scope.setLayout(loadService.layout());
-			loadService.build(palladioService.getStateFunctions());
-		}, 1000);
-	});
-
 angular.module('palladio.directives.dimension', ['palladio'])
 	.directive('palladioDimension', ['palladioService', function(ps) {
 		return {
@@ -61469,6 +60811,664 @@ angular.module('palladio.directives.yasgui', [
 			}
 		};
 	});
+angular.module('palladio.controllers', ['palladio.services', 'palladio'])
+	.controller('WorkflowCtrl', function (version, $rootScope, $scope, $location, $controller, $compile, $timeout, dataService, spinnerService, loadService, palladioService, $http) {
+
+		// Show/hide filters on panel
+		$scope.$watch(function(){ return $location.path(); }, function (path){
+			// If we don't have data, redirect to the 'start' page.
+			if( ( path !== '/' && path !== '/upload' ) && dataService.getFiles().length === 0) {
+			//	$location.path('/upload');
+			}
+
+			if (path == "/visualization") {
+				$('#filter-buttons').show();
+				$('#search-top').show();
+			}
+			else {
+				$('#filter-buttons').hide();
+				$('#search-top').hide();
+			}
+
+			$scope.reload = $location.path() === '/upload';
+		});
+
+		$scope.searchText = "";
+
+		$scope.$watch('searchText', function (nv, ov) {
+			if(nv !== ov) {
+				palladioService.search(nv);
+			}
+		});
+
+		// Control display of the individual visualizations.
+		$scope.showGrid = false;
+		$scope.showTable = false;
+		$scope.showGeo = false;
+		$scope.showTime = false;
+		$scope.showGraph = true;
+
+		$scope.files = dataService.getFiles();
+
+		$scope.data = [];
+
+		// let access location from template
+		$rootScope.location = $location;
+
+		// Property (in addition to the above 3) required by the visualization stage.
+		$scope.layout = 'geo';
+
+		// Initialize the scope element that controls filter visibility.
+		$scope.expandedFilters = true;
+
+		$scope.types = {
+			text : 'Text',
+			number : 'Number',
+			date : 'Date',
+			latlong : 'Coordinates',
+			url : 'URL'
+		};
+
+		$scope.$watch(function(){ return $('#footer').html(); }, function(){
+			$('*[data-toggle="tooltip"]').tooltip({container:'body'});
+		});
+
+
+		// TODO: Remove - this is no longer required as we don't run off of data on $scope.
+		$scope.refreshData = function (data) {
+			// Data setup.
+			if(dataService.isDirty() || data === undefined) {
+				// If data has been added/deleted/changed, we need to wipe out the existing
+				// filters that rely on the old data...
+				if(angular.element("#filters").scope()) {
+					angular.element("#filters").scope().$broadcast('$destroy');
+					angular.element("#filters").children().remove();
+					$scope.$emit('triggerFilterReset');
+				}
+
+				// ... then we reload the data.
+				dataService.getData().then(function (resolvedData) {
+					$scope.data = resolvedData.data;
+					$scope.metadata = resolvedData.metadata;
+					$scope.xfilter = resolvedData.xfilter;
+
+					$scope.$emit('triggerUpdate');
+				});
+			} else {
+				if (data !== undefined) {
+					$scope.data = data.data;
+					$scope.metadata = data.metadata;
+					$scope.xfilter = data.xfilter;
+
+					$scope.$emit('triggerUpdate');
+				}
+			}
+		};
+
+		$scope.setLayout = function (layout) {
+			$scope.layout = layout;
+		};
+
+		$scope.refreshData();
+
+		$scope.clearFiles = function () {
+			while(dataService.getFiles().length > 0) {
+				dataService.deleteFile(dataService.getFiles()[0], 0);
+			}
+		};
+
+		$scope.onLoad = function() {
+			// Only move on to the visualization if the save file has a visualization part, in
+			// which case it would have a layout specified.
+			if(!loadService.layout()) {
+				$location.path('/upload');
+				spinnerService.hide();
+			}
+			// if(loadService.layout()) setTimeout(function() { $location.path('/visualization'); }, 1000);
+			if(loadService.layout()) {
+				$location.path('/visualization');
+			}
+		};
+
+		function loadFile(path) {
+			spinnerService.spin();
+			$http.get(path)
+				.success(function(data) {
+					loadService.loadJson(data);
+					$scope.onLoad();
+				})
+				.error(function() {
+					spinnerService.hide();
+					console.log("Attempted to load auto-load.json but it did not exist. This is not usually a problem.");
+				});
+		}
+
+		if($location.search().file) {
+			// Load the file from the path on the URL.
+			loadFile($location.search().file);
+		} else {
+			// Otherwise auto-load file auto-load.json if it exists.
+			loadFile('auto-load.json');
+		}
+
+		// Alert when leaving
+		$(window).bind('beforeunload', function(){
+			return 'By leaving this page you will loose your work.';
+		});
+
+	})
+	
+	.controller('UploadRefineCtrl', function ($scope, $location, parseService, dataService, validationService, $controller) {
+
+		// Instantiate the WorkflowCtrl controller in scope if it is not already.
+		if($scope.refreshData === undefined) {
+			$controller('WorkflowCtrl', { '$scope': $scope });
+		}
+		
+		$scope.selectedFieldMetadata = null;
+		$scope.selectedFile = null;
+		$scope.sparqlEndpoint = "";
+
+		$scope.sortOptions = [
+			{ label:'Sort by Value', value:'key' },
+			{ label:'Sort by Frequency', value:'value'}
+		];
+
+		$scope.sortBy = $scope.sortOptions[0];
+
+		$scope.onDrop = function(obj, e){
+			$scope.lastFileName = e.dataTransfer.files[0].name.replace(/\.[^/.]+$/, "") || null;
+		};
+
+		$scope.addFile = function (file) {
+			dataService.addFile(file);
+		};
+
+		$scope.deleteFile = function(file) {
+			dataService.deleteFile(file);
+			$scope.selectedFieldMetadata = null;
+			$scope.selectedFile = null;
+		};
+
+		$scope.hasSpecial = function(file) {
+
+			return file.fields.filter(function (field){
+				return field.special.length;
+			}).length > 0;
+		};
+
+		$scope.setSelected = function(field, file) {
+			$scope.showSpecialCharDetail = false;
+			
+			// This is screwy: Don't update links if this is true, which we
+			// only have to do if the augmentID is not null or undefined.
+			if(field.augmentId !== null && field.augmentId !== undefined) field.initial = true;
+			
+			$scope.selectedFieldMetadata = field;
+			$scope.selectedFile = file;
+			$scope.selectedSpecialChar = null;
+
+			var autoFields = file.autoFields.filter(function (d) { return d.key === field.key; })[0];
+
+			// If 'type' isn't set, grab the auto-recognized type.
+			if(field.type === undefined) {
+				field.type = autoFields.type;
+			}
+
+			if(field.uniqueKey === undefined) {
+				field.uniqueKey = autoFields.uniqueKey;
+			}
+
+			field.unassignedSpecialChars = calcUnassignedSpecialCharacters();
+
+			// Update unique values and detect errors.
+			$scope.updateUniques();
+
+			// Set field as confirmed once user has looked at it.
+			field.confirmed = true;
+		};
+
+		$scope.setCountBy = function (field) {
+			dataService.setCountBy(field);
+			dataService.setDirty();
+		};
+
+		$scope.updateMetadata = function () {
+			$scope.updateUniques();
+			dataService.setDirty();
+		};
+
+		$scope.autoRecognize = function(file) {
+			file.fields = file.autoFields;
+			dataService.setDirty();
+		};
+
+		$scope.updateUniques = function() {
+
+			var ignore = [];
+
+			if($scope.selectedFieldMetadata.ignore)
+				ignore = $scope.selectedFieldMetadata.ignore;
+			// Recalculate metadata with delimiter.
+
+			var md = parseService.parseColumn($scope.selectedFieldMetadata.key,
+					$scope.selectedFile.data, $scope.selectedFieldMetadata.mvDelimiter,
+					$scope.selectedFieldMetadata.hierDelimiter, ignore, $scope.selectedFieldMetadata.type);
+
+			// Reassign metadata that might change due to delimiter.
+			$scope.selectedFieldMetadata.cardinality = md.cardinality;
+			$scope.selectedFieldMetadata.blanks = md.blanks;
+			$scope.selectedFieldMetadata.unassignedSpecialChars = calcUnassignedSpecialCharacters();
+			$scope.selectedFieldMetadata.uniqueKey = md.uniqueKey;
+
+			// Check to make sure that the currently selected special character is in the list
+			// of unassigned special characters. If not, remove the current selection.
+			if($scope.selectedFieldMetadata.unassignedSpecialChars.indexOf($scope.selectedSpecialChar) === -1) {
+				$scope.selectedSpecialChar = null;
+			}
+
+			$scope.selectedFieldMetadata.errors = validationService($scope.selectedFieldMetadata.uniques.map(function (d) { return d.key; }), $scope.selectedFieldMetadata.type);
+
+			$scope.selectedFieldMetadata.uniques = md.uniques.filter( function(d) {
+				// Display only uniques with the selected special character (if selected).
+				return $scope.selectedSpecialChar === null || d.key.indexOf($scope.selectedSpecialChar) !== -1;
+			}).sort(function (a, b) {
+				var sortBy = $scope.sortBy.value;
+				if($scope.findError(a.key) && $scope.findError(b.key)) return a[sortBy] > b[sortBy] ? 1 : -1;
+				if($scope.findError(a.key)) return -1;
+				if($scope.findError(b.key)) return 1;
+				return a[sortBy] > b[sortBy] ? 1 : -1;
+			});
+
+			// Animate unique values table on change here.
+			var tab = d3.select(".refine-values-table");
+			tab.transition().delay(100).style('opacity', '.2');
+			tab.transition().delay(500).style('opacity', '');
+		};
+
+		$scope.findError = function (val) {
+			var errors = $scope.selectedFieldMetadata.errors.filter(function (d) {
+				return d.value === val;
+			});
+
+			if(errors.length > 0) return errors[0];
+
+			return false;
+		};
+
+		function calcUnassignedSpecialCharacters() {
+			var inMv, inHier, inIgnore;
+
+			return $scope.selectedFieldMetadata.special.filter(function (d) {
+				if(typeof $scope.selectedFieldMetadata.mvDelimiter === 'string') {
+					inMv = $scope.selectedFieldMetadata.mvDelimiter.indexOf(d) !== -1;
+				} else { inMv = false; }
+
+				if(typeof $scope.selectedFieldMetadata.hierDelimiter === 'string') {
+					inHier = $scope.selectedFieldMetadata.hierDelimiter.indexOf(d) !== -1;
+				} else { inHier = false; }
+
+				if($scope.selectedFieldMetadata.ignore) {
+					inIgnore = $scope.selectedFieldMetadata.ignore.join("").indexOf(d) !== -1;
+				} else { inIgnore = false; }
+
+				return !inMv && !inHier && !inIgnore;
+			});
+		}
+
+		$scope.downloadUniques = function(filter) {
+			var blob = new Blob(
+				$scope.selectedFieldMetadata.uniques.map(function (d) { return d.key; }).filter(function (d) {
+					if(filter) {
+						return d.toLowerCase().indexOf(filter.toLowerCase()) !== -1;
+					} else {
+						return true;
+					}
+				}).map(function (d) {
+					return d + "\n";
+				}),
+				{type: "text/plain;charset=utf-8"}
+			);
+			var fileName = filter ? $scope.selectedFieldMetadata.description + " (unique values filtered).txt" : $scope.selectedFieldMetadata.description + " (unique values).txt";
+			saveAs(blob, fileName);
+		};
+
+		$scope.downloadErrors = function() {
+			var blob = new Blob(
+				[d3.csv.format($scope.selectedFieldMetadata.errors.map(function (d) {
+					return [d.value, d.message];
+				}))],
+				{type: "text/plain;charset=utf-8"}
+			);
+			var fileName = $scope.selectedFieldMetadata.description + " (errors).txt";
+			saveAs(blob, fileName);
+		};
+
+		$scope.allowedTypes = [
+			{id: 'text', name: 'Text'},
+			{id: 'number', name: 'Number'},
+			{id: 'date', name: 'Year or Date (YYYY-MM-DD)'},
+			{id: 'latlong', name: 'Coordinates'},
+			{id: 'url', name: 'URL'}
+		];
+
+		$scope.hasLinks = function (field) {
+			var found = false;
+			if(field) {
+				dataService.getLinks().forEach(function (d){
+					if (d.source.field.key === field.key) found = d;
+				});
+			}
+			return found;
+		};
+
+		$scope.isLinked = function (field) {
+			var found = false;
+			if(field) {
+				dataService.getLinks().forEach(function (d){
+					if (d.source.field.key === field.key || d.lookup.field.key === field.key) found = true;
+				});
+			}
+			return found;
+		}
+
+		$scope.highlightLink = function (link, source) {
+			if (!link) {
+				$('.file-info').css("opacity","1");
+				return;
+			}
+
+			$('.file-info').css("opacity",".2");
+			$('#file-info-' + source.id).css("opacity","1");
+			$('#file-info-' + link.lookup.file.id).css("opacity","1");
+		};
+
+		$scope.showNewTableAndSelect = function(field,file) {
+			$scope.parseError = null;
+			$scope.fromFileView = true;
+			$scope.addingTable = true;
+			$scope.text = "";
+			$scope.lastFileName = null;
+			$scope.setSelected(field, file);
+		};
+
+		$scope.showNewTable = function() {
+			$scope.parseError = null;
+			$scope.addingTable = true;
+			$scope.text = "";
+			$scope.lastFileName = null;
+		};
+	})
+
+	.controller("LinkCtrl", function ($scope, dataService) {
+		$scope.links = dataService.getLinks();
+
+		$scope.onDrop = function (event, ui) {
+			var dragged = angular.element(ui.draggable);
+			var dropped = angular.element(event.target);
+
+			$scope.$apply( function (scope) {
+				var source = {
+					file: dragged.scope().file,
+					field: dragged.scope().field
+				};
+
+				var lookup = {
+					file: dropped.scope().file,
+					field: dropped.scope().field
+				};
+
+				var metadata = dataService.calcLinkMetadata(source, lookup);
+
+				dataService.addLink({
+					source: source,
+					lookup: lookup,
+					metadata: metadata
+				});
+			});
+
+			
+		};
+
+		$scope.hasLinks = function (field) {
+			var found = false;
+			if(field) {
+				dataService.getLinks().forEach(function(d){
+					if (d.lookup.field.key === field.key || d.source.field.key === field.key) found = true;
+				});
+			}
+			return found;
+		};
+
+		$scope.deleteLink = function (link, index) {
+			dataService.deleteLink(link, index);
+		};
+
+		$scope.$watch(function(){ return $('.file-info').html(); }, function(){
+			$('.notification').tooltip({container:'body'});
+			$('.type').tooltip({container:'body'});
+		});
+
+		/* Resizing links 
+
+		function resizeLinks() {
+			var height = $('#linking-files').height();
+			var sumHeight=0;
+			$('#linking-links .link').each( function(){ sumHeight += $(this).height(); });
+			if (sumHeight > height) {
+				$('#linking-links').css("height", "auto");
+				return;
+			}
+			var h = d3.max( [ height, $(window).height() ] ) + 20;
+			$('#linking-links').css("height",h+"px");
+		}
+
+		$scope.$watch(function(){ return $('#linking-files').height(); }, resizeLinks);
+		$scope.$watch(function(){ return $('#linking-links').html(); }, resizeLinks);
+		$(window).resize(resizeLinks);*/
+	})
+
+	.controller("VisualizationCtrl", function ($scope, data, $controller, $window, $location, $compile, exportService, loadService, palladioService) {
+
+		$scope.showFilters = function () {
+			if($location.path() === '/upload' || $location.path() === '/link' || $location.path() === '/' || $location.path() === '/index.html') {
+				return false;
+			} else { return true; }
+		};
+
+		$scope.removeFilter = function (event) {
+			// '$destroy' event isn't getting fired properly with just .remove(), so we do it
+			// ourselves.
+			angular.element(event.currentTarget.parentElement).scope().$broadcast('$destroy');
+			angular.element(event.currentTarget.parentElement.parentElement.parentElement).remove();
+			palladioService.update();
+			$('.tooltip').remove();
+		};
+
+		// Compile new filters, add them to the WorkflowCtrl scope (parent)
+		// and then append them to the DOM.
+		$scope.addFilter = function(filter) {
+			switch (filter) {
+				case 'timeline':
+					if(!$scope.blurTimeline) {
+						$('#filters').prepend($compile('<li><div data-palladio-timeline-filter-with-settings></div></li>')($scope));
+					}
+					break;
+				// case 'timespan':
+				// 	$('#filters').prepend($compile('<li><div data-palladio-timespan-filter></div></li>')($scope));
+				// 	break;
+				// case 'timestep':
+				// 	$('#filters').prepend($compile('<li><div data-palladio-timestep-filter></div></li>')($scope));
+				// 	break;
+				case 'partime':
+					if(!$scope.blurTimeSpan) {
+						$('#filters').prepend($compile('<li><div data-palladio-partime-filter></div></li>')($scope));
+					}
+					break;
+				case 'facet':
+					if(!$scope.blurFacet) {
+						$('#filters').prepend($compile('<li><div data-palladio-facet-filter show-controls="true" show-accordion="true" show-drop-area="false" show-settings="true"></div></li>')($scope));
+					}
+					break;
+				// case 'histogram':
+				// 	$('#filters').prepend($compile('<li><div data-palladio-histogram-filter-with-settings></div></li>')($scope));
+				// 	break;
+				// case 'arctime':
+				// 	$('#filters').prepend($compile('<li><div data-palladio-arctime-filter-with-settings></div></li>')($scope));
+				// 	break;
+			}
+			$scope.showAddFilter = false;
+		};
+
+		// Instantiate the WorkflowCtrl controller in scope if it is not already.
+		if($scope.refreshData === undefined) {
+			$controller('WorkflowCtrl', { '$scope': $scope });
+		}
+
+		// We need to get the data onto the higher-level WorkflowCtrl scope.
+		$scope.refreshData(data);
+
+		// If the data is undefined, redirect back to '/'
+		if(data.metadata === undefined) {
+			$window.location = '#/';
+			return;
+		}
+
+		$scope.exportSvg = function(source, title){
+			exportService(d3.select('svg'), title);
+		};
+
+		$scope.$watch('layout', function(){
+			$('*[data-toggle="tooltip"]').tooltip({container:'body'});
+		});
+
+		var metadata = data.metadata;
+
+		$scope.blurTimeline = true;
+		$scope.blurTimeSpan = true;
+		$scope.blurFacet = true;
+		$scope.blurHistogram = true;
+
+		$scope.showAddFilter = false;
+
+		if(metadata.filter(function (d) { return d.type === 'number'; }).length > 0) {
+			$scope.blurHistogram = false;
+		}
+
+		if(metadata.filter(function (d) { return d.type === 'date'; }).length > 1) {
+			$scope.blurTimeSpan = false;
+		}
+
+		if(metadata.filter(function (d) { return d.type === 'date'; }).length > 0) {
+			$scope.blurTimeline = false;
+		}
+
+		if(metadata.filter(function (d) {
+				return d.type === 'text' && !d.uniqueKey && d.cardinality < 1000; }).length > 0) {
+			$scope.blurFacet = false;
+		}
+
+		// Handle save/load for Palladio-specific way we dynamically add and remove filters.
+
+		var facetImportFunctions = [],
+			facetExportFunctions = [],
+			timelineImportFunctions = [],
+			timelineExportFunctions = [],
+			partimeImportFunctions = [],
+			partimeExportFunctions = [],
+			timestepImportFunctions = [],
+			timestepExportFunctions = [];
+
+		function importState(state) {
+			if(state.facets.length > 0) {
+				state.facets.forEach(function (f, i) {
+					if(!facetImportFunctions[i]) $scope.addFilter('facet');
+
+					// This is related to having to wait for the facets to build themselves.
+					// Unfortunately this includes a 100ms setTimeout call in the facet building, which
+					// needs to be fixed, but until then we need to artificially wait until that
+					// call completes.
+					window.setTimeout(function () { facetImportFunctions[i](f); }, 300);
+				});
+			}
+
+			if(state.timelines.length > 0) {
+				state.timelines.forEach(function (f, i) {
+					if(!timelineImportFunctions[i]) $scope.addFilter('timeline');
+					window.setTimeout(function () { timelineImportFunctions[i](f); }, 300);
+				});
+			}
+
+			if(state.partimes.length > 0) {
+				state.partimes.forEach(function (f, i) {
+					if(!partimeImportFunctions[i]) $scope.addFilter('partime');
+					window.setTimeout(function() { partimeImportFunctions[i](f); }, 300);
+				});
+			}
+
+			if(state.timesteps.length > 0) {
+				state.timesteps.forEach(function (f, i) {
+					if(!timestepImportFunctions[i]) $scope.addFilter('timestep');
+					window.setTimeout(function() { timestepImportFunctions[i](f); }, 300);
+				});
+			}
+		}
+
+		function exportState() {
+			return {
+				facets: facetExportFunctions.map(function (f) { return f(); }).filter(function(s) { return s; }),
+				timelines: timelineExportFunctions.map(function (f) { return f(); }).filter(function(s) { return s; }),
+				partimes: partimeExportFunctions.map(function (f) { return f(); }).filter(function(s) { return s; }),
+				timesteps: timestepExportFunctions.map(function (f) { return f(); }).filter(function(s) { return s; })
+			};
+		}
+
+		var handler = function(id, type, exp, imp) {
+			// Intercept 'facet' and 'timeline' type registrations and handle them ourselves.
+			if(type === 'facet' || type === 'timeline' ||
+				type === 'partime' || type === 'timestep') {
+				
+				if(type === 'facet') {
+					facetExportFunctions.push(exp);
+					facetImportFunctions.push(imp);
+				}
+
+				if(type === 'timeline') {
+					timelineExportFunctions.push(exp);
+					timelineImportFunctions.push(imp);
+				}
+
+				if(type === 'partime') {
+					partimeExportFunctions.push(exp);
+					partimeImportFunctions.push(imp);
+				}
+
+				if(type === 'timestep') {
+					timestepExportFunctions.push(exp);
+					timestepImportFunctions.push(imp);
+				}
+			}
+
+			return function () {};
+		};
+
+		var deregister = [];
+
+		deregister.push(
+			palladioService.registerStateFunctions('filters', 'palladioFilters', exportState, importState, ['facet', 'timeline', 'partime', 'timestep'], handler)
+		);
+
+		$scope.$on('$destroy', function () {
+			deregister.forEach(function(f) { f(); });
+		});
+
+		// Total hack, but we need to give the directives time to finish registering themselves.
+		setTimeout(function() {
+			if(loadService.layout()) $scope.setLayout(loadService.layout());
+			loadService.build(palladioService.getStateFunctions());
+		}, 1000);
+	});
+
 angular.module('palladio.filters', [])
   .filter('titleCase', function () {
 		return function (str) {
@@ -64499,6 +64499,41 @@ angular.module('palladio.services.validation', [])
 	});
 // Palladio data upload component
 
+angular.module('palladioDataUpload', ['palladio.services'])
+	.directive('palladioDataUpload', function (dataService, loadService, spinnerService) {
+		var directiveObj = {
+			scope: {
+				'load': '&onLoad'
+			},
+			transclude: true,
+			templateUrl: 'partials/palladio-data-upload/template.html',
+
+			link: function(scope) {
+
+				scope.loadDataModel = function(input) {
+					spinnerService.spin();
+					var reader = new FileReader();
+					reader.onload = function() {
+						var json = JSON.parse(reader.result);
+						loadService.loadJson(json);
+						scope.$apply(function(s) { s.load(); });
+					};
+					reader.readAsText(input.files[0]);
+					// We need to clear the input so that we pick up future uploads. This is *not*
+					// cross-browser-compatible.
+					input.value = null;
+				};
+
+				scope.triggerDataModelSelector = function () {
+					$('#dataModelSelector').click();
+				};
+			}
+		};
+
+		return directiveObj;
+	});
+// Palladio data upload component
+
 angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 	.directive('palladioDataDownload', function (dataService, version, palladioService) {
 		var directiveObj = {
@@ -64553,40 +64588,1586 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 
 		return directiveObj;
 	});
-// Palladio data upload component
+// Palladio template component module
 
-angular.module('palladioDataUpload', ['palladio.services'])
-	.directive('palladioDataUpload', function (dataService, loadService, spinnerService) {
+angular.module('palladioDurationView', ['palladio', 'palladio.services'])
+	.directive('palladioDurationView', function (dateService, palladioService, dataService) {
 		var directiveObj = {
 			scope: {
-				'load': '&onLoad'
+				fullHeight: '@',
+				fullWidth: '@',
+				showControls: '@',
+				showAccordion: '@',
+				view: '@'
 			},
-			transclude: true,
-			templateUrl: 'partials/palladio-data-upload/template.html',
+			templateUrl: 'partials/palladio-duration-view/template.html',
 
-			link: function(scope) {
+			link: { pre: function(scope) {
 
-				scope.loadDataModel = function(input) {
-					spinnerService.spin();
-					var reader = new FileReader();
-					reader.onload = function() {
-						var json = JSON.parse(reader.result);
-						loadService.loadJson(json);
-						scope.$apply(function(s) { s.load(); });
+					// In the pre-linking function we can use scope.data, scope.metadata, and
+					// scope.xfilter to populate any additional scope values required by the
+					// template.
+
+					// The parent scope must include the following:
+					//   scope.xfilter
+					//   scope.metadata
+
+					// If you need to do any configuration before your visualization is set up,
+					// do it here. DO NOT do anything that changes the DOM here, so don't
+					// programatically instantiate your visualization at this point. That happens
+					// in the 'post' function.
+					//
+					// You might need to do things here especially
+					// if your visualization is contained in another directive that is included
+					// in the template of this directive.
+
+					scope.uniqueToggleId = "durationView" + Math.floor(Math.random() * 10000);
+					scope.uniqueToggleHref = "#" + scope.uniqueToggleId;
+					scope.uniqueModalId = scope.uniqueToggleId + "modal";
+
+					scope.metadata = dataService.getDataSync().metadata;
+					scope.xfilter = dataService.getDataSync().xfilter;
+					scope.data = dataService.getDataSync().data;
+
+					// Take the first number dimension we find.
+					scope.durationDims = scope.metadata.filter(function (d) { return d.type === 'number'; });
+					// scope.durationDim = scope.durationDims[0];
+
+					// Label dimensions.
+					scope.labelDims = scope.metadata;
+					scope.tooltipLabelDim = scope.labelDims[0];
+					// scope.groupDim = scope.labelDims[0];
+					// scope.xGroupDim = scope.labelDims[0];
+					scope.xSortDim = scope.labelDims[0];
+
+					scope.title = "Duration view";
+
+					scope.modes = ['Constant duration'];
+					if(scope.durationDims.length > 0) scope.modes.push('Actual duration');
+					scope.mode = scope.modes[0];
+
+					scope.showDurationModal = function () {
+						$('#' + scope.uniqueModalId).find('#duration-modal').modal('show');
 					};
-					reader.readAsText(input.files[0]);
-					// We need to clear the input so that we pick up future uploads. This is *not*
-					// cross-browser-compatible.
-					input.value = null;
-				};
 
-				scope.triggerDataModelSelector = function () {
-					$('#dataModelSelector').click();
-				};
+					scope.showTooltipLabelModal = function () {
+						$('#' + scope.uniqueModalId).find('#tooltip-label-modal').modal('show');
+					};
+
+					scope.showGroupModal = function () {
+						$('#' + scope.uniqueModalId).find('#group-modal').modal('show');
+					};
+
+					scope.showXGroupModal = function () {
+						$('#' + scope.uniqueModalId).find('#x-group-modal').modal('show');
+					};
+
+					scope.showXSortModal = function () {
+						$('#' + scope.uniqueModalId).find('#x-sort-modal').modal('show');
+					};
+
+				}, post: function(scope, element) {
+
+					// If you are building a d3.js visualization, you can grab the containing
+					// element with:
+					//
+					// d3.select(element[0]);
+
+					var sel, svg, dim, group, x, y,
+						top, bottom, left, filter, yStep, tooltip,
+						colors, bottomAxis, topAxis, yAxis, uniques, height, lineHeight;
+
+					// Constants...
+					var margin = 25;
+					var lineHeight = 20;
+					var leftMargin = 150;
+					var bottomOffset = 50;
+					var width = scope.fullWidth === 'true' ? $(window).width() - margin*2 : $(window).width()*0.7;
+					// var height = scope.height ? +scope.height : 200;
+					// height = scope.fullHeight === 'true' ? $(window).height()-200 : height;
+					var highlightColor = '#67D6E5';
+
+					setup();
+					update();
+
+					function setup() {
+						// Check necessary fields are selected.
+						if(!scope.tooltipLabelDim ||
+							!scope.groupDim ||
+							!scope.xGroupDim ||
+							!scope.xSortDim ||
+							(scope.mode === 'Actual duration' && !scope.durationDim)) {
+
+							return false;
+						}
+
+						// Calculate uniques for use in y scale and height.
+						uniques = [];
+						scope.data.forEach(function(d) {
+							if(uniques.indexOf("" + d[scope.groupDim.key]) === -1) {
+								uniques.push("" + d[scope.groupDim.key]);
+							}
+						});
+						uniques.sort(d3.descending);
+
+						// Figure height based on uniques and a minimum height.
+						height = uniques.length * lineHeight;
+
+						sel = d3.select(d3.select(element[0]).select(".main-viz")[0][0].children[0]);
+						if(!sel.select('svg').empty()) sel.select('svg').remove();
+						svg = sel.append('svg');
+
+						sel.attr('width', width + margin*2);
+						sel.attr('height', height + margin*2);
+
+						svg.attr('width', width + margin*2);
+						svg.attr('height', height + margin*2);
+
+						if(dim) dim.remove();
+
+						dim = scope.xfilter.dimension(function(d) { return "" + d[scope.groupDim.key]; });
+
+						// For now we keep the grouping simple and just do a naive count. To enable
+						// 'countBy' functionality we need to use the Crossfilter helpers or Reductio.
+						group = dim.group();
+
+						// Use reductio value-lists to track the xGroup for each group.
+						var reducer = reductio().count(true)
+							.nest([function(d) { return d[scope.xGroupDim.key]; }]);
+
+						if(scope.mode === 'Actual duration') {
+							reducer.sum(function(d) { return +d[scope.durationDim.key]; });
+						}
+
+						reducer(group);
+
+						// Scales
+						x = d3.scale.linear().range([0, width - leftMargin]);
+						setXDomain();
+						y = d3.scale.ordinal().rangeBands([height - bottomOffset, 0], 0.2)
+								// .domain(group.top(Infinity)
+								// 	.filter(function (d) {
+								// 		return d.value.count !== 0;
+								// 	}).map(function(d) { return d.key; }));
+								.domain(uniques);
+
+						colors = d3.scale.ordinal()
+							.range(colorbrewer.Greys[9])
+							.domain(scope.xGroupDim.uniques);
+
+						bottomAxis = d3.svg.axis().orient("bottom").scale(x);
+						topAxis = d3.svg.axis().orient("top").scale(x);
+						yAxis = d3.svg.axis().orient("left").scale(y);
+
+						// Build the visualization.
+						var g = svg.append('g')
+								.attr("transform", "translate(" + leftMargin + "," + margin + ")");
+
+						bottom = g.append('g')
+							.attr("class", "axis x-axis x-bottom")
+							.attr("transform", "translate(" + 0 + "," + (height - bottomOffset) + ")")
+							.call(bottomAxis);
+
+						top = g.append('g')
+							.attr("class", "axis x-axis x-top")
+							.call(topAxis);
+
+						left = g.append('g')
+							.attr("class", "axis y-axis")
+							.call(yAxis);
+
+						tooltip = g.select(".duration-tooltip");
+						// Set up the tooltip.
+						if(tooltip.empty()) {
+							tooltip = g.append("g")
+									.attr("class", "duration-tooltip")
+									.attr("pointer-events", "none")
+									.style("display", "none");
+
+							tooltip.append("foreignObject")
+									.attr("width", 100)
+									.attr("height", 26)
+									.attr("pointer-events", "none")
+								.append("html")
+									.style("background-color", "rgba(0,0,0,0)")
+								.append("div")
+									.style("padding-left", 3)
+									.style("padding-right", 3)
+									.style("text-align", "center")
+									.style("white-space", "nowrap")
+									.style("overflow", "hidden")
+									.style("text-overflow", "ellipsis")
+									.style("border-radius", "5px")
+									.style("background-color", "white")
+									.style("border", "3px solid grey");
+						}
+					}
+
+					function update() {
+						// Check necessary fields are selected.
+						if(!scope.tooltipLabelDim ||
+							!scope.groupDim ||
+							!scope.xGroupDim ||
+							!scope.xSortDim ||
+							(scope.mode === 'Actual duration' && !scope.durationDim)) {
+
+							return false;
+						}
+
+						// Update the x-scale and x-axes
+						setXDomain();
+						bottomAxis.scale(x);
+						topAxis.scale(x);
+						svg.select('.x-bottom').call(bottomAxis);
+						svg.select('.x-top').call(topAxis);
+
+						var groups = svg.select('g').selectAll('.duration-group')
+							.data(group.top(Infinity),
+									// .filter(function (d) {
+									// 	return d.value.count !== 0;
+									// }),
+								function (d) { return d.key; });
+
+						groups.exit().remove();
+
+						groups.enter()
+								.append('g')
+									.attr('class', 'duration-group')
+									.attr('transform', function(d) {
+										return 'translate(1,' + y(d.key) + ')';
+									});
+
+						var constantDuration = scope.mode === 'Constant duration';
+						var rectWidth = x(1) - x(0);
+
+						function calcWidth(d) {
+							return constantDuration ?
+								rectWidth :
+								(isNaN(+d[scope.durationDim.key]) ?
+									0 :
+									x(+d[scope.durationDim.key]));
+						}
+
+						var rects = groups.selectAll('.duration-bar')
+							.data(function(d, i) {
+								var total = 0;
+
+								// Flatten to basic records
+								return d.value.nest.map(function(n) {
+									return n.values;
+								}).reduce(function(a, b) {
+									return a.concat(b);
+								}).sort(function(a, b) {
+									return d3.ascending(a[scope.xSortDim.key], b[scope.xSortDim.key]);
+								}).map(function(d) {
+									total = total + calcWidth(d);
+									// Build object with information needed to visualize
+									return {
+										name: d[scope.xGroupDim.key],
+										label: d[scope.tooltipLabelDim.key],
+										group: i,
+										x: calcWidth(d),
+										offset: (total - calcWidth(d))
+									};
+								});
+							}, function(d, i) { return d.name + '-' + d.group + '-' + i; });
+
+						rects.exit().remove();
+
+						rects.enter()
+								.append('rect')
+									.attr('height', y.rangeBand())
+									.attr('class', 'duration-bar');
+
+						rects
+							.attr('width', function(d) { return d.x ? d.x : 0; })
+							.attr('fill', function(d) { return colors(d.name); })
+							.attr('stroke', function(d) { return colors(d.name); })
+							.attr('transform', function(d) { return 'translate(' + (d.offset ? d.offset : 0) + ',0)'; })
+							.on('mouseover', function(d) {
+								rects.attr('fill', function(f) {
+										if(d.name === f.name) {
+											return highlightColor;
+										} else {
+											return colors(f.name);
+										}})
+									.attr('stroke', function(f) {
+										if(d.name === f.name) {
+											return highlightColor;
+										} else {
+											return colors(f.name);
+										}
+									});
+							})
+							.on('mouseout', function() {
+								rects
+									.attr('fill', function(d) { return colors(d.name); })
+									.attr('stroke', function(d) { return colors(d.name); });
+							})
+							.tooltip(function (d){
+								return {
+									text : d.label,
+									displacement : [0,20],
+									position: [0,0],
+									gravity: "right",
+									placement: "mouse",
+									mousemove : true
+								};
+							});
+					}
+
+					function setXDomain() {
+						if(scope.mode === 'Actual duration') {
+							x.domain([ 0, d3.max(group.top(Infinity), function (d) { return d.value.sum; }) ]);
+						} else {
+							x.domain([ 0, d3.max(group.top(Infinity), function (d) { return d.value.count; }) ]);
+						}
+					}
+
+					function reset() {
+						if(dim) {
+							group.remove();
+							dim.remove();
+							svg.remove();
+						}
+					}
+
+					scope.filterReset = function () {
+						reset();
+						setup();
+						update();
+					};
+
+					scope.$watchGroup(['mode', 'durationDim', 'tooltipLabelDim', 'groupDim', 'xGroupDim', 'xSortDim'], function () {
+						reset();
+						setup();
+						update();
+					});
+
+					//
+					// If you are going to programatically instantiate your visualization, do it
+					// here. Your visualization should emit the following events if necessary:
+					//
+					// For new/changed filters:
+					//
+					// scope.$emit('updateFilter', [identifier, description, filter, callback]);
+					//
+					// For removing all filters:
+					//
+					// scope.$emit('updateFilter', [identifier, null]);
+					//
+					// If you apply a filter in this component, notify the Palladio framework.
+					//
+					// identifier: A string unique to this instance of this component. Should
+					//             be randomly generated.
+					//
+					// description: A human-readable description of this component. Should be
+					//              unique to this instance of this component, but not required.
+					//
+					// filter: A human-readable description of the filter that is currently
+					//         applied on this component.
+					//
+					// callback: A function that will remove all filters on this component when
+					//           it is evaluated.
+					//
+					//
+					// Whenever the component needs to trigger an update for all other components
+					// in the application (for example, when a filter is applied or removed):
+					//
+					// scope.$emit('triggerUpdate');
+
+					var deregister = [];
+
+					// You should also handle the following externally triggered events:
+
+					deregister.push(palladioService.onReset(scope.uniqueToggleId, function() {
+
+						// Reset any filters that have been applied through this visualization.
+						// This means running .filterAll() on any Crossfilter dimensions you have
+						// created and updating your visualization as required.
+
+						scope.filterReset();
+
+					}));
+
+					deregister.push(palladioService.onUpdate(scope.uniqueToggleId, function() {
+						// Only update if the table is visible.
+						if(element.is(':visible')) { update(); }
+					}));
+
+					// Update when it becomes visible (updating when not visibile errors out)
+					scope.$watch(function() { return element.is(':visible'); }, update);
+
+					scope.$on('$destroy', function () {
+
+						// Clean up after yourself. Remove dimensions that we have created. If we
+						// created watches on another scope, destroy those as well.
+
+						if(dim) {
+							group.remove();
+							dim.remove();
+							dim = undefined;
+						}
+						deregister.forEach(function(f) { f(); });
+						deregister = [];
+
+					});
+
+
+					// Support save/load. These functions should be able to fully recreate an instance
+					// of this visualization based on the results of the exportState() function. Include
+					// current filters, any type of manipulations the user has done, etc.
+
+					function importState(state) {
+
+						// Load a state object created by exportState().
+						scope.title = state.title;
+						scope.durationDim = scope.durationDims.filter(function(d) { return d.key === state.durationDim; })[0];
+						scope.tooltipLabelDim = scope.labelDims.filter(function(d) { return d.key === state.tooltipLabelDim; })[0];
+						scope.groupDim = scope.labelDims.filter(function(d) { return d.key === state.groupDim; })[0];
+						scope.xGroupDim = scope.labelDims.filter(function(d) { return d.key === state.xGroupDim; })[0];
+						scope.xSortDim = scope.labelDims.filter(function(d) { return d.key === state.xSortDim; })[0];
+
+						scope.mode = state.mode;
+
+					}
+
+					function exportState() {
+
+						// Return a state object that can be consumed by importState().
+						return {
+							title: scope.title,
+							durationDim: scope.durationDim.key,
+							tooltipLabelDim: scope.tooltipLabelDim.key,
+							groupDim: scope.groupDim.key,
+							xGroupDim: scope.xGroupDim.key,
+							xSortDim: scope.xSortDim.key,
+							mode: scope.mode
+						};
+					}
+
+					deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'duration', exportState, importState));
+
+					// Move the modal out of the fixed area.
+					$(element[0]).find('#duration-modal').parent().appendTo('body');
+
+					// Set up the toggle if in view state.
+					if(scope.view === 'true') {
+						$(document).ready(function(){
+							$(element[0]).find('.toggle').click(function() {
+								$(element[0]).find('.settings').toggleClass('open close');
+							});
+						});
+					}
+				}
 			}
 		};
 
 		return directiveObj;
+	});
+
+function elastic_list() {
+
+  // Colors from colorbrewer2.org
+
+	var height = 350,
+			width = 200,
+			group = null,
+      all = null,
+      dimension = null,
+      filter = d3.map(),
+      mode = 0,  // 0 = filter, 1 = global, 2 = lock
+      maxCells = Infinity,
+      resort = false,
+      selection = null,
+      minCellHeight = 20,
+      emptyCellHeight = 2,
+      scrollbarWidth = 0,
+      scrollbarElement = null,
+      cellMargin = 2,
+      cellWidth = function() {
+        return width - scrollbarWidth;
+      },
+      backgroundColor = "white",
+      initialGroupMetaData = { },
+      initialGroups = [ ],
+      initialAgg = 0,
+      initialCardinality = 0,
+      uniqueDimension = null,
+      aggregationType = null,
+      aggregateKey = null,
+
+      groupValue = function(v) { return v; },
+      groupDisplayValue = function(v) { return v; },
+
+      // Sort ordering - g and h are groups (g.key and g.value are available)
+      // By default, sort descending by value.
+      compareFunction = function(g, h) {
+        return h.value.data.agg - g.value.data.agg;
+      },
+
+      // Call this after filter selection/deselection
+      callback = function() { return true; },
+
+      // drawCell context
+      cellColorScale = d3.scale.quantize().range(["#EFF3FF", "#BDD7E7", "#6BAED6", "#DDDDDD"]).domain([1,0]),
+      cellSizeScale = null,
+      emptyCellColor = "#D9D9D9",
+      filterColor = "#A8DDB5",
+      totalAgg = 0,
+
+      // cells.each(drawcell) - "this" is a svg "g" DOM object
+      // default function can be over-ridden for fanciness
+      redrawCell = function(sel) {
+        var g = d3.select(sel);
+        var rect = g.select("rect");
+        var labelText = g.select(".label");
+        var elementsText = g.select(".elements");
+
+        g.classed("empty", function (d) { return d.group.value.data.agg === 0; });
+
+        rect
+          .classed("filtered", function (d) {
+              return filter.has(d.group.key);
+            })
+          .transition(500).delay(500).attr("height", function(d) {
+              // Make sure cells have a minimum height.
+              return cellHeight(cellSizeScale(d.group.value.data.agg), d.group.value.data.agg); })
+            .attr("fill", function(d) {
+              if(filter.has(d.group.key)) {
+                return filterColor;
+              } else {
+                if(d.group.value.data.agg === 0) {
+                  return emptyCellColor;
+                } else {
+                  // Show the local profile by comparing the current % of the total for the group value to the
+                  // initial % of total for the group value.
+                  return cellColorScale(Math.abs((d.group.value.data.agg / totalAgg) - initialGroupMetaData[d.group.key].percentage));
+                }
+              }
+            });
+            
+
+        g.transition(500).delay(1000).attr("transform", function(d, i) {
+            return "translate(0, " + d.heightbefore + ")"; });
+
+        labelText.text(function(d) { if(d.group.value.data.agg !== 0) return groupDisplayValue(d.group.key); });
+        elementsText
+          .text(function(d) { if(d.group.value.data.agg !== 0) return "" + d.group.value.data.agg + " / " + initialGroupMetaData[d.group.key].value; });
+      },
+
+      // cells.each(drawcell) - "this" is a svg "g" DOM object
+      // default function can be over-ridden for fanciness
+      initializeCell = function(sel) {
+
+        var g = d3.select(sel);
+        var rect = g.select("rect");
+        var labelText = g.select(".label");
+        var elementsText = g.select(".elements");
+
+        if(rect.empty()) {
+          g.on("click", function(d) {
+            if(!g.classed("empty")) {
+              if(filter.has(d.group.key)) {
+                filter.remove(d.group.key);
+              } else {
+                filter.set(d.group.key, true);
+              }
+              dimension.filter(function(v) {
+                return filter.has(groupValue(v)) || filter.keys().length === 0;
+              });
+              updateInternal();
+              callback();
+            }
+          });
+
+          rect = g.append("rect")
+              .attr("width", cellWidth());
+              
+        }
+
+        if(labelText.empty()) {
+          labelText = g.append("text")
+              .attr("class", "label")
+              .attr("x", cellMargin)
+              .attr("y", "1em")
+              .attr("dx","2px")
+              .attr("dy","2px")
+          //    .attr("font-family", "Helvetica")
+              .attr("font-size", "0.8em");
+        }
+
+        if(elementsText.empty()) {
+          elementsText = g.append("text")
+            .attr("class", "elements")
+            .attr("x", cellWidth() - cellMargin)
+            .attr("y", "1em")
+            .attr("dx","-2px")
+            .attr("dy","2px")
+          //  .attr("font-family", "Helvetica")
+            .attr("font-size", "0.8em")
+            .attr("text-anchor", "end");
+        }
+      };
+
+  // "sel" should be an "svg" or "g" element.
+  function my(sel) {
+    selection = sel;
+    selection.style("height", height).style("width", width);
+
+    group = dimension.group(groupValue);
+
+    // Custom reducers to handle situations where there are multiple records for single "entity"
+    // For example, we might have a data set of people and a person can have multiple occupations.
+    // This is modeled with multiple records per person to show the mulitple occupations.
+
+    var helpers = crossfilterHelpers.countByDimensionWithInitialCountAndData(
+      function (v) { return v[uniqueDimension]; },
+      function (d, p, t) {
+        if(p === undefined) {
+          p = { agg: 0, initialAgg: 0 };
+        }
+        if(t === 'add') {
+          // Adding a new record.
+          if(aggregationType === 'COUNT') {
+            p.agg++;
+          } else {
+            p.agg = p.agg + (+d[aggregateKey] ? +d[aggregateKey] : 0); // Make sure to cast or you end up with a String!!!
+          }
+          if(p.agg > p.initialAgg) p.initialAgg = p.agg;
+        } else {
+          // Removing a record.
+          if(aggregationType === 'COUNT') {
+            p.agg--;
+          } else {
+            p.agg = p.agg - (+d[aggregateKey] ? +d[aggregateKey] : 0); // Make sure to cast or you end up with a String!!!
+          }
+        }
+        return p;
+      }
+    );
+
+    var reduceAdd = helpers.add;
+    var reduceRemove = helpers.remove;
+    var reduceInitial = helpers.init;
+
+    function orderValue(p) {
+      return p.data.agg;
+    }
+
+    // If uniqueDimension is defined, use it for counting.
+    if(uniqueDimension !== undefined && aggregationType) {
+      group.reduce(reduceAdd, reduceRemove, reduceInitial);
+      group.order(orderValue);
+    } else {
+    // Otherwise, use default counting.
+      group.reduce(
+        function(p, v) {
+          ++p.data.agg;
+          if(p.data.agg > p.data.initialAgg) p.data.initialAgg = p.data.agg;
+          return p;
+        }, function(p, v) {
+          --p.data.agg;
+          return p;
+        }, function() {
+          return { count: 0, initialCount: 0, data: { agg: 0, initialAgg: 0 } };
+        }
+      );
+    }
+
+    all = group.top(Infinity);
+
+    // Save the initial count to calculate proportions for local profile.
+    initialAgg = all.reduce(function(prev, curr) { return prev + curr.value.data.initialAgg; }, 0);
+
+    // Save hash of initial grouping values and percentages for local profile display.
+    all.map(function(g){
+      initialGroupMetaData[g.key] = { "value": g.value.data.initialAgg, "percentage": g.value.data.initialAgg / initialAgg };
+    });
+
+    // Save off initial group values for global display, locking counts with deep-ish copy.
+    all.map(function(g){
+      initialGroups.push({ "key": g.key, "value": { "count": g.value.initialCount, data: { agg: g.value.data.initialAgg } } });
+    });
+
+    // Set sort order - default to frequency ordering
+    initialGroups.sort(compareFunction);
+    all.sort(compareFunction);
+
+    // Save the initial cardinality for the cell height scale calculation.
+    initialCardinality = all.length;
+
+    initialize();
+
+    return {  update: updateInternal,
+              selection: selection,
+              resetFilter: resetFilter,
+              lockMode: lockMode,
+              filter: getFilterText,
+              filterInternal: filterInternal,
+              globalMode: globalMode,
+              filterMode: filterMode,
+              mode: my.mode,
+              toggleResort: toggleResort,
+              toggleLabelSort: toggleLabelSort,
+              selectAll: selectAll,
+              deselectAll: deselectAll };
+  }
+
+  function initialize() {
+
+    // Cells    
+    var cells = selection.selectAll(".cell")
+        .data(generate_cell_data(all),
+              function(d) { return d.group.key; });
+
+    cells.enter().append("g")
+        .attr("class", "cell");
+
+    // Use queue.js for delayed execution.
+    var q = queue();
+    function enqueueCellInitialize() { q.defer(initializeCell, this); }
+
+    // Initialize the cells (this can be user-specified).
+    cells.each(enqueueCellInitialize);
+
+    q.defer(function() {
+      // Scrollbars
+      if(scrollbarElement !== null) {
+        scrollbarElement.height(height);
+        //scrollbarElement.jScrollPane();
+      }
+    });
+
+  }
+
+  function updateInternal() {
+
+    if(resort) {
+      all.sort(compareFunction);
+    }
+
+    if(mode != 2) {
+      if(mode === 0){
+        updateWithGroups(all);
+      } else {
+        updateWithGroups(initialGroups);
+      }
+    }
+
+    function updateWithGroups(groups) {
+
+      var cspacing = 5,
+          ctopmargin = cspacing,
+          cleftmargin = cspacing;
+
+      // Update global parameters with values based on new filters.
+      totalAgg = groups.reduce(function(prev, curr) { return prev + curr.value.data.agg; }, 0); // Count of all groups
+
+      // Set up the scale we use to calculate cell height.
+      cellSizeScale = d3.scale.linear()
+        .range([0, height - ((initialCardinality + 1) * cellMargin)])
+        .domain([0, totalAgg]);
+
+      // Cells    
+      var cells = selection.selectAll(".cell")
+          .data(generate_cell_data(groups),
+                function(d) { return d.group.key; });
+
+      if(resort) {
+        cells.order();
+      }
+
+      // <nastiness>
+      // Accumulator for totalHeight to which we'll stretch the selection
+      var totalHeight = cellMargin; // Start with 0 height
+
+      cells.each(function(){
+        var cell = d3.select(this);
+        var d = cell.datum();
+        d.heightbefore = totalHeight; // Override to use scaled height for display
+        totalHeight = totalHeight + cellHeight(cellSizeScale(d.group.value.data.agg), d.group.value.data.agg) + cellMargin;
+        cell.datum(d); // Reset the data on the cell with the new height.
+      });
+      // </nastiness>
+
+      // Use queue.js for delayed execution.
+      var q = queue();
+      function enqueueCellRedraw() {
+        q.defer(redrawCell, this);
+      }
+
+      // Draw the cells (this can be user-specified).
+      // Variables available:
+      //
+      //    totalAgg = dimension.groupAll().value();
+      cells.each(enqueueCellRedraw);
+
+      // Stretch the height of the selection to the totalHeight.
+      q.defer(function() {
+        selection.style("height", totalHeight);
+      });
+
+      // Update scrollbars after all the cells finish rendering.
+      q.defer(function() {
+        if(scrollbarElement && scrollbarElement.data('jsp')) {
+          //scrollbarElement.data('jsp').reinitialise();
+        }
+      });
+
+    }
+  }
+
+  // We generate an array of the data elements needed for cell in format
+  // {  "group": a crossfilter group as represented as an element of group.all()
+  //    "heightbefore": the number of elements in groups larger than this one }
+  function generate_cell_data(groups) {
+
+    var heightBefore = 0; // Accumulator for the size of the group before the current element.
+
+    return groups.map(function(a, i) {
+      heightBefore = heightBefore + a.value.value;
+
+      return {
+        "group": a,
+        // This is raw size, but we'll scale to the real display height later
+        "heightbefore": heightBefore - a.value.data.agg
+      };
+    });
+  }
+
+  // Ensure that cells have a minimum height after being scaled however we're scaling them.
+  function cellHeight(scaled, value) {
+    if(scaled < minCellHeight) {
+      if(value === 0) {
+        return emptyCellHeight;
+      } else {
+        return minCellHeight;
+      }
+    } else {
+      return scaled;
+    }
+  }
+
+  function resetFilter() {
+    filter = d3.map();
+    dimension.filterAll();
+    callback();
+  }
+
+  function lockMode() {
+    mode = 2;
+  }
+
+  function filterMode() {
+    mode = 0;
+    updateInternal();
+  }
+
+  function globalMode() {
+    mode = 1;
+    updateInternal();
+  }
+
+  function toggleResort() {
+    if(resort === false) {
+      resort = true;
+      compareFunction = function(g, h) {
+        return h.value.data.agg - g.value.data.agg;
+      };
+      updateInternal();
+    } else {
+      compareFunction = function(g, h) {
+        return initialGroupMetaData[h.key].value - initialGroupMetaData[g.key].value;
+      };
+      updateInternal();
+      resort = false;
+    }
+  }
+
+  var labelSort = false;
+  function toggleLabelSort() {
+    if(labelSort === false) {
+      compareFunction = function(g, h) {
+        if(h.key > g.key) { return -1; } else { return 1; }
+      };
+      labelSort = true;
+    } else {
+      if(resort === false) {
+        compareFunction = function(g, h) {
+          return initialGroupMetaData[h.key].value - initialGroupMetaData[g.key].value;
+        };
+      } else {
+        compareFunction = function(g, h) {
+          return h.value.data.agg - g.value.data.agg;
+        };
+      }
+      labelSort = false;
+    }
+
+    if(resort === false) {
+      resort = true;
+      updateInternal();
+      resort = false;
+    } else { updateInternal(); }
+  }
+
+  function getFilterText() {
+    return filter.keys().map(function(f) {
+      return groupDisplayValue(f);
+    }).join(", ");
+  }
+
+  function filterInternal(value) {
+    if (!arguments.length) return filter.entries();
+    filter = d3.map();
+    value.forEach(function(e) { filter.set(e.key, e.value); });
+
+    dimension.filter(function(v) {
+      return filter.has(groupValue(v)) || filter.keys().length === 0;
+    });
+
+    callback();
+  }
+
+  function selectAll() {
+    filter = d3.map();
+    
+    all.forEach(function (a) {
+      filter.set(a.key, true);
+    });
+    
+    dimension.filter(function(v) {
+      return filter.has(groupValue(v)) || filter.keys().length === 0;
+    });
+    
+    callback();
+  }
+
+  function deselectAll() {
+    filter = d3.map();
+    dimension.filterAll();
+    callback();
+  }
+
+  my.width = function(value) {
+    if (!arguments.length) return width;
+    width = value;
+    return my;
+  };
+
+  my.height = function(value) {
+    if (!arguments.length) return height;
+    height = value;
+    return my;
+  };
+
+  my.dimension = function(value) {
+    if (!arguments.length) return dimension;
+    dimension = value;
+    return my;
+  };
+
+  my.callback = function(value) {
+    if (!arguments.length) return callback;
+    callback = value;
+    return my;
+  };
+
+  my.redrawCell = function(value) {
+    if (!arguments.length) return drawCell;
+    drawCell = value;
+    return my;
+  };
+
+  my.initializeCell = function(value) {
+    if (!arguments.length) return initializeCell;
+    initializeCell = value;
+    return my;
+  };
+
+  my.groupValue = function(value) {
+    if (!arguments.length) return groupValue;
+    groupValue = value;
+    return my;
+  };
+
+  my.groupDisplayValue = function(value) {
+    if (!arguments.length) return groupDisplayValue;
+    groupDisplayValue = value;
+    return my;
+  };
+
+  my.compareFunction = function(value) {
+    if (!arguments.length) return compareFunction;
+    compareFunction = value;
+    return my;
+  };
+
+  my.minCellHeight = function(value) {
+    if (!arguments.length) return minCellHeight;
+    minCellHeight = value;
+    return my;
+  };
+
+  my.mode = function(value) {
+    if (!arguments.length) return mode;
+    mode = value;
+    return my;
+  };
+
+  my.resort = function(value) {
+    if (!arguments.length) return resort;
+    resort = value;
+    return my;
+  };
+
+  my.scrollbarWidth = function(value) {
+    if (!arguments.length) return scrollbarWidth;
+    scrollbarWidth = value;
+    return my;
+  };
+
+  my.scrollbarElement = function(value) {
+    if (!arguments.length) return scrollbarElement;
+    scrollbarElement = value;
+    return my;
+  };
+
+  my.uniqueDimension = function(value) {
+    if (!arguments.length) return uniqueDimension;
+    uniqueDimension = value;
+    return my;
+  };
+
+  my.aggregateKey = function(value) {
+    if (!arguments.length) return aggregateKey;
+    aggregateKey = value;
+    return my;
+  };
+
+  my.aggregationType = function(value) {
+    if (!arguments.length) return aggregationType;
+    aggregationType = value;
+    return my;
+  };
+
+  return my;
+}
+// Facet filter module
+
+angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
+	.directive('palladioFacetFilter', function (palladioService, dataService) {
+		return {
+			scope : {
+				height: '@',
+				showControls: '@',
+				showAccordion: '@',
+				showDropArea: '@',
+				showSettings: '@',
+				configDimensions: '=',
+				configAggregation: '='
+			},
+			templateUrl : 'partials/palladio-facet-filter/template.html',
+			link : {
+				pre : function(scope, element) {
+
+					var numericHeight;
+					var headerHeight = 30;
+					var minCellHeight = 20;
+
+					if(!scope.height) {
+						scope.calcHeight = "200px";
+						numericHeight = 200;
+					} else {
+						scope.calcHeight = scope.height;
+						numericHeight = +scope.calcHeight.substring(0, (scope.calcHeight.length - 2));
+					}
+
+					numericHeight = numericHeight - headerHeight;
+					scope.dropMarginTop = (numericHeight - 100)/3 + 'px';
+
+					// In the pre-linking function we can use scope.data, scope.metadata, and
+					// scope.xfilter to populate any additional scope values required by the
+					// template.
+
+					var deregister = [];
+
+					scope.metadata = dataService.getDataSync().metadata;
+					scope.xfilter = dataService.getDataSync().xfilter;
+
+					scope.uniqueToggleId = "facetFilter" + Math.floor(Math.random() * 10000);
+					scope.uniqueToggleHref = "#" + scope.uniqueToggleId;
+					scope.uniqueModalId = scope.uniqueToggleId + "modal";
+
+					scope.dimensions = [];
+					scope.config = {};
+					scope.title = "Facet Filter";
+
+					scope.dropModel = false;
+
+					scope.$watch('dropModel', function() {
+						if(scope.dropModel) {
+							scope.dims = scope.dims.concat(scope.dropModel);
+							scope.dropModel = false;
+						}
+					});
+
+					// Set up aggregation selection.
+					scope.getAggDescription = function (field) {
+						if(field.type === 'count') {
+							return 'Number of ' + field.field.countDescription;
+						} else {
+							return 'Sum of ' + field.field.description + ' (from ' + countDims.get(field.fileId).countDescription + ' table)';
+						}
+					};
+
+					var countDims = d3.map();
+					scope.metadata.filter(function (d) { return d.countable === true; })
+						.forEach(function (d) {
+							countDims.set(d.originFileId ? d.originFileId : 0, d);
+						});
+
+					scope.aggDims = scope.metadata.filter(function (d) { return d.countable === true || d.type === 'number'; })
+						.map(function (a) {
+							return {
+								key: a.key,
+								type: a.countable ? 'count' : 'sum',
+								field: a,
+								fileId: a.originFileId ? a.originFileId : 0
+							};
+						})
+						.sort(function (a, b) { return scope.getAggDescription(a) < scope.getAggDescription(b) ? -1 : 1; });
+
+							
+					scope.aggDim = scope.configAggregation ? scope.configAggregation : scope.aggDims[0];
+					scope.$watch('aggDim', function () {
+						if(scope.aggDim.key) {
+
+							// Rebuild the facets with the new grouping.
+							var selection = d3.select(element[0]).select('.inner-facet-container');
+							var facets = selection
+								.selectAll('.facet')
+									.data(scope.dims, function(d) { return calculateDomKey(d.key); });
+
+							facets.each(function (d) {
+								buildFacetData(d);
+							});
+
+							updateFacets();
+						}
+					});
+					scope.showAggModal = function () { $('#' + scope.uniqueModalId).find('#facet-agg-modal').modal('show'); };
+
+					scope.showModal = function () { $('#' + scope.uniqueModalId).find('#facet-modal').modal('show'); };
+					
+					scope.fieldDescriptions = function () {
+						return scope.dims.map( function (d) { return d.description; }).join(", ");
+					};
+
+					scope.countDescription = function () {
+						if(scope.uniqueDimension) {
+							return scope.uniqueDimension.countDescription;
+						} else {
+							return false;
+						}
+					};
+
+					scope.getCountDescription = function (field) {
+						return field.countDescription;
+					};
+
+					scope.uniqueDimension = undefined;
+
+					// There can be only one unique key, so no selection for this one.
+					if(scope.metadata.filter(function (d) { return d.countBy === true; })[0]) {
+						scope.uniqueDimension = scope.metadata.filter(function (d) { return d.countBy === true; })[0];
+						scope.config.uniqueDimension = scope.uniqueDimension.key;
+					}
+
+					scope.fields = scope.metadata.filter(function () {
+						return true;
+					}).sort(function (a, b) { return a.description < b.description ? -1 : 1; });
+
+					// Get the countable fields.
+					scope.countFields = scope.metadata.sort(function (a, b) { return a.countDescription < b.countDescription ? -1 : 1; });
+
+					// If configuration dimensions are provided, default to those.
+					if(scope.configDimensions) {
+						scope.dims = scope.configDimensions;
+					} else {
+						scope.dims = [];
+					}
+
+					scope.check = function (d) {
+						return scope.dims.map(function (g) { return g.key; }).indexOf(d.key) !== -1;
+					};
+
+					scope.$watch('dims', function () {
+
+						scope.dims.forEach(function(d) {
+							// If the dim has not already been updated with dimensions/groups,
+							// update it.
+							if(d.dimension === undefined) {
+								buildFacetData(d);
+							}
+						});
+
+						var selection = d3.select(element[0]).select('.inner-facet-container');
+
+						var facets = selection
+							.selectAll('.facet')
+								.data(scope.dims, function(d) { return calculateDomKey(d.key); });
+
+						// Build dimensions, groups
+						facets.enter()
+							.call(function(sel) {
+								var count = 0;
+								sel[0].forEach(function(d) {
+									count++; // Count added elements (sel[0].length is not reliable)
+								});
+
+								if(count > 0) {
+									// Extend the width of the inner- and mid-facet-container
+									selection.transition().style('width', (+selection.style('width').substring(0, selection.style('width').length - 2) + (205 * count)) + 'px');
+									d3.select(element[0]).select('.mid-facet-container').transition()
+										.style('width', (+d3.select(element[0]).select('.mid-facet-container')
+											.style('width').substring(0, d3.select(element[0]).select('.mid-facet-container')
+												.style('width').length - 2) + (205 * count)) + 'px');
+								}
+							});
+
+						// Build facets and button group
+						var buttonGroup = facets.enter()
+							.append('div')
+								.classed('facet', true)
+								.style('height', function() { return scope.calcHeight; })
+							.append('div')
+								.classed('facet-header', true)
+								.style('height', headerHeight)
+								.text(function(d) { return d.description + " (" + d.group.size() + ")"; })
+							.append("span")
+								.attr("class", "mode-buttons")
+							.append("div").attr("class", "btn-group");
+
+						var cells = facets.selectAll('.cell')
+								.data(function (d) { return d.group.top(Infinity)
+											.map(function(g) {
+												return buildCellData(g,d);
+											}); },
+										function (d) { return d.key; });
+
+						// Sort options twiddle the cells.
+						buttonGroup.append("a").attr("class", "btn-mini")
+								.on("click", function(d) {
+									$(this).button('toggle');
+									// Remove all current filter values.
+									d.filters.splice(0, d.filters.length);
+									if(d3.select(this).classed("active")) {
+										d.group.all().forEach(function (g) {
+											d.filters.push(g.key);
+										});
+										d.dimension.filterFunction(function() { return true; });
+										palladioService.setFilter(
+											scope.uniqueToggleId + d.key,
+											d.description,
+											d.filters.join(', '),
+											function() {
+												d.filters.splice(0, d.filters.length); // Maintain the reference
+												d.dimension.filterAll();
+												palladioService.removeFilter(scope.uniqueToggleId + d.key);
+												palladioService.update();
+											}
+										);
+									} else {
+										d.dimension.filterAll();
+										palladioService.removeFilter(scope.uniqueToggleId + d.key);
+									}
+									palladioService.update();
+								})
+								.append("i").attr("class", "fa fa-check-square-o");
+
+						buttonGroup.append("a").attr("class", "btn-mini")
+								.on("click", function(d, i) {
+									$(this).button('toggle');
+									// Note that we have to reselect just the cells in this facet.
+									if(d3.select(this).classed("active")) {
+										d3.selectAll(cells[i]).sort(function(a,b) {
+											return d3.ascending(a.key, b.key);
+										});
+										// Switch icon
+										d3.select(this).select('i').classed('fa-sort-alpha-asc', false);
+										d3.select(this).select('i').classed('fa-sort-numeric-desc', true);
+									} else {
+										d3.selectAll(cells[i]).sort(function(a,b) {
+											return d3.descending(a.displayValue, b.displayValue);
+										});
+										// Switch icon
+										d3.select(this).select('i').classed('fa-sort-alpha-asc', true);
+										d3.select(this).select('i').classed('fa-sort-numeric-desc', false);
+									}
+								})
+								.append("i").attr("class", "fa fa-sort-alpha-asc");
+
+						buttonGroup.append("a").attr("class", "btn-mini")
+								.on("click", function (d) {
+									scope.$apply(function(s) {
+										s.dims = s.dims.filter(function (g) {
+											return g.key !== d.key;
+										});
+									});
+								})
+								.append("i").attr("class", "fa fa-times");
+
+						var newCells = cells.enter()
+							.append('div')
+								.classed('cell', true)
+								.on('click', filterCell );
+
+						newCells.append('div')
+								.classed('cell-text', true);
+
+						newCells.append('div')
+								.classed('cell-value', true);
+
+						newCells.call(updateCell);
+
+						// Remove facets.
+						facets.exit().each(function(d) {
+							// Collapse the width of the inner-facet-container
+							selection.transition().style('width', (+selection.style('width').substring(0, selection.style('width').length - 2) - 205) + 'px');
+							d3.select(element[0]).select('.mid-facet-container').transition()
+								.style('width', (+d3.select(element[0]).select('.mid-facet-container')
+									.style('width').substring(0, d3.select(element[0]).select('.mid-facet-container')
+										.style('width').length - 2) - 205) + 'px');
+							palladioService.removeFilter(scope.uniqueToggleId + d.key);
+							removeFacetData(d);
+							palladioService.update();
+						});
+
+						facets.exit().remove();
+					});
+
+
+					function buildFacetData(data) {
+						if(data.dimension) {
+							data.dimension.filterAll();
+							data.dimension.remove();
+						}
+						data.dimension = scope.xfilter.dimension(function (l) { return "" + l[data.key]; });
+						var exceptionKey = scope.aggDim.key;
+						var summationKey = countDims.get(scope.aggDim.fileId).key;
+						data.group = scope.aggDim.type === "count" ?
+							reductio().exception(function (d) { return d[exceptionKey]; })
+								.exceptionCount(true)(data.dimension.group()) :
+							reductio().exception(function (d) { return d[exceptionKey]; })
+								.exceptionSum(function(d) { return d[summationKey]; });
+						if(scope.aggDim.type === "count") {
+							data.group.order(function (d) { return d.exceptionCount; });
+						} else {
+							data.group.order(function (d) { return d.exceptionSum; });
+						}
+						var topValue = scope.aggDim.type === "count" ?
+							data.group.top(1)[0].value.exceptionCount :
+							data.group.top(1)[0].value.exceptionSum;
+						var total = scope.aggDim.type === "count" ?
+							d3.sum(data.group.all(), function (d) { return d.value.exceptionCount; }) :
+							d3.sum(data.group.all(), function (d) { return d.value.exceptionSum; });
+						var topRange = topValue / total * numericHeight > minCellHeight*2 ? topValue / total * numericHeight : minCellHeight*2;
+
+						topRange = Math.floor(topRange) - 2;
+						
+						data.scale = d3.scale.linear()
+							.domain([1, topValue])
+							.range([minCellHeight, topRange]);
+
+						data.domKey = calculateDomKey(data.key);
+						data.filters = [];
+					}
+
+					function removeFacetData(data) {
+						if(data.dimension) {
+							data.dimension.filterAll();
+							data.dimension.remove();
+						}
+						data.dimension = undefined;
+						data.group = undefined;
+						data.scale = undefined;
+						data.domKey = undefined;
+						data.filters = undefined;
+					}
+
+					function updateCell(sel) {
+						sel.classed('filter-value', function(d) { return d.inFilter; })
+							.transition()
+								// .style('height', function (d) { return d.displayValue > 0 ? d.scale(d.displayValue) + 'px' : '3px'; });
+								.style('height', function (d) { return d.displayValue > 0 ? minCellHeight + 'px' : '3px'; });
+
+						sel.select('.cell-text')
+							.text(function(d) { return d.displayValue > 0 ? d.key : ''; });
+
+						sel.select('.cell-value')
+							.text(function(d) { return d.displayValue > 0 ? d.displayValue : ''; });
+					}
+
+					function buildCellData(cellData, facetData) {
+						cellData.scale = facetData.scale;
+						cellData.facetKey = facetData.key;
+						cellData.facetDescription = facetData.description;
+						cellData.dimension = facetData.dimension;
+						cellData.filters = facetData.filters;
+						cellData.inFilter = cellData.filters.indexOf(cellData.key) !== -1;
+						if(scope.aggDim.type === "count") {
+							cellData.displayValue = cellData.value.exceptionCount;
+						} else {
+							cellData.displayValue = cellData.value.exceptionSum;
+						}
+						return cellData;
+					}
+
+					function filterCell(d) {
+						if(d.filters.indexOf(d.key) !== -1) {
+							// It's already in the filter.
+							d.filters.splice(d.filters.indexOf(d.key),1);
+						} else {
+							// It's not in the filter.
+							d.filters.push(d.key);
+						}
+
+						d.dimension.filterFunction(filterFunction.bind(null, d));
+
+						if(d.filters.length > 0) {
+							deregister.push(
+								palladioService.setFilter(
+									scope.uniqueToggleId + d.facetKey,
+									d.facetDescription,
+									d.filters.join(', '),
+									function() {
+										d.filters.splice(0, d.filters.length); // Maintain the reference
+										d.dimension.filterAll();
+										palladioService.removeFilter(scope.uniqueToggleId + d.facetKey);
+										palladioService.update();
+									}
+								)
+							);
+						} else {
+							palladioService.removeFilter(scope.uniqueToggleId + d.facetKey);
+						}
+
+						palladioService.update();
+					}
+
+					function filterFunction(d, v) {
+						return d.filters.indexOf(v) !== -1 || d.filters.length === 0;
+					}
+
+					function calculateDomKey(key) {
+						return key.split("\n").join("").split('?').join("").split('"').join("").split(")").join("").split("(").join("").split(" ").join("").split(".").join("").split("#").join("").split("/").join("").split(",").join("").split("[").join("").split("]").join("").split("{").join("").split("}").join("");
+					}
+
+					function updateFacets() {
+						var selection = d3.select(element[0]).select('.inner-facet-container');
+
+						var facets = selection
+							.selectAll('.facet')
+								.data(scope.dims, function(d) { return calculateDomKey(d.key); });
+
+						var cells = facets.selectAll('.cell')
+							.data(function (d) { return d.group.top(Infinity)
+											.map(function(g) {
+												return buildCellData(g,d);
+											}); },
+										function (d) { return d.key; });
+
+						cells.call(updateCell);
+					}
+
+					var updateCallback = palladioService.onUpdate(scope.uniqueToggleId, updateFacets);
+
+					deregister.push(updateCallback);
+
+					// Clean up after ourselves. Remove dimensions that we have created. If we
+					// created watches on another scope, destroy those as well.
+					scope.$on('$destroy', function () {
+						console.log(scope.dims.length);
+						scope.dims.map(function(d) {
+							removeFacetData(d);
+						});
+
+						deregister.forEach(function (f) { f(); });
+
+						// Get rid of the modal.
+						$('#' + scope.uniqueModalId).remove();
+					});
+
+					scope.filterReset = function () {
+						scope.dims.forEach(function(d) {
+							d.filters = [];
+							d.dimension.filterAll();
+							palladioService.removeFilter(scope.uniqueToggleId + calculateDomKey(d.key));
+						});
+						palladioService.update();
+					};
+
+					// State save/load.
+
+					var importState = function(state) {
+						scope.config = state.config;
+						scope.$digest();
+
+						// Remove default dims. We have to copy the array to do this in order to trigger
+						// our watcher.
+						while(scope.dims.length > 0) {
+							if(scope.dims.length > 1) {
+								scope.dims = scope.dims.slice(0, scope.dims.length - 1);
+							} else {
+								scope.dims = [];
+							}
+							scope.$digest();
+						}
+
+						// Need to do this one-by-one because of the way we watch for changes.
+						scope.fields.filter(function(f) { return state.dimKeys.indexOf(f.key) !== -1; })
+							.forEach(function(d) {
+								scope.dims = scope.dims.concat(d);
+								scope.$digest();
+							});
+
+						// Set the aggregation.
+						if(state.aggDimKey) scope.aggDim = scope.aggDims.filter(function(f) { return f.key === state.aggDimKey; })[0];
+
+						// Recalculate domKeys (in case we change format)
+						state.domKeys = state.dimKeys.map(function(k) { return calculateDomKey(k); });
+
+						scope.$digest();
+					};
+
+					var exportState = function() {
+						return {
+							config: scope.config,
+							aggDimKey: scope.aggDim.key,
+							dimKeys: scope.dims.map(function(d) { return d.key; }),
+							domKeys: scope.dims.map(function(d) { return calculateDomKey(d.key); })
+						};
+					};
+
+					deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'facet', exportState, importState));
+				},
+
+				post : function(scope, element, attrs) {
+
+					$(element[0]).find('.toggle').on("click", function() {
+						$(element[0]).find('.settings-panel').toggle(0, function() {
+							$(element[0]).find('.view').toggleClass('span12');
+							$(element[0]).find('.view').toggleClass('span10');
+						});
+					});
+
+					// Move the modal out of the fixed area.
+					$(element[0]).find('#facet-modal').parent().appendTo('body');
+				}
+			}
+		};
 	});
 angular.module('palladioGraphView', ['palladio.services', 'palladio'])
 	// Palladio Timechart View
@@ -66115,6 +67696,10 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 								// Assume we have a mapbox id. Example: esjewett.k36b48ge
 								ts.layer = L.mapbox.tileLayer(ts.mbId);
 							}
+							if(ts.geoJson) {
+								// User has pasted in geoJson
+								ts.layer = L.geoJson(ts.geoJson);
+							}
 
 							if(ts.layer) {
 								m.addLayer(ts.layer);
@@ -66488,6 +68073,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							return {
 								"url": t.url,
 								"mbId": t.mbId,
+								"geoJson": t.geoJson,
 								"enabled": t.enabled,
 								"description": t.description,
 							};
@@ -66563,6 +68149,13 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 								'<input type="text" id="layerMbId" ng-model="mbId" class="span8">' +
 							'</div>' +
 						'</div>' +
+
+						'<div class="control-group" ng-show="layerOption && layerOption.custom">' +
+							'<label class="control-label" for="layerGeoJSON">geoJSON<span class="help-block">Paste geoJSON</span></label>' +
+							'<div class="controls">' +
+								'<textarea class="span8" id="layerGeoJSON" ng-model="geoJson" ui-codemirror="{ mode : \'javascript\', lineNumbers : true, lineWrapping: true }" placeholder="Paste your geoJSON data or drop a file here"></textarea>' +
+							'</div>' +
+						'</div>' +
 					'</form>' +
 			  	'</div>' +
 			  	'<div class="modal-footer" style="display:block;">' +
@@ -66607,15 +68200,17 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					if (scope.layerOption && !scope.layerOption.custom) {
 						scope.layers.push({
 							"url": null,
+							"geoJson": null,
 							"mbId": scope.layerOption.mbId,
 							"enabled": true,
 							"description": scope.description ? scope.description : scope.layerOption.description,
 							"layer": null
 						});
 					}
-					else if (scope.url || scope.mbId) {
+					else if (scope.url || scope.mbId || scope.geoJson) {
 						scope.layers.push({
 							"url": scope.url ? scope.url : null,
+							"geoJson": scope.geoJson ? JSON.parse(scope.geoJson) : null,
 							"mbId": scope.mbId ? scope.mbId : null,
 							"enabled": true,
 							"description": scope.description,
@@ -66625,6 +68220,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 					scope.url = null;
 					scope.mbId = null;
+					scope.geoJson = null;
 					scope.description = null;
 				}
 			}
@@ -67800,1587 +69396,6 @@ angular.module('palladioTableView', ['palladio', 'palladio.services'])
 			}
 		};
 	});
-function elastic_list() {
-
-  // Colors from colorbrewer2.org
-
-	var height = 350,
-			width = 200,
-			group = null,
-      all = null,
-      dimension = null,
-      filter = d3.map(),
-      mode = 0,  // 0 = filter, 1 = global, 2 = lock
-      maxCells = Infinity,
-      resort = false,
-      selection = null,
-      minCellHeight = 20,
-      emptyCellHeight = 2,
-      scrollbarWidth = 0,
-      scrollbarElement = null,
-      cellMargin = 2,
-      cellWidth = function() {
-        return width - scrollbarWidth;
-      },
-      backgroundColor = "white",
-      initialGroupMetaData = { },
-      initialGroups = [ ],
-      initialAgg = 0,
-      initialCardinality = 0,
-      uniqueDimension = null,
-      aggregationType = null,
-      aggregateKey = null,
-
-      groupValue = function(v) { return v; },
-      groupDisplayValue = function(v) { return v; },
-
-      // Sort ordering - g and h are groups (g.key and g.value are available)
-      // By default, sort descending by value.
-      compareFunction = function(g, h) {
-        return h.value.data.agg - g.value.data.agg;
-      },
-
-      // Call this after filter selection/deselection
-      callback = function() { return true; },
-
-      // drawCell context
-      cellColorScale = d3.scale.quantize().range(["#EFF3FF", "#BDD7E7", "#6BAED6", "#DDDDDD"]).domain([1,0]),
-      cellSizeScale = null,
-      emptyCellColor = "#D9D9D9",
-      filterColor = "#A8DDB5",
-      totalAgg = 0,
-
-      // cells.each(drawcell) - "this" is a svg "g" DOM object
-      // default function can be over-ridden for fanciness
-      redrawCell = function(sel) {
-        var g = d3.select(sel);
-        var rect = g.select("rect");
-        var labelText = g.select(".label");
-        var elementsText = g.select(".elements");
-
-        g.classed("empty", function (d) { return d.group.value.data.agg === 0; });
-
-        rect
-          .classed("filtered", function (d) {
-              return filter.has(d.group.key);
-            })
-          .transition(500).delay(500).attr("height", function(d) {
-              // Make sure cells have a minimum height.
-              return cellHeight(cellSizeScale(d.group.value.data.agg), d.group.value.data.agg); })
-            .attr("fill", function(d) {
-              if(filter.has(d.group.key)) {
-                return filterColor;
-              } else {
-                if(d.group.value.data.agg === 0) {
-                  return emptyCellColor;
-                } else {
-                  // Show the local profile by comparing the current % of the total for the group value to the
-                  // initial % of total for the group value.
-                  return cellColorScale(Math.abs((d.group.value.data.agg / totalAgg) - initialGroupMetaData[d.group.key].percentage));
-                }
-              }
-            });
-            
-
-        g.transition(500).delay(1000).attr("transform", function(d, i) {
-            return "translate(0, " + d.heightbefore + ")"; });
-
-        labelText.text(function(d) { if(d.group.value.data.agg !== 0) return groupDisplayValue(d.group.key); });
-        elementsText
-          .text(function(d) { if(d.group.value.data.agg !== 0) return "" + d.group.value.data.agg + " / " + initialGroupMetaData[d.group.key].value; });
-      },
-
-      // cells.each(drawcell) - "this" is a svg "g" DOM object
-      // default function can be over-ridden for fanciness
-      initializeCell = function(sel) {
-
-        var g = d3.select(sel);
-        var rect = g.select("rect");
-        var labelText = g.select(".label");
-        var elementsText = g.select(".elements");
-
-        if(rect.empty()) {
-          g.on("click", function(d) {
-            if(!g.classed("empty")) {
-              if(filter.has(d.group.key)) {
-                filter.remove(d.group.key);
-              } else {
-                filter.set(d.group.key, true);
-              }
-              dimension.filter(function(v) {
-                return filter.has(groupValue(v)) || filter.keys().length === 0;
-              });
-              updateInternal();
-              callback();
-            }
-          });
-
-          rect = g.append("rect")
-              .attr("width", cellWidth());
-              
-        }
-
-        if(labelText.empty()) {
-          labelText = g.append("text")
-              .attr("class", "label")
-              .attr("x", cellMargin)
-              .attr("y", "1em")
-              .attr("dx","2px")
-              .attr("dy","2px")
-          //    .attr("font-family", "Helvetica")
-              .attr("font-size", "0.8em");
-        }
-
-        if(elementsText.empty()) {
-          elementsText = g.append("text")
-            .attr("class", "elements")
-            .attr("x", cellWidth() - cellMargin)
-            .attr("y", "1em")
-            .attr("dx","-2px")
-            .attr("dy","2px")
-          //  .attr("font-family", "Helvetica")
-            .attr("font-size", "0.8em")
-            .attr("text-anchor", "end");
-        }
-      };
-
-  // "sel" should be an "svg" or "g" element.
-  function my(sel) {
-    selection = sel;
-    selection.style("height", height).style("width", width);
-
-    group = dimension.group(groupValue);
-
-    // Custom reducers to handle situations where there are multiple records for single "entity"
-    // For example, we might have a data set of people and a person can have multiple occupations.
-    // This is modeled with multiple records per person to show the mulitple occupations.
-
-    var helpers = crossfilterHelpers.countByDimensionWithInitialCountAndData(
-      function (v) { return v[uniqueDimension]; },
-      function (d, p, t) {
-        if(p === undefined) {
-          p = { agg: 0, initialAgg: 0 };
-        }
-        if(t === 'add') {
-          // Adding a new record.
-          if(aggregationType === 'COUNT') {
-            p.agg++;
-          } else {
-            p.agg = p.agg + (+d[aggregateKey] ? +d[aggregateKey] : 0); // Make sure to cast or you end up with a String!!!
-          }
-          if(p.agg > p.initialAgg) p.initialAgg = p.agg;
-        } else {
-          // Removing a record.
-          if(aggregationType === 'COUNT') {
-            p.agg--;
-          } else {
-            p.agg = p.agg - (+d[aggregateKey] ? +d[aggregateKey] : 0); // Make sure to cast or you end up with a String!!!
-          }
-        }
-        return p;
-      }
-    );
-
-    var reduceAdd = helpers.add;
-    var reduceRemove = helpers.remove;
-    var reduceInitial = helpers.init;
-
-    function orderValue(p) {
-      return p.data.agg;
-    }
-
-    // If uniqueDimension is defined, use it for counting.
-    if(uniqueDimension !== undefined && aggregationType) {
-      group.reduce(reduceAdd, reduceRemove, reduceInitial);
-      group.order(orderValue);
-    } else {
-    // Otherwise, use default counting.
-      group.reduce(
-        function(p, v) {
-          ++p.data.agg;
-          if(p.data.agg > p.data.initialAgg) p.data.initialAgg = p.data.agg;
-          return p;
-        }, function(p, v) {
-          --p.data.agg;
-          return p;
-        }, function() {
-          return { count: 0, initialCount: 0, data: { agg: 0, initialAgg: 0 } };
-        }
-      );
-    }
-
-    all = group.top(Infinity);
-
-    // Save the initial count to calculate proportions for local profile.
-    initialAgg = all.reduce(function(prev, curr) { return prev + curr.value.data.initialAgg; }, 0);
-
-    // Save hash of initial grouping values and percentages for local profile display.
-    all.map(function(g){
-      initialGroupMetaData[g.key] = { "value": g.value.data.initialAgg, "percentage": g.value.data.initialAgg / initialAgg };
-    });
-
-    // Save off initial group values for global display, locking counts with deep-ish copy.
-    all.map(function(g){
-      initialGroups.push({ "key": g.key, "value": { "count": g.value.initialCount, data: { agg: g.value.data.initialAgg } } });
-    });
-
-    // Set sort order - default to frequency ordering
-    initialGroups.sort(compareFunction);
-    all.sort(compareFunction);
-
-    // Save the initial cardinality for the cell height scale calculation.
-    initialCardinality = all.length;
-
-    initialize();
-
-    return {  update: updateInternal,
-              selection: selection,
-              resetFilter: resetFilter,
-              lockMode: lockMode,
-              filter: getFilterText,
-              filterInternal: filterInternal,
-              globalMode: globalMode,
-              filterMode: filterMode,
-              mode: my.mode,
-              toggleResort: toggleResort,
-              toggleLabelSort: toggleLabelSort,
-              selectAll: selectAll,
-              deselectAll: deselectAll };
-  }
-
-  function initialize() {
-
-    // Cells    
-    var cells = selection.selectAll(".cell")
-        .data(generate_cell_data(all),
-              function(d) { return d.group.key; });
-
-    cells.enter().append("g")
-        .attr("class", "cell");
-
-    // Use queue.js for delayed execution.
-    var q = queue();
-    function enqueueCellInitialize() { q.defer(initializeCell, this); }
-
-    // Initialize the cells (this can be user-specified).
-    cells.each(enqueueCellInitialize);
-
-    q.defer(function() {
-      // Scrollbars
-      if(scrollbarElement !== null) {
-        scrollbarElement.height(height);
-        //scrollbarElement.jScrollPane();
-      }
-    });
-
-  }
-
-  function updateInternal() {
-
-    if(resort) {
-      all.sort(compareFunction);
-    }
-
-    if(mode != 2) {
-      if(mode === 0){
-        updateWithGroups(all);
-      } else {
-        updateWithGroups(initialGroups);
-      }
-    }
-
-    function updateWithGroups(groups) {
-
-      var cspacing = 5,
-          ctopmargin = cspacing,
-          cleftmargin = cspacing;
-
-      // Update global parameters with values based on new filters.
-      totalAgg = groups.reduce(function(prev, curr) { return prev + curr.value.data.agg; }, 0); // Count of all groups
-
-      // Set up the scale we use to calculate cell height.
-      cellSizeScale = d3.scale.linear()
-        .range([0, height - ((initialCardinality + 1) * cellMargin)])
-        .domain([0, totalAgg]);
-
-      // Cells    
-      var cells = selection.selectAll(".cell")
-          .data(generate_cell_data(groups),
-                function(d) { return d.group.key; });
-
-      if(resort) {
-        cells.order();
-      }
-
-      // <nastiness>
-      // Accumulator for totalHeight to which we'll stretch the selection
-      var totalHeight = cellMargin; // Start with 0 height
-
-      cells.each(function(){
-        var cell = d3.select(this);
-        var d = cell.datum();
-        d.heightbefore = totalHeight; // Override to use scaled height for display
-        totalHeight = totalHeight + cellHeight(cellSizeScale(d.group.value.data.agg), d.group.value.data.agg) + cellMargin;
-        cell.datum(d); // Reset the data on the cell with the new height.
-      });
-      // </nastiness>
-
-      // Use queue.js for delayed execution.
-      var q = queue();
-      function enqueueCellRedraw() {
-        q.defer(redrawCell, this);
-      }
-
-      // Draw the cells (this can be user-specified).
-      // Variables available:
-      //
-      //    totalAgg = dimension.groupAll().value();
-      cells.each(enqueueCellRedraw);
-
-      // Stretch the height of the selection to the totalHeight.
-      q.defer(function() {
-        selection.style("height", totalHeight);
-      });
-
-      // Update scrollbars after all the cells finish rendering.
-      q.defer(function() {
-        if(scrollbarElement && scrollbarElement.data('jsp')) {
-          //scrollbarElement.data('jsp').reinitialise();
-        }
-      });
-
-    }
-  }
-
-  // We generate an array of the data elements needed for cell in format
-  // {  "group": a crossfilter group as represented as an element of group.all()
-  //    "heightbefore": the number of elements in groups larger than this one }
-  function generate_cell_data(groups) {
-
-    var heightBefore = 0; // Accumulator for the size of the group before the current element.
-
-    return groups.map(function(a, i) {
-      heightBefore = heightBefore + a.value.value;
-
-      return {
-        "group": a,
-        // This is raw size, but we'll scale to the real display height later
-        "heightbefore": heightBefore - a.value.data.agg
-      };
-    });
-  }
-
-  // Ensure that cells have a minimum height after being scaled however we're scaling them.
-  function cellHeight(scaled, value) {
-    if(scaled < minCellHeight) {
-      if(value === 0) {
-        return emptyCellHeight;
-      } else {
-        return minCellHeight;
-      }
-    } else {
-      return scaled;
-    }
-  }
-
-  function resetFilter() {
-    filter = d3.map();
-    dimension.filterAll();
-    callback();
-  }
-
-  function lockMode() {
-    mode = 2;
-  }
-
-  function filterMode() {
-    mode = 0;
-    updateInternal();
-  }
-
-  function globalMode() {
-    mode = 1;
-    updateInternal();
-  }
-
-  function toggleResort() {
-    if(resort === false) {
-      resort = true;
-      compareFunction = function(g, h) {
-        return h.value.data.agg - g.value.data.agg;
-      };
-      updateInternal();
-    } else {
-      compareFunction = function(g, h) {
-        return initialGroupMetaData[h.key].value - initialGroupMetaData[g.key].value;
-      };
-      updateInternal();
-      resort = false;
-    }
-  }
-
-  var labelSort = false;
-  function toggleLabelSort() {
-    if(labelSort === false) {
-      compareFunction = function(g, h) {
-        if(h.key > g.key) { return -1; } else { return 1; }
-      };
-      labelSort = true;
-    } else {
-      if(resort === false) {
-        compareFunction = function(g, h) {
-          return initialGroupMetaData[h.key].value - initialGroupMetaData[g.key].value;
-        };
-      } else {
-        compareFunction = function(g, h) {
-          return h.value.data.agg - g.value.data.agg;
-        };
-      }
-      labelSort = false;
-    }
-
-    if(resort === false) {
-      resort = true;
-      updateInternal();
-      resort = false;
-    } else { updateInternal(); }
-  }
-
-  function getFilterText() {
-    return filter.keys().map(function(f) {
-      return groupDisplayValue(f);
-    }).join(", ");
-  }
-
-  function filterInternal(value) {
-    if (!arguments.length) return filter.entries();
-    filter = d3.map();
-    value.forEach(function(e) { filter.set(e.key, e.value); });
-
-    dimension.filter(function(v) {
-      return filter.has(groupValue(v)) || filter.keys().length === 0;
-    });
-
-    callback();
-  }
-
-  function selectAll() {
-    filter = d3.map();
-    
-    all.forEach(function (a) {
-      filter.set(a.key, true);
-    });
-    
-    dimension.filter(function(v) {
-      return filter.has(groupValue(v)) || filter.keys().length === 0;
-    });
-    
-    callback();
-  }
-
-  function deselectAll() {
-    filter = d3.map();
-    dimension.filterAll();
-    callback();
-  }
-
-  my.width = function(value) {
-    if (!arguments.length) return width;
-    width = value;
-    return my;
-  };
-
-  my.height = function(value) {
-    if (!arguments.length) return height;
-    height = value;
-    return my;
-  };
-
-  my.dimension = function(value) {
-    if (!arguments.length) return dimension;
-    dimension = value;
-    return my;
-  };
-
-  my.callback = function(value) {
-    if (!arguments.length) return callback;
-    callback = value;
-    return my;
-  };
-
-  my.redrawCell = function(value) {
-    if (!arguments.length) return drawCell;
-    drawCell = value;
-    return my;
-  };
-
-  my.initializeCell = function(value) {
-    if (!arguments.length) return initializeCell;
-    initializeCell = value;
-    return my;
-  };
-
-  my.groupValue = function(value) {
-    if (!arguments.length) return groupValue;
-    groupValue = value;
-    return my;
-  };
-
-  my.groupDisplayValue = function(value) {
-    if (!arguments.length) return groupDisplayValue;
-    groupDisplayValue = value;
-    return my;
-  };
-
-  my.compareFunction = function(value) {
-    if (!arguments.length) return compareFunction;
-    compareFunction = value;
-    return my;
-  };
-
-  my.minCellHeight = function(value) {
-    if (!arguments.length) return minCellHeight;
-    minCellHeight = value;
-    return my;
-  };
-
-  my.mode = function(value) {
-    if (!arguments.length) return mode;
-    mode = value;
-    return my;
-  };
-
-  my.resort = function(value) {
-    if (!arguments.length) return resort;
-    resort = value;
-    return my;
-  };
-
-  my.scrollbarWidth = function(value) {
-    if (!arguments.length) return scrollbarWidth;
-    scrollbarWidth = value;
-    return my;
-  };
-
-  my.scrollbarElement = function(value) {
-    if (!arguments.length) return scrollbarElement;
-    scrollbarElement = value;
-    return my;
-  };
-
-  my.uniqueDimension = function(value) {
-    if (!arguments.length) return uniqueDimension;
-    uniqueDimension = value;
-    return my;
-  };
-
-  my.aggregateKey = function(value) {
-    if (!arguments.length) return aggregateKey;
-    aggregateKey = value;
-    return my;
-  };
-
-  my.aggregationType = function(value) {
-    if (!arguments.length) return aggregationType;
-    aggregationType = value;
-    return my;
-  };
-
-  return my;
-}
-// Facet filter module
-
-angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
-	.directive('palladioFacetFilter', function (palladioService, dataService) {
-		return {
-			scope : {
-				height: '@',
-				showControls: '@',
-				showAccordion: '@',
-				showDropArea: '@',
-				showSettings: '@',
-				configDimensions: '=',
-				configAggregation: '='
-			},
-			templateUrl : 'partials/palladio-facet-filter/template.html',
-			link : {
-				pre : function(scope, element) {
-
-					var numericHeight;
-					var headerHeight = 30;
-					var minCellHeight = 20;
-
-					if(!scope.height) {
-						scope.calcHeight = "200px";
-						numericHeight = 200;
-					} else {
-						scope.calcHeight = scope.height;
-						numericHeight = +scope.calcHeight.substring(0, (scope.calcHeight.length - 2));
-					}
-
-					numericHeight = numericHeight - headerHeight;
-					scope.dropMarginTop = (numericHeight - 100)/3 + 'px';
-
-					// In the pre-linking function we can use scope.data, scope.metadata, and
-					// scope.xfilter to populate any additional scope values required by the
-					// template.
-
-					var deregister = [];
-
-					scope.metadata = dataService.getDataSync().metadata;
-					scope.xfilter = dataService.getDataSync().xfilter;
-
-					scope.uniqueToggleId = "facetFilter" + Math.floor(Math.random() * 10000);
-					scope.uniqueToggleHref = "#" + scope.uniqueToggleId;
-					scope.uniqueModalId = scope.uniqueToggleId + "modal";
-
-					scope.dimensions = [];
-					scope.config = {};
-					scope.title = "Facet Filter";
-
-					scope.dropModel = false;
-
-					scope.$watch('dropModel', function() {
-						if(scope.dropModel) {
-							scope.dims = scope.dims.concat(scope.dropModel);
-							scope.dropModel = false;
-						}
-					});
-
-					// Set up aggregation selection.
-					scope.getAggDescription = function (field) {
-						if(field.type === 'count') {
-							return 'Number of ' + field.field.countDescription;
-						} else {
-							return 'Sum of ' + field.field.description + ' (from ' + countDims.get(field.fileId).countDescription + ' table)';
-						}
-					};
-
-					var countDims = d3.map();
-					scope.metadata.filter(function (d) { return d.countable === true; })
-						.forEach(function (d) {
-							countDims.set(d.originFileId ? d.originFileId : 0, d);
-						});
-
-					scope.aggDims = scope.metadata.filter(function (d) { return d.countable === true || d.type === 'number'; })
-						.map(function (a) {
-							return {
-								key: a.key,
-								type: a.countable ? 'count' : 'sum',
-								field: a,
-								fileId: a.originFileId ? a.originFileId : 0
-							};
-						})
-						.sort(function (a, b) { return scope.getAggDescription(a) < scope.getAggDescription(b) ? -1 : 1; });
-
-							
-					scope.aggDim = scope.configAggregation ? scope.configAggregation : scope.aggDims[0];
-					scope.$watch('aggDim', function () {
-						if(scope.aggDim.key) {
-
-							// Rebuild the facets with the new grouping.
-							var selection = d3.select(element[0]).select('.inner-facet-container');
-							var facets = selection
-								.selectAll('.facet')
-									.data(scope.dims, function(d) { return calculateDomKey(d.key); });
-
-							facets.each(function (d) {
-								buildFacetData(d);
-							});
-
-							updateFacets();
-						}
-					});
-					scope.showAggModal = function () { $('#' + scope.uniqueModalId).find('#facet-agg-modal').modal('show'); };
-
-					scope.showModal = function () { $('#' + scope.uniqueModalId).find('#facet-modal').modal('show'); };
-					
-					scope.fieldDescriptions = function () {
-						return scope.dims.map( function (d) { return d.description; }).join(", ");
-					};
-
-					scope.countDescription = function () {
-						if(scope.uniqueDimension) {
-							return scope.uniqueDimension.countDescription;
-						} else {
-							return false;
-						}
-					};
-
-					scope.getCountDescription = function (field) {
-						return field.countDescription;
-					};
-
-					scope.uniqueDimension = undefined;
-
-					// There can be only one unique key, so no selection for this one.
-					if(scope.metadata.filter(function (d) { return d.countBy === true; })[0]) {
-						scope.uniqueDimension = scope.metadata.filter(function (d) { return d.countBy === true; })[0];
-						scope.config.uniqueDimension = scope.uniqueDimension.key;
-					}
-
-					scope.fields = scope.metadata.filter(function () {
-						return true;
-					}).sort(function (a, b) { return a.description < b.description ? -1 : 1; });
-
-					// Get the countable fields.
-					scope.countFields = scope.metadata.sort(function (a, b) { return a.countDescription < b.countDescription ? -1 : 1; });
-
-					// If configuration dimensions are provided, default to those.
-					if(scope.configDimensions) {
-						scope.dims = scope.configDimensions;
-					} else {
-						scope.dims = [];
-					}
-
-					scope.check = function (d) {
-						return scope.dims.map(function (g) { return g.key; }).indexOf(d.key) !== -1;
-					};
-
-					scope.$watch('dims', function () {
-
-						scope.dims.forEach(function(d) {
-							// If the dim has not already been updated with dimensions/groups,
-							// update it.
-							if(d.dimension === undefined) {
-								buildFacetData(d);
-							}
-						});
-
-						var selection = d3.select(element[0]).select('.inner-facet-container');
-
-						var facets = selection
-							.selectAll('.facet')
-								.data(scope.dims, function(d) { return calculateDomKey(d.key); });
-
-						// Build dimensions, groups
-						facets.enter()
-							.call(function(sel) {
-								var count = 0;
-								sel[0].forEach(function(d) {
-									count++; // Count added elements (sel[0].length is not reliable)
-								});
-
-								if(count > 0) {
-									// Extend the width of the inner- and mid-facet-container
-									selection.transition().style('width', (+selection.style('width').substring(0, selection.style('width').length - 2) + (205 * count)) + 'px');
-									d3.select(element[0]).select('.mid-facet-container').transition()
-										.style('width', (+d3.select(element[0]).select('.mid-facet-container')
-											.style('width').substring(0, d3.select(element[0]).select('.mid-facet-container')
-												.style('width').length - 2) + (205 * count)) + 'px');
-								}
-							});
-
-						// Build facets and button group
-						var buttonGroup = facets.enter()
-							.append('div')
-								.classed('facet', true)
-								.style('height', function() { return scope.calcHeight; })
-							.append('div')
-								.classed('facet-header', true)
-								.style('height', headerHeight)
-								.text(function(d) { return d.description + " (" + d.group.size() + ")"; })
-							.append("span")
-								.attr("class", "mode-buttons")
-							.append("div").attr("class", "btn-group");
-
-						var cells = facets.selectAll('.cell')
-								.data(function (d) { return d.group.top(Infinity)
-											.map(function(g) {
-												return buildCellData(g,d);
-											}); },
-										function (d) { return d.key; });
-
-						// Sort options twiddle the cells.
-						buttonGroup.append("a").attr("class", "btn-mini")
-								.on("click", function(d) {
-									$(this).button('toggle');
-									// Remove all current filter values.
-									d.filters.splice(0, d.filters.length);
-									if(d3.select(this).classed("active")) {
-										d.group.all().forEach(function (g) {
-											d.filters.push(g.key);
-										});
-										d.dimension.filterFunction(function() { return true; });
-										palladioService.setFilter(
-											scope.uniqueToggleId + d.key,
-											d.description,
-											d.filters.join(', '),
-											function() {
-												d.filters.splice(0, d.filters.length); // Maintain the reference
-												d.dimension.filterAll();
-												palladioService.removeFilter(scope.uniqueToggleId + d.key);
-												palladioService.update();
-											}
-										);
-									} else {
-										d.dimension.filterAll();
-										palladioService.removeFilter(scope.uniqueToggleId + d.key);
-									}
-									palladioService.update();
-								})
-								.append("i").attr("class", "fa fa-check-square-o");
-
-						buttonGroup.append("a").attr("class", "btn-mini")
-								.on("click", function(d, i) {
-									$(this).button('toggle');
-									// Note that we have to reselect just the cells in this facet.
-									if(d3.select(this).classed("active")) {
-										d3.selectAll(cells[i]).sort(function(a,b) {
-											return d3.ascending(a.key, b.key);
-										});
-										// Switch icon
-										d3.select(this).select('i').classed('fa-sort-alpha-asc', false);
-										d3.select(this).select('i').classed('fa-sort-numeric-desc', true);
-									} else {
-										d3.selectAll(cells[i]).sort(function(a,b) {
-											return d3.descending(a.displayValue, b.displayValue);
-										});
-										// Switch icon
-										d3.select(this).select('i').classed('fa-sort-alpha-asc', true);
-										d3.select(this).select('i').classed('fa-sort-numeric-desc', false);
-									}
-								})
-								.append("i").attr("class", "fa fa-sort-alpha-asc");
-
-						buttonGroup.append("a").attr("class", "btn-mini")
-								.on("click", function (d) {
-									scope.$apply(function(s) {
-										s.dims = s.dims.filter(function (g) {
-											return g.key !== d.key;
-										});
-									});
-								})
-								.append("i").attr("class", "fa fa-times");
-
-						var newCells = cells.enter()
-							.append('div')
-								.classed('cell', true)
-								.on('click', filterCell );
-
-						newCells.append('div')
-								.classed('cell-text', true);
-
-						newCells.append('div')
-								.classed('cell-value', true);
-
-						newCells.call(updateCell);
-
-						// Remove facets.
-						facets.exit().each(function(d) {
-							// Collapse the width of the inner-facet-container
-							selection.transition().style('width', (+selection.style('width').substring(0, selection.style('width').length - 2) - 205) + 'px');
-							d3.select(element[0]).select('.mid-facet-container').transition()
-								.style('width', (+d3.select(element[0]).select('.mid-facet-container')
-									.style('width').substring(0, d3.select(element[0]).select('.mid-facet-container')
-										.style('width').length - 2) - 205) + 'px');
-							palladioService.removeFilter(scope.uniqueToggleId + d.key);
-							removeFacetData(d);
-							palladioService.update();
-						});
-
-						facets.exit().remove();
-					});
-
-
-					function buildFacetData(data) {
-						if(data.dimension) {
-							data.dimension.filterAll();
-							data.dimension.remove();
-						}
-						data.dimension = scope.xfilter.dimension(function (l) { return "" + l[data.key]; });
-						var exceptionKey = scope.aggDim.key;
-						var summationKey = countDims.get(scope.aggDim.fileId).key;
-						data.group = scope.aggDim.type === "count" ?
-							reductio().exception(function (d) { return d[exceptionKey]; })
-								.exceptionCount(true)(data.dimension.group()) :
-							reductio().exception(function (d) { return d[exceptionKey]; })
-								.exceptionSum(function(d) { return d[summationKey]; });
-						if(scope.aggDim.type === "count") {
-							data.group.order(function (d) { return d.exceptionCount; });
-						} else {
-							data.group.order(function (d) { return d.exceptionSum; });
-						}
-						var topValue = scope.aggDim.type === "count" ?
-							data.group.top(1)[0].value.exceptionCount :
-							data.group.top(1)[0].value.exceptionSum;
-						var total = scope.aggDim.type === "count" ?
-							d3.sum(data.group.all(), function (d) { return d.value.exceptionCount; }) :
-							d3.sum(data.group.all(), function (d) { return d.value.exceptionSum; });
-						var topRange = topValue / total * numericHeight > minCellHeight*2 ? topValue / total * numericHeight : minCellHeight*2;
-
-						topRange = Math.floor(topRange) - 2;
-						
-						data.scale = d3.scale.linear()
-							.domain([1, topValue])
-							.range([minCellHeight, topRange]);
-
-						data.domKey = calculateDomKey(data.key);
-						data.filters = [];
-					}
-
-					function removeFacetData(data) {
-						if(data.dimension) {
-							data.dimension.filterAll();
-							data.dimension.remove();
-						}
-						data.dimension = undefined;
-						data.group = undefined;
-						data.scale = undefined;
-						data.domKey = undefined;
-						data.filters = undefined;
-					}
-
-					function updateCell(sel) {
-						sel.classed('filter-value', function(d) { return d.inFilter; })
-							.transition()
-								// .style('height', function (d) { return d.displayValue > 0 ? d.scale(d.displayValue) + 'px' : '3px'; });
-								.style('height', function (d) { return d.displayValue > 0 ? minCellHeight + 'px' : '3px'; });
-
-						sel.select('.cell-text')
-							.text(function(d) { return d.displayValue > 0 ? d.key : ''; });
-
-						sel.select('.cell-value')
-							.text(function(d) { return d.displayValue > 0 ? d.displayValue : ''; });
-					}
-
-					function buildCellData(cellData, facetData) {
-						cellData.scale = facetData.scale;
-						cellData.facetKey = facetData.key;
-						cellData.facetDescription = facetData.description;
-						cellData.dimension = facetData.dimension;
-						cellData.filters = facetData.filters;
-						cellData.inFilter = cellData.filters.indexOf(cellData.key) !== -1;
-						if(scope.aggDim.type === "count") {
-							cellData.displayValue = cellData.value.exceptionCount;
-						} else {
-							cellData.displayValue = cellData.value.exceptionSum;
-						}
-						return cellData;
-					}
-
-					function filterCell(d) {
-						if(d.filters.indexOf(d.key) !== -1) {
-							// It's already in the filter.
-							d.filters.splice(d.filters.indexOf(d.key),1);
-						} else {
-							// It's not in the filter.
-							d.filters.push(d.key);
-						}
-
-						d.dimension.filterFunction(filterFunction.bind(null, d));
-
-						if(d.filters.length > 0) {
-							deregister.push(
-								palladioService.setFilter(
-									scope.uniqueToggleId + d.facetKey,
-									d.facetDescription,
-									d.filters.join(', '),
-									function() {
-										d.filters.splice(0, d.filters.length); // Maintain the reference
-										d.dimension.filterAll();
-										palladioService.removeFilter(scope.uniqueToggleId + d.facetKey);
-										palladioService.update();
-									}
-								)
-							);
-						} else {
-							palladioService.removeFilter(scope.uniqueToggleId + d.facetKey);
-						}
-
-						palladioService.update();
-					}
-
-					function filterFunction(d, v) {
-						return d.filters.indexOf(v) !== -1 || d.filters.length === 0;
-					}
-
-					function calculateDomKey(key) {
-						return key.split("\n").join("").split('?').join("").split('"').join("").split(")").join("").split("(").join("").split(" ").join("").split(".").join("").split("#").join("").split("/").join("").split(",").join("").split("[").join("").split("]").join("").split("{").join("").split("}").join("");
-					}
-
-					function updateFacets() {
-						var selection = d3.select(element[0]).select('.inner-facet-container');
-
-						var facets = selection
-							.selectAll('.facet')
-								.data(scope.dims, function(d) { return calculateDomKey(d.key); });
-
-						var cells = facets.selectAll('.cell')
-							.data(function (d) { return d.group.top(Infinity)
-											.map(function(g) {
-												return buildCellData(g,d);
-											}); },
-										function (d) { return d.key; });
-
-						cells.call(updateCell);
-					}
-
-					var updateCallback = palladioService.onUpdate(scope.uniqueToggleId, updateFacets);
-
-					deregister.push(updateCallback);
-
-					// Clean up after ourselves. Remove dimensions that we have created. If we
-					// created watches on another scope, destroy those as well.
-					scope.$on('$destroy', function () {
-						console.log(scope.dims.length);
-						scope.dims.map(function(d) {
-							removeFacetData(d);
-						});
-
-						deregister.forEach(function (f) { f(); });
-
-						// Get rid of the modal.
-						$('#' + scope.uniqueModalId).remove();
-					});
-
-					scope.filterReset = function () {
-						scope.dims.forEach(function(d) {
-							d.filters = [];
-							d.dimension.filterAll();
-							palladioService.removeFilter(scope.uniqueToggleId + calculateDomKey(d.key));
-						});
-						palladioService.update();
-					};
-
-					// State save/load.
-
-					var importState = function(state) {
-						scope.config = state.config;
-						scope.$digest();
-
-						// Remove default dims. We have to copy the array to do this in order to trigger
-						// our watcher.
-						while(scope.dims.length > 0) {
-							if(scope.dims.length > 1) {
-								scope.dims = scope.dims.slice(0, scope.dims.length - 1);
-							} else {
-								scope.dims = [];
-							}
-							scope.$digest();
-						}
-
-						// Need to do this one-by-one because of the way we watch for changes.
-						scope.fields.filter(function(f) { return state.dimKeys.indexOf(f.key) !== -1; })
-							.forEach(function(d) {
-								scope.dims = scope.dims.concat(d);
-								scope.$digest();
-							});
-
-						// Set the aggregation.
-						if(state.aggDimKey) scope.aggDim = scope.aggDims.filter(function(f) { return f.key === state.aggDimKey; })[0];
-
-						// Recalculate domKeys (in case we change format)
-						state.domKeys = state.dimKeys.map(function(k) { return calculateDomKey(k); });
-
-						scope.$digest();
-					};
-
-					var exportState = function() {
-						return {
-							config: scope.config,
-							aggDimKey: scope.aggDim.key,
-							dimKeys: scope.dims.map(function(d) { return d.key; }),
-							domKeys: scope.dims.map(function(d) { return calculateDomKey(d.key); })
-						};
-					};
-
-					deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'facet', exportState, importState));
-				},
-
-				post : function(scope, element, attrs) {
-
-					$(element[0]).find('.toggle').on("click", function() {
-						$(element[0]).find('.settings-panel').toggle(0, function() {
-							$(element[0]).find('.view').toggleClass('span12');
-							$(element[0]).find('.view').toggleClass('span10');
-						});
-					});
-
-					// Move the modal out of the fixed area.
-					$(element[0]).find('#facet-modal').parent().appendTo('body');
-				}
-			}
-		};
-	});
-// Palladio template component module
-
-angular.module('palladioDurationView', ['palladio', 'palladio.services'])
-	.directive('palladioDurationView', function (dateService, palladioService, dataService) {
-		var directiveObj = {
-			scope: {
-				fullHeight: '@',
-				fullWidth: '@',
-				showControls: '@',
-				showAccordion: '@',
-				view: '@'
-			},
-			templateUrl: 'partials/palladio-duration-view/template.html',
-
-			link: { pre: function(scope) {
-
-					// In the pre-linking function we can use scope.data, scope.metadata, and
-					// scope.xfilter to populate any additional scope values required by the
-					// template.
-
-					// The parent scope must include the following:
-					//   scope.xfilter
-					//   scope.metadata
-
-					// If you need to do any configuration before your visualization is set up,
-					// do it here. DO NOT do anything that changes the DOM here, so don't
-					// programatically instantiate your visualization at this point. That happens
-					// in the 'post' function.
-					//
-					// You might need to do things here especially
-					// if your visualization is contained in another directive that is included
-					// in the template of this directive.
-
-					scope.uniqueToggleId = "durationView" + Math.floor(Math.random() * 10000);
-					scope.uniqueToggleHref = "#" + scope.uniqueToggleId;
-					scope.uniqueModalId = scope.uniqueToggleId + "modal";
-
-					scope.metadata = dataService.getDataSync().metadata;
-					scope.xfilter = dataService.getDataSync().xfilter;
-					scope.data = dataService.getDataSync().data;
-
-					// Take the first number dimension we find.
-					scope.durationDims = scope.metadata.filter(function (d) { return d.type === 'number'; });
-					// scope.durationDim = scope.durationDims[0];
-
-					// Label dimensions.
-					scope.labelDims = scope.metadata;
-					scope.tooltipLabelDim = scope.labelDims[0];
-					// scope.groupDim = scope.labelDims[0];
-					// scope.xGroupDim = scope.labelDims[0];
-					scope.xSortDim = scope.labelDims[0];
-
-					scope.title = "Duration view";
-
-					scope.modes = ['Constant duration'];
-					if(scope.durationDims.length > 0) scope.modes.push('Actual duration');
-					scope.mode = scope.modes[0];
-
-					scope.showDurationModal = function () {
-						$('#' + scope.uniqueModalId).find('#duration-modal').modal('show');
-					};
-
-					scope.showTooltipLabelModal = function () {
-						$('#' + scope.uniqueModalId).find('#tooltip-label-modal').modal('show');
-					};
-
-					scope.showGroupModal = function () {
-						$('#' + scope.uniqueModalId).find('#group-modal').modal('show');
-					};
-
-					scope.showXGroupModal = function () {
-						$('#' + scope.uniqueModalId).find('#x-group-modal').modal('show');
-					};
-
-					scope.showXSortModal = function () {
-						$('#' + scope.uniqueModalId).find('#x-sort-modal').modal('show');
-					};
-
-				}, post: function(scope, element) {
-
-					// If you are building a d3.js visualization, you can grab the containing
-					// element with:
-					//
-					// d3.select(element[0]);
-
-					var sel, svg, dim, group, x, y,
-						top, bottom, left, filter, yStep, tooltip,
-						colors, bottomAxis, topAxis, yAxis, uniques, height, lineHeight;
-
-					// Constants...
-					var margin = 25;
-					var lineHeight = 20;
-					var leftMargin = 150;
-					var bottomOffset = 50;
-					var width = scope.fullWidth === 'true' ? $(window).width() - margin*2 : $(window).width()*0.7;
-					// var height = scope.height ? +scope.height : 200;
-					// height = scope.fullHeight === 'true' ? $(window).height()-200 : height;
-					var highlightColor = '#67D6E5';
-
-					setup();
-					update();
-
-					function setup() {
-						// Check necessary fields are selected.
-						if(!scope.tooltipLabelDim ||
-							!scope.groupDim ||
-							!scope.xGroupDim ||
-							!scope.xSortDim ||
-							(scope.mode === 'Actual duration' && !scope.durationDim)) {
-
-							return false;
-						}
-
-						// Calculate uniques for use in y scale and height.
-						uniques = [];
-						scope.data.forEach(function(d) {
-							if(uniques.indexOf("" + d[scope.groupDim.key]) === -1) {
-								uniques.push("" + d[scope.groupDim.key]);
-							}
-						});
-						uniques.sort(d3.descending);
-
-						// Figure height based on uniques and a minimum height.
-						height = uniques.length * lineHeight;
-
-						sel = d3.select(d3.select(element[0]).select(".main-viz")[0][0].children[0]);
-						if(!sel.select('svg').empty()) sel.select('svg').remove();
-						svg = sel.append('svg');
-
-						sel.attr('width', width + margin*2);
-						sel.attr('height', height + margin*2);
-
-						svg.attr('width', width + margin*2);
-						svg.attr('height', height + margin*2);
-
-						if(dim) dim.remove();
-
-						dim = scope.xfilter.dimension(function(d) { return "" + d[scope.groupDim.key]; });
-
-						// For now we keep the grouping simple and just do a naive count. To enable
-						// 'countBy' functionality we need to use the Crossfilter helpers or Reductio.
-						group = dim.group();
-
-						// Use reductio value-lists to track the xGroup for each group.
-						var reducer = reductio().count(true)
-							.nest([function(d) { return d[scope.xGroupDim.key]; }]);
-
-						if(scope.mode === 'Actual duration') {
-							reducer.sum(function(d) { return +d[scope.durationDim.key]; });
-						}
-
-						reducer(group);
-
-						// Scales
-						x = d3.scale.linear().range([0, width - leftMargin]);
-						setXDomain();
-						y = d3.scale.ordinal().rangeBands([height - bottomOffset, 0], 0.2)
-								// .domain(group.top(Infinity)
-								// 	.filter(function (d) {
-								// 		return d.value.count !== 0;
-								// 	}).map(function(d) { return d.key; }));
-								.domain(uniques);
-
-						colors = d3.scale.ordinal()
-							.range(colorbrewer.Greys[9])
-							.domain(scope.xGroupDim.uniques);
-
-						bottomAxis = d3.svg.axis().orient("bottom").scale(x);
-						topAxis = d3.svg.axis().orient("top").scale(x);
-						yAxis = d3.svg.axis().orient("left").scale(y);
-
-						// Build the visualization.
-						var g = svg.append('g')
-								.attr("transform", "translate(" + leftMargin + "," + margin + ")");
-
-						bottom = g.append('g')
-							.attr("class", "axis x-axis x-bottom")
-							.attr("transform", "translate(" + 0 + "," + (height - bottomOffset) + ")")
-							.call(bottomAxis);
-
-						top = g.append('g')
-							.attr("class", "axis x-axis x-top")
-							.call(topAxis);
-
-						left = g.append('g')
-							.attr("class", "axis y-axis")
-							.call(yAxis);
-
-						tooltip = g.select(".duration-tooltip");
-						// Set up the tooltip.
-						if(tooltip.empty()) {
-							tooltip = g.append("g")
-									.attr("class", "duration-tooltip")
-									.attr("pointer-events", "none")
-									.style("display", "none");
-
-							tooltip.append("foreignObject")
-									.attr("width", 100)
-									.attr("height", 26)
-									.attr("pointer-events", "none")
-								.append("html")
-									.style("background-color", "rgba(0,0,0,0)")
-								.append("div")
-									.style("padding-left", 3)
-									.style("padding-right", 3)
-									.style("text-align", "center")
-									.style("white-space", "nowrap")
-									.style("overflow", "hidden")
-									.style("text-overflow", "ellipsis")
-									.style("border-radius", "5px")
-									.style("background-color", "white")
-									.style("border", "3px solid grey");
-						}
-					}
-
-					function update() {
-						// Check necessary fields are selected.
-						if(!scope.tooltipLabelDim ||
-							!scope.groupDim ||
-							!scope.xGroupDim ||
-							!scope.xSortDim ||
-							(scope.mode === 'Actual duration' && !scope.durationDim)) {
-
-							return false;
-						}
-
-						// Update the x-scale and x-axes
-						setXDomain();
-						bottomAxis.scale(x);
-						topAxis.scale(x);
-						svg.select('.x-bottom').call(bottomAxis);
-						svg.select('.x-top').call(topAxis);
-
-						var groups = svg.select('g').selectAll('.duration-group')
-							.data(group.top(Infinity),
-									// .filter(function (d) {
-									// 	return d.value.count !== 0;
-									// }),
-								function (d) { return d.key; });
-
-						groups.exit().remove();
-
-						groups.enter()
-								.append('g')
-									.attr('class', 'duration-group')
-									.attr('transform', function(d) {
-										return 'translate(1,' + y(d.key) + ')';
-									});
-
-						var constantDuration = scope.mode === 'Constant duration';
-						var rectWidth = x(1) - x(0);
-
-						function calcWidth(d) {
-							return constantDuration ?
-								rectWidth :
-								(isNaN(+d[scope.durationDim.key]) ?
-									0 :
-									x(+d[scope.durationDim.key]));
-						}
-
-						var rects = groups.selectAll('.duration-bar')
-							.data(function(d, i) {
-								var total = 0;
-
-								// Flatten to basic records
-								return d.value.nest.map(function(n) {
-									return n.values;
-								}).reduce(function(a, b) {
-									return a.concat(b);
-								}).sort(function(a, b) {
-									return d3.ascending(a[scope.xSortDim.key], b[scope.xSortDim.key]);
-								}).map(function(d) {
-									total = total + calcWidth(d);
-									// Build object with information needed to visualize
-									return {
-										name: d[scope.xGroupDim.key],
-										label: d[scope.tooltipLabelDim.key],
-										group: i,
-										x: calcWidth(d),
-										offset: (total - calcWidth(d))
-									};
-								});
-							}, function(d, i) { return d.name + '-' + d.group + '-' + i; });
-
-						rects.exit().remove();
-
-						rects.enter()
-								.append('rect')
-									.attr('height', y.rangeBand())
-									.attr('class', 'duration-bar');
-
-						rects
-							.attr('width', function(d) { return d.x ? d.x : 0; })
-							.attr('fill', function(d) { return colors(d.name); })
-							.attr('stroke', function(d) { return colors(d.name); })
-							.attr('transform', function(d) { return 'translate(' + (d.offset ? d.offset : 0) + ',0)'; })
-							.on('mouseover', function(d) {
-								rects.attr('fill', function(f) {
-										if(d.name === f.name) {
-											return highlightColor;
-										} else {
-											return colors(f.name);
-										}})
-									.attr('stroke', function(f) {
-										if(d.name === f.name) {
-											return highlightColor;
-										} else {
-											return colors(f.name);
-										}
-									});
-							})
-							.on('mouseout', function() {
-								rects
-									.attr('fill', function(d) { return colors(d.name); })
-									.attr('stroke', function(d) { return colors(d.name); });
-							})
-							.tooltip(function (d){
-								return {
-									text : d.label,
-									displacement : [0,20],
-									position: [0,0],
-									gravity: "right",
-									placement: "mouse",
-									mousemove : true
-								};
-							});
-					}
-
-					function setXDomain() {
-						if(scope.mode === 'Actual duration') {
-							x.domain([ 0, d3.max(group.top(Infinity), function (d) { return d.value.sum; }) ]);
-						} else {
-							x.domain([ 0, d3.max(group.top(Infinity), function (d) { return d.value.count; }) ]);
-						}
-					}
-
-					function reset() {
-						if(dim) {
-							group.remove();
-							dim.remove();
-							svg.remove();
-						}
-					}
-
-					scope.filterReset = function () {
-						reset();
-						setup();
-						update();
-					};
-
-					scope.$watchGroup(['mode', 'durationDim', 'tooltipLabelDim', 'groupDim', 'xGroupDim', 'xSortDim'], function () {
-						reset();
-						setup();
-						update();
-					});
-
-					//
-					// If you are going to programatically instantiate your visualization, do it
-					// here. Your visualization should emit the following events if necessary:
-					//
-					// For new/changed filters:
-					//
-					// scope.$emit('updateFilter', [identifier, description, filter, callback]);
-					//
-					// For removing all filters:
-					//
-					// scope.$emit('updateFilter', [identifier, null]);
-					//
-					// If you apply a filter in this component, notify the Palladio framework.
-					//
-					// identifier: A string unique to this instance of this component. Should
-					//             be randomly generated.
-					//
-					// description: A human-readable description of this component. Should be
-					//              unique to this instance of this component, but not required.
-					//
-					// filter: A human-readable description of the filter that is currently
-					//         applied on this component.
-					//
-					// callback: A function that will remove all filters on this component when
-					//           it is evaluated.
-					//
-					//
-					// Whenever the component needs to trigger an update for all other components
-					// in the application (for example, when a filter is applied or removed):
-					//
-					// scope.$emit('triggerUpdate');
-
-					var deregister = [];
-
-					// You should also handle the following externally triggered events:
-
-					deregister.push(palladioService.onReset(scope.uniqueToggleId, function() {
-
-						// Reset any filters that have been applied through this visualization.
-						// This means running .filterAll() on any Crossfilter dimensions you have
-						// created and updating your visualization as required.
-
-						scope.filterReset();
-
-					}));
-
-					deregister.push(palladioService.onUpdate(scope.uniqueToggleId, function() {
-						// Only update if the table is visible.
-						if(element.is(':visible')) { update(); }
-					}));
-
-					// Update when it becomes visible (updating when not visibile errors out)
-					scope.$watch(function() { return element.is(':visible'); }, update);
-
-					scope.$on('$destroy', function () {
-
-						// Clean up after yourself. Remove dimensions that we have created. If we
-						// created watches on another scope, destroy those as well.
-
-						if(dim) {
-							group.remove();
-							dim.remove();
-							dim = undefined;
-						}
-						deregister.forEach(function(f) { f(); });
-						deregister = [];
-
-					});
-
-
-					// Support save/load. These functions should be able to fully recreate an instance
-					// of this visualization based on the results of the exportState() function. Include
-					// current filters, any type of manipulations the user has done, etc.
-
-					function importState(state) {
-
-						// Load a state object created by exportState().
-						scope.title = state.title;
-						scope.durationDim = scope.durationDims.filter(function(d) { return d.key === state.durationDim; })[0];
-						scope.tooltipLabelDim = scope.labelDims.filter(function(d) { return d.key === state.tooltipLabelDim; })[0];
-						scope.groupDim = scope.labelDims.filter(function(d) { return d.key === state.groupDim; })[0];
-						scope.xGroupDim = scope.labelDims.filter(function(d) { return d.key === state.xGroupDim; })[0];
-						scope.xSortDim = scope.labelDims.filter(function(d) { return d.key === state.xSortDim; })[0];
-
-						scope.mode = state.mode;
-
-					}
-
-					function exportState() {
-
-						// Return a state object that can be consumed by importState().
-						return {
-							title: scope.title,
-							durationDim: scope.durationDim.key,
-							tooltipLabelDim: scope.tooltipLabelDim.key,
-							groupDim: scope.groupDim.key,
-							xGroupDim: scope.xGroupDim.key,
-							xSortDim: scope.xSortDim.key,
-							mode: scope.mode
-						};
-					}
-
-					deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'duration', exportState, importState));
-
-					// Move the modal out of the fixed area.
-					$(element[0]).find('#duration-modal').parent().appendTo('body');
-
-					// Set up the toggle if in view state.
-					if(scope.view === 'true') {
-						$(document).ready(function(){
-							$(element[0]).find('.toggle').click(function() {
-								$(element[0]).find('.settings').toggleClass('open close');
-							});
-						});
-					}
-				}
-			}
-		};
-
-		return directiveObj;
-	});
-
 // Timeline filter module
 
 angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])

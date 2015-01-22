@@ -11316,6 +11316,10 @@ pre.CodeMirror-placeholder {
 [data-palladio-map-view-with-settings] .layer-item:first-child {
 	border: none;
 }
+
+[data-palladio-map-view-with-settings] .CodeMirror {
+	height: 100px;
+}
 [data-palladio-palette] .palette-new-dimension-button {
 	width: 100%;
 	margin-top: 10px;

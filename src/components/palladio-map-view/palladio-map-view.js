@@ -717,6 +717,10 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 								// Assume we have a mapbox id. Example: esjewett.k36b48ge
 								ts.layer = L.mapbox.tileLayer(ts.mbId);
 							}
+							if(ts.geoJson) {
+								// User has pasted in geoJson
+								ts.layer = L.geoJson(ts.geoJson);
+							}
 
 							if(ts.layer) {
 								m.addLayer(ts.layer);
@@ -1090,6 +1094,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							return {
 								"url": t.url,
 								"mbId": t.mbId,
+								"geoJson": t.geoJson,
 								"enabled": t.enabled,
 								"description": t.description,
 							};
@@ -1165,6 +1170,13 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 								'<input type="text" id="layerMbId" ng-model="mbId" class="span8">' +
 							'</div>' +
 						'</div>' +
+
+						'<div class="control-group" ng-show="layerOption && layerOption.custom">' +
+							'<label class="control-label" for="layerGeoJSON">geoJSON<span class="help-block">Paste geoJSON</span></label>' +
+							'<div class="controls">' +
+								'<textarea class="span8" id="layerGeoJSON" ng-model="geoJson" ui-codemirror="{ mode : \'javascript\', lineNumbers : true, lineWrapping: true }" placeholder="Paste your geoJSON data or drop a file here"></textarea>' +
+							'</div>' +
+						'</div>' +
 					'</form>' +
 			  	'</div>' +
 			  	'<div class="modal-footer" style="display:block;">' +
@@ -1209,15 +1221,17 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					if (scope.layerOption && !scope.layerOption.custom) {
 						scope.layers.push({
 							"url": null,
+							"geoJson": null,
 							"mbId": scope.layerOption.mbId,
 							"enabled": true,
 							"description": scope.description ? scope.description : scope.layerOption.description,
 							"layer": null
 						});
 					}
-					else if (scope.url || scope.mbId) {
+					else if (scope.url || scope.mbId || scope.geoJson) {
 						scope.layers.push({
 							"url": scope.url ? scope.url : null,
+							"geoJson": scope.geoJson ? JSON.parse(scope.geoJson) : null,
 							"mbId": scope.mbId ? scope.mbId : null,
 							"enabled": true,
 							"description": scope.description,
@@ -1227,6 +1241,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 					scope.url = null;
 					scope.mbId = null;
+					scope.geoJson = null;
 					scope.description = null;
 				}
 			}
