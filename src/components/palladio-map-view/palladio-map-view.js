@@ -719,7 +719,23 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							}
 							if(ts.geoJson) {
 								// User has pasted in geoJson
-								ts.layer = L.geoJson(ts.geoJson);
+								ts.layer = L.geoJson(ts.geoJson, {
+									style: function (feature) {
+										return {
+											'color': feature.properties.color ? feature.properties.color : "black",
+											'stroke': feature.properties.color ? feature.properties.color : "black",
+											'fill': feature.properties.color ? feature.properties.color : "black",
+											'opacity': feature.properties.opacity ? feature.properties.opacity : 1,
+											'stroke-opacity': feature.properties.opacity ? feature.properties.opacity : 1,
+											'fill-opacity': feature.properties.opacity ? feature.properties.opacity : 1
+										};
+									},
+									onEachFeature: function (feature, layer) {
+										if(feature.properties.description) {
+											layer.bindPopup(feature.properties.description);
+										}
+									}
+								});
 							}
 
 							if(ts.layer) {
@@ -738,7 +754,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						if(ts.layer) {
 							// As we cycle through the layers, bring them to the front in order,
 							// resulting in them being re-ordered according to the current sort.
-							ts.layer.bringToFront();
+							ts.layer.bringToBack();
 							
 							// Update remove function to the current index.
 							ts.remove = function() {
