@@ -8,6 +8,12 @@
 	shape-rendering: crispEdges;
 }
 
+[data-palladio-duration-view] .x-grid line {
+	fill: none;
+	stroke: #DDD;
+	shape-rendering: crispEdges;
+}
+
 [data-palladio-duration-view] .axis text {
 	font: 10px Merriweather, Helvetica, Arial, sans-serif;
 }

@@ -83,7 +83,7 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 					//
 					// d3.select(element[0]);
 
-					var sel, svg, dim, group, x, y,
+					var sel, svg, dim, group, x, y, colorRange,
 						top, bottom, left, filter, yStep, tooltip,
 						colors, bottomAxis, topAxis, yAxis, uniques, height, lineHeight;
 
@@ -121,7 +121,7 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 						uniques.sort(d3.descending);
 
 						// Figure height based on uniques and a minimum height.
-						height = uniques.length * lineHeight;
+						height = uniques.length * lineHeight + bottomOffset;
 
 						sel = d3.select(d3.select(element[0]).select(".main-viz")[0][0].children[0]);
 						if(!sel.select('svg').empty()) sel.select('svg').remove();
@@ -161,13 +161,22 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 								// 	}).map(function(d) { return d.key; }));
 								.domain(uniques);
 
+						colorRange = colorbrewer.Greys[9].map(function(d) { return d; });
+						// Remove color too close to background.
+						colorRange.splice(1,1);
+
 						colors = d3.scale.ordinal()
-							.range(colorbrewer.Greys[9])
+							.range(colorRange)
 							.domain(scope.xGroupDim.uniques);
 
 						bottomAxis = d3.svg.axis().orient("bottom").scale(x);
 						topAxis = d3.svg.axis().orient("top").scale(x);
 						yAxis = d3.svg.axis().orient("left").scale(y);
+						grid = d3.svg.axis().orient("top")
+								.scale(x)
+								.innerTickSize(-(height - bottomOffset - 0.5))
+								.outerTickSize(0)
+								.tickFormat("");
 
 						// Build the visualization.
 						var g = svg.append('g')
@@ -181,6 +190,10 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 						top = g.append('g')
 							.attr("class", "axis x-axis x-top")
 							.call(topAxis);
+
+						g.append('g')
+							.attr("class", "axis x-axis x-grid")
+							.call(grid);
 
 						left = g.append('g')
 							.attr("class", "axis y-axis")
