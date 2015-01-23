@@ -45,27 +45,39 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 					update();
 
 					var graph,
-							data;
+						data,
+						dimension,
+						group,
+						nodeKeyField;
 
 					function setup() {
 						// Called when the entire visualization should be rebuilt.
 						//d3.select(element[0]).selectAll('*').remove();
 						if (!graph) graph = d3.graph();
-						// fake data
-						data = {
-							nodes: [
-								{name:'First Node'},
-								{name:'Second Node'},
-								{name:'Third Node'},
-								{name:'Fourth Node'}
-							],
-							links: [
-								{source:0,target:1,value:1},{source:0,target:2,value:1}
-							]
+
+						if(dimension) {
+							dimension.remove();
+							dimension = undefined;
+							group = undefined;
+						}
+
+						if(scope.nodeDim) {
+
+							// nodeDim is a table, not a field. Find a field that is a unique key.
+							// TODO: we need to always add a unique key to a table...
+							nodeKeyField = scope.nodeDim.fields.filter(function(d) { return d.uniqueKey; })[0];
+
+							dimension = scope.xfilter.dimension(function(d) {
+								return "" + d[nodeKeyField.key];
+							});
+
+							// Basic count - will overcount.
+							group = dimension.group();
 						}
 					}
 
 					function update() {
+
 						// Incremental updates to existing visualization.
 						graph
 						.width(element.width())
@@ -74,9 +86,22 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 						.key(key)
 						.on('selected', selected)*/
 
-						d3.select(element[0])
-						.datum(data)
-						.call(graph)
+						if(scope.nodeDim) {
+
+							// fake data
+							data = {
+								nodes: group.top(Infinity).map(function(d) {
+									return { name: d.key, value: d.value };
+								}),
+								links: [
+									{source:0,target:1,value:1},{source:0,target:2,value:1}
+								]
+							}
+
+							d3.select(element[0])
+								.datum(data)
+								.call(graph)
+						}
 					}
 
 					function reset() {
@@ -85,7 +110,7 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 					}
 
 					// Watch scope elements that should trigger a full rebuild.
-					scope.$watchGroup([], function () {
+					scope.$watchGroup(['nodeDim'], function () {
 						reset();
 						setup();
 						update();
