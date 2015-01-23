@@ -64554,6 +64554,8 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 						//d3.select(element[0]).selectAll('*').remove();
 						if (!graph) graph = d3.graph();
 
+						// If a dimension already exists, explicitly destroy it so that it is dropped from
+						// the Crossfilter.
 						if(dimension) {
 							dimension.remove();
 							dimension = undefined;
@@ -64566,6 +64568,7 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 							// TODO: we need to always add a unique key to a table...
 							nodeKeyField = scope.nodeDim.fields.filter(function(d) { return d.uniqueKey; })[0];
 
+							// Create a dimension based on the key field.
 							dimension = scope.xfilter.dimension(function(d) {
 								return "" + d[nodeKeyField.key];
 							});
@@ -64580,7 +64583,7 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 						// Incremental updates to existing visualization.
 						graph
 						.width(element.width())
-						.height(500)
+						.height(500);
 					/*	.size(size)
 						.key(key)
 						.on('selected', selected)*/
@@ -64590,16 +64593,18 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 							// fake data
 							data = {
 								nodes: group.top(Infinity).map(function(d) {
+									// groups have properties "key" and "value" so we need to
+									// rewrite to what the graph chart expects.
 									return { name: d.key, value: d.value };
 								}),
 								links: [
 									{source:0,target:1,value:1},{source:0,target:2,value:1}
 								]
-							}
+							};
 
 							d3.select(element[0])
 								.datum(data)
-								.call(graph)
+								.call(graph);
 						}
 					}
 
