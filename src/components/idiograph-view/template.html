@@ -1,6 +1,18 @@
 <div class="row-fluid">
 	<div class="span3 settings open">
-		<div class="settings-panel" ng-show="!collapse">
+		<div class="" ng-show="!collapse">
+
+
+			<div class="row-fluid">
+				<div class="span6">
+					<div class="setting">
+						<label>Nodes</label>
+						<select bs-select ng-model="modeDim" ng-options="type.label for type in nodeDims" class="span12 form-control show-tick">
+						</select>
+				</div>
+				</div>
+			</div>
+
 
 		</div>
 	</div>
@@ -9,6 +21,9 @@
 		<div id="{{uniqueToggleId}}" class="row-fluid">
 			<!-- SVG inserted here -->
 			IDIOGRAPH
+		</div>
+		<div id="{{uniqueModalId}}">
+			<!--<div id="nodes-modal" data-modal dimensions="nodeDims" model="nodeDim"></div>-->
 		</div>
 	</div>
 

@@ -1,3 +1,43 @@
-[data-palladio-ideograph-view] {
+[data-palladio-idiograph-view] {
 
+}
+
+[data-palladio-idiograph-view] canvas {
+  position: absolute;
+}
+[data-palladio-idiograph-view] svg {
+  background-color: transaprent;
+  position: absolute;
+  cursor: default;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+[data-palladio-idiograph-view] .overlay {
+  display: none;
+  cursor: grab;
+  cursor: -webkit-grab;
+  cursor: -moz-grab;
+}
+[data-palladio-idiograph-view] .overlay.active {
+  display: block;
+}
+[data-palladio-idiograph-view] .node {
+  opacity: 0.8;
+  cursor: pointer;
+  stroke: #fff;
+  -webkit-transition: stroke 0.1s;
+  transition: stroke 0.1s;
+}
+[data-palladio-idiograph-view] .node:hover {
+  opacity: 1;
+}
+[data-palladio-idiograph-view] .node.selected {
+  opacity: 1;
+  stroke: #000;
+}
+[data-palladio-idiograph-view] .point {
+  stroke-width: 1.5px;
 }

@@ -31,6 +31,9 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 					scope.xfilter = dataService.getDataSync().xfilter;
 					scope.data = dataService.getDataSync().data;
 
+					scope.nodeDims = dataService.getFiles();
+
+
 				}, post: function(scope, element) {
 
 					// If you are building a d3.js visualization, you can grab the containing
@@ -41,14 +44,39 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 					setup();
 					update();
 
+					var graph,
+							data;
+
 					function setup() {
 						// Called when the entire visualization should be rebuilt.
-						
+						//d3.select(element[0]).selectAll('*').remove();
+						if (!graph) graph = d3.graph();
+						// fake data
+						data = {
+							nodes: [
+								{name:'First Node'},
+								{name:'Second Node'},
+								{name:'Third Node'},
+								{name:'Fourth Node'}
+							],
+							links: [
+								{source:0,target:1,value:1},{source:0,target:2,value:1}
+							]
+						}
 					}
 
 					function update() {
 						// Incremental updates to existing visualization.
-						
+						graph
+						.width(element.width())
+						.height(500)
+					/*	.size(size)
+						.key(key)
+						.on('selected', selected)*/
+
+						d3.select(element[0])
+						.datum(data)
+						.call(graph)
 					}
 
 					function reset() {
@@ -136,7 +164,7 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 					function importState(state) {
 
 						// Load a state object created by exportState().
-						
+
 
 					}
 
@@ -144,7 +172,7 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 
 						// Return a state object that can be consumed by importState().
 						return {
-							
+
 						};
 					}
 
