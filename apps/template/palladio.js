@@ -59973,6 +59973,848 @@ angular.module('palladio', [])
 			facetFilter: facetFilter
 		};
 	}]);
+angular.module('palladio.directives.dimension', ['palladio'])
+	.directive('palladioDimension', ['palladioService', function(ps) {
+		return {
+			scope: {
+				model: '=',
+				checkFunc: '='
+			},
+			template:   '<span palladio-draggable model="model" class="dimension-pill" data-ng-class="{\'dimension-pill-checked\': check(model)}">' +
+							'<i data-ng-show="!sortableOptions.disabled" class="icon-move"></i>' +
+							'<label class="checkbox">' +
+								'<input type="checkbox" ng-checked="check(model)"> {{model.description}}' +
+							'</label>' +
+						'</span>',
+			link: function postLink(scope) {
+				if(scope.checkFunc) {
+					scope.check = scope.checkFunc;
+				} else {
+					scope.check = function () { return false; };
+				}
+			}
+		};
+	}])
+	.directive('palladioDraggable', function () {
+		return {
+			scope: {
+				model: '='
+			},
+			link: function postLink(scope, elements) {
+				$(elements[0]).draggable({
+					revert: true,
+					revertDuration: 0,
+					start: function (event, ui) {
+						$('.blur-on-drag').addClass('blur');
+					},
+					stop: function (event, ui) {
+						$('.blur-on-drag').removeClass('blur');
+					},
+					zIndex: 1000
+				});
+			}
+		};
+	})
+	.directive('palladioDroppable', function () {
+		return {
+			scope: {
+				model: '='
+			},
+			link: function postLink(scope, elements, attrs) {
+				var jq = $(elements[0]);
+				var an = angular.element(elements[0]);
+
+				jq.droppable({
+					over: function (event, ui) {
+						// If we want to highlight the drop target, do it here.
+						an.addClass('over-drop');
+						ui.draggable.addClass('over-drop');
+					},
+					out: function (event, ui) {
+						// If we want to highlight the drop target, do it here.
+						an.removeClass('over-drop');
+						ui.draggable.removeClass('over-drop');
+					},
+					drop: function (event, ui) {
+						scope.$apply(function(scope) {
+							// Copy because many components will attach dimensions and groups to the
+							// field model.
+							scope.model = angular.copy(angular.element(event.toElement).scope().model);
+						});
+						an.removeClass('over-drop');
+						ui.draggable.removeClass('over-drop');
+					},
+					activate: function (event, ui) {
+						// If we want to highlight the drop target on drag, do it here.
+						an.addClass('active-drag');
+					},
+					deactivate: function (event, ui) {
+						// If we want to highlight the drop target on drag, do it here.
+						an.removeClass('active-drag');
+					}
+				});
+			}
+		};
+	});
+angular.module('palladio.directives', [
+	'$strap.directives',
+	'palladio.directives.dimension',
+	'palladio.directives.refine',
+	'palladio.directives.files',
+	'palladio.directives.yasgui',
+	'palladio.directives.group',
+	'palladio.directives.tag',
+	'palladio.directives.specials',
+	'palladio.directives.draggable',
+	'palladio.directives.droppable',
+	'palladio.directives.modal',
+	'palladio.directives.optionsDisabled',
+	'palladio.directives.resizable',
+	'palladio.directives.filePills',
+	'ui.sortable',
+	'ngSanitize',
+	'palladio'])
+
+	.directive('resizable', function() {
+	    return {
+	      restrict: 'A',
+	      link: function (scope, element, attrs) {
+	        
+	        attrs.handles = attrs.handles || "e, s, se";
+	        attrs.options = attrs.options || {};
+	        
+	        var options = {
+	          
+	          handles : attrs.handles,
+
+	          resize: function(event, ui) {
+	            ui.element.css("position", "fixed");
+	            ui.element.css("bottom", "0px");
+	            ui.element.css("top", "");
+	          }
+	        }
+
+	        options = angular.extend(options, attrs.options);
+	        $(element).resizable(options)
+
+	      } 
+	    }
+	});
+
+angular.module('palladio.directives.draggable', [])
+
+	.directive('draggable', function () {
+		return {
+			scope: false,
+			link: function postLink(scope, elements, attrs) {
+				$(elements[0]).draggable({
+					revert: true,
+					start: function (event, ui) {
+						$('.blur-on-drag').addClass('blur');
+					},
+					stop: function (event, ui) {
+						$('.blur-on-drag').removeClass('blur');
+					},
+					zIndex: 1000
+				});
+			}
+		};
+	})
+angular.module('palladio.directives.droppable', [])
+
+	.directive('droppable', function () {
+		return {
+			scope: false,
+			link: function postLink(scope, elements, attrs) {
+				var jq = $(elements[0]);
+				var an = angular.element(elements[0]);
+
+				if(an.scope().field.uniqueKey === true) {
+					jq.droppable({
+						over: function (event, ui) {
+							// If we want to highlight the drop target, do it here.
+							an.addClass('over-drop');
+							ui.draggable.addClass('over-drop');
+						},
+						out: function (event, ui) {
+							// If we want to highlight the drop target, do it here.
+							an.removeClass('over-drop');
+							ui.draggable.removeClass('over-drop');
+						},
+						drop: function (event, ui) {
+							if(attrs.droppableCallback) {
+								scope[attrs.droppableCallback](event, ui);
+							}
+							an.removeClass('over-drop');
+							ui.draggable.removeClass('over-drop');
+						}
+					});
+				} else {
+					jq.addClass("blur-on-drag");
+				}
+			}
+		};
+	});
+angular.module('palladio.directives.filePills', ['palladio'])
+	.directive('palladioFilePills', [function() {
+		return {
+			scope: {
+				model: '=',
+				files: '='
+			},
+			template:   '<span ng-repeat="file in files()">' +
+							'<span class="file-pill" data-ng-class="{\'file-pill-checked\': check(file)}">' +
+								'<label class="checkbox">' +
+									'<input type="checkbox" ng-click="select(file)" ng-checked="check(file)"> {{file.label}}' +
+								'</label>' +
+							'</span>' +
+						'</span>',
+			// template:   '<span ng-repeat="file in files()"></span>',
+			link: function postLink(scope) {
+
+				scope.select = function(file) {
+					if(scope.model != null && scope.model != undefined && file.uniqueId === scope.model) {
+						scope.model = null;
+					} else {
+						scope.model = file.uniqueId;
+					}
+				};
+
+				scope.check = function(file) {
+					return scope.model === file.uniqueId;
+				};
+			}
+		};
+	}]);
+angular.module('palladio.directives.files', [
+	'palladio.services',
+	'palladio'])
+	.directive('filesDirective', function ($rootScope, parseService, dataService) {
+		var directiveDefObj = {
+			templateUrl: 'partials/files.html',
+
+			link: function (scope, element, attrs) {
+
+				// function to parse data
+				scope.parseData = function(afterParse){
+					
+					// if no text return
+					if (!scope.text || !scope.text.length) return;
+					scope.parseError = false;
+					// let's see if the text is a URL.
+					if (scope.text.indexOf("http") === 0 && scope.text.indexOf("\n") === -1) {
+						try {
+							parseService.parseUrl(scope.text).then(
+								function(csv){
+									scope.text = csv;
+									var data = parseService.parseText(scope.text);
+									addFile(data, scope.lastFileName);
+									if(afterParse) afterParse();
+								},
+								function(error){
+									scope.parseError = error;
+								});
+						} catch(error) {
+							scope.parseError = error.message;
+						}
+						return;
+					}
+
+					try {
+						var data = JSON.parse(scope.text);
+
+						addFile(data, scope.lastFileName);
+						if(afterParse) afterParse();
+						return;
+					} catch(error) {
+						try {
+							var data = parseService.parseText(scope.text);
+							addFile(data, scope.lastFileName);
+							if(afterParse) afterParse();
+						} catch(error) {
+							scope.parseError = error.message;
+						}
+					}
+				};
+
+				scope.$watch(function(){ return $('.files-list').html(); }, function(){
+					$('.tooltip').remove();
+					$('*[data-toggle="tooltip"]').tooltip({container:'body'});
+				});
+
+				scope.toggleDelete = function(field) {
+					field.delete = !field.delete;
+					dataService.setDirty();
+				};
+
+				scope.setDirty = dataService.setDirty;
+
+				scope.downloadFile = function(file) {
+					var blob = new Blob(
+						[ d3.csv.format(file.data) ],
+						{type: "text/csv;charset=utf-8"}
+					);
+					var fileName = file.label + ".csv";
+					saveAs(blob, fileName);
+				};
+
+				/* Creates a new file */
+
+				var addFile = function(data, label) {
+					scope.text = null;
+					dataService.addFile(data, label);
+					scope.lastFileName = null;
+				};
+
+			}
+		};
+
+		return directiveDefObj;
+	});
+angular.module('palladio.directives.group', [])
+
+	// For handling Bootstrap scaffolding
+	.directive('group', function () {
+    return {
+      restrict: 'A',
+      link: function postLink(scope, element, attrs) {
+        scope.$watch(attrs.watch, function (watch){
+        	/*
+          var last = element;
+          element.find('li').each(function(i, o){
+            if( (i) && (i) % attrs.every == 0) {
+           	  var oldLast = last;
+              last = element.clone().empty();
+              last.insertAfter(oldLast);
+            }
+            $(o).appendTo(last);
+          })
+
+        // bad fix
+        /*element.parent().find('ul').each(function(i,o){
+        	if (!$(o).children().length) $(o).remove();
+        })*/
+
+        },true)
+
+       }
+      };
+  	})
+angular.module('palladio.directives.modal', [])
+
+	.directive('modal', function () {
+		return {
+			replace : true,
+			scope : {
+				dimensions: '=',
+				model: '=',
+				sortable: '@',
+				descriptionAccessor: '='
+			},
+			template: '<div class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">' +
+  				'<div class="modal-header">' +
+			    	'<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>' +
+			    	'<h4 style="line-height: normal">Choose the dimensions</h4>' +
+			  	'</div>' +
+			  	'<div class="modal-body">' +
+			    	'<ul ui-sortable="sortableOptions" class="unstyled" data-ng-model="internalDimensions">' +
+			    		'<li ng-repeat="field in internalDimensions" class="pill" data-ng-class="{checked: check(field)}">' +
+			    			'<i data-ng-show="!sortableOptions.disabled" class="icon-move"></i>' +
+			    			'<label class="checkbox">' +
+		    					'<input type="checkbox" ng-checked="check(field)" ng-click="change(field)"> {{getDescription(field)}}' +
+					    	'</label>' +
+			    		'</li>' +
+			    	'</ul>' +
+			  	'</div>' +
+			  	'<div class="modal-footer">' +
+			    	'<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>' +
+			  	'</div>' +
+			'</div>',
+
+			link: function postLink(scope, elements, attrs) {
+
+				scope.internalDimensions = scope.dimensions.map(copyDimension);
+				
+				scope.change = function(field) {
+					if(Array.isArray(scope.model)) {
+						if(scope.check(field)) {
+							// Field is already in the model (uncheck).
+							scope.model = scope.model.filter( function (d) { return field.key !== d.key; });
+						} else {
+							scope.model = scope.model.concat(field);
+						}
+						reorderModel();
+					} else {
+						if(scope.check(field)) {
+							// Field is already checked (uncheck).
+							scope.model = null;
+						} else {
+							scope.model = field;
+						}
+					}
+				};
+
+				scope.$watchCollection('dimensions', function() {
+					// Rebuild the internalDimensions (copied dimensions) by re-ordering, inserting,
+					// or deleting as appropriate. For now we can be naive about it. TODO.
+					scope.internalDimensions = scope.dimensions.map(copyDimension);
+				});
+
+				scope.$watchCollection('internalDimensions', function () {
+					// Reorder the model if the order of dimensions changes and model is an array
+					reorderModel();
+				})
+
+
+
+				scope.check = function(field) {
+					if(Array.isArray(scope.model)) {
+						// Model is an array of fields.
+						return scope.model.filter( function (d) { return field.key === d.key; }).length > 0;
+					} else {
+						// Model is an individual field.
+						if(scope.model) {
+							return field.key === scope.model.key;
+						} else {
+							return false;
+						}
+					}
+				};
+
+				scope.getDescription = function (d) {
+					if(scope.descriptionAccessor) {
+						return scope.descriptionAccessor(d);
+					} else {
+						return d.description;
+					}
+				};
+
+				function reorderModel() {
+					// Only reorder if we are in array and sorting mode
+					if(Array.isArray(scope.model) && scope.sortable === 'true') {
+						scope.model = scope.internalDimensions.filter(function(d) {
+							// Does it exist in the model?
+							return scope.model.filter( function (m) { return d.key === m.key; }).length;
+						});
+					}
+				}
+
+				function copyDimension(dimension) {
+					if(dimension.field) {
+						// Agg dim
+						return dimension;
+					} else {
+						return {
+							blanks: dimension.blanks,
+							cardinality: dimension.cardinality,
+							confirmed: dimension.confirmed,
+							countBy: dimension.countBy,
+							countDescription: dimension.countDescription,
+							countable: dimension.countable,
+							delete: dimension.delete,
+							description: dimension.description,
+							descriptiveField: dimension.descriptiveField,
+							errors: dimension.errors.slice(0),
+							hierDelimiter: dimension.hierDelimiter,
+							ignore: dimension.ignore,
+							key: dimension.key,
+							mvDelimiter: dimension.mvDelimiter,
+							originFileId: dimension.originFileId,
+							special: dimension.special.slice(0),
+							type: dimension.type,
+							typeField: dimension.typeField,
+							unassignedSpecialChars: dimension.unassignedSpecialChars? dimension.unassignedSpecialChars.slice(0) : undefined,
+							uniqueKey: dimension.uniqueKey,
+							uniques: dimension.uniques.slice(0),
+						};
+					}
+				}
+
+				scope.sortableOptions = {
+					disabled: scope.sortable === 'true' ? false : true
+				};
+			}
+		};
+	});
+angular.module('palladio.directives.optionsDisabled', [])
+	.directive('optionsDisabled', function($parse) {
+	    var disableOptions = function(scope, attr, element, data, fnDisableIfTrue) {
+	        // refresh the disabled options in the select element.
+	        $("option[value!='?']", element).each(function(i, e) {
+	            var locals = {};
+	            locals[attr] = data[i];
+	            $(this).attr("disabled", fnDisableIfTrue(scope, locals));
+	        });
+	    };
+	    return {
+	        priority: 0,
+	        require: 'ngModel',
+	        link: function(scope, iElement, iAttrs, ctrl) {
+	            // parse expression and build array of disabled options
+	            var expElements = iAttrs.optionsDisabled.match(/^\s*(.+)\s+for\s+(.+)\s+in\s+(.+)?\s*/);
+	            var attrToWatch = expElements[3];
+	            var fnDisableIfTrue = $parse(expElements[1]);
+	            scope.$watch(attrToWatch, function(newValue, oldValue) {
+	                if(newValue)
+	                    disableOptions(scope, expElements[2], iElement, newValue, fnDisableIfTrue);
+	            }, true);
+	            // handle model updates properly
+	            scope.$watch(iAttrs.ngModel, function(newValue, oldValue) {
+	                var disOptions = $parse(attrToWatch)(scope);
+	                if(newValue)
+	                    disableOptions(scope, expElements[2], iElement, disOptions, fnDisableIfTrue);
+	            }, true);
+	        }
+	    };
+	})
+angular.module('palladio.directives.refine', [
+	'palladio.services'])
+	.directive('refineDirective', function (dataService) {
+		var directiveDefObj = {
+			templateUrl: 'partials/refine.html',
+			link: function (scope, element, attrs) {
+
+				// Add a repeat method to the String prototype (from MDN).
+				String.prototype.repeat = function (nTimes) {
+					var sDiff = "", sBase2 = nTimes > 0 ? this.valueOf() : "";
+						for (var nMask = nTimes; nMask > 1; nMask >>= 1) {
+						if (nMask & 1) { sDiff += sBase2; }
+							sBase2 += sBase2;
+					}
+					return sBase2 + sDiff;
+				};
+
+				// Showing/hiding Adding table...
+				scope.addingTable = false;
+
+				$(document).ready(function(){
+					$('.input-tag').tag({
+							caseInsensitive: false,
+							placeholder: "Press enter after each string"
+						})
+						.on('added', function(ui, values){
+							scope.selectedFieldMetadata.ignore = values;
+							scope.updateMetadata();
+						})
+						.on('removed', function(ui, values){
+							scope.selectedFieldMetadata.ignore = values;
+							scope.updateMetadata();
+						});
+				});
+
+				scope.displayVal = function(val) {
+
+					var delimiter = scope.selectedFieldMetadata.hierDelimiter;
+					if(delimiter === "") delimiter = null;
+
+					var key = '<span class="small">' + val.key.split(delimiter).reduce(function(prev, curr, i, a) {
+						return prev + '&nbsp;'.repeat(i*2) + curr;
+					}, "") + '</span>';
+
+					var multiples = val.value > 1 ? '<span class="pull-right small muted">' + val.value + '</span>' : '';
+
+					return key + multiples;
+				};
+
+				scope.hideNewTable = function() {
+					hide();
+				};
+
+				scope.setDirty = dataService.setDirty;
+
+				scope.filteredFiles = function() {
+					return scope.selectedFile ? scope.files.filter(function (d){ return d.id !== scope.selectedFile.id; }) : [];
+				};
+
+				scope.parseExtendTable = function() {
+					var afterParse = function () {
+						// Only do this if we are loading an extension file
+						if(scope.selectedFieldMetadata) {
+							scope.augmenting = true;
+							// Set the new file (latest created) as the "extend" file for the current field.
+							scope.selectedFieldMetadata.augmentId = dataService.getFiles()[dataService.getFiles().length - 1].uniqueId;
+
+							// Make sure we actually augmented the file and need to wait for the augmentId watcher to finish.
+							if(scope.selectedFieldMetadata.augmentId === null || scope.selectedFieldMetadata.augmentId === undefined) {
+								scope.augmenting = false;
+							}
+
+							// Hide the upload dialog after the parsing has happened.
+							// Wait until the augmentId watcher is finished. 
+							// TODO: This wait shouldn't be necessary
+							var intervalId = window.setInterval(function () {
+								if(!scope.augmenting) {
+									hideAndApply();
+									window.clearInterval(intervalId);
+								}
+							}, 50);
+						}
+					};
+
+					// Parse the table as normal.
+					scope.parseData(afterParse);
+				};
+
+				// resetting search unique value
+				scope.$watch('selectedFieldMetadata.key', function(){
+					scope.searchUnique = "";
+					/*scope.addingTable = false;*/
+				});
+
+				scope.$watch('selectedFieldMetadata.augmentId', function (nv, ov) {
+					// Only do this if there is a field selected at all and it's not initial.
+					if(scope.selectedFieldMetadata && !scope.selectedFieldMetadata.initial) {
+
+						// Was undefined, now defined - so this is a purely new link.
+						// A little worried this can create duplicate links.
+						if((ov === undefined || ov === null) && ( nv || nv === 0)) {
+							dataService.addLink({
+								source: {
+									file: scope.selectedFile,
+									field: scope.selectedFieldMetadata,
+								},
+								lookup: {
+									file: dataService.getFiles().filter(function(f) { return f.uniqueId === nv; })[0]
+								}
+							});
+						} else {
+							// Was defined, but changed - need to remove old link and create a new one.
+							if(( ov || ov === 0) && ov !== nv) {
+								dataService.deleteLink(scope.hasLinks(scope.selectedFieldMetadata));
+
+								// If it's still defined, create the new link.
+								if(nv !== null) {
+									dataService.addLink({
+										source: {
+											file: scope.selectedFile,
+											field: scope.selectedFieldMetadata,
+										},
+										lookup: {
+											file: dataService.getFiles().filter(function(f) { return f.uniqueId === nv; })[0]
+										}
+									});
+								}
+							}
+
+							// If it was defined but not changed, don't do anything.
+						}
+					} else {
+						// Unset the initial flag so that we process augmentId changes in the future.
+						if(scope.selectedFieldMetadata &&
+							scope.selectedFieldMetadata.initial) scope.selectedFieldMetadata.initial = false;
+					}
+
+					// In case someone set the scope.augmenting flag, we set it to false now that we're done.
+					if(scope.augmenting) scope.augmenting = false;
+				});
+
+				function updatePosition(){
+
+					var width = $(window).width();
+					var w = width/2-400;
+					$('.refine-selected').css("left",w+"px");
+					$('.refine-selected').css("height","initial");
+					$('.refine-selected').css("max-height",$(window).height()-120+"px");
+					if($('.refine-selected').height() > $(window).height()-120) {
+						$('.refine-selected').css("height",$(window).height()-120+"px");
+					}
+				}
+
+				function hide() {
+					if(scope.fromFileView === true || scope.addingTable === false) {
+						// Only in the extend view from file view or in the refine view
+						scope.fromFileView = false;
+						scope.addingTable = false;
+						scope.selectedFieldMetadata = null;
+						scope.selectedFile = null;
+					} else {
+						// Only in the extend view from the refine view
+						scope.fromFileView = false;
+						scope.addingTable = false;
+					}
+				}
+
+				function hideAndApply() {
+					scope.$apply(hide);
+				}
+
+				scope.$watch('addingTable', updatePosition);
+				$(window).resize(updatePosition);
+				$(window).ready(updatePosition);
+				$('.refine-background').click(hideAndApply);
+				$('.refine-close').click(hideAndApply);
+			}
+		};
+
+		return directiveDefObj;
+	});
+angular.module('palladio.directives.resizable', [])
+
+	.directive('resizable', function() {
+	    return {
+	      restrict: 'A',
+	      link: function (scope, element, attrs) {
+	        
+	        attrs.handles = attrs.handles || "e, s, se";
+	        attrs.options = attrs.options || {};
+	        
+	        var options = {
+	          
+	          handles : attrs.handles,
+
+	          resize: function(event, ui) {
+	            ui.element.css("position", "fixed");
+	            ui.element.css("bottom", "0px");
+	            ui.element.css("top", "");
+	          }
+	        }
+
+	        options = angular.extend(options, attrs.options);
+	        $(element).resizable(options)
+
+	      } 
+	    }
+	});
+angular.module('palladio.directives.specials', [])
+
+	.directive('specials', function () {
+		return {
+			restrict: 'A',
+			scope: false,
+			template: '<a data-ng-repeat="char in selectedFieldMetadata.unassignedSpecialChars" class="tag"' +
+						'data-toggle="tooltip" title="Click to search this character in the values"' +
+						'data-ng-click="filterUniquesOnChar(char, $event)">' +
+						'{{char}}' +
+					'</a>',
+			link: function (scope, element, attrs) {
+
+				scope.$watch("selectedFieldMetadata.unassignedSpecialChars", function(val){
+					$('.tag').tooltip();
+				})
+
+				scope.filterUniquesOnChar = function (str, event) {
+					var tag = angular.element(event.target);
+					var tags = angular.element(element[0]).children('.tag');
+
+					// Make sure no tags are selected.
+					tags.removeClass('tag-selected');
+
+					if(scope.selectedSpecialChar === str) {
+						// Unfilter
+						scope.selectedSpecialChar = null;
+					} else {
+						// Filter
+						scope.selectedSpecialChar = str;
+
+						// Make the current tag selected.
+						tag.addClass('tag-selected');
+					}
+
+					scope.updateUniques();
+				};
+			}
+		};
+	});
+angular.module('palladio.directives.tag', [])
+
+  	// For Ignore tags
+	.directive('tag', function () {
+    return {
+      restrict: 'A',
+      link: function postLink(scope, element, attrs) {
+
+		scope.$watch('selectedFieldMetadata', function(md){
+			if (!md) return;
+
+			d3.select(element[0]).selectAll(".tags").remove();
+			d3.select(element[0])
+				.append("input")
+				.attr("id", "ignore")
+				.attr("class","input-tag")
+				.attr("type","text")
+				.attr("name","tags")
+				.attr("data-provide","tag")
+
+			element.find(".input-tag").tag({
+					caseInsensitive: false,
+					values : md.ignore || []
+				})
+				.on('added', function(ui, values){ 
+					scope.selectedFieldMetadata.ignore = values;
+					scope.updateMetadata();
+					scope.$apply();
+				})
+				.on('removed', function(ui, values){
+					scope.selectedFieldMetadata.ignore = values;
+					scope.updateMetadata();
+					scope.$apply();
+				});
+		})
+       }
+      };
+  	})
+angular.module('palladio.directives.yasgui', [
+	'palladio.services'])
+
+	.directive('yasgui', function (spinnerService) {
+		return {
+			restrict: 'E',
+			scope: {
+				data : "=data",
+				endpoint : "=endpoint"
+			},
+			template:	'<div>' +
+							'<label>SPARQL endpoint</label>' +
+							'<input type="text" data-ng-model="endpoint"/>' +
+						'</div>' +
+						'<div></div>' +
+						'<button class="btn" ng-disabled="!endpoint" ng-click="query()" ng-show="!text">Run query</button>' +
+						'<div data-ng-show="data" class="yasr-data-display"></div>',
+			link: function (scope, element, attrs) {
+				var yasqe = YASQE(element.children()[1], {
+					createShareLink: false,
+					sparql: {
+						showQueryButton: false,
+						acceptHeader: "text/csv",
+						endpoint:scope.endpoint
+					}
+				});
+
+				scope.$watch('endpoint', function(newVal, oldVal) {
+					yasqe.options.sparql.endpoint = newVal;
+				});
+
+				scope.query = function() {
+					spinnerService.spin();
+					yasqe.query();
+				};
+
+				var yasr = YASR(element.children()[3], {
+					//this way, the URLs in the results are prettified using the defined prefixes in the query
+					getUsedPrefixes: yasqe.getPrefixesFromQuery,
+					drawOutputSelector: false,
+					drawDownloadIcon: false
+				});
+
+				/**
+				* Set some of the hooks to link YASR and YASQE
+				*/
+				yasqe.options.sparql.handlers.success = function(data, textStatus, xhr) {
+					scope.$apply(function(scope) {
+						spinnerService.hide();
+						yasr.setResponse({response: data, contentType: xhr.getResponseHeader("Content-Type")});
+						scope.data = data;
+					});
+				};
+				yasqe.options.sparql.handlers.error = function(xhr, textStatus, errorThrown) {
+					spinnerService.hide();
+					var exceptionMsg = textStatus + " (response status code " + xhr.status + ")";
+					if (errorThrown && errorThrown.length) exceptionMsg += ": " + errorThrown;
+					yasr.setResponse({exception: exceptionMsg});
+				};
+			}
+		};
+	});
 angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 	.controller('WorkflowCtrl', function (version, $rootScope, $scope, $location, $controller, $compile, $timeout, dataService, spinnerService, loadService, palladioService, $http) {
 
@@ -60635,846 +61477,6 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		}, 1000);
 	});
 
-angular.module('palladio.directives.dimension', ['palladio'])
-	.directive('palladioDimension', ['palladioService', function(ps) {
-		return {
-			scope: {
-				model: '=',
-				checkFunc: '='
-			},
-			template:   '<span palladio-draggable model="model" class="dimension-pill" data-ng-class="{\'dimension-pill-checked\': check(model)}">' +
-							'<i data-ng-show="!sortableOptions.disabled" class="icon-move"></i>' +
-							'<label class="checkbox">' +
-								'<input type="checkbox" ng-checked="check(model)"> {{model.description}}' +
-							'</label>' +
-						'</span>',
-			link: function postLink(scope) {
-				if(scope.checkFunc) {
-					scope.check = scope.checkFunc;
-				} else {
-					scope.check = function () { return false; };
-				}
-			}
-		};
-	}])
-	.directive('palladioDraggable', function () {
-		return {
-			scope: {
-				model: '='
-			},
-			link: function postLink(scope, elements) {
-				$(elements[0]).draggable({
-					revert: true,
-					revertDuration: 0,
-					start: function (event, ui) {
-						$('.blur-on-drag').addClass('blur');
-					},
-					stop: function (event, ui) {
-						$('.blur-on-drag').removeClass('blur');
-					},
-					zIndex: 1000
-				});
-			}
-		};
-	})
-	.directive('palladioDroppable', function () {
-		return {
-			scope: {
-				model: '='
-			},
-			link: function postLink(scope, elements, attrs) {
-				var jq = $(elements[0]);
-				var an = angular.element(elements[0]);
-
-				jq.droppable({
-					over: function (event, ui) {
-						// If we want to highlight the drop target, do it here.
-						an.addClass('over-drop');
-						ui.draggable.addClass('over-drop');
-					},
-					out: function (event, ui) {
-						// If we want to highlight the drop target, do it here.
-						an.removeClass('over-drop');
-						ui.draggable.removeClass('over-drop');
-					},
-					drop: function (event, ui) {
-						scope.$apply(function(scope) {
-							// Copy because many components will attach dimensions and groups to the
-							// field model.
-							scope.model = angular.copy(angular.element(event.toElement).scope().model);
-						});
-						an.removeClass('over-drop');
-						ui.draggable.removeClass('over-drop');
-					},
-					activate: function (event, ui) {
-						// If we want to highlight the drop target on drag, do it here.
-						an.addClass('active-drag');
-					},
-					deactivate: function (event, ui) {
-						// If we want to highlight the drop target on drag, do it here.
-						an.removeClass('active-drag');
-					}
-				});
-			}
-		};
-	});
-angular.module('palladio.directives', [
-	'$strap.directives',
-	'palladio.directives.dimension',
-	'palladio.directives.refine',
-	'palladio.directives.files',
-	'palladio.directives.yasgui',
-	'palladio.directives.group',
-	'palladio.directives.tag',
-	'palladio.directives.specials',
-	'palladio.directives.draggable',
-	'palladio.directives.droppable',
-	'palladio.directives.modal',
-	'palladio.directives.optionsDisabled',
-	'palladio.directives.resizable',
-	'palladio.directives.filePills',
-	'ui.sortable',
-	'ngSanitize',
-	'palladio'])
-
-	.directive('resizable', function() {
-	    return {
-	      restrict: 'A',
-	      link: function (scope, element, attrs) {
-	        
-	        attrs.handles = attrs.handles || "e, s, se";
-	        attrs.options = attrs.options || {};
-	        
-	        var options = {
-	          
-	          handles : attrs.handles,
-
-	          resize: function(event, ui) {
-	            ui.element.css("position", "fixed");
-	            ui.element.css("bottom", "0px");
-	            ui.element.css("top", "");
-	          }
-	        }
-
-	        options = angular.extend(options, attrs.options);
-	        $(element).resizable(options)
-
-	      } 
-	    }
-	});
-
-angular.module('palladio.directives.draggable', [])
-
-	.directive('draggable', function () {
-		return {
-			scope: false,
-			link: function postLink(scope, elements, attrs) {
-				$(elements[0]).draggable({
-					revert: true,
-					start: function (event, ui) {
-						$('.blur-on-drag').addClass('blur');
-					},
-					stop: function (event, ui) {
-						$('.blur-on-drag').removeClass('blur');
-					},
-					zIndex: 1000
-				});
-			}
-		};
-	})
-angular.module('palladio.directives.droppable', [])
-
-	.directive('droppable', function () {
-		return {
-			scope: false,
-			link: function postLink(scope, elements, attrs) {
-				var jq = $(elements[0]);
-				var an = angular.element(elements[0]);
-
-				if(an.scope().field.uniqueKey === true) {
-					jq.droppable({
-						over: function (event, ui) {
-							// If we want to highlight the drop target, do it here.
-							an.addClass('over-drop');
-							ui.draggable.addClass('over-drop');
-						},
-						out: function (event, ui) {
-							// If we want to highlight the drop target, do it here.
-							an.removeClass('over-drop');
-							ui.draggable.removeClass('over-drop');
-						},
-						drop: function (event, ui) {
-							if(attrs.droppableCallback) {
-								scope[attrs.droppableCallback](event, ui);
-							}
-							an.removeClass('over-drop');
-							ui.draggable.removeClass('over-drop');
-						}
-					});
-				} else {
-					jq.addClass("blur-on-drag");
-				}
-			}
-		};
-	});
-angular.module('palladio.directives.filePills', ['palladio'])
-	.directive('palladioFilePills', [function() {
-		return {
-			scope: {
-				model: '=',
-				files: '='
-			},
-			template:   '<span ng-repeat="file in files()">' +
-							'<span class="file-pill" data-ng-class="{\'file-pill-checked\': check(file)}">' +
-								'<label class="checkbox">' +
-									'<input type="checkbox" ng-click="select(file)" ng-checked="check(file)"> {{file.label}}' +
-								'</label>' +
-							'</span>' +
-						'</span>',
-			// template:   '<span ng-repeat="file in files()"></span>',
-			link: function postLink(scope) {
-
-				scope.select = function(file) {
-					if(scope.model != null && scope.model != undefined && file.uniqueId === scope.model) {
-						scope.model = null;
-					} else {
-						scope.model = file.uniqueId;
-					}
-				};
-
-				scope.check = function(file) {
-					return scope.model === file.uniqueId;
-				};
-			}
-		};
-	}]);
-angular.module('palladio.directives.files', [
-	'palladio.services',
-	'palladio'])
-	.directive('filesDirective', function ($rootScope, parseService, dataService) {
-		var directiveDefObj = {
-			templateUrl: 'partials/files.html',
-
-			link: function (scope, element, attrs) {
-
-				// function to parse data
-				scope.parseData = function(afterParse){
-					
-					// if no text return
-					if (!scope.text || !scope.text.length) return;
-					scope.parseError = false;
-					// let's see if the text is a URL.
-					if (scope.text.indexOf("http") === 0 && scope.text.indexOf("\n") === -1) {
-						try {
-							parseService.parseUrl(scope.text).then(
-								function(csv){
-									scope.text = csv;
-									var data = parseService.parseText(scope.text);
-									addFile(data, scope.lastFileName);
-									if(afterParse) afterParse();
-								},
-								function(error){
-									scope.parseError = error;
-								});
-						} catch(error) {
-							scope.parseError = error.message;
-						}
-						return;
-					}
-
-					try {
-						var data = JSON.parse(scope.text);
-
-						addFile(data, scope.lastFileName);
-						if(afterParse) afterParse();
-						return;
-					} catch(error) {
-						try {
-							var data = parseService.parseText(scope.text);
-							addFile(data, scope.lastFileName);
-							if(afterParse) afterParse();
-						} catch(error) {
-							scope.parseError = error.message;
-						}
-					}
-				};
-
-				scope.$watch(function(){ return $('.files-list').html(); }, function(){
-					$('.tooltip').remove();
-					$('*[data-toggle="tooltip"]').tooltip({container:'body'});
-				});
-
-				scope.toggleDelete = function(field) {
-					field.delete = !field.delete;
-					dataService.setDirty();
-				};
-
-				scope.setDirty = dataService.setDirty;
-
-				scope.downloadFile = function(file) {
-					var blob = new Blob(
-						[ d3.csv.format(file.data) ],
-						{type: "text/csv;charset=utf-8"}
-					);
-					var fileName = file.label + ".csv";
-					saveAs(blob, fileName);
-				};
-
-				/* Creates a new file */
-
-				var addFile = function(data, label) {
-					scope.text = null;
-					dataService.addFile(data, label);
-					scope.lastFileName = null;
-				};
-
-			}
-		};
-
-		return directiveDefObj;
-	});
-angular.module('palladio.directives.group', [])
-
-	// For handling Bootstrap scaffolding
-	.directive('group', function () {
-    return {
-      restrict: 'A',
-      link: function postLink(scope, element, attrs) {
-        scope.$watch(attrs.watch, function (watch){
-        	/*
-          var last = element;
-          element.find('li').each(function(i, o){
-            if( (i) && (i) % attrs.every == 0) {
-           	  var oldLast = last;
-              last = element.clone().empty();
-              last.insertAfter(oldLast);
-            }
-            $(o).appendTo(last);
-          })
-
-        // bad fix
-        /*element.parent().find('ul').each(function(i,o){
-        	if (!$(o).children().length) $(o).remove();
-        })*/
-
-        },true)
-
-       }
-      };
-  	})
-angular.module('palladio.directives.modal', [])
-
-	.directive('modal', function () {
-		return {
-			replace : true,
-			scope : {
-				dimensions: '=',
-				model: '=',
-				sortable: '@',
-				descriptionAccessor: '='
-			},
-			template: '<div class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">' +
-  				'<div class="modal-header">' +
-			    	'<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>' +
-			    	'<h4 style="line-height: normal">Choose the dimensions</h4>' +
-			  	'</div>' +
-			  	'<div class="modal-body">' +
-			    	'<ul ui-sortable="sortableOptions" class="unstyled" data-ng-model="internalDimensions">' +
-			    		'<li ng-repeat="field in internalDimensions" class="pill" data-ng-class="{checked: check(field)}">' +
-			    			'<i data-ng-show="!sortableOptions.disabled" class="icon-move"></i>' +
-			    			'<label class="checkbox">' +
-		    					'<input type="checkbox" ng-checked="check(field)" ng-click="change(field)"> {{getDescription(field)}}' +
-					    	'</label>' +
-			    		'</li>' +
-			    	'</ul>' +
-			  	'</div>' +
-			  	'<div class="modal-footer">' +
-			    	'<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>' +
-			  	'</div>' +
-			'</div>',
-
-			link: function postLink(scope, elements, attrs) {
-
-				scope.internalDimensions = scope.dimensions.map(copyDimension);
-				
-				scope.change = function(field) {
-					if(Array.isArray(scope.model)) {
-						if(scope.check(field)) {
-							// Field is already in the model (uncheck).
-							scope.model = scope.model.filter( function (d) { return field.key !== d.key; });
-						} else {
-							scope.model = scope.model.concat(field);
-						}
-						reorderModel();
-					} else {
-						if(scope.check(field)) {
-							// Field is already checked (uncheck).
-							scope.model = null;
-						} else {
-							scope.model = field;
-						}
-					}
-				};
-
-				scope.$watchCollection('dimensions', function() {
-					// Rebuild the internalDimensions (copied dimensions) by re-ordering, inserting,
-					// or deleting as appropriate. For now we can be naive about it. TODO.
-					scope.internalDimensions = scope.dimensions.map(copyDimension);
-				});
-
-				scope.$watchCollection('internalDimensions', function () {
-					// Reorder the model if the order of dimensions changes and model is an array
-					reorderModel();
-				})
-
-
-
-				scope.check = function(field) {
-					if(Array.isArray(scope.model)) {
-						// Model is an array of fields.
-						return scope.model.filter( function (d) { return field.key === d.key; }).length > 0;
-					} else {
-						// Model is an individual field.
-						if(scope.model) {
-							return field.key === scope.model.key;
-						} else {
-							return false;
-						}
-					}
-				};
-
-				scope.getDescription = function (d) {
-					if(scope.descriptionAccessor) {
-						return scope.descriptionAccessor(d);
-					} else {
-						return d.description;
-					}
-				};
-
-				function reorderModel() {
-					// Only reorder if we are in array and sorting mode
-					if(Array.isArray(scope.model) && scope.sortable === 'true') {
-						scope.model = scope.internalDimensions.filter(function(d) {
-							// Does it exist in the model?
-							return scope.model.filter( function (m) { return d.key === m.key; }).length;
-						});
-					}
-				}
-
-				function copyDimension(dimension) {
-					if(dimension.field) {
-						// Agg dim
-						return dimension;
-					} else {
-						return {
-							blanks: dimension.blanks,
-							cardinality: dimension.cardinality,
-							confirmed: dimension.confirmed,
-							countBy: dimension.countBy,
-							countDescription: dimension.countDescription,
-							countable: dimension.countable,
-							delete: dimension.delete,
-							description: dimension.description,
-							descriptiveField: dimension.descriptiveField,
-							errors: dimension.errors.slice(0),
-							hierDelimiter: dimension.hierDelimiter,
-							ignore: dimension.ignore,
-							key: dimension.key,
-							mvDelimiter: dimension.mvDelimiter,
-							originFileId: dimension.originFileId,
-							special: dimension.special.slice(0),
-							type: dimension.type,
-							typeField: dimension.typeField,
-							unassignedSpecialChars: dimension.unassignedSpecialChars? dimension.unassignedSpecialChars.slice(0) : undefined,
-							uniqueKey: dimension.uniqueKey,
-							uniques: dimension.uniques.slice(0),
-						};
-					}
-				}
-
-				scope.sortableOptions = {
-					disabled: scope.sortable === 'true' ? false : true
-				};
-			}
-		};
-	});
-angular.module('palladio.directives.optionsDisabled', [])
-	.directive('optionsDisabled', function($parse) {
-	    var disableOptions = function(scope, attr, element, data, fnDisableIfTrue) {
-	        // refresh the disabled options in the select element.
-	        $("option[value!='?']", element).each(function(i, e) {
-	            var locals = {};
-	            locals[attr] = data[i];
-	            $(this).attr("disabled", fnDisableIfTrue(scope, locals));
-	        });
-	    };
-	    return {
-	        priority: 0,
-	        require: 'ngModel',
-	        link: function(scope, iElement, iAttrs, ctrl) {
-	            // parse expression and build array of disabled options
-	            var expElements = iAttrs.optionsDisabled.match(/^\s*(.+)\s+for\s+(.+)\s+in\s+(.+)?\s*/);
-	            var attrToWatch = expElements[3];
-	            var fnDisableIfTrue = $parse(expElements[1]);
-	            scope.$watch(attrToWatch, function(newValue, oldValue) {
-	                if(newValue)
-	                    disableOptions(scope, expElements[2], iElement, newValue, fnDisableIfTrue);
-	            }, true);
-	            // handle model updates properly
-	            scope.$watch(iAttrs.ngModel, function(newValue, oldValue) {
-	                var disOptions = $parse(attrToWatch)(scope);
-	                if(newValue)
-	                    disableOptions(scope, expElements[2], iElement, disOptions, fnDisableIfTrue);
-	            }, true);
-	        }
-	    };
-	})
-angular.module('palladio.directives.refine', [
-	'palladio.services'])
-	.directive('refineDirective', function (dataService) {
-		var directiveDefObj = {
-			templateUrl: 'partials/refine.html',
-			link: function (scope, element, attrs) {
-
-				// Add a repeat method to the String prototype (from MDN).
-				String.prototype.repeat = function (nTimes) {
-					var sDiff = "", sBase2 = nTimes > 0 ? this.valueOf() : "";
-						for (var nMask = nTimes; nMask > 1; nMask >>= 1) {
-						if (nMask & 1) { sDiff += sBase2; }
-							sBase2 += sBase2;
-					}
-					return sBase2 + sDiff;
-				};
-
-				// Showing/hiding Adding table...
-				scope.addingTable = false;
-
-				$(document).ready(function(){
-					$('.input-tag').tag({
-							caseInsensitive: false,
-							placeholder: "Press enter after each string"
-						})
-						.on('added', function(ui, values){
-							scope.selectedFieldMetadata.ignore = values;
-							scope.updateMetadata();
-						})
-						.on('removed', function(ui, values){
-							scope.selectedFieldMetadata.ignore = values;
-							scope.updateMetadata();
-						});
-				});
-
-				scope.displayVal = function(val) {
-
-					var delimiter = scope.selectedFieldMetadata.hierDelimiter;
-					if(delimiter === "") delimiter = null;
-
-					var key = '<span class="small">' + val.key.split(delimiter).reduce(function(prev, curr, i, a) {
-						return prev + '&nbsp;'.repeat(i*2) + curr;
-					}, "") + '</span>';
-
-					var multiples = val.value > 1 ? '<span class="pull-right small muted">' + val.value + '</span>' : '';
-
-					return key + multiples;
-				};
-
-				scope.hideNewTable = function() {
-					hide();
-				};
-
-				scope.filteredFiles = function() {
-					return scope.selectedFile ? scope.files.filter(function (d){ return d.id !== scope.selectedFile.id; }) : [];
-				};
-
-				scope.parseExtendTable = function() {
-					var afterParse = function () {
-						// Only do this if we are loading an extension file
-						if(scope.selectedFieldMetadata) {
-							scope.augmenting = true;
-							// Set the new file (latest created) as the "extend" file for the current field.
-							scope.selectedFieldMetadata.augmentId = dataService.getFiles()[dataService.getFiles().length - 1].uniqueId;
-
-							// Make sure we actually augmented the file and need to wait for the augmentId watcher to finish.
-							if(scope.selectedFieldMetadata.augmentId === null || scope.selectedFieldMetadata.augmentId === undefined) {
-								scope.augmenting = false;
-							}
-
-							// Hide the upload dialog after the parsing has happened.
-							// Wait until the augmentId watcher is finished. 
-							// TODO: This wait shouldn't be necessary
-							var intervalId = window.setInterval(function () {
-								if(!scope.augmenting) {
-									hideAndApply();
-									window.clearInterval(intervalId);
-								}
-							}, 50);
-						}
-					};
-
-					// Parse the table as normal.
-					scope.parseData(afterParse);
-				};
-
-				// resetting search unique value
-				scope.$watch('selectedFieldMetadata.key', function(){
-					scope.searchUnique = "";
-					/*scope.addingTable = false;*/
-				});
-
-				scope.$watch('selectedFieldMetadata.augmentId', function (nv, ov) {
-					// Only do this if there is a field selected at all and it's not initial.
-					if(scope.selectedFieldMetadata && !scope.selectedFieldMetadata.initial) {
-
-						// Was undefined, now defined - so this is a purely new link.
-						// A little worried this can create duplicate links.
-						if((ov === undefined || ov === null) && ( nv || nv === 0)) {
-							dataService.addLink({
-								source: {
-									file: scope.selectedFile,
-									field: scope.selectedFieldMetadata,
-								},
-								lookup: {
-									file: dataService.getFiles().filter(function(f) { return f.uniqueId === nv; })[0]
-								}
-							});
-						} else {
-							// Was defined, but changed - need to remove old link and create a new one.
-							if(( ov || ov === 0) && ov !== nv) {
-								dataService.deleteLink(scope.hasLinks(scope.selectedFieldMetadata));
-
-								// If it's still defined, create the new link.
-								if(nv !== null) {
-									dataService.addLink({
-										source: {
-											file: scope.selectedFile,
-											field: scope.selectedFieldMetadata,
-										},
-										lookup: {
-											file: dataService.getFiles().filter(function(f) { return f.uniqueId === nv; })[0]
-										}
-									});
-								}
-							}
-
-							// If it was defined but not changed, don't do anything.
-						}
-					} else {
-						// Unset the initial flag so that we process augmentId changes in the future.
-						if(scope.selectedFieldMetadata &&
-							scope.selectedFieldMetadata.initial) scope.selectedFieldMetadata.initial = false;
-					}
-
-					// In case someone set the scope.augmenting flag, we set it to false now that we're done.
-					if(scope.augmenting) scope.augmenting = false;
-				});
-
-				function updatePosition(){
-
-					var width = $(window).width();
-					var w = width/2-400;
-					$('.refine-selected').css("left",w+"px");
-					$('.refine-selected').css("height","initial");
-					$('.refine-selected').css("max-height",$(window).height()-120+"px");
-					if($('.refine-selected').height() > $(window).height()-120) {
-						$('.refine-selected').css("height",$(window).height()-120+"px");
-					}
-				}
-
-				function hide() {
-					if(scope.fromFileView === true || scope.addingTable === false) {
-						// Only in the extend view from file view or in the refine view
-						scope.fromFileView = false;
-						scope.addingTable = false;
-						scope.selectedFieldMetadata = null;
-						scope.selectedFile = null;
-					} else {
-						// Only in the extend view from the refine view
-						scope.fromFileView = false;
-						scope.addingTable = false;
-					}
-				}
-
-				function hideAndApply() {
-					scope.$apply(hide);
-				}
-
-				scope.$watch('addingTable', updatePosition);
-				$(window).resize(updatePosition);
-				$(window).ready(updatePosition);
-				$('.refine-background').click(hideAndApply);
-				$('.refine-close').click(hideAndApply);
-			}
-		};
-
-		return directiveDefObj;
-	});
-angular.module('palladio.directives.resizable', [])
-
-	.directive('resizable', function() {
-	    return {
-	      restrict: 'A',
-	      link: function (scope, element, attrs) {
-	        
-	        attrs.handles = attrs.handles || "e, s, se";
-	        attrs.options = attrs.options || {};
-	        
-	        var options = {
-	          
-	          handles : attrs.handles,
-
-	          resize: function(event, ui) {
-	            ui.element.css("position", "fixed");
-	            ui.element.css("bottom", "0px");
-	            ui.element.css("top", "");
-	          }
-	        }
-
-	        options = angular.extend(options, attrs.options);
-	        $(element).resizable(options)
-
-	      } 
-	    }
-	});
-angular.module('palladio.directives.specials', [])
-
-	.directive('specials', function () {
-		return {
-			restrict: 'A',
-			scope: false,
-			template: '<a data-ng-repeat="char in selectedFieldMetadata.unassignedSpecialChars" class="tag"' +
-						'data-toggle="tooltip" title="Click to search this character in the values"' +
-						'data-ng-click="filterUniquesOnChar(char, $event)">' +
-						'{{char}}' +
-					'</a>',
-			link: function (scope, element, attrs) {
-
-				scope.$watch("selectedFieldMetadata.unassignedSpecialChars", function(val){
-					$('.tag').tooltip();
-				})
-
-				scope.filterUniquesOnChar = function (str, event) {
-					var tag = angular.element(event.target);
-					var tags = angular.element(element[0]).children('.tag');
-
-					// Make sure no tags are selected.
-					tags.removeClass('tag-selected');
-
-					if(scope.selectedSpecialChar === str) {
-						// Unfilter
-						scope.selectedSpecialChar = null;
-					} else {
-						// Filter
-						scope.selectedSpecialChar = str;
-
-						// Make the current tag selected.
-						tag.addClass('tag-selected');
-					}
-
-					scope.updateUniques();
-				};
-			}
-		};
-	});
-angular.module('palladio.directives.tag', [])
-
-  	// For Ignore tags
-	.directive('tag', function () {
-    return {
-      restrict: 'A',
-      link: function postLink(scope, element, attrs) {
-
-		scope.$watch('selectedFieldMetadata', function(md){
-			if (!md) return;
-
-			d3.select(element[0]).selectAll(".tags").remove();
-			d3.select(element[0])
-				.append("input")
-				.attr("id", "ignore")
-				.attr("class","input-tag")
-				.attr("type","text")
-				.attr("name","tags")
-				.attr("data-provide","tag")
-
-			element.find(".input-tag").tag({
-					caseInsensitive: false,
-					values : md.ignore || []
-				})
-				.on('added', function(ui, values){ 
-					scope.selectedFieldMetadata.ignore = values;
-					scope.updateMetadata();
-					scope.$apply();
-				})
-				.on('removed', function(ui, values){
-					scope.selectedFieldMetadata.ignore = values;
-					scope.updateMetadata();
-					scope.$apply();
-				});
-		})
-       }
-      };
-  	})
-angular.module('palladio.directives.yasgui', [
-	'palladio.services'])
-
-	.directive('yasgui', function (spinnerService) {
-		return {
-			restrict: 'E',
-			scope: {
-				data : "=data",
-				endpoint : "=endpoint"
-			},
-			template:	'<div>' +
-							'<label>SPARQL endpoint</label>' +
-							'<input type="text" data-ng-model="endpoint"/>' +
-						'</div>' +
-						'<div></div>' +
-						'<button class="btn" ng-disabled="!endpoint" ng-click="query()" ng-show="!text">Run query</button>' +
-						'<div data-ng-show="data" class="yasr-data-display"></div>',
-			link: function (scope, element, attrs) {
-				var yasqe = YASQE(element.children()[1], {
-					createShareLink: false,
-					sparql: {
-						showQueryButton: false,
-						acceptHeader: "text/csv",
-						endpoint:scope.endpoint
-					}
-				});
-
-				scope.$watch('endpoint', function(newVal, oldVal) {
-					yasqe.options.sparql.endpoint = newVal;
-				});
-
-				scope.query = function() {
-					spinnerService.spin();
-					yasqe.query();
-				};
-
-				var yasr = YASR(element.children()[3], {
-					//this way, the URLs in the results are prettified using the defined prefixes in the query
-					getUsedPrefixes: yasqe.getPrefixesFromQuery,
-					drawOutputSelector: false,
-					drawDownloadIcon: false
-				});
-
-				/**
-				* Set some of the hooks to link YASR and YASQE
-				*/
-				yasqe.options.sparql.handlers.success = function(data, textStatus, xhr) {
-					scope.$apply(function(scope) {
-						spinnerService.hide();
-						yasr.setResponse({response: data, contentType: xhr.getResponseHeader("Content-Type")});
-						scope.data = data;
-					});
-				};
-				yasqe.options.sparql.handlers.error = function(xhr, textStatus, errorThrown) {
-					spinnerService.hide();
-					var exceptionMsg = textStatus + " (response status code " + xhr.status + ")";
-					if (errorThrown && errorThrown.length) exceptionMsg += ": " + errorThrown;
-					yasr.setResponse({exception: exceptionMsg});
-				};
-			}
-		};
-	});
 angular.module('palladio.filters', [])
   .filter('titleCase', function () {
 		return function (str) {
@@ -71655,7 +71657,7 @@ angular.module('palladio').run(['$templateCache', function($templateCache) {
 }]);
 angular.module('palladio').run(['$templateCache', function($templateCache) {
     $templateCache.put('partials/refine.html',
-        "<div class=\"refine-background\" data-ng-show=\"selectedFieldMetadata\"></div>\n\n<div class=\"refine-selected\" data-ng-show=\"selectedFieldMetadata\">\n\n\t<div class=\"\" style=\"padding: 20px 40px 20px 20px\" ng-show=\"addingTable\">\n\n\t\t<div class=\"row-fluid\">\n\t\t\t<div class=\"span12\">\n\t\t\t\t<label for=\"type\">Add a new table</label>\n\t\t\t\t<input type=\"text\" class=\"editable span12 left\" placeholder=\"Untitled\" ng-model=\"lastFileName\"></input>\n\t\t\t\t<span class=\"help-block\">Provide a title to this table.</span>\n\t\t\t</div>\n\t\t\t<span class=\"refine-close\" aria-hidden=\"true\">&times;</span>\n\t\t</div>\n\n\t\t<ul class=\"nav nav-tabs\" role=\"tablist\" id=\"uploadTab\" data-ng-init=\"loadFromRefine = 'csv'\">\n\t        <li data-ng-class=\"{'active' : loadFromRefine =='csv'}\"><a ng-click=\"loadFromRefine='csv'\" role=\"tab\" data-toggle=\"tab\">Load CSV</a></li>\n\t        <li data-ng-class=\"{'active' : loadFromRefine =='sparql'}\"><a ng-click=\"loadFromRefine='sparql'\" role=\"tab\" data-toggle=\"tab\">Load from SPARQL endpoint</a></li>\n        </ul>\n        <div class=\"tab-content\">\n\t\t\t<div class=\"tab-pane\" data-ng-class=\"{'active' : loadFromRefine =='csv'}\" id=\"csv\">\n\t\t\t\t<textarea ui-refresh=\"selectedFieldMetadata\" ui-codemirror=\"{ mode : 'text',  lineNumbers : true, lineWrapping: true, onDrop : onDrop }\" placeholder=\"Paste your data or drop a file here\" ng-model=\"text\"></textarea>\n\t\t\t\t<span class=\"help-block\">Copy and paste your data here or drop a file in to add new table.</span>\n\t\t\t\t<div class=\"alert\" ng-show=\"parseError\">{{parseError}}</div>\n\t\t\t</div>\n\t\t\t<div class=\"tab-pane\" data-ng-class=\"{'active' : loadFromRefine =='sparql'}\" id=\"sparql\">\n\t\t\t\t<yasgui data=\"text\" endpoint=\"sparqlEndpoint\"/>\n\t\t\t\t<div class=\"space\"></div>\n\t\t\t</div>\n        </div>\n\n\t\t<div class=\"\">\n\t\t\t<button class=\"btn btn-info\" ng-click=\"hideNewTable()\">Cancel</button>\n\t\t\t<button class=\"btn\" ng-click=\"parseExtendTable()\" ng-disabled=\"!text\">Load data</button>\n\t\t\t<div class=\"clearfix\"></div>\n\t\t</div>\n\n\t</div>\n\n\t<div ng-hide=\"addingTable\">\n\n\t\t<div style=\"padding:20px 20px 10px 10px; border-bottom: 1px solid #eee\">\n\n\t\t\t<div class=\"row-fluid\">\n\n\t\t\t\t<div class=\"span8\">\n\n\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t<div class=\"span12\" style=\"padding-left: 10px\">\n\t\t\t\t\t\t\t<input  data-toggle=\"tooltip\"\n                    \t\t\t\tdata-original-title=\"Rename\"\n                    \t\t\t\ttype=\"text\" class=\"editable span12 left\" data-ng-model=\"selectedFieldMetadata.description\" placeholder=\"Untitled\"></input>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t<span class=\"refine-close\" aria-hidden=\"true\">&times;</span>\n\t\t\t\t\t</div>\n\n\t\t\t\t</div>\n\n\t\t\t</div>\n\n\t\t\t<div class=\"\" style=\"padding-left: 10px\">\n\t\t\t\t<span class=\"small muted tiny\">{{selectedFieldMetadata.cardinality}} unique values ({{selectedFieldMetadata.blanks}} null values)</span>\n\t\t\t\t<span class=\"small tiny\" data-ng-show=\"selectedFieldMetadata.uniqueKey\"><i class=\"fa fa-tag muted\" style=\"margin-left:8px\"></i><span class=\"super\"> Unique key</span></span>\n\t\t\t</div>\n\n\n\n\t\t</div>\n\n\t\t<div style=\"padding:20px 20px 20px 20px\">\n\n\t\t\t<div class=\"row-fluid\">\n\n\t\t\t\t<div class=\"span8\">\n\n\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t<div class=\"span6\">\n\t\t\t\t\t\t\t<label for=\"type\">Data type</label>\n\t\t\t\t\t\t\t<select class=\"form-control show-tick\" bs-select\n\t\t\t\t\t\t\t\t\tdata-ng-model=\"selectedFieldMetadata.type\"\n\t\t\t\t\t\t\t\t\tdata-ng-options=\"t.id as t.name for t in allowedTypes\" id=\"type\"\n\t\t\t\t\t\t\t\t\tdata-ng-change=\"updateMetadata()\">\n\t\t\t\t\t\t\t</select>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</div>\n\n\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t<div class=\"help-block\">\n\t\t\t\t\t\t\t<span class=\"error\" data-ng-show=\"selectedFieldMetadata.errors.length\">\n\t\t\t\t\t\t\t\t{{selectedFieldMetadata.errors.length}} unique values do not match this data type! <a class=\"error\" data-ng-click=\"downloadErrors()\"><strong>Download the list of errors.</strong></a>\n\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t<span data-ng-hide=\"selectedFieldMetadata.errors.length\">All the unique values match this type</span>\n\t\t\t\t\t\t</div>\n\n\t\t\t\t\t</div>\n\n\t\t\t\t\t<div class=\"space\"></div>\n\n\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t<div class=\"span6\">\n\t\t\t\t\t\t\t<input type=\"text\" class=\"span12\" ng-model=\"searchUnique\" placeholder=\"Search\"></input>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t<div class=\"span4 offset2\">\n\t\t\t\t\t\t\t<select class=\"span12 form-control show-tick\" bs-select data-ng-model=\"sortBy\"\n\t\t\t\t\t\t\tdata-ng-options=\"t as t.label for t in sortOptions\" id=\"sortBy\"\n\t\t\t\t\t\t\tdata-ng-change=\"updateMetadata()\">\n\t\t\t\t\t\t\t</select>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</div>\n\n\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t<div class=\"bordered\" style=\"margin-bottom:10px\">\n\t\t\t\t\t\t\t<table class=\"table span12 refine-values-table table-striped\" data-ng-show=\"!filtered || (filtered && filtered.length > 0)\">\n\t\t\t\t\t\t\t\t<tr data-ng-repeat=\"val in filtered = (selectedFieldMetadata.uniques | filter:searchUnique) | limitTo:1000\">\n\t\t\t\t\t\t\t\t\t<td class=\"span12\" data-ng-class=\"{ error: findError(val.key) }\"\n\t\t\t\t\t\t\t\t\t\ttitle=\"{{findError(val.key).message}}\"\n\t\t\t\t\t\t\t\t\t\tdata-ng-bind-html=\"displayVal(val)\">\n\t\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t</table>\n\t\t\t\t\t\t\t<div class=\"clearfix\"></div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t<p class=\"alert\" data-ng-show=\"filtered && filtered.length == 0\">No values found.</p>\n\t\t\t\t\t\t<p class=\"small muted tiny\">{{filtered.length}} values displayed. <a data-ng-click=\"downloadUniques(searchUnique)\" class=\"\" data-ng-hide=\"filtered && filtered.length == 0\">Download</a></p>\n\t\t\t\t\t</div>\n\n\t\t\t\t\t<div class=\"space\"></div>\n\t\t\t\t\t<div>\n\t\t\t\t\t\t<label for=\"type\">Extension</label>\n\n\t\t\t\t\t\t\n\t\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t\t<div class=\"span8\">\n\t\t\t\t\t\t\t\t<span palladio-file-pills files=\"filteredFiles\" model=\"selectedFieldMetadata.augmentId\"></span>\n\t\t\t\t\t\t\t\t<span class=\"help-block\" data-ng-show=\"!hasLinks(selectedFieldMetadata).lookup\">You can provide additional information about this dimension with data from another table.</span>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<div class=\"span4 text-right\">\n\t\t\t\t\t\t\t\t<a class=\"btn\" ng-click=\"showNewTable()\">Add a new table</a>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t\t<span class=\"tiny strong span6\"\n\t\t\t\t\t\t\t\tstyle=\"margin-bottom:0px\"\n\t\t\t\t\t\t\t\tdata-ng-show=\"hasLinks(selectedFieldMetadata).lookup\"\n\t\t\t\t\t\t\t\tng-style=\"{ 'color': hasLinks(selectedFieldMetadata).metadata.background }\">\n\n\t\t\t\t\t\t\t\t<span class=\"super\">{{hasLinks(selectedFieldMetadata).metadata.matches}}</span> out of {{hasLinks(selectedFieldMetadata).metadata.total}} matches\n\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</div>\n\n\t\t\t\t</div>\n\n\t\t\t\t<div class=\"span4\" style=\"padding-left:8px\">\n\n\t\t\t\t\t<!--<label ng-show=\"selectedFieldMetadata.special.length\">¶ Special characters found!</label>-->\n\t\t\t\t\t<div ng-show=\"selectedFieldMetadata.special.length && !selectedFieldMetadata.unassignedSpecialChars.length\">\n\t\t\t\t\t\t<span class=\"help-block alert alert-special\">All the special characters are currently used as delimiters.</span>\n\t\t\t\t\t\t<div class=\"space\"></div>\n\t\t\t\t\t</div>\n\n\t\t\t\t\t<div class=\"row-fluid\" ng-show=\"selectedFieldMetadata.unassignedSpecialChars.length\">\n\t\t\t\t\t\t<div class=\"\">\n\t\t\t\t\t\t\t<span class=\"help-block\">Some of the values in this dimension contain the following special characters. If you want to use them as delimiter, type them into the forms below.</span>\n\t\t\t\t\t\t\t<div specials></div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t<div class=\"space\"></div>\n\t\t\t\t\t</div>\n\n\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t<div class=\"span12\">\n\t\t\t\t\t\t\t<label for=\"val-delimiter\">Multiple values delimiter</label>\n\t\t\t\t\t\t\t<input type=\"text\" id=\"val-delimiter\" class=\"input-mini span12\"\n\t\t\t\t\t\t\t\tdata-ng-model=\"selectedFieldMetadata.mvDelimiter\"\n\t\t\t\t\t\t\t\tdata-ng-change=\"updateMetadata()\"/>\n\t\t\t\t\t\t\t<span class=\"help-block\">If the dimension contains multiple values, insert the delimiter string here.</span>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</div>\n\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t<div class=\"span12\">\n\t\t\t\t\t\t\t<label for=\"hier-delimiter\">Hierarchy delimiter</label>\n\t\t\t\t\t\t\t<input type=\"text\" id=\"hier-delimiter\" class=\"input-mini span12\"\n\t\t\t\t\t\t\t\tdata-ng-model=\"selectedFieldMetadata.hierDelimiter\"\n\t\t\t\t\t\t\t\tdata-ng-change=\"updateMetadata()\" />\n\t\t\t\t\t\t\t<span class=\"help-block\">If the dimension contains hierarchical values, insert the delimiter string here.</span>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</div>\n\n\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t<div class=\"span12\">\n\t\t\t\t\t\t\t<label for=\"ignore\">Remove the following strings</label>\n\t\t\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t\t\t<div tag></div>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<span class=\"help-block\">If you want to remove specific strings from the values, insert them here. Press Enter after each string.</span>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\n\t\t\t</div>\n\n\t\t</div>\n\n\t\t<!--<div class=\"with-border\">\n\t\t\t<a class=\"pull-right danger small tiny\" ng-click=\"deleteFile(file, $index)\">Delete</a>\n\t\t\t<div class=\"clearfix\"></div>\n\t\t</div>-->\n\n\t</div>\n\n</div>\n");
+        "<div class=\"refine-background\" data-ng-show=\"selectedFieldMetadata\"></div>\n\n<div class=\"refine-selected\" data-ng-show=\"selectedFieldMetadata\">\n\n\t<div class=\"\" style=\"padding: 20px 40px 20px 20px\" ng-show=\"addingTable\">\n\n\t\t<div class=\"row-fluid\">\n\t\t\t<div class=\"span12\">\n\t\t\t\t<label for=\"type\">Add a new table</label>\n\t\t\t\t<input type=\"text\" class=\"editable span12 left\" placeholder=\"Untitled\" ng-model=\"lastFileName\"></input>\n\t\t\t\t<span class=\"help-block\">Provide a title to this table.</span>\n\t\t\t</div>\n\t\t\t<span class=\"refine-close\" aria-hidden=\"true\">&times;</span>\n\t\t</div>\n\n\t\t<ul class=\"nav nav-tabs\" role=\"tablist\" id=\"uploadTab\" data-ng-init=\"loadFromRefine = 'csv'\">\n\t        <li data-ng-class=\"{'active' : loadFromRefine =='csv'}\"><a ng-click=\"loadFromRefine='csv'\" role=\"tab\" data-toggle=\"tab\">Load CSV</a></li>\n\t        <li data-ng-class=\"{'active' : loadFromRefine =='sparql'}\"><a ng-click=\"loadFromRefine='sparql'\" role=\"tab\" data-toggle=\"tab\">Load from SPARQL endpoint</a></li>\n        </ul>\n        <div class=\"tab-content\">\n\t\t\t<div class=\"tab-pane\" data-ng-class=\"{'active' : loadFromRefine =='csv'}\" id=\"csv\">\n\t\t\t\t<textarea ui-refresh=\"selectedFieldMetadata\" ui-codemirror=\"{ mode : 'text',  lineNumbers : true, lineWrapping: true, onDrop : onDrop }\" placeholder=\"Paste your data or drop a file here\" ng-model=\"text\"></textarea>\n\t\t\t\t<span class=\"help-block\">Copy and paste your data here or drop a file in to add new table.</span>\n\t\t\t\t<div class=\"alert\" ng-show=\"parseError\">{{parseError}}</div>\n\t\t\t</div>\n\t\t\t<div class=\"tab-pane\" data-ng-class=\"{'active' : loadFromRefine =='sparql'}\" id=\"sparql\">\n\t\t\t\t<yasgui data=\"text\" endpoint=\"sparqlEndpoint\"/>\n\t\t\t\t<div class=\"space\"></div>\n\t\t\t</div>\n        </div>\n\n\t\t<div class=\"\">\n\t\t\t<button class=\"btn btn-info\" ng-click=\"hideNewTable()\">Cancel</button>\n\t\t\t<button class=\"btn\" ng-click=\"parseExtendTable()\" ng-disabled=\"!text\">Load data</button>\n\t\t\t<div class=\"clearfix\"></div>\n\t\t</div>\n\n\t</div>\n\n\t<div ng-hide=\"addingTable\">\n\n\t\t<div style=\"padding:20px 20px 10px 10px; border-bottom: 1px solid #eee\">\n\n\t\t\t<div class=\"row-fluid\">\n\n\t\t\t\t<div class=\"span8\">\n\n\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t<div class=\"span12\" style=\"padding-left: 10px\">\n\t\t\t\t\t\t\t<input  data-toggle=\"tooltip\"\n                    \t\t\t\tdata-original-title=\"Rename\"\n                    \t\t\t\tdata-ng-change=\"setDirty()\"\n                    \t\t\t\ttype=\"text\" class=\"editable span12 left\" data-ng-model=\"selectedFieldMetadata.description\" placeholder=\"Untitled\"></input>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t<span class=\"refine-close\" aria-hidden=\"true\">&times;</span>\n\t\t\t\t\t</div>\n\n\t\t\t\t</div>\n\n\t\t\t</div>\n\n\t\t\t<div class=\"\" style=\"padding-left: 10px\">\n\t\t\t\t<span class=\"small muted tiny\">{{selectedFieldMetadata.cardinality}} unique values ({{selectedFieldMetadata.blanks}} null values)</span>\n\t\t\t\t<span class=\"small tiny\" data-ng-show=\"selectedFieldMetadata.uniqueKey\"><i class=\"fa fa-tag muted\" style=\"margin-left:8px\"></i><span class=\"super\"> Unique key</span></span>\n\t\t\t</div>\n\n\n\n\t\t</div>\n\n\t\t<div style=\"padding:20px 20px 20px 20px\">\n\n\t\t\t<div class=\"row-fluid\">\n\n\t\t\t\t<div class=\"span8\">\n\n\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t<div class=\"span6\">\n\t\t\t\t\t\t\t<label for=\"type\">Data type</label>\n\t\t\t\t\t\t\t<select class=\"form-control show-tick\" bs-select\n\t\t\t\t\t\t\t\t\tdata-ng-model=\"selectedFieldMetadata.type\"\n\t\t\t\t\t\t\t\t\tdata-ng-options=\"t.id as t.name for t in allowedTypes\" id=\"type\"\n\t\t\t\t\t\t\t\t\tdata-ng-change=\"updateMetadata()\">\n\t\t\t\t\t\t\t</select>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</div>\n\n\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t<div class=\"help-block\">\n\t\t\t\t\t\t\t<span class=\"error\" data-ng-show=\"selectedFieldMetadata.errors.length\">\n\t\t\t\t\t\t\t\t{{selectedFieldMetadata.errors.length}} unique values do not match this data type! <a class=\"error\" data-ng-click=\"downloadErrors()\"><strong>Download the list of errors.</strong></a>\n\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t<span data-ng-hide=\"selectedFieldMetadata.errors.length\">All the unique values match this type</span>\n\t\t\t\t\t\t</div>\n\n\t\t\t\t\t</div>\n\n\t\t\t\t\t<div class=\"space\"></div>\n\n\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t<div class=\"span6\">\n\t\t\t\t\t\t\t<input type=\"text\" class=\"span12\" ng-model=\"searchUnique\" placeholder=\"Search\"></input>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t<div class=\"span4 offset2\">\n\t\t\t\t\t\t\t<select class=\"span12 form-control show-tick\" bs-select data-ng-model=\"sortBy\"\n\t\t\t\t\t\t\tdata-ng-options=\"t as t.label for t in sortOptions\" id=\"sortBy\"\n\t\t\t\t\t\t\tdata-ng-change=\"updateMetadata()\">\n\t\t\t\t\t\t\t</select>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</div>\n\n\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t<div class=\"bordered\" style=\"margin-bottom:10px\">\n\t\t\t\t\t\t\t<table class=\"table span12 refine-values-table table-striped\" data-ng-show=\"!filtered || (filtered && filtered.length > 0)\">\n\t\t\t\t\t\t\t\t<tr data-ng-repeat=\"val in filtered = (selectedFieldMetadata.uniques | filter:searchUnique) | limitTo:1000\">\n\t\t\t\t\t\t\t\t\t<td class=\"span12\" data-ng-class=\"{ error: findError(val.key) }\"\n\t\t\t\t\t\t\t\t\t\ttitle=\"{{findError(val.key).message}}\"\n\t\t\t\t\t\t\t\t\t\tdata-ng-bind-html=\"displayVal(val)\">\n\t\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t</table>\n\t\t\t\t\t\t\t<div class=\"clearfix\"></div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t<p class=\"alert\" data-ng-show=\"filtered && filtered.length == 0\">No values found.</p>\n\t\t\t\t\t\t<p class=\"small muted tiny\">{{filtered.length}} values displayed. <a data-ng-click=\"downloadUniques(searchUnique)\" class=\"\" data-ng-hide=\"filtered && filtered.length == 0\">Download</a></p>\n\t\t\t\t\t</div>\n\n\t\t\t\t\t<div class=\"space\"></div>\n\t\t\t\t\t<div>\n\t\t\t\t\t\t<label for=\"type\">Extension</label>\n\n\t\t\t\t\t\t\n\t\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t\t<div class=\"span8\">\n\t\t\t\t\t\t\t\t<span palladio-file-pills files=\"filteredFiles\" model=\"selectedFieldMetadata.augmentId\"></span>\n\t\t\t\t\t\t\t\t<span class=\"help-block\" data-ng-show=\"!hasLinks(selectedFieldMetadata).lookup\">You can provide additional information about this dimension with data from another table.</span>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<div class=\"span4 text-right\">\n\t\t\t\t\t\t\t\t<a class=\"btn\" ng-click=\"showNewTable()\">Add a new table</a>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t\t<span class=\"tiny strong span6\"\n\t\t\t\t\t\t\t\tstyle=\"margin-bottom:0px\"\n\t\t\t\t\t\t\t\tdata-ng-show=\"hasLinks(selectedFieldMetadata).lookup\"\n\t\t\t\t\t\t\t\tng-style=\"{ 'color': hasLinks(selectedFieldMetadata).metadata.background }\">\n\n\t\t\t\t\t\t\t\t<span class=\"super\">{{hasLinks(selectedFieldMetadata).metadata.matches}}</span> out of {{hasLinks(selectedFieldMetadata).metadata.total}} matches\n\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</div>\n\n\t\t\t\t</div>\n\n\t\t\t\t<div class=\"span4\" style=\"padding-left:8px\">\n\n\t\t\t\t\t<!--<label ng-show=\"selectedFieldMetadata.special.length\">¶ Special characters found!</label>-->\n\t\t\t\t\t<div ng-show=\"selectedFieldMetadata.special.length && !selectedFieldMetadata.unassignedSpecialChars.length\">\n\t\t\t\t\t\t<span class=\"help-block alert alert-special\">All the special characters are currently used as delimiters.</span>\n\t\t\t\t\t\t<div class=\"space\"></div>\n\t\t\t\t\t</div>\n\n\t\t\t\t\t<div class=\"row-fluid\" ng-show=\"selectedFieldMetadata.unassignedSpecialChars.length\">\n\t\t\t\t\t\t<div class=\"\">\n\t\t\t\t\t\t\t<span class=\"help-block\">Some of the values in this dimension contain the following special characters. If you want to use them as delimiter, type them into the forms below.</span>\n\t\t\t\t\t\t\t<div specials></div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t<div class=\"space\"></div>\n\t\t\t\t\t</div>\n\n\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t<div class=\"span12\">\n\t\t\t\t\t\t\t<label for=\"val-delimiter\">Multiple values delimiter</label>\n\t\t\t\t\t\t\t<input type=\"text\" id=\"val-delimiter\" class=\"input-mini span12\"\n\t\t\t\t\t\t\t\tdata-ng-model=\"selectedFieldMetadata.mvDelimiter\"\n\t\t\t\t\t\t\t\tdata-ng-change=\"updateMetadata()\"/>\n\t\t\t\t\t\t\t<span class=\"help-block\">If the dimension contains multiple values, insert the delimiter string here.</span>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</div>\n\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t<div class=\"span12\">\n\t\t\t\t\t\t\t<label for=\"hier-delimiter\">Hierarchy delimiter</label>\n\t\t\t\t\t\t\t<input type=\"text\" id=\"hier-delimiter\" class=\"input-mini span12\"\n\t\t\t\t\t\t\t\tdata-ng-model=\"selectedFieldMetadata.hierDelimiter\"\n\t\t\t\t\t\t\t\tdata-ng-change=\"updateMetadata()\" />\n\t\t\t\t\t\t\t<span class=\"help-block\">If the dimension contains hierarchical values, insert the delimiter string here.</span>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</div>\n\n\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t<div class=\"span12\">\n\t\t\t\t\t\t\t<label for=\"ignore\">Remove the following strings</label>\n\t\t\t\t\t\t\t<div class=\"row-fluid\">\n\t\t\t\t\t\t\t\t<div tag></div>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<span class=\"help-block\">If you want to remove specific strings from the values, insert them here. Press Enter after each string.</span>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\n\t\t\t</div>\n\n\t\t</div>\n\n\t\t<!--<div class=\"with-border\">\n\t\t\t<a class=\"pull-right danger small tiny\" ng-click=\"deleteFile(file, $index)\">Delete</a>\n\t\t\t<div class=\"clearfix\"></div>\n\t\t</div>-->\n\n\t</div>\n\n</div>\n");
 }]);
 angular.module('palladio').run(['$templateCache', function($templateCache) {
     $templateCache.put('partials/start.html',

@@ -51,6 +51,8 @@ angular.module('palladio.directives.refine', [
 					hide();
 				};
 
+				scope.setDirty = dataService.setDirty;
+
 				scope.filteredFiles = function() {
 					return scope.selectedFile ? scope.files.filter(function (d){ return d.id !== scope.selectedFile.id; }) : [];
 				};
