@@ -460,11 +460,11 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 						// Return a state object that can be consumed by importState().
 						return {
 							title: scope.title,
-							durationDim: scope.durationDim.key,
-							tooltipLabelDim: scope.tooltipLabelDim.key,
-							groupDim: scope.groupDim.key,
-							xGroupDim: scope.xGroupDim.key,
-							xSortDim: scope.xSortDim.key,
+							durationDim: scope.durationDim ? scope.durationDim.key : null,
+							tooltipLabelDim: scope.tooltipLabelDim ? scope.tooltipLabelDim.key : null,
+							groupDim: scope.groupDim ? scope.groupDim.key : null,
+							xGroupDim: scope.xGroupDim ? scope.xGroupDim.key : null,
+							xSortDim: scope.xSortDim ? scope.xSortDim.key : null,
 							mode: scope.mode
 						};
 					}
