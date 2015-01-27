@@ -141,16 +141,23 @@
 					<i class="fa fa-bars pull-right"></i>
 				</span>
 			</div>
+		</div>
+	</div>
 
+	<div class="row-fluid">
+		<div class="span12">
 			<div class="space"></div>
-
 			<div class="setting">
-				<label class="text">Layers</label>
-				<div class="row-fluid">
-					<ul class="layer-list" ui-sortable data-ng-model="tileSets">
+				<label class="text">
+					Layers
+					<span class="tiny muted"> (Layers can overlap. Drag to change order)</span>
+				</label>
+				
+				<div class="span12">
+					<ul class="layer-list span8" ui-sortable data-ng-model="tileSets">
 
 						<li class="layer-item" data-ng-repeat="layer in tileSets | orderBy:index">
-							<i class="icon-move"></i>
+							<i class="fa fa-arrows" style="margin-right:3px;"></i>
 							<i class="fa fa-eye-slash" data-ng-click="layer.toggle()" ng-show="!layer.enabled" data-toggle="tooltip" data-original-title="Show"></i>
 							<i class="fa fa-eye" data-ng-click="layer.toggle()" ng-show="layer.enabled" data-toggle="tooltip" data-original-title="Hide"></i>
 							<span style="margin-left: 10px">{{layer.description}}</span>
@@ -160,10 +167,14 @@
 							<span>No layers</span>
 						</li>
 					</ul>
-					<button class="btn" data-ng-click="showLayerModal()">Add new layer</button>
 				</div>
-			</div>
 
+				<button class="btn" data-ng-click="showLayerModal()">Add new layer</button>
+			</div>
+		</div>
+	</div>
+	<div class="row-fluid">
+		<div class="span12">
 			<div class="space"></div>
 
 			<div class="setting">
@@ -171,10 +182,7 @@
 					<i class="fa fa-arrow-circle-down margin-right"></i> Export places and links as .svg
 				</a>
 			</div>
-
 		</div>
-
-		
 	</div>
 </div>
 <div id="{{uniqueModalId}}">
