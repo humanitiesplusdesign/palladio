@@ -59,6 +59,8 @@ angular.module('palladio.directives.files', [
 					dataService.setDirty();
 				};
 
+				scope.setDirty = dataService.setDirty;
+
 				scope.downloadFile = function(file) {
 					var blob = new Blob(
 						[ d3.csv.format(file.data) ],

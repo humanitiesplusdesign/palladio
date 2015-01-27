@@ -71,7 +71,7 @@
 				<div class="file-info-header">
 					<input 	data-toggle="tooltip"
 		                    data-original-title="Rename"
-		                    type="text" class="editable span12 left" ng-class="{strong:$index==0}" ng-model="file.label" placeholder="Untitled"></input>
+		                    type="text" class="editable span12 left" ng-class="{strong:$index==0}" ng-model="file.label" ng-change="setDirty()" placeholder="Untitled"></input>
 					<p class="tiny small" style="cursor:pointer">
 						<span class="" ng-show="$index==0">Primary table</span>
 						<span class="" ng-show="$index!=0">Secondary table</span>
