@@ -40,7 +40,7 @@
     "angular-strap": "~0.7.8",
     "angular-ui-sortable": "~0.12.11",
     "angular-ui-codemirror": "~0.1.6",
-    "reductio": "~0.0.3",
+    "reductio": "~0.0.11",
     "modernizr": "~2.8.3",
     "YASQE": "https://github.com/YASGUI/YASQE.git#~1.4.0",
     "YASR": "https://github.com/YASGUI/YASR.git#~1.2.0",

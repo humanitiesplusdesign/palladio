@@ -143,52 +143,47 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 					if(!sourceGroups) {
 						if(!scope.countBy) {
-							sourceGroups = scope.sourceDimension.group().reduce(
-								function (p, v) {
-									p.data.description = sourceAccessor(v);
-									p.data.agg++;
-									if(p.data.agg > p.data.initialAgg) p.data.initialAgg = p.data.agg;
-									return p;
+							sourceGroups = reductio().aliasProp({
+								data: function(g, v) {
+									return {
+										description: sourceAccessor(v),
+										agg: g.data.agg + 1,
+										initialAgg: p.data.agg > +p.data.initialAgg ? p.data.agg : p.data.initialAgg
+									};
 								},
-								function (p, v) {
-									p.data.agg--;
-									return p;
-								},
-								function () {
-									return { data: { agg: 0, initialAgg: 0 }, initialCount: 0 };
+								initialCount: function () {
+									return 0;
 								}
-							).order(function (p) { return p.data.agg; });
+							})(scope.sourceDimension.group()).order(function (p) { return p.data.agg; });
 						} else {
-							helpers = crossfilterHelpers.countByDimensionWithInitialCountAndData(
-								function(v) { return v[scope.countBy]; },
-								function (d, p, t) {
-									if(p === undefined) {
-										p = { agg: 0, initialAgg: 0, description: sourceAccessor(d) };
-									}
-									if(t === 'add') {
-										// Adding a new record.
-										if(scope.aggregationType === 'COUNT') {
-											p.agg++;
-										} else {
-											p.agg = p.agg + (+d[scope.aggregateKey] ? +d[scope.aggregateKey] : 0); // Make sure to cast or you end up with a String!!!
-										}
-										if(p.agg > p.initialAgg) p.initialAgg = p.agg;
-									} else {
-										// Removing a record.
-										if(scope.aggregationType === 'COUNT') {
-											p.agg--;
-										} else {
-											p.agg = p.agg - (+d[scope.aggregateKey] ? +d[scope.aggregateKey] : 0); // Make sure to cast or you end up with a String!!!
-										}
-									}
-									return p;
-								}
-							);
-							sourceGroups = scope.sourceDimension.group().reduce(
-								helpers.add,
-								helpers.remove,
-								helpers.init
-							).order(function (p) { return p.data.agg; });
+							var reducer = reductio()
+								.exception(function(v) { return v[scope.countBy]; });
+
+							if(scope.aggregationType === 'COUNT') {
+								reducer.exceptionCount(true);
+								reducer.aliasProp({
+									data: function(p, v) {
+										return {
+											description: sourceAccessor(v),
+											agg: p.exceptionCount,
+											initialAgg: p.data ? (p.exceptionCount > p.data.initialAgg ? p.exceptionCount : p.data.initialAgg) : 1
+										};
+									},
+								});
+							} else {
+								reducer.exceptionSum(function(d) { return +d[scope.aggregateKey]; });
+								reducer.aliasProp({
+									data: function(p, v) {
+										return {
+											description: sourceAccessor(v),
+											agg: p.exceptionSum,
+											initialAgg: p.data ? (p.exceptionSum > p.data.initialAgg ? p.exceptionSum : p.data.initialAgg) : p.exceptionSum
+										};
+									},
+								});
+							}
+							sourceGroups = reducer(scope.sourceDimension.group())
+									.order(function (p) { return p.data.agg; });
 						}
 					}
 
