@@ -342,8 +342,9 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 					}
 
 					function updateCell(sel) {
-						sel.classed('filter-value', function(d) { return d.inFilter; })
-							.transition()
+						sel.classed('filter-value', function(d) {
+								return d.inFilter;
+							}).transition()
 								// .style('height', function (d) { return d.displayValue > 0 ? d.scale(d.displayValue) + 'px' : '3px'; });
 								.style('height', function (d) { return d.displayValue > 0 ? minCellHeight + 'px' : '3px'; });
 
@@ -473,7 +474,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 						// Need to do this one-by-one because of the way we watch for changes.
 						scope.fields.filter(function(f) { return state.dimKeys.indexOf(f.key) !== -1; })
 							.forEach(function(d) {
-								scope.dims = scope.dims.concat(d);
+								scope.addKey = d.key;
 								scope.$digest();
 							});
 
@@ -484,6 +485,9 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 						state.domKeys = state.dimKeys.map(function(k) { return calculateDomKey(k); });
 
 						scope.$digest();
+
+						// Set up the filters.
+
 					};
 
 					var exportState = function() {
@@ -491,7 +495,8 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 							config: scope.config,
 							aggDimKey: scope.aggDim.key,
 							dimKeys: scope.dims.map(function(d) { return d.key; }),
-							domKeys: scope.dims.map(function(d) { return calculateDomKey(d.key); })
+							domKeys: scope.dims.map(function(d) { return calculateDomKey(d.key); }),
+							filters: scope.dims.map(function(d) { return d.filters; })
 						};
 					};
 

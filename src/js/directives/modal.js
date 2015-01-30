@@ -6,6 +6,7 @@ angular.module('palladio.directives.modal', [])
 			scope : {
 				dimensions: '=',
 				model: '=',
+				toggleKey: '=',
 				sortable: '@',
 				descriptionAccessor: '='
 			},
@@ -61,9 +62,14 @@ angular.module('palladio.directives.modal', [])
 				scope.$watchCollection('internalDimensions', function () {
 					// Reorder the model if the order of dimensions changes and model is an array
 					reorderModel();
-				})
+				});
 
-
+				scope.$watch('toggleKey', function (nv) {
+					if(nv) {
+						console.log("Toggling " + nv);
+						scope.change(scope.internalDimensions.filter(function (d) { return nv === d.key; })[0]);
+					}
+				});
 
 				scope.check = function(field) {
 					if(Array.isArray(scope.model)) {
