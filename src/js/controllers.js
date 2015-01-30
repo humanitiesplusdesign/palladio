@@ -1,5 +1,5 @@
 angular.module('palladioApp.controllers', ['palladioApp.services', 'palladioApp.load', 'palladio'])
-	.controller('WorkflowCtrl', function (version, $rootScope, $scope, $location, $controller, $compile, $timeout, dataService, spinnerService, loadService, palladioService) {
+	.controller('WorkflowCtrl', function (version, $rootScope, $scope, $location, $controller, $compile, $timeout, dataService, spinnerService, loadService, palladioService, $http) {
 
 		// Show/hide filters on panel
 		$scope.$watch(function(){ return $location.path(); }, function (path){
@@ -109,6 +109,27 @@ angular.module('palladioApp.controllers', ['palladioApp.services', 'palladioApp.
 			// which case it would have a layout specified.
 			if(loadService.layout()) $location.path('/visualization');
 		};
+
+		function loadFile(path) {
+			spinnerService.spin();
+			$http.get(path)
+				.success(function(data) {
+					loadService.loadJson(data);
+					$scope.onLoad();
+				})
+				.error(function() {
+					spinnerService.hide();
+					console.log("Attempted to load auto-load.json but it did not exist. This is not usually a problem.");
+				});
+		}
+
+		if($location.search().file) {
+			// Load the file from the path on the URL.
+			loadFile($location.search().file);
+		} else {
+			// Otherwise auto-load file auto-load.json if it exists.
+			loadFile('auto-load.json');
+		}
 
 		// Alert when leaving
 		$(window).bind('beforeunload', function(){
