@@ -66,7 +66,6 @@ angular.module('palladio.directives.modal', [])
 
 				scope.$watch('toggleKey', function (nv) {
 					if(nv) {
-						console.log("Toggling " + nv);
 						scope.change(scope.internalDimensions.filter(function (d) { return nv === d.key; })[0]);
 					}
 				});

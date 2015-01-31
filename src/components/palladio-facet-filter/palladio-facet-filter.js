@@ -173,7 +173,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 
 								if(count > 0) {
 									// Extend the width of the inner- and mid-facet-container
-									selection.transition().style('width', (+selection.style('width').substring(0, selection.style('width').length - 2) + (205 * count)) + 'px');
+									selection.style('width', (+selection.style('width').substring(0, selection.style('width').length - 2) + (205 * count)) + 'px');
 									d3.select(element[0]).select('.mid-facet-container').transition()
 										.style('width', (+d3.select(element[0]).select('.mid-facet-container')
 											.style('width').substring(0, d3.select(element[0]).select('.mid-facet-container')
@@ -434,7 +434,6 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 					// Clean up after ourselves. Remove dimensions that we have created. If we
 					// created watches on another scope, destroy those as well.
 					scope.$on('$destroy', function () {
-						console.log(scope.dims.length);
 						scope.dims.map(function(d) {
 							removeFacetData(d);
 						});
@@ -486,8 +485,30 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 
 						scope.$digest();
 
-						// Set up the filters.
+						// Grab the facets from the DOM. We're going to click on them to filter.
+						var facetSelection = d3.select(element[0]).selectAll('.facet')[0];
 
+						// Set up the filters.
+						state.filters.forEach(function(f, i) {
+							var simpleArrayOfKeys = [];
+							if(f[0] && typeof f[0] === 'string') {
+								// New format.
+								simpleArrayOfKeys = f;
+							} else {
+								simpleArrayOfKeys = f.map(function(d) { return d.key; });
+							}
+							
+							// Filter the celsl to the ones in the saved filter.
+							var cells = d3.select(facetSelection[i]).selectAll('.cell')
+								.filter(function(d) {
+									return simpleArrayOfKeys.indexOf(d.key) !== -1;
+								});
+
+							// Click 'em
+							cells.each(function() {
+								this.click();
+							});
+						});
 					};
 
 					var exportState = function() {
