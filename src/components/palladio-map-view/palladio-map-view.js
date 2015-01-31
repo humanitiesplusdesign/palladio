@@ -1054,7 +1054,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						s.countDim = state.countDim;
 						s.descriptiveDim = state.descriptiveDim;
 						s.showLinks = state.showLinks;
-						s.tileSets = state.tileSets;
+						if(state.tileSets) s.tileSets = state.tileSets;
 						s.pointSize = state.pointSize;
 						s.mapType = s.mapTypes.filter(function (d) { return d.value === state.mapType.value; })[0];
 						if(state.mapping.sourceCoordinates) {

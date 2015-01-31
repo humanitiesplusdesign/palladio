@@ -445,11 +445,11 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 
 						// Load a state object created by exportState().
 						scope.title = state.title;
-						scope.durationDim = scope.durationDims.filter(function(d) { return d.key === state.durationDim; })[0];
-						scope.tooltipLabelDim = scope.labelDims.filter(function(d) { return d.key === state.tooltipLabelDim; })[0];
-						scope.groupDim = scope.labelDims.filter(function(d) { return d.key === state.groupDim; })[0];
-						scope.xGroupDim = scope.labelDims.filter(function(d) { return d.key === state.xGroupDim; })[0];
-						scope.xSortDim = scope.labelDims.filter(function(d) { return d.key === state.xSortDim; })[0];
+						scope.durationDim = scope.durationDims ? scope.durationDims.filter(function(d) { return d.key === state.durationDim; })[0] : null;
+						scope.tooltipLabelDim = scope.labelDims ? scope.labelDims.filter(function(d) { return d.key === state.tooltipLabelDim; })[0] : null;
+						scope.groupDim = scope.labelDims ? scope.labelDims.filter(function(d) { return d.key === state.groupDim; })[0] : null;
+						scope.xGroupDim = scope.labelDims ? scope.labelDims.filter(function(d) { return d.key === state.xGroupDim; })[0] : null;
+						scope.xSortDim = scope.labelDims ? scope.labelDims.filter(function(d) { return d.key === state.xSortDim; })[0] : null;
 
 						scope.mode = state.mode;
 

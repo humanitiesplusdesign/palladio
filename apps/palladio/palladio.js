@@ -61072,6 +61072,7 @@ angular.module('palladio.directives.modal', [])
 			scope : {
 				dimensions: '=',
 				model: '=',
+				toggleKey: '=',
 				sortable: '@',
 				descriptionAccessor: '='
 			},
@@ -61127,9 +61128,13 @@ angular.module('palladio.directives.modal', [])
 				scope.$watchCollection('internalDimensions', function () {
 					// Reorder the model if the order of dimensions changes and model is an array
 					reorderModel();
-				})
+				});
 
-
+				scope.$watch('toggleKey', function (nv) {
+					if(nv) {
+						scope.change(scope.internalDimensions.filter(function (d) { return nv === d.key; })[0]);
+					}
+				});
 
 				scope.check = function(field) {
 					if(Array.isArray(scope.model)) {
@@ -65145,11 +65150,11 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 
 						// Load a state object created by exportState().
 						scope.title = state.title;
-						scope.durationDim = scope.durationDims.filter(function(d) { return d.key === state.durationDim; })[0];
-						scope.tooltipLabelDim = scope.labelDims.filter(function(d) { return d.key === state.tooltipLabelDim; })[0];
-						scope.groupDim = scope.labelDims.filter(function(d) { return d.key === state.groupDim; })[0];
-						scope.xGroupDim = scope.labelDims.filter(function(d) { return d.key === state.xGroupDim; })[0];
-						scope.xSortDim = scope.labelDims.filter(function(d) { return d.key === state.xSortDim; })[0];
+						scope.durationDim = scope.durationDims ? scope.durationDims.filter(function(d) { return d.key === state.durationDim; })[0] : null;
+						scope.tooltipLabelDim = scope.labelDims ? scope.labelDims.filter(function(d) { return d.key === state.tooltipLabelDim; })[0] : null;
+						scope.groupDim = scope.labelDims ? scope.labelDims.filter(function(d) { return d.key === state.groupDim; })[0] : null;
+						scope.xGroupDim = scope.labelDims ? scope.labelDims.filter(function(d) { return d.key === state.xGroupDim; })[0] : null;
+						scope.xSortDim = scope.labelDims ? scope.labelDims.filter(function(d) { return d.key === state.xSortDim; })[0] : null;
 
 						scope.mode = state.mode;
 
@@ -65952,7 +65957,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 
 								if(count > 0) {
 									// Extend the width of the inner- and mid-facet-container
-									selection.transition().style('width', (+selection.style('width').substring(0, selection.style('width').length - 2) + (205 * count)) + 'px');
+									selection.style('width', (+selection.style('width').substring(0, selection.style('width').length - 2) + (205 * count)) + 'px');
 									d3.select(element[0]).select('.mid-facet-container').transition()
 										.style('width', (+d3.select(element[0]).select('.mid-facet-container')
 											.style('width').substring(0, d3.select(element[0]).select('.mid-facet-container')
@@ -66121,8 +66126,9 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 					}
 
 					function updateCell(sel) {
-						sel.classed('filter-value', function(d) { return d.inFilter; })
-							.transition()
+						sel.classed('filter-value', function(d) {
+								return d.inFilter;
+							}).transition()
 								// .style('height', function (d) { return d.displayValue > 0 ? d.scale(d.displayValue) + 'px' : '3px'; });
 								.style('height', function (d) { return d.displayValue > 0 ? minCellHeight + 'px' : '3px'; });
 
@@ -66212,7 +66218,6 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 					// Clean up after ourselves. Remove dimensions that we have created. If we
 					// created watches on another scope, destroy those as well.
 					scope.$on('$destroy', function () {
-						console.log(scope.dims.length);
 						scope.dims.map(function(d) {
 							removeFacetData(d);
 						});
@@ -66252,7 +66257,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 						// Need to do this one-by-one because of the way we watch for changes.
 						scope.fields.filter(function(f) { return state.dimKeys.indexOf(f.key) !== -1; })
 							.forEach(function(d) {
-								scope.dims = scope.dims.concat(d);
+								scope.addKey = d.key;
 								scope.$digest();
 							});
 
@@ -66263,6 +66268,31 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 						state.domKeys = state.dimKeys.map(function(k) { return calculateDomKey(k); });
 
 						scope.$digest();
+
+						// Grab the facets from the DOM. We're going to click on them to filter.
+						var facetSelection = d3.select(element[0]).selectAll('.facet')[0];
+
+						// Set up the filters.
+						state.filters.forEach(function(f, i) {
+							var simpleArrayOfKeys = [];
+							if(f[0] && typeof f[0] === 'string') {
+								// New format.
+								simpleArrayOfKeys = f;
+							} else {
+								simpleArrayOfKeys = f.map(function(d) { return d.key; });
+							}
+							
+							// Filter the celsl to the ones in the saved filter.
+							var cells = d3.select(facetSelection[i]).selectAll('.cell')
+								.filter(function(d) {
+									return simpleArrayOfKeys.indexOf(d.key) !== -1;
+								});
+
+							// Click 'em
+							cells.each(function() {
+								this.click();
+							});
+						});
 					};
 
 					var exportState = function() {
@@ -66270,7 +66300,8 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 							config: scope.config,
 							aggDimKey: scope.aggDim.key,
 							dimKeys: scope.dims.map(function(d) { return d.key; }),
-							domKeys: scope.dims.map(function(d) { return calculateDomKey(d.key); })
+							domKeys: scope.dims.map(function(d) { return calculateDomKey(d.key); }),
+							filters: scope.dims.map(function(d) { return d.filters; })
 						};
 					};
 
@@ -68156,7 +68187,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						s.countDim = state.countDim;
 						s.descriptiveDim = state.descriptiveDim;
 						s.showLinks = state.showLinks;
-						s.tileSets = state.tileSets;
+						if(state.tileSets) s.tileSets = state.tileSets;
 						s.pointSize = state.pointSize;
 						s.mapType = s.mapTypes.filter(function (d) { return d.value === state.mapType.value; })[0];
 						if(state.mapping.sourceCoordinates) {
@@ -71782,7 +71813,7 @@ angular.module('palladio').run(['$templateCache', function($templateCache) {
 }]);
 angular.module('palladio').run(['$templateCache', function($templateCache) {
     $templateCache.put('partials/palladio-facet-filter/template.html',
-        "<div class=\"row-fluid\">\n\t<div class=\"span3\" data-ng-show=\"showSettings === 'true'\">\n\t\t<div ng-show=\"showAccordion === 'true'\" class=\"accordion-heading row-fluid\">\n\t\t\t<a class=\"span1 text-center angle\" data-toggle=\"collapse\" data-ng-click=\"collapse=!collapse\" data-ng-init=\"collapse=false\" data-parent=\"#filters\" href=\"{{uniqueToggleHref}}\" target=\"_self\">\n\t\t\t\t<span data-ng-show=\"!collapse\"><i class=\"fa fa-angle-down\"></i></span>\n\t\t\t\t<span data-ng-show=\"collapse\"><i class=\"fa fa-angle-right\"></i></span>\n\t\t\t</a>\n\t\t\t<input type=\"text\" class=\"editable span11\" data-ng-model=\"title\"></input>\n\t\t</div>\n\t\t<div class=\"settings-panel accordion-body\" ng-show=\"!collapse\"> \n\n\t\t\t<div class=\"setting row-fluid\" data-ng-show=\"showDimensions === 'true'\">\n\t\t\t\t<label class=\"span4 inline\">Dimensions</label> \n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\" data-ng-show=\"showDimensions === 'true'\">\n\t\t\t\t<span class=\"span2\">&nbsp;</span>\n\t\t\t\t<span class=\"span10\">\n\t\t\t\t\t<span data-ng-repeat=\"field in fields\" palladio-dimension model=\"field\" check-func=\"check\"></span>\n\t\t\t\t</span>\n\t\t\t</div>\n\n\t\t\t<br />\n\n\t\t\t<div class=\"setting\">\n\t\t\t\t<label class=\"span4 inline\">Count</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showAggModal()\">\n\t\t\t\t\t\t{{getAggDescription(aggDim) || \"Choose...\"}}\n\t\t\t\t\t<i class=\"fa fa-bars pull-right\"></i>\n\t\t\t\t</span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting\"> \n\t\t\t\t<label class=\"span4 inline\">Dimensions</label> \n\t\t\t\t<span class=\"field span8\" ng-click=\"showModal()\">\n\t\t\t\t\t{{fieldDescriptions() || \"Choose...\"}}\n\t\t\t\t\t<i class=\"fa fa-bars pull-right\"></i>\n\t\t\t\t</span>\n\t\t\t</div>\n\t\t</div>\n\t</div>\n\t\t\t\t\t\t\t\n\t<div class=\"span9\">\n\t\t<!-- View -->\n\t\t<div id=\"{{uniqueToggleId}}\" class=\"row-fluid accordion-body collapse in component\">\n\t\t\t<div class=\"span12 view\">\n\t\t\t\t<div class=\"facet-container\" style=\"height: {{calcHeight}}; margin-bottom: 5px\">\n\t\t\t\t\t<div class=\"mid-facet-container\" style=\"height: {{calcHeight}};\">\n\t\t\t\t\t\t<div class=\"inner-facet-container\" style=\"height: {{calcHeight}};\"></div>\n\t\t\t\t\t\t<div ng-show=\"showDropArea === 'true'\" palladio-droppable model=\"dropModel\" class=\"facet-drop-area\" style=\"margin-top: {{dropMarginTop}};\">\n\t\t\t\t\t\t\t<div class=\"facet-drop-area-text\">\n\t\t\t\t\t\t\t\tDrop dimensions here\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t\t<a class=\"toggle\" class=\"close\"></a>\n\t\t\t</div>\n\t\t</div>\n\t\t<!--Modal-->\n\t\t<div id=\"{{uniqueModalId}}\">\n\t\t\t<div id=\"facet-modal\" data-modal dimensions=\"fields\" model=\"dims\" sortable=\"false\"></div>\n\t\t\t<div id=\"facet-agg-modal\" data-modal dimensions=\"aggDims\" model=\"aggDim\" description-accessor=\"getAggDescription\"></div>\n\t\t</div>\n\t</div>\n\n\t<a data-ng-show=\"showControls === 'true'\" class=\"remove fa fa-trash-o\" data-ng-click=\"$parent.removeFilter($event)\" data-toggle=\"tooltip\" data-title=\"Delete\"></a>\n\t<a data-ng-show=\"showControls === 'true'\" class=\"reset fa fa-eraser\" style=\"line-height:40px\" data-ng-click=\"filterReset()\" data-toggle=\"tooltip\" data-title=\"Clear\"></a>\n</div>");
+        "<div class=\"row-fluid\">\n\t<div class=\"span3\" data-ng-show=\"showSettings === 'true'\">\n\t\t<div ng-show=\"showAccordion === 'true'\" class=\"accordion-heading row-fluid\">\n\t\t\t<a class=\"span1 text-center angle\" data-toggle=\"collapse\" data-ng-click=\"collapse=!collapse\" data-ng-init=\"collapse=false\" data-parent=\"#filters\" href=\"{{uniqueToggleHref}}\" target=\"_self\">\n\t\t\t\t<span data-ng-show=\"!collapse\"><i class=\"fa fa-angle-down\"></i></span>\n\t\t\t\t<span data-ng-show=\"collapse\"><i class=\"fa fa-angle-right\"></i></span>\n\t\t\t</a>\n\t\t\t<input type=\"text\" class=\"editable span11\" data-ng-model=\"title\"></input>\n\t\t</div>\n\t\t<div class=\"settings-panel accordion-body\" ng-show=\"!collapse\"> \n\n\t\t\t<div class=\"setting row-fluid\" data-ng-show=\"showDimensions === 'true'\">\n\t\t\t\t<label class=\"span4 inline\">Dimensions</label> \n\t\t\t</div>\n\n\t\t\t<div class=\"setting row-fluid\" data-ng-show=\"showDimensions === 'true'\">\n\t\t\t\t<span class=\"span2\">&nbsp;</span>\n\t\t\t\t<span class=\"span10\">\n\t\t\t\t\t<span data-ng-repeat=\"field in fields\" palladio-dimension model=\"field\" check-func=\"check\"></span>\n\t\t\t\t</span>\n\t\t\t</div>\n\n\t\t\t<br />\n\n\t\t\t<div class=\"setting\">\n\t\t\t\t<label class=\"span4 inline\">Count</label>\n\t\t\t\t<span class=\"field span8\" ng-click=\"showAggModal()\">\n\t\t\t\t\t\t{{getAggDescription(aggDim) || \"Choose...\"}}\n\t\t\t\t\t<i class=\"fa fa-bars pull-right\"></i>\n\t\t\t\t</span>\n\t\t\t</div>\n\n\t\t\t<div class=\"setting\"> \n\t\t\t\t<label class=\"span4 inline\">Dimensions</label> \n\t\t\t\t<span class=\"field span8\" ng-click=\"showModal()\">\n\t\t\t\t\t{{fieldDescriptions() || \"Choose...\"}}\n\t\t\t\t\t<i class=\"fa fa-bars pull-right\"></i>\n\t\t\t\t</span>\n\t\t\t</div>\n\t\t</div>\n\t</div>\n\t\t\t\t\t\t\t\n\t<div class=\"span9\">\n\t\t<!-- View -->\n\t\t<div id=\"{{uniqueToggleId}}\" class=\"row-fluid accordion-body collapse in component\">\n\t\t\t<div class=\"span12 view\">\n\t\t\t\t<div class=\"facet-container\" style=\"height: {{calcHeight}}; margin-bottom: 5px\">\n\t\t\t\t\t<div class=\"mid-facet-container\" style=\"height: {{calcHeight}};\">\n\t\t\t\t\t\t<div class=\"inner-facet-container\" style=\"height: {{calcHeight}};\"></div>\n\t\t\t\t\t\t<div ng-show=\"showDropArea === 'true'\" palladio-droppable model=\"dropModel\" class=\"facet-drop-area\" style=\"margin-top: {{dropMarginTop}};\">\n\t\t\t\t\t\t\t<div class=\"facet-drop-area-text\">\n\t\t\t\t\t\t\t\tDrop dimensions here\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t\t<a class=\"toggle\" class=\"close\"></a>\n\t\t\t</div>\n\t\t</div>\n\t\t<!--Modal-->\n\t\t<div id=\"{{uniqueModalId}}\">\n\t\t\t<div id=\"facet-modal\" data-modal toggle-key=\"addKey\" dimensions=\"fields\" model=\"dims\" sortable=\"false\"></div>\n\t\t\t<div id=\"facet-agg-modal\" data-modal dimensions=\"aggDims\" model=\"aggDim\" description-accessor=\"getAggDescription\"></div>\n\t\t</div>\n\t</div>\n\n\t<a data-ng-show=\"showControls === 'true'\" class=\"remove fa fa-trash-o\" data-ng-click=\"$parent.removeFilter($event)\" data-toggle=\"tooltip\" data-title=\"Delete\"></a>\n\t<a data-ng-show=\"showControls === 'true'\" class=\"reset fa fa-eraser\" style=\"line-height:40px\" data-ng-click=\"filterReset()\" data-toggle=\"tooltip\" data-title=\"Clear\"></a>\n</div>");
 }]);
 angular.module('palladio').run(['$templateCache', function($templateCache) {
     $templateCache.put('partials/palladio-graph-view/template.html',
