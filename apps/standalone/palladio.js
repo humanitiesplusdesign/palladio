@@ -64614,6 +64614,41 @@ angular.module('palladio.services.validation', [])
 	});
 // Palladio data upload component
 
+angular.module('palladioDataUpload', ['palladio.services'])
+	.directive('palladioDataUpload', function (dataService, loadService, spinnerService) {
+		var directiveObj = {
+			scope: {
+				'load': '&onLoad'
+			},
+			transclude: true,
+			templateUrl: 'partials/palladio-data-upload/template.html',
+
+			link: function(scope) {
+
+				scope.loadDataModel = function(input) {
+					spinnerService.spin();
+					var reader = new FileReader();
+					reader.onload = function() {
+						var json = JSON.parse(reader.result);
+						loadService.loadJson(json);
+						scope.$apply(function(s) { s.load(); });
+					};
+					reader.readAsText(input.files[0]);
+					// We need to clear the input so that we pick up future uploads. This is *not*
+					// cross-browser-compatible.
+					input.value = null;
+				};
+
+				scope.triggerDataModelSelector = function () {
+					$('#dataModelSelector').click();
+				};
+			}
+		};
+
+		return directiveObj;
+	});
+// Palladio data upload component
+
 angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 	.directive('palladioDataDownload', function (dataService, version, palladioService) {
 		var directiveObj = {
@@ -64662,41 +64697,6 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 					);
 					var fileName = "Data export.palladio." + version + ".json";
 					saveAs(blob, fileName);
-				};
-			}
-		};
-
-		return directiveObj;
-	});
-// Palladio data upload component
-
-angular.module('palladioDataUpload', ['palladio.services'])
-	.directive('palladioDataUpload', function (dataService, loadService, spinnerService) {
-		var directiveObj = {
-			scope: {
-				'load': '&onLoad'
-			},
-			transclude: true,
-			templateUrl: 'partials/palladio-data-upload/template.html',
-
-			link: function(scope) {
-
-				scope.loadDataModel = function(input) {
-					spinnerService.spin();
-					var reader = new FileReader();
-					reader.onload = function() {
-						var json = JSON.parse(reader.result);
-						loadService.loadJson(json);
-						scope.$apply(function(s) { s.load(); });
-					};
-					reader.readAsText(input.files[0]);
-					// We need to clear the input so that we pick up future uploads. This is *not*
-					// cross-browser-compatible.
-					input.value = null;
-				};
-
-				scope.triggerDataModelSelector = function () {
-					$('#dataModelSelector').click();
 				};
 			}
 		};
@@ -67276,18 +67276,13 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 					if(!sourceGroups) {
 						if(!scope.countBy) {
-							sourceGroups = reductio().aliasProp({
-								data: function(g, v) {
-									return {
-										description: sourceAccessor(v),
-										agg: g.data.agg + 1,
-										initialAgg: p.data.agg > +p.data.initialAgg ? p.data.agg : p.data.initialAgg
-									};
-								},
-								initialCount: function () {
-									return 0;
-								}
-							})(scope.sourceDimension.group()).order(function (p) { return p.data.agg; });
+							sourceGroups = reductio()
+								.aliasProp({
+									description: function (g, v) { return sourceAccessor(v); },
+									agg: function (g) { return g.agg + 1; },
+									initialAgg: function(g) { return isNaN(g.initialAgg) || g.agg > +g.initialAgg ? g.agg : g.initialAgg; }
+								})(scope.sourceDimension.group())
+									.order(function (p) { return p.agg; });
 						} else {
 							var reducer = reductio()
 								.exception(function(v) { return v[scope.countBy]; });
@@ -67295,91 +67290,63 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							if(scope.aggregationType === 'COUNT') {
 								reducer.exceptionCount(true);
 								reducer.aliasProp({
-									data: function(p, v) {
-										return {
-											description: sourceAccessor(v),
-											agg: p.exceptionCount,
-											initialAgg: p.data ? (p.exceptionCount > p.data.initialAgg ? p.exceptionCount : p.data.initialAgg) : 1
-										};
-									},
+									description: function(g, v) { return sourceAccessor(v); },
+									agg: function(g) { return g.exceptionCount; },
+									initialAgg: function(g) { return isNaN(g.initialAgg) || g.exceptionCount > +g.initialAgg ? g.exceptionCount : g.initialAgg; }
 								});
 							} else {
 								reducer.exceptionSum(function(d) { return +d[scope.aggregateKey]; });
 								reducer.aliasProp({
-									data: function(p, v) {
-										return {
-											description: sourceAccessor(v),
-											agg: p.exceptionSum,
-											initialAgg: p.data ? (p.exceptionSum > p.data.initialAgg ? p.exceptionSum : p.data.initialAgg) : p.exceptionSum
-										};
-									},
+									description: function(g, v) { return sourceAccessor(v); },
+									agg: function(g) { return g.exceptionSum; },
+									initialAgg: function(g) { return isNaN(g.initialAgg) || g.exceptionSum > +g.initialAgg ? g.exceptionSum : g.initialAgg; }
 								});
 							}
 							sourceGroups = reducer(scope.sourceDimension.group())
-									.order(function (p) { return p.data.agg; });
+									.order(function (p) { return p.agg; });
 						}
 					}
 
-					// from destinationDimension
-					if (scope.type == "point-to-point" && scope.destinationDimension && !destGroups) {
-						// adding destinations
+					if(scope.type == "point-to-point" && scope.destinationDimension && !destGroups) {
 						if(!scope.countBy) {
-							destGroups = scope.destinationDimension.group().reduce(
-								function (p, v) {
-									p.data.description = destinationAccessor(v);
-									p.data.agg++;
-									if(p.data.agg > p.data.initialAgg) p.data.initialAgg = p.data.agg;
-									return p;
-								},
-								function (p, v) {
-									p.data.agg--;
-									return p;
-								},
-								function () {
-									return { data: { agg: 0, initialAgg: 0 }, initialCount: 0 };
-								}
-							).order(function (p) { return p.data.agg; });
+							destGroups = reductio()
+								.aliasProp({
+									description: function (g, v) { return destinationAccessor(v); },
+									agg: function (g) { return g.agg + 1; },
+									initialAgg: function(g) { return isNaN(g.initialAgg) || g.agg > +g.initialAgg ? g.agg : g.initialAgg; }
+								})(scope.destinationDimension.group())
+									.order(function (p) { return p.agg; });
 						} else {
-							helpers = crossfilterHelpers.countByDimensionWithInitialCountAndData(
-								function(v) { return v[scope.countBy]; },
-								function (d, p, t) {
-									if(p === undefined) {
-										p = { agg: 0, initialAgg: 0, description: destinationAccessor(d) };
-									}
-									if(t === 'add') {
-										// Adding a new record.
-										if(scope.aggregationType === 'COUNT') {
-											p.agg++;
-										} else {
-											p.agg = p.agg + (+d[scope.aggregateKey] ? +d[scope.aggregateKey] : 0); // Make sure to cast or you end up with a String!!!
-										}
-										if(p.agg > p.initialAgg) p.initialAgg = p.agg;
-									} else {
-										// Removing a record.
-										if(scope.aggregationType === 'COUNT') {
-											p.agg--;
-										} else {
-											p.agg = p.agg - (+d[scope.aggregateKey] ? +d[scope.aggregateKey] : 0); // Make sure to cast or you end up with a String!!!
-										}
-									}
-									return p;
-								}
-							);
-							destGroups = scope.destinationDimension.group().reduce(
-								helpers.add,
-								helpers.remove,
-								helpers.init
-							).order(function (p) { return p.data.agg; });
+							var reducer = reductio()
+								.exception(function(v) { return v[scope.countBy]; });
+
+							if(scope.aggregationType === 'COUNT') {
+								reducer.exceptionCount(true);
+								reducer.aliasProp({
+									description: function(g, v) { return destinationAccessor(v); },
+									agg: function(g) { return g.exceptionCount; },
+									initialAgg: function(g) { return isNaN(g.initialAgg) || g.exceptionCount > +g.initialAgg ? g.exceptionCount : g.initialAgg; }
+								});
+							} else {
+								reducer.exceptionSum(function(d) { return +d[scope.aggregateKey]; });
+								reducer.aliasProp({
+									description: function(g, v) { return destinationAccessor(v); },
+									agg: function(g) { return g.exceptionSum; },
+									initialAgg: function(g) { return isNaN(g.initialAgg) || g.exceptionSum > +g.initialAgg ? g.exceptionSum : g.initialAgg; }
+								});
+							}
+							destGroups = reducer(scope.destinationDimension.group())
+									.order(function (p) { return p.agg; });
 						}
 					}
 
 					var groupPoints = d3.map();
 
 					sourceGroups.top(Infinity)
-						.filter( function (d) { return d.key && d.value.data.agg > 0; })
+						.filter( function (d) { return d.key && d.value.agg > 0; })
 						.forEach( function (d) {
 							// Must copy the group value because these values will be updated if we have a destGroup.
-							groupPoints.set(d.key, { data: angular.copy(d.value.data), count: d.value.count, initialCount: d.value.initialCount });
+							groupPoints.set(d.key, angular.copy(d.value));
 						});
 
 					// Having to merge is not ideal. Would be better to maintain a different grouping,
@@ -67387,13 +67354,13 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					if(destGroups) {
 						// Merge sources and destinations;
 						var dests = destGroups.top(Infinity)
-							.filter( function (d) { return d.key && d.value.data.agg > 0; })
+							.filter( function (d) { return d.key && d.value.agg > 0; })
 							.forEach( function (d) {
 								if(groupPoints.has(d.key)) {
-									groupPoints.get(d.key).data.agg += +d.value.data.agg;
+									groupPoints.get(d.key).agg += +d.value.agg;
 								} else {
 									// Must copy the group value because these values will be updated.
-									groupPoints.set(d.key, { data: angular.copy(d.value.data), count: d.value.count, initialCount: d.value.initialCount });
+									groupPoints.set(d.key, angular.copy(d.value));
 								}
 							});
 					}
@@ -67419,37 +67386,26 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					if (!scope.destinationDimension) return [];
 
 					if(!nestedGroups) {
-						var helpers = crossfilterHelpers.countByDimensionWithInitialCountAndData(
-							function(v) { return v[scope.countBy]; },
-							function (d, p, t) {
-								if(p === undefined) {
-									p = { agg: 0, initialAgg: 0, description: "Placeholder", record: d };
-								}
-								if(t === 'add') {
-									// Adding a new record.
-									if(scope.aggregationType === 'COUNT') {
-										p.agg++;
-									} else {
-										p.agg = p.agg + (+d[scope.aggregateKey] ? +d[scope.aggregateKey] : 0); // Make sure to cast or you end up with a String!!!
-									}
-									if(p.agg > p.initialAgg) p.initialAgg = p.agg;
-								} else {
-									// Removing a record.
-									if(scope.aggregationType === 'COUNT') {
-										p.agg--;
-									} else {
-										p.agg = p.agg - (+d[scope.aggregateKey] ? +d[scope.aggregateKey] : 0); // Make sure to cast or you end up with a String!!!
-									}
-								}
-								return p;
-							}
-						);
+						var reducer = reductio()
+							.exception(function(v) { return v[scope.countBy]; });
 
-						nestedGroups = scope.filterDimension.group().reduce(
-							helpers.add,
-							helpers.remove,
-							helpers.init
-						);
+						if(scope.aggregationType === 'COUNT') {
+							reducer.exceptionCount(true);
+							reducer.aliasProp({
+								agg: function(g) { return g.exceptionCount; },
+								description: function(g, v) { return scope.sourceAccessor(v) + " - " + scope.destinationAccessor(v); },
+								record: function(g,v) { return v; }
+							});
+						} else {
+							reducer.exceptionSum(function(d) { return +d[scope.aggregateKey]; });
+							reducer.aliasProp({
+								agg: function(g) { return g.exceptionSum; },
+								description: function(g, v) { return scope.sourceAccessor(v) + " - " + scope.destinationAccessor(v); },
+								record: function(g,v) { return v; }
+							});
+						}
+
+						nestedGroups = reducer(scope.filterDimension.group());
 					}
 
 					var tempLinks = [];
@@ -67457,13 +67413,13 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					nestedGroups.all().forEach( function (d) {
 						// s.value.nest.entries().forEach( function (d) {
 							// Don't use blank latlongs.
-							if(d.key[0] && d.key[1] && d.value.data.agg > 0) tempLinks.push(
+							if(d.key[0] && d.key[1] && d.value.agg > 0) tempLinks.push(
 								{
 									source: d.key[0],
 									destination: d.key[1],
-									value: d.value.data.agg,
-									description: d.value.data.description,
-									data: d.value.data.record
+									value: d.value.agg,
+									description: d.value.description,
+									data: d.value.record
 								}
 							);
 						// });
@@ -67526,14 +67482,14 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					var nodes = points(),
 						edges = links,
 						line = d3.svg.line().interpolate('bundle'),
-						maxPointSize = scope.maxPointSize ? +scope.maxPointSize : d3.max(nodes.features, function(d){ return d.properties.value.data.initialAgg; });
+						maxPointSize = scope.maxPointSize ? +scope.maxPointSize : d3.max(nodes.features, function(d){ return d.properties.value.initialAgg; });
 						pointSize = scope.pointSize ?
 							d3.scale.sqrt().domain(
 					       		[ 1, maxPointSize ]
 					       	).range([3,26]) :
 					       	function(){ return 3; },
 						path = d3.geo.path()
-							.pointRadius(function(d){ return pointSize(d.properties.value.data.agg);})
+							.pointRadius(function(d){ return pointSize(d.properties.value.agg);})
 							.projection(project),
    						value = edges.feature ? d3.scale.linear().domain([ d3.min(edges.features, function(d){ return d.properties.value; }), d3.max(edges.features, function(d){ return d.properties.value; }) ]).range([2,20]) : function(d){ return 2; };
 
@@ -67636,7 +67592,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 										c[1] === d.properties.key;
 								});
 						    	// scope.sourceDimension.filter(d.properties.key);
-						    	deregister.push(palladioService.setFilter(identifier, scope.title, d.properties.value.data.description, resetNode));
+						    	deregister.push(palladioService.setFilter(identifier, scope.title, d.properties.value.description, resetNode));
 								palladioService.update();
 						    })
 						    .on("mouseover", nodeTip.show)
@@ -67655,7 +67611,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 										c[1] === d.properties.key;
 								});
 						    	// scope.sourceDimension.filter(d.properties.key);
-						    	deregister.push(palladioService.setFilter(identifier, scope.title, d.properties.value.data.description, resetNode));
+						    	deregister.push(palladioService.setFilter(identifier, scope.title, d.properties.value.description, resetNode));
 								palladioService.update();
 						    })
 						    .on("mouseover", nodeTip.show)
@@ -67715,11 +67671,11 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 					    return {
 						    type: "tooltip",
-						    text: d.properties.value.data.description + " (" + d.properties.value.data.agg + ")",//source + " → " + destination + " (" + d.properties.value + ")",
+						    text: d.properties.value.description + " (" + d.properties.value.agg + ")",//source + " → " + destination + " (" + d.properties.value + ")",
 						    detection: "shape",
 						    placement: "mouse",
 						    gravity: "top",
-						    displacement: [-(d.properties.value.data.description).length*7/2, 0],
+						    displacement: [-(d.properties.value.description).length*7/2, 0],
 						    mousemove: true
 					    };
 					}
@@ -67780,7 +67736,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 		        	// some highlight
 		        	node.classed("hidden-node", function(d){
-		        		var found = d.properties.value.data.description.toLowerCase().indexOf(search.toLowerCase()) !== -1;
+		        		var found = d.properties.value.description.toLowerCase().indexOf(search.toLowerCase()) !== -1;
 		        		return found ? false : true;
 		        	})
 
@@ -67793,7 +67749,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 		        function reCalculatePointSize() {
 		        	return d3.scale.sqrt().domain(
-			       		[ 1, d3.max(nodes.features, function(d){ return d.properties.value.data.agg; }) ]).range([3,26]);
+			       		[ 1, d3.max(nodes.features, function(d){ return d.properties.value.agg; }) ]).range([3,26]);
 		        }
 
 		        // Set up HTTPS URLS for 1.0 API
@@ -67818,7 +67774,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				var nodeTip = d3.tip()
 				  	.offset([-10, 0])
 				  	.attr("class","d3-tip")
-				  	.html(function(d){ return d.properties.value.data.description + " (" + d.properties.value.data.agg + ")"; });
+				  	.html(function(d){ return d.properties.value.description + " (" + d.properties.value.agg + ")"; });
 
 				var linkTip = d3.tip()
 				  	//.offset([0, 0])
@@ -71800,12 +71756,12 @@ angular.module('palladio').run(['$templateCache', function($templateCache) {
         "<div id=\"visualization\">\n  <div class=\"row-fluid\" data-ng-show=\"layout==='geo'\">\n    <div class=\"with-settings\" data-palladio-map-view-with-settings></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='time'\">\n    <div class=\"with-settings\" data-full-height=\"true\" data-full-width=\"true\"\n      data-show-controls = \"false\" data-show-accordion = \"false\"\n      data-view = \"true\"\n      data-palladio-partime-filter></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='graph'\">\n    <div class=\"with-settings\" data-palladio-graph-view-with-settings></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='table'\">\n    <div style=\"position: absolute; right: 40px; top:10px; z-index:20\" data-palladio-download-widget></div>\n    <div class=\"with-settings\" data-palladio-table-view-with-settings></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='grid'\">\n    <div style=\"position: absolute; right: 40px; top:10px; z-index:20\" data-palladio-download-widget></div>\n    <div class=\"with-settings\" data-palladio-list-view-with-settings></div>\n  </div>\n  <div class=\"row-fluid\" data-ng-show=\"layout==='duration'\">\n    <div class=\"with-settings\" data-full-height=\"true\" data-full-width=\"true\"\n      data-show-controls = \"false\" data-show-accordion = \"false\"\n      data-view = \"true\"\n      data-palladio-duration-view></div>\n  </div>\n</div>\n<div id=\"footer\" data-ng-show=\"showFilters()\">\n                <div class=\"\">\n                    <div id=\"filters-wrapper\" class=\"\">\n                        <div class=\"row-fluid filters-header\">\n                            <a style=\"line-height:30px\" data-ng-click=\"expandedFilters = !expandedFilters\" data-ng-init=\"expandedFilters = true\" class=\"pull-left\">\n                                <span data-ng-show=\"expandedFilters\"><i class=\"fa fa-angle-down text-center\" style=\"width:10px\"></i></span>\n                                <span data-ng-show=\"!expandedFilters\"><i class=\"fa fa-angle-right text-center\" style=\"width:10px\"></i></span>\n                            </a>\n\n                            <div class=\"row-fluid\" style=\"padding: 0px 10px 0px 20px;\">\n                                <a  data-toggle=\"tooltip\"\n                                    data-original-title=\"Add a new Facet Filter\"\n                                    class=\"view-link selected alert alert-info\"\n                                    data-ng-click=\"addFilter('facet')\"\n                                    data-ng-class=\"{selected: filter.indexOf('facet') !== -1, blur: blurFacet}\">Facet</a>\n\n                                <a  data-toggle=\"tooltip\"\n                                    data-original-title=\"Add a new Timeline Filter\"\n                                    class=\"view-link selected alert alert-info\"\n                                    data-ng-click=\"addFilter('timeline')\"\n                                    data-ng-class=\"{selected: filter.indexOf('timeline') !== -1, blur: blurTimeline}\">TimeLine</a>\n\n                                <a  data-toggle=\"tooltip\"\n                                    data-original-title=\"Add a new Time Spans Filter\"\n                                    class=\"view-link selected alert alert-info\"\n                                    data-ng-click=\"addFilter('partime')\"\n                                    data-ng-class=\"{selected: filter.indexOf('partime') !== -1, blur: blurTimeSpan}\">TimeSpan</a>\n\n                                <div class=\"\" data-palladio-selection-view></div>\n                            </div>\n\n\n                            <div class=\"clearfix\"></div>\n                        </div>\n\n\n\n                        <div class=\"row-fluid\" data-ng-show=\"expandedFilters\"></div>\n                        <ul data-ng-show=\"expandedFilters\" class=\"unstyled accordion\" id=\"filters\"></ul>\n                    </div>\n                </div>\n            </div>\n");
 }]);
 angular.module('palladio').run(['$templateCache', function($templateCache) {
-    $templateCache.put('partials/palladio-data-upload/template.html',
-        "<span data-ng-click=\"triggerDataModelSelector()\" >\n\t<span ng-transclude></span>\n</span>\n\n<input \ttype=\"file\" id=\"dataModelSelector\" \n\t\tstyle=\"display:none\" \n\t\tonchange=\"angular.element(this).scope().loadDataModel(this)\" />");
-}]);
-angular.module('palladio').run(['$templateCache', function($templateCache) {
     $templateCache.put('partials/palladio-data-download/template.html',
         "<span data-ng-click=\"exportDataModel()\" >\n\t<span ng-transclude></span>\n</span>");
+}]);
+angular.module('palladio').run(['$templateCache', function($templateCache) {
+    $templateCache.put('partials/palladio-data-upload/template.html',
+        "<span data-ng-click=\"triggerDataModelSelector()\" >\n\t<span ng-transclude></span>\n</span>\n\n<input \ttype=\"file\" id=\"dataModelSelector\" \n\t\tstyle=\"display:none\" \n\t\tonchange=\"angular.element(this).scope().loadDataModel(this)\" />");
 }]);
 angular.module('palladio').run(['$templateCache', function($templateCache) {
     $templateCache.put('partials/link.html',
