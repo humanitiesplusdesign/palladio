@@ -83,7 +83,7 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 					//
 					// d3.select(element[0]);
 
-					var sel, svg, dim, group, x, y,
+					var sel, svg, dim, group, x, y, colorRange,
 						top, bottom, left, filter, yStep, tooltip,
 						colors, bottomAxis, topAxis, yAxis, uniques, height, lineHeight;
 
@@ -121,7 +121,7 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 						uniques.sort(d3.descending);
 
 						// Figure height based on uniques and a minimum height.
-						height = uniques.length * lineHeight;
+						height = uniques.length * lineHeight + bottomOffset;
 
 						sel = d3.select(d3.select(element[0]).select(".main-viz")[0][0].children[0]);
 						if(!sel.select('svg').empty()) sel.select('svg').remove();
@@ -161,13 +161,22 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 								// 	}).map(function(d) { return d.key; }));
 								.domain(uniques);
 
+						colorRange = colorbrewer.Greys[9].map(function(d) { return d; });
+						// Remove color too close to background.
+						colorRange.splice(1,1);
+
 						colors = d3.scale.ordinal()
-							.range(colorbrewer.Greys[9])
+							.range(colorRange)
 							.domain(scope.xGroupDim.uniques);
 
 						bottomAxis = d3.svg.axis().orient("bottom").scale(x);
 						topAxis = d3.svg.axis().orient("top").scale(x);
 						yAxis = d3.svg.axis().orient("left").scale(y);
+						grid = d3.svg.axis().orient("top")
+								.scale(x)
+								.innerTickSize(-(height - bottomOffset - 0.5))
+								.outerTickSize(0)
+								.tickFormat("");
 
 						// Build the visualization.
 						var g = svg.append('g')
@@ -181,6 +190,10 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 						top = g.append('g')
 							.attr("class", "axis x-axis x-top")
 							.call(topAxis);
+
+						g.append('g')
+							.attr("class", "axis x-axis x-grid")
+							.call(grid);
 
 						left = g.append('g')
 							.attr("class", "axis y-axis")
@@ -432,11 +445,11 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 
 						// Load a state object created by exportState().
 						scope.title = state.title;
-						scope.durationDim = scope.durationDims.filter(function(d) { return d.key === state.durationDim; })[0];
-						scope.tooltipLabelDim = scope.labelDims.filter(function(d) { return d.key === state.tooltipLabelDim; })[0];
-						scope.groupDim = scope.labelDims.filter(function(d) { return d.key === state.groupDim; })[0];
-						scope.xGroupDim = scope.labelDims.filter(function(d) { return d.key === state.xGroupDim; })[0];
-						scope.xSortDim = scope.labelDims.filter(function(d) { return d.key === state.xSortDim; })[0];
+						scope.durationDim = scope.durationDims ? scope.durationDims.filter(function(d) { return d.key === state.durationDim; })[0] : null;
+						scope.tooltipLabelDim = scope.labelDims ? scope.labelDims.filter(function(d) { return d.key === state.tooltipLabelDim; })[0] : null;
+						scope.groupDim = scope.labelDims ? scope.labelDims.filter(function(d) { return d.key === state.groupDim; })[0] : null;
+						scope.xGroupDim = scope.labelDims ? scope.labelDims.filter(function(d) { return d.key === state.xGroupDim; })[0] : null;
+						scope.xSortDim = scope.labelDims ? scope.labelDims.filter(function(d) { return d.key === state.xSortDim; })[0] : null;
 
 						scope.mode = state.mode;
 
@@ -447,11 +460,11 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 						// Return a state object that can be consumed by importState().
 						return {
 							title: scope.title,
-							durationDim: scope.durationDim.key,
-							tooltipLabelDim: scope.tooltipLabelDim.key,
-							groupDim: scope.groupDim.key,
-							xGroupDim: scope.xGroupDim.key,
-							xSortDim: scope.xSortDim.key,
+							durationDim: scope.durationDim ? scope.durationDim.key : null,
+							tooltipLabelDim: scope.tooltipLabelDim ? scope.tooltipLabelDim.key : null,
+							groupDim: scope.groupDim ? scope.groupDim.key : null,
+							xGroupDim: scope.xGroupDim ? scope.xGroupDim.key : null,
+							xSortDim: scope.xSortDim ? scope.xSortDim.key : null,
 							mode: scope.mode
 						};
 					}

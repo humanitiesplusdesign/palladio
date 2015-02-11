@@ -519,6 +519,10 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		// If the data is undefined, redirect back to '/'
 		if(data.metadata === undefined) {
 			$window.location = '#/';
+			// Unbind the beforeunload handler so that we don't trigger a dialog on 2nd reload.
+			$(window).unbind('beforeunload');
+			// Hard reload.
+			$window.location.reload();
 			return;
 		}
 

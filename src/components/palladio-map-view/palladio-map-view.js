@@ -734,8 +734,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						if(ts.layer) {
 							// As we cycle through the layers, bring them to the front in order,
 							// resulting in them being re-ordered according to the current sort.
-							ts.layer.bringToFront();
-
+							ts.layer.bringToBack();
+							
 							// Update remove function to the current index.
 							ts.remove = function() {
 								m.removeLayer(ts.layer);
@@ -1059,7 +1059,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						s.countDim = state.countDim;
 						s.descriptiveDim = state.descriptiveDim;
 						s.showLinks = state.showLinks;
-						s.tileSets = state.tileSets;
+						if(state.tileSets) s.tileSets = state.tileSets;
 						s.pointSize = state.pointSize;
 						s.mapType = s.mapTypes.filter(function (d) { return d.value === state.mapType.value; })[0];
 						if(state.mapping.sourceCoordinates) {
@@ -1231,7 +1231,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				scope.addLayer = function () {
 
 					if (scope.layerOption && !scope.layerOption.custom) {
-						scope.layers.push({
+						scope.layers.unshift({
 							"url": null,
 							"mbId": scope.layerOption.mbId,
 							"enabled": true,
@@ -1240,7 +1240,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						});
 					}
 					else if (scope.url || scope.mbId) {
-						scope.layers.push({
+						scope.layers.unshift({
 							"url": scope.url ? scope.url : null,
 							"mbId": scope.mbId ? scope.mbId : null,
 							"enabled": true,

@@ -173,7 +173,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 
 								if(count > 0) {
 									// Extend the width of the inner- and mid-facet-container
-									selection.transition().style('width', (+selection.style('width').substring(0, selection.style('width').length - 2) + (205 * count)) + 'px');
+									selection.style('width', (+selection.style('width').substring(0, selection.style('width').length - 2) + (205 * count)) + 'px');
 									d3.select(element[0]).select('.mid-facet-container').transition()
 										.style('width', (+d3.select(element[0]).select('.mid-facet-container')
 											.style('width').substring(0, d3.select(element[0]).select('.mid-facet-container')
@@ -342,8 +342,9 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 					}
 
 					function updateCell(sel) {
-						sel.classed('filter-value', function(d) { return d.inFilter; })
-							.transition()
+						sel.classed('filter-value', function(d) {
+								return d.inFilter;
+							}).transition()
 								// .style('height', function (d) { return d.displayValue > 0 ? d.scale(d.displayValue) + 'px' : '3px'; });
 								.style('height', function (d) { return d.displayValue > 0 ? minCellHeight + 'px' : '3px'; });
 
@@ -433,7 +434,6 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 					// Clean up after ourselves. Remove dimensions that we have created. If we
 					// created watches on another scope, destroy those as well.
 					scope.$on('$destroy', function () {
-						console.log(scope.dims.length);
 						scope.dims.map(function(d) {
 							removeFacetData(d);
 						});
@@ -473,7 +473,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 						// Need to do this one-by-one because of the way we watch for changes.
 						scope.fields.filter(function(f) { return state.dimKeys.indexOf(f.key) !== -1; })
 							.forEach(function(d) {
-								scope.dims = scope.dims.concat(d);
+								scope.addKey = d.key;
 								scope.$digest();
 							});
 
@@ -484,6 +484,31 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 						state.domKeys = state.dimKeys.map(function(k) { return calculateDomKey(k); });
 
 						scope.$digest();
+
+						// Grab the facets from the DOM. We're going to click on them to filter.
+						var facetSelection = d3.select(element[0]).selectAll('.facet')[0];
+
+						// Set up the filters.
+						state.filters.forEach(function(f, i) {
+							var simpleArrayOfKeys = [];
+							if(f[0] && typeof f[0] === 'string') {
+								// New format.
+								simpleArrayOfKeys = f;
+							} else {
+								simpleArrayOfKeys = f.map(function(d) { return d.key; });
+							}
+							
+							// Filter the celsl to the ones in the saved filter.
+							var cells = d3.select(facetSelection[i]).selectAll('.cell')
+								.filter(function(d) {
+									return simpleArrayOfKeys.indexOf(d.key) !== -1;
+								});
+
+							// Click 'em
+							cells.each(function() {
+								this.click();
+							});
+						});
 					};
 
 					var exportState = function() {
@@ -491,7 +516,8 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 							config: scope.config,
 							aggDimKey: scope.aggDim.key,
 							dimKeys: scope.dims.map(function(d) { return d.key; }),
-							domKeys: scope.dims.map(function(d) { return calculateDomKey(d.key); })
+							domKeys: scope.dims.map(function(d) { return calculateDomKey(d.key); }),
+							filters: scope.dims.map(function(d) { return d.filters; })
 						};
 					};
 
