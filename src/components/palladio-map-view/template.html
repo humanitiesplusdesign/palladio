@@ -1,7 +1,8 @@
 <div class="view">
-	<a class="toggle" data-toggle="tooltip" data-original-title="Settings" data-placement="bottom">
-		<i class="fa fa-cog"></i>
-	</a>
+
+
+	<!-- View -->
+
 	<div data-palladio-map-view
 		type="mapType.value"
 		source-dimension="source"
@@ -23,15 +24,160 @@
 		count-description="{{aggDescription}}">
 	</div>
 </div>
+
 <!-- Settings -->
-<div class="span4 settings open">
+<div class="row">
+
+		<div class="settings col-lg-4 col-lg-offset-8 col-md-5 col-md-offset-7">
+			<div class="panel panel-default">
+
+				<a class="settings-toggle" data-toggle="tooltip" data-original-title="Settings" data-placement="bottom">
+					<i class="fa fa-cog"></i>
+				</a>
+
+				<!-- Body -->
+				<div class="panel-body">
+
+					<div class="row">
+						<div class="col-lg-12">
+							<label>Map type</label>
+							<select bs-select ng-model="mapType" ng-options="type.label for type in mapTypes"
+									data-size="5" class="span12 form-control">
+							</select>
+						</div>
+					</div>
+
+					<div class="row margin-top" ng-show="mapType.value=='points' || mapType.value=='sequence'">
+						<div class="col-lg-12">
+							<label>Places</label>
+							<select bs-select ng-model="mapping.sourceCoordinates"
+									ng-options="field as field.description for field in latlonFields"
+									data-size="5" class="form-control">
+								<option value=""><i>None</i></option>
+							</select>
+						</div>
+					</div>
+
+					<div class="row margin-top" ng-show="mapType.value=='point-to-point'">
+						<div class="col-lg-6 col-md-6">
+							<label>Source Places</label>
+							<select bs-select ng-model="mapping.sourceCoordinates"
+									placeholder="Choose..."
+									ng-options="field as field.description for field in latlonFields"
+									data-size="5" class="form-control">
+								<option value=""><i>None</i></option>
+							</select>
+						</div>
+						<div class="col-lg-6 col-md-6">
+							<label>Destination Places</label>
+							<select bs-select ng-model="mapping.destinationCoordinates"
+									placeholder="Choose..."
+									ng-options="field as field.description for field in latlonFields"
+									data-size="5" class="form-control">
+							<option value=""><i>None</i></option>
+							</select>
+						</div>
+
+					</div>
+
+					<div class="row margin-top" ng-show="mapType.value=='point-to-point' || mapType.value=='sequence'">
+							<div class="col-lg-12 checkbox">
+								<label class="">
+									<input type="checkbox" ng-model="showLinks"> Show links
+								</label>
+						</div>
+					</div>
+
+					<div class="row margin-top">
+						<div class="col-lg-12">
+							<label>Tooltip label</label>
+							<span class="btn btn-default" ng-click="showDescriptionModal()">
+									{{descriptiveDim.description || "Choose"}}...
+							</span>
+						</div>
+					</div>
+
+					<div class="row margin-top">
+						<div class="col-lg-12 checkbox">
+							<label>
+								<input type="checkbox" ng-model="pointSize"> Size points
+							</label>
+						</div>
+					</div>
+
+					<div class="row margin-top">
+						<div class="col-lg-6" data-ng-show="pointSize">
+							<label>Point size corresponds to</label>
+							<span class="btn btn-default" ng-click="showAggModal()">
+								{{getAggDescription(aggDim) || "Choose"}}...
+							</span>
+						</div>
+
+						<div class="col-lg-6" data-ng-show="pointSize">
+
+							<div data-ng-show="pointSize">
+								<label>
+									<input type="checkbox" ng-model="fixScale"> Adjust scale
+								</label>
+							</div>
+
+							<div data-ng-show="fixScale && pointSize">
+								<input class="form-control" type="number" ng-model="maxPointSize">
+								<p class="help-block">Maximum value</p>
+							</div>
+
+						</div>
+
+
+					</div>
+
+					<div class="row margin-top">
+						<div class="col-lg-6">
+							<label>Layers</label>
+								<ul class="layer-list list-unstyled" ui-sortable="{axis:'y'}" data-ng-model="tileSets" data-ng-show="tileSets.length">
+									<li class="layer-item" data-ng-repeat="layer in tileSets | orderBy:index">
+										<i class="icon-move"></i>
+										<i class="fa fa-eye-slash" data-ng-click="layer.toggle()" ng-show="!layer.enabled" data-toggle="tooltip" data-original-title="Show"></i>
+										<i class="fa fa-eye" data-ng-click="layer.toggle()" ng-show="layer.enabled" data-toggle="tooltip" data-original-title="Hide"></i>
+										<span style="margin-left: 10px">{{layer.description}}</span>
+										<i class="fa fa-trash-o pull-right" data-ng-click="layer.remove();" style="line-height: 1.6"></i>
+									</li>
+								</ul>
+								<ul data-ng-show="!tileSets.length" class="list-unstyled">
+									<li class="layer-item">
+										<span>No layers</span>
+									</li>
+								</ul>
+								<button class="btn btn-default" data-ng-click="showLayerModal()">New layer</button>
+
+						</div>
+					</div>
+
+				</div>
+
+				<!-- Footer -->
+				<div class="panel-footer">
+					<a ng-click="exportSvg(this, 'Palladio Map.svg')">
+						<i class="fa fa-download margin-right"></i>Download places and links as .svg
+					</a>
+				</div>
+
+			</div>
+		</div>
+
+
+
+</div>
+
+
+<!--<div class="span4 settings open">
 	<div class="row-fluid">
-		<div class="span6">						     
+		<div class="span6">
 			<div class="setting">
 				<label>Map type</label>
 				<select bs-select ng-model="mapType" ng-options="type.label for type in mapTypes"
 						data-size="5" class="span12 form-control show-tick">
-				</select> 
+				</select>
 			</div>
 		</div>
 		<div class="span6">
@@ -42,23 +188,23 @@
 
 	<div class="row-fluid">
 		<div class="span6">
-						        
+
 			<div class="setting" ng-show="mapType.value=='points' || mapType.value=='sequence'">
 				<label>Places</label>
-				<select bs-select ng-model="mapping.sourceCoordinates" 
-						ng-options="field as field.description for field in latlonFields" 
+				<select bs-select ng-model="mapping.sourceCoordinates"
+						ng-options="field as field.description for field in latlonFields"
 						data-size="5" class="span12 form-control show-tick">
 					<option value=""><i>None</i></option>
-				</select> 
+				</select>
 			</div>
-						    
+
 			<div class="setting" ng-show="mapType.value=='point-to-point'">
 				<label>Source Places</label>
-				<select bs-select ng-model="mapping.sourceCoordinates" 
-						ng-options="field as field.description for field in latlonFields" 
+				<select bs-select ng-model="mapping.sourceCoordinates"
+						ng-options="field as field.description for field in latlonFields"
 						data-size="5" class="span12 form-control show-tick">
 					<option value=""><i>None</i></option>
-				</select> 
+				</select>
 			</div>
 
 		</div>
@@ -67,20 +213,20 @@
 
 			<div class="setting" ng-show="mapType.value=='point-to-point'">
 					<label>Destination Places</label>
-					<select bs-select ng-model="mapping.destinationCoordinates" 
+					<select bs-select ng-model="mapping.destinationCoordinates"
 							ng-options="field as field.description for field in latlonFields"
 							data-size="5" class="span12 form-control show-tick">
 					<option value=""><i>None</i></option>
-				</select> 
+				</select>
 			</div>
 
 			<div class="setting" ng-show="mapType.value=='sequence'">
 				<label>Establish sequence by</label>
-				<select bs-select ng-model="mapping.sequence" 
-						ng-options="field.description for field in dateFields" 
+				<select bs-select ng-model="mapping.sequence"
+						ng-options="field.description for field in dateFields"
 						data-size="5" class="span12 form-control show-tick">
 					<option value=""><i>None</i></option>
-				</select> 
+				</select>
 			</div>
 
 			<div class="setting" ng-show="mapType.value=='point-to-point' || mapType.value=='sequence'">
@@ -133,7 +279,7 @@
 		<div class="span6">
 
 			<div class="space"></div>
-						      	
+
 			<div class="setting">
 				<label class="">Tooltip label</label>
 				<span class="field" ng-click="showDescriptionModal()">
@@ -174,11 +320,12 @@
 
 		</div>
 
-		
+
 	</div>
-</div>
+</div>-->
+
 <div id="{{uniqueModalId}}">
-	<div id="agg-modal" data-modal dimensions="aggDims" model="aggDim" 
+	<div id="agg-modal" data-modal dimensions="aggDims" model="aggDim"
 			description-accessor="getAggDescription"></div>
 	<div id="description-modal" data-modal dimensions="descriptiveDims" model="descriptiveDim"></div>
 	<div id="layer-modal" data-layer-modal layers="tileSets"></div>

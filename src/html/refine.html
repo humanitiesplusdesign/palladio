@@ -1,211 +1,102 @@
-<div class="refine-background" data-ng-show="selectedFieldMetadata"></div>
-
-<div class="refine-selected" data-ng-show="selectedFieldMetadata">
-
-	<div class="" style="padding: 20px 40px 20px 20px" ng-show="addingTable">
-
-		<div class="row-fluid">
-			<div class="span12">
-				<label for="type">Add a new table</label>
-				<input type="text" class="editable span12 left" placeholder="Untitled" ng-model="lastFileName"></input>
-				<span class="help-block">Provide a title to this table.</span>
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<!-- Modal Header -->
+			<div class="modal-header">
+				<!--<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>-->
+				<input
+					data-toggle="tooltip"
+					data-original-title="Rename"
+					type="text"
+					class="editable form-control"
+					data-ng-model="selectedFieldMetadata.description" placeholder="Untitled"></input>
 			</div>
-			<span class="refine-close" aria-hidden="true">&times;</span>
-		</div>
+			<!-- Modal Body -->
+			<div class="modal-body">
 
-		<ul class="nav nav-tabs" role="tablist" id="uploadTab" data-ng-init="loadFromRefine = 'csv'">
-	        <li data-ng-class="{'active' : loadFromRefine =='csv'}"><a ng-click="loadFromRefine='csv'" role="tab" data-toggle="tab">Load CSV</a></li>
-	        <li data-ng-class="{'active' : loadFromRefine =='sparql'}"><a ng-click="loadFromRefine='sparql'" role="tab" data-toggle="tab">Load from SPARQL endpoint</a></li>
-        </ul>
-        <div class="tab-content">
-			<div class="tab-pane" data-ng-class="{'active' : loadFromRefine =='csv'}" id="csv">
-				<textarea ui-refresh="selectedFieldMetadata" ui-codemirror="{ mode : 'text',  lineNumbers : true, lineWrapping: true, onDrop : onDrop }" placeholder="Paste your data or drop a file here" ng-model="text"></textarea>
-				<span class="help-block">Copy and paste your data here or drop a file in to add new table.</span>
-				<div class="alert" ng-show="parseError">{{parseError}}</div>
-			</div>
-			<div class="tab-pane" data-ng-class="{'active' : loadFromRefine =='sparql'}" id="sparql">
-				<yasgui data="text" endpoint="sparqlEndpoint"/>
-				<div class="space"></div>
-			</div>
-        </div>
+				<div class="row">
 
-		<div class="">
-			<button class="btn btn-info" ng-click="hideNewTable()">Cancel</button>
-			<button class="btn" ng-click="parseExtendTable()" ng-disabled="!text">Load data</button>
-			<div class="clearfix"></div>
-		</div>
-
-	</div>
-
-	<div ng-hide="addingTable">
-
-		<div style="padding:20px 20px 10px 10px; border-bottom: 1px solid #eee">
-
-			<div class="row-fluid">
-
-				<div class="span8">
-
-					<div class="row-fluid">
-						<div class="span12" style="padding-left: 10px">
-							<input  data-toggle="tooltip"
-                    				data-original-title="Rename"
-                    				type="text" class="editable span12 left" data-ng-model="selectedFieldMetadata.description" placeholder="Untitled"></input>
-						</div>
-						<span class="refine-close" aria-hidden="true">&times;</span>
-					</div>
-
-				</div>
-
-			</div>
-
-			<div class="" style="padding-left: 10px">
-				<span class="small muted tiny">{{selectedFieldMetadata.cardinality}} unique values ({{selectedFieldMetadata.blanks}} null values)</span>
-				<span class="small tiny" data-ng-show="selectedFieldMetadata.uniqueKey"><i class="fa fa-tag muted" style="margin-left:8px"></i><span class="super"> Unique key</span></span>
-			</div>
-
-
-
-		</div>
-
-		<div style="padding:20px 20px 20px 20px">
-
-			<div class="row-fluid">
-
-				<div class="span8">
-
-					<div class="row-fluid">
-						<div class="span6">
-							<label for="type">Data type</label>
-							<select class="form-control show-tick" bs-select
+					<!-- Left column -->
+					<div class="col-lg-8">
+						<!-- Data type -->
+						<div class="row margin-bottom">
+							<div class="col-lg-12">
+								<label>Data type</label>
+								<select
+									bs-select
+									class="form-control"
 									data-ng-model="selectedFieldMetadata.type"
 									data-ng-options="t.id as t.name for t in allowedTypes" id="type"
 									data-ng-change="updateMetadata()">
-							</select>
-						</div>
-					</div>
-
-					<div class="row-fluid">
-						<div class="help-block">
-							<span class="error" data-ng-show="selectedFieldMetadata.errors.length">
-								{{selectedFieldMetadata.errors.length}} unique values do not match this data type! <a class="error" data-ng-click="downloadErrors()"><strong>Download the list of errors.</strong></a>
-							</span>
-							<span data-ng-hide="selectedFieldMetadata.errors.length">All the unique values match this type</span>
-						</div>
-
-					</div>
-
-					<div class="space"></div>
-
-					<div class="row-fluid">
-						<div class="span6">
-							<input type="text" class="span12" ng-model="searchUnique" placeholder="Search"></input>
-						</div>
-						<div class="span4 offset2">
-							<select class="span12 form-control show-tick" bs-select data-ng-model="sortBy"
-							data-ng-options="t as t.label for t in sortOptions" id="sortBy"
-							data-ng-change="updateMetadata()">
-							</select>
-						</div>
-					</div>
-
-					<div class="row-fluid">
-						<div class="bordered" style="margin-bottom:10px">
-							<table class="table span12 refine-values-table table-striped" data-ng-show="!filtered || (filtered && filtered.length > 0)">
-								<tr data-ng-repeat="val in filtered = (selectedFieldMetadata.uniques | filter:searchUnique) | limitTo:1000">
-									<td class="span12" data-ng-class="{ error: findError(val.key) }"
-										title="{{findError(val.key).message}}"
-										data-ng-bind-html="displayVal(val)">
-									</td>
-								</tr>
-							</table>
-							<div class="clearfix"></div>
-						</div>
-						<p class="alert" data-ng-show="filtered && filtered.length == 0">No values found.</p>
-						<p class="small muted tiny">{{filtered.length}} values displayed. <a data-ng-click="downloadUniques(searchUnique)" class="" data-ng-hide="filtered && filtered.length == 0">Download</a></p>
-					</div>
-
-					<div class="space"></div>
-					<div>
-						<label for="type">Extension</label>
-
-						
-						<div class="row-fluid">
-							<div class="span8">
-								<span palladio-file-pills files="filteredFiles" model="selectedFieldMetadata.augmentId"></span>
-								<span class="help-block" data-ng-show="!hasLinks(selectedFieldMetadata).lookup">You can provide additional information about this dimension with data from another table.</span>
-							</div>
-							<div class="span4 text-right">
-								<a class="btn" ng-click="showNewTable()">Add a new table</a>
+								</select>
+								<p class="help-block" data-ng-show="selectedFieldMetadata.errors.length">{{selectedFieldMetadata.errors.length}} unique values do not match this data type! <a data-ng-click="downloadErrors()">Download the list of errors.</a></p>
+								<p class="help-block" data-ng-hide="selectedFieldMetadata.errors.length">All the values match this type.</p>
 							</div>
 						</div>
-						<div class="row-fluid">
-							<span class="tiny strong span6"
-								style="margin-bottom:0px"
-								data-ng-show="hasLinks(selectedFieldMetadata).lookup"
-								ng-style="{ 'color': hasLinks(selectedFieldMetadata).metadata.background }">
+						<!-- Unique values -->
+						<div class="row">
+							<div class="col-lg-12">
+								<!-- Search -->
+								<div class="row margin-bottom">
+									<div class="col-lg-6 col-md-6 col-sm-6">
+										<input type="text" class="form-control" ng-model="searchUnique" placeholder="Search"></input>
+									</div>
+									<div class="col-lg-6 col-md-6 col-sm-6">
+										<div class="pull-right">
+											<select
+												class="form-control"
+												bs-select
+												data-ng-model="sortBy"
+												data-ng-options="t as t.label for t in sortOptions" id="sortBy"
+												data-ng-change="updateMetadata()">
+											</select>
+										</div>
+									</div>
+								</div>
 
-								<span class="super">{{hasLinks(selectedFieldMetadata).metadata.matches}}</span> out of {{hasLinks(selectedFieldMetadata).metadata.total}} matches
-							</span>
+								<div class="unique-values margin-bottom">
+									<table
+										class="table table-striped"
+										data-ng-show="!filtered || (filtered && filtered.length > 0)">
+										<tr data-ng-repeat="val in filtered = (selectedFieldMetadata.uniques | filter:searchUnique) | limitTo:1000">
+												<td
+													data-ng-class="{ 'text-danger': findError(val.key) }"
+													title="{{findError(val.key).message}}"
+													data-ng-bind-html="displayVal(val)">
+											</td>
+										</tr>
+									</table>
+									<div class="padding-all text-danger bg-danger" data-ng-show="filtered && filtered.length == 0">No values found.</div>
+								</div>
+								<p><strong>{{filtered.length}}</strong> values displayed. <a data-ng-click="downloadUniques(searchUnique)" class="" data-ng-hide="filtered && filtered.length == 0">Download</a></p>
+
+								<div>
+									<label>Extention</label>
+								</div>
+
+
+							</div>
 						</div>
+
 					</div>
+
+
+					<!-- Right column -->
+					<div class="col-lg-4">
+						<label>Special characters</label>
+					</div>
+
 
 				</div>
 
-				<div class="span4" style="padding-left:8px">
 
-					<!--<label ng-show="selectedFieldMetadata.special.length">¶ Special characters found!</label>-->
-					<div ng-show="selectedFieldMetadata.special.length && !selectedFieldMetadata.unassignedSpecialChars.length">
-						<span class="help-block alert alert-special">All the special characters are currently used as delimiters.</span>
-						<div class="space"></div>
-					</div>
-
-					<div class="row-fluid" ng-show="selectedFieldMetadata.unassignedSpecialChars.length">
-						<div class="">
-							<span class="help-block">Some of the values in this dimension contain the following special characters. If you want to use them as delimiter, type them into the forms below.</span>
-							<div specials></div>
-						</div>
-						<div class="space"></div>
-					</div>
-
-					<div class="row-fluid">
-						<div class="span12">
-							<label for="val-delimiter">Multiple values delimiter</label>
-							<input type="text" id="val-delimiter" class="input-mini span12"
-								data-ng-model="selectedFieldMetadata.mvDelimiter"
-								data-ng-change="updateMetadata()"/>
-							<span class="help-block">If the dimension contains multiple values, insert the delimiter string here.</span>
-						</div>
-					</div>
-					<div class="row-fluid">
-						<div class="span12">
-							<label for="hier-delimiter">Hierarchy delimiter</label>
-							<input type="text" id="hier-delimiter" class="input-mini span12"
-								data-ng-model="selectedFieldMetadata.hierDelimiter"
-								data-ng-change="updateMetadata()" />
-							<span class="help-block">If the dimension contains hierarchical values, insert the delimiter string here.</span>
-						</div>
-					</div>
-
-					<div class="row-fluid">
-						<div class="span12">
-							<label for="ignore">Remove the following strings</label>
-							<div class="row-fluid">
-								<div tag></div>
-							</div>
-							<span class="help-block">If you want to remove specific strings from the values, insert them here. Press Enter after each string.</span>
-						</div>
-					</div>
-				</div>
 
 			</div>
-
+			<!-- Modal Footer -->
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			</div>
 		</div>
-
-		<!--<div class="with-border">
-			<a class="pull-right danger small tiny" ng-click="deleteFile(file, $index)">Delete</a>
-			<div class="clearfix"></div>
-		</div>-->
-
 	</div>
-
 </div>

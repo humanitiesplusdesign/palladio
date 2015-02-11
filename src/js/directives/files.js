@@ -9,7 +9,7 @@ angular.module('palladio.directives.files', [
 
 				// function to parse data
 				scope.parseData = function(afterParse){
-					
+
 					// if no text return
 					if (!scope.text || !scope.text.length) return;
 					scope.parseError = false;
@@ -49,7 +49,12 @@ angular.module('palladio.directives.files', [
 					}
 				};
 
-				scope.$watch(function(){ return $('.files-list').html(); }, function(){
+				scope.$watch(function(){ return $('.files').html(); }, function(){
+					$('.tooltip').remove();
+					$('*[data-toggle="tooltip"]').tooltip({container:'body'});
+				});
+
+				scope.$watch('files.length', function(files){
 					$('.tooltip').remove();
 					$('*[data-toggle="tooltip"]').tooltip({container:'body'});
 				});
@@ -75,6 +80,7 @@ angular.module('palladio.directives.files', [
 					dataService.addFile(data, label);
 					scope.lastFileName = null;
 				};
+
 
 			}
 		};

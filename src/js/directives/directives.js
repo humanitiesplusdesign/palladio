@@ -1,5 +1,5 @@
 angular.module('palladio.directives', [
-	'$strap.directives',
+	'mgcrea.ngStrap',
 	'palladio.directives.dimension',
 	'palladio.directives.refine',
 	'palladio.directives.files',
@@ -21,12 +21,12 @@ angular.module('palladio.directives', [
 	    return {
 	      restrict: 'A',
 	      link: function (scope, element, attrs) {
-	        
+
 	        attrs.handles = attrs.handles || "e, s, se";
 	        attrs.options = attrs.options || {};
-	        
+
 	        var options = {
-	          
+
 	          handles : attrs.handles,
 
 	          resize: function(event, ui) {
@@ -39,6 +39,6 @@ angular.module('palladio.directives', [
 	        options = angular.extend(options, attrs.options);
 	        $(element).resizable(options)
 
-	      } 
+	      }
 	    }
 	});

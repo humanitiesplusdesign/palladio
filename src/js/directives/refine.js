@@ -69,7 +69,7 @@ angular.module('palladio.directives.refine', [
 							}
 
 							// Hide the upload dialog after the parsing has happened.
-							// Wait until the augmentId watcher is finished. 
+							// Wait until the augmentId watcher is finished.
 							// TODO: This wait shouldn't be necessary
 							var intervalId = window.setInterval(function () {
 								if(!scope.augmenting) {
@@ -172,6 +172,7 @@ angular.module('palladio.directives.refine', [
 				$(window).ready(updatePosition);
 				$('.refine-background').click(hideAndApply);
 				$('.refine-close').click(hideAndApply);
+
 			}
 		};
 

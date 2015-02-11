@@ -108,20 +108,27 @@
 [data-palladio-map-view-with-settings] .layer-list {
 	list-style-type: none;
 	margin-left: 0px;
-	border: 1px solid #ddd;
 	border-radius: 2px;
+	background: #fafafa;
 }
 
 [data-palladio-map-view-with-settings] .layer-list i {
 	cursor: pointer;
 }
 
+.layer-img {
+	height: 120px;
+	background-size: cover;
+	background-position: center;
+}
+
 [data-palladio-map-view-with-settings] .layer-item {
 	padding: 6px 10px;
-	border-top: 1px solid #ddd;
-	font-size: 11px;
+	font-size: 12px;
+	background: #f5f5f5;
+	cursor: move;
+	margin-bottom: 2px;
 }
 
 [data-palladio-map-view-with-settings] .layer-item:first-child {
-	border: none;
 }

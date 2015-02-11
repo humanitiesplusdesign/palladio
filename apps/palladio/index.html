@@ -14,28 +14,82 @@
         <link type="text/css" href="palladio.css" rel="stylesheet" />
 
         <!-- Font Awesome -->
-        <link href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-
+        <link href="https://netdna.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
 
         <!-- Google Fonts -->
-        <link href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,500,700,900|Merriweather:400,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
-        <link href='https://fonts.googleapis.com/css?family=Oxygen:400,300,700' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic,500,700,500italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:300,700' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
     </head>
 
     <body data-ng-controller="WorkflowCtrl">
+
+    <nav class="navbar navbar-default navbar-fixed-top">
+
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#main-navbar">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" ui-sref="/">P</a>
+          </div>
+
+          <div class="collapse navbar-collapse" id="main-navbar">
+            <ul class="nav navbar-nav">
+
+              <li data-ng-class="{'active' : location.path() == '/upload'}">
+                  <a ui-sref="/upload" data-ng-show="files.length">Data</a>
+                  <a ui-sref="/upload" data-ng-show="!files.length && location.path() == '/upload'">Start</a>
+                  <a data-ng-show="!files.length && location.path() != '/upload'" ui-sref="/upload">Start</a>
+              </li>
+
+              <li data-ng-show="files.length"
+                  data-ng-class="{'active' : location.path() == '/visualization' && layout=='geo'}">
+                <a ui-sref="/visualization" ui-sref-opts="{reload: reload}" data-ng-click="setLayout('geo')" class="short">Map</a>
+              </li>
+
+              <li data-ng-show="files.length"
+                  data-ng-class="{'active' : location.path() == '/visualization' && layout=='graph'}">
+                  <a ui-sref="/visualization" ui-sref-opts="{reload: reload}" data-ng-click="setLayout('graph')" class="short">Graph</a>
+              </li>
+
+              <li data-ng-show="files.length"
+                  data-ng-class="{'active' : location.path() == '/visualization' && layout=='grid'}">
+                  <a ui-sref="/visualization" ui-sref-opts="{reload: reload}" data-ng-click="setLayout('grid')" class="short">Gallery</a>
+              </li>
+
+            </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+              <li data-ng-show="files.length">
+                  <a palladio-data-download>Save</a>
+              </li>
+            </ul>
+
+          </div>
+        </div>
+      </nav>
+
+      <div ui-view id="main" data-ng-class="{'palette-displayed' : showPalette}"></div>
+
+
+      <!--
         <div class="wrapper">
 
             <div class="navbar navbar-fixed-top">
               <div class="navbar-inner">
                 <div class="container-fluid">
-                  
+
                   <a class="brand"
                         ui-sref="/">
                         Palladio
                     </a>
 
                   <ul class="nav">
-                    
+
                     <li data-ng-class="{'active' : location.path() == '/upload'}">
                         <a ui-sref="/upload" class="short" data-ng-show="files.length">Data</a>
                         <a ui-sref="/upload" class="short" data-ng-show="!files.length && location.path() == '/upload'">Start</a>
@@ -43,7 +97,7 @@
                             <button ui-sref="/upload" class="btn" style="margin-top:0px">Start</button>
                         </span>
                     </li>
-                    
+
                     <li data-ng-show="files.length"
                         data-ng-class="{'active' : location.path() == '/visualization' && layout=='geo'}">
                         <a ui-sref="/visualization" ui-sref-opts="{reload: reload}" data-ng-click="setLayout('geo')" class="short">Map</a>
@@ -84,40 +138,25 @@
                             <i class="fa fa-search" style="margin-right:10px"></i><input class="search" ng-model="searchText" type="text" placeholder="Search in the view..." style="margin-bottom: 0px"></input>
                         </span>
                     </li>
-                    <!-- <li data-ng-show="location.path() == '/visualization'"
-                        data-ng-init="showPalette = false"
-                        data-ng-click="showPalette = !showPalette"
-                        id="palette-top" class="pull-right" style="margin-right:20px">
-
-                        <span>
-                            <i class="fa fa-bars"></i>
-                        </span>
-                    </li> -->
                   </ul>
 
                 </div>
               </div>
             </div>
 
-            <!-- <div id="palette" data-ng-show="showPalette && location.path() == '/visualization'">
-                <div data-palladio-palette></div>
-            </div> -->
-
             <div ui-view id="main"
                 data-ng-class="{'palette-displayed' : showPalette}"></div>
 
-        </div> <!-- wrapper -->
+        </div>
+        -->
 
-        <div id="spinner"></div>
+        <div id="spinner">
+          <div class="msg">Loading data. Please wait...</div>
+        </div>
 
         <script src="palladio.js"></script>
         <script src="https://api.tiles.mapbox.com/mapbox.js/v1.0.4/mapbox.js"></script>
-
         <script src="js/app.js"></script>
-
-        <script>
-            //new gnMenu( document.getElementById( 'gn-menu' ) );
-        </script>
 
     </body>
 </html>

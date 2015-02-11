@@ -19,61 +19,41 @@
     "lib"
   ],
   "dependencies": {
-    "jquery": "~2.1.1",
-    "jquery-ui": "~1.11.1",
-    "jquery-mousewheel": "~3.1.12",
-    "bootstrap": ">=2.0.4 <3.0",
-    "spin.js": "~2.0.1",
-    "crossfilter": "~1.3.9",
-    "d3": "~3.4.13",
-    "d3-tip": "~0.6.4",
-    "FileSaver": "*",
-    "Blob": "*",
-    "codemirror": "~4.5.0",
+    "jquery": "~2.1.3",
+    "angular": "~1.3.10",
+    "angular-ui-router": "~0.2.13",
+    "angular-sanitize": "~1.3.10",
+    "bootstrap": "~3.3.2",
+    "d3": "~3.5.3",
+    "angular-strap": "~2.1.6",
+    "angular-ui-sortable": "~0.13.3",
+    "angular-ui-codemirror": "~0.2.2",
+    "spin.js": "~2.0.2",
+    "crossfilter": "1.3.9",
+    "d3-tip": "~0.6.6",
     "leaflet": "~0.7.3",
-    "leaflet-search": "~1.5.5",
-    "colorbrewer": "~1.0.0",
+    "reductio": "~0.1.0",
     "classie": "~1.0.1",
-    "angular": "~1.3",
-    "angular-ui-router": "~0.2.11",
-    "angular-sanitize": "~1.2.24",
-    "angular-strap": "~0.7.8",
-    "angular-ui-sortable": "~0.12.11",
-    "angular-ui-codemirror": "~0.1.6",
-    "reductio": "~0.0.3",
-    "modernizr": "~2.8.3",
+    "Blob": "*",
+    "FileSaver": "*",
     "YASQE": "https://github.com/YASGUI/YASQE.git#~1.4.0",
-    "YASR": "https://github.com/YASGUI/YASR.git#~1.2.0",
-    "normalize-css": "~3.0.1"
+    "YASR": "https://github.com/YASGUI/YASR.git#~1.2.0"
   },
   "overrides": {
-    "crossfilter": {
-      "main": "../../lib/crossfilter/crossfilter.min.js"
-    },
-    "angular": {
-      "main": "./angular.min.js"
-    },
-    "jquery": {
-      "main": "dist/jquery.min.js"
-    },
-    "d3": {
-      "main": "d3.js"
-    },
     "FileSaver": {
       "main": "FileSaver.js"
     },
     "Blob": {
       "main": "Blob.js"
     },
+    "crossfilter": {
+      "main": "../../lib/crossfilter/crossfilter.min.js"
+    },
     "YASQE": {
       "main": [
         "dist/yasqe.min.js",
         "dist/yasqe.min.css"
-      ],
-      "dependencies": {
-        "jquery": "~2.1.1",
-        "codemirror": "~4.6.0"
-      }
+      ]
     },
     "YASR": {
       "main": [
@@ -81,11 +61,6 @@
         "dist/yasr.min.css"
       ]
     }
-  },
-  "resolutions": {
-    "angular": "~1.3",
-    "bootstrap": ">=2.0.4 <3.0",
-    "jquery": "~2.1.1",
-    "codemirror": "~4.5.0"
+
   }
 }
