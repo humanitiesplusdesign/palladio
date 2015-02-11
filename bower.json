@@ -61,6 +61,8 @@
         "dist/yasr.min.css"
       ]
     }
-
+  },
+  "resolutions": {
+    "d3": "~3.5.3"
   }
 }
