@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html ng-app="palladioApp" xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta charset="utf-8">
+        <title>Palladio</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <meta name="keywords" lang="en-us" content="Palladio, visualization, humanities, digital humanities" />
+
+        <!-- Map stuff -->
+        <link href='https://api.tiles.mapbox.com/mapbox.js/v1.0.4/mapbox.css' rel='stylesheet' />
+
+        <!-- Palladio -->
+        <link type="text/css" href="palladio.css" rel="stylesheet" />
+
+        <!-- Font Awesome -->
+        <link href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+
+        <!-- Google Fonts -->
+        <link href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,500,700,900|Merriweather:400,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Oxygen:400,300,700' rel='stylesheet' type='text/css'>
+    </head>
+
+    <body data-ng-controller="WorkflowCtrl">
+        <div class="wrapper">
+
+            <div class="navbar navbar-fixed-top">
+              <div class="navbar-inner">
+                <div class="container-fluid">
+
+                  <a class="brand"
+                        ui-sref="/">
+                        Palladio
+                    </a>
+
+                  <ul class="nav">
+
+                    <li data-ng-class="{'active' : location.path() == '/upload'}">
+                        <a ui-sref="/upload" class="short" data-ng-show="files.length">Data</a>
+                        <a ui-sref="/upload" class="short" data-ng-show="!files.length && location.path() == '/upload'">Start</a>
+                        <span data-ng-show="!files.length && location.path() != '/upload'">
+                            <button ui-sref="/upload" class="btn" style="margin-top:0px">Start</button>
+                        </span>
+                    </li>
+
+                    <li data-ng-show="files.length"
+                        data-ng-class="{'active' : location.path() == '/visualization' && layout=='geo'}">
+                        <a ui-sref="/visualization" ui-sref-opts="{reload: reload}" data-ng-click="setLayout('geo')" class="short">Map</a>
+                    </li>
+
+                    <li data-ng-show="files.length"
+                        data-ng-class="{'active' : location.path() == '/visualization' && layout=='graph'}">
+                        <a ui-sref="/visualization" ui-sref-opts="{reload: reload}" data-ng-click="setLayout('graph')" class="short">Graph</a>
+                    </li>
+
+                    <li data-ng-show="files.length"
+                        data-ng-class="{'active' : location.path() == '/visualization' && layout=='table'}">
+                        <a ui-sref="/visualization" ui-sref-opts="{reload: reload}" data-ng-click="setLayout('table')" class="short">List</a>
+                    </li>
+
+                    <li data-ng-show="files.length"
+                        data-ng-class="{'active' : location.path() == '/visualization' && layout=='grid'}">
+                        <a ui-sref="/visualization" ui-sref-opts="{reload: reload}" data-ng-click="setLayout('grid')" class="short">Gallery</a>
+                    </li>
+
+                    <li data-ng-show="files.length"
+                        data-ng-class="{'active' : location.path() == '/visualization' && layout=='time'}"><a ui-sref="/visualization" ui-sref-opts="{reload: reload}" data-ng-click="setLayout('time')" class="short">Time</a>
+                    </li>
+
+                    <li data-ng-show="files.length"
+                        data-ng-class="{'active' : location.path() == '/visualization' && layout=='duration'}"><a ui-sref="/visualization" ui-sref-opts="{reload: reload}" data-ng-click="setLayout('duration')" class="short">Duration</a>
+                    </li>
+
+                    <li data-ng-show="files.length">
+                        <span><button palladio-data-download class="btn" style="margin-top:0px">Save</button></span>
+                    </li>
+
+                    <li data-ng-show="!files.length"><span class="muted tiny small">The design of Palladio is an active research project. Your contributions have been essential. Please help us improve the tool by <a class="navbar-text small tiny" href="mailto:palladio@designhumanities.org">sharing any thoughts or suggestions.</a></span></li>
+
+                  </ul>
+
+                  <ul class="nav pull-right">
+                    <li id="search-top" class="pull-right" style="margin-right:20px">
+                        <span>
+                            <i class="fa fa-search" style="margin-right:10px"></i><input class="search" ng-model="searchText" type="text" placeholder="Search in the view..." style="margin-bottom: 0px"></input>
+                        </span>
+                    </li>
+                    <!-- <li data-ng-show="location.path() == '/visualization'"
+                        data-ng-init="showPalette = false"
+                        data-ng-click="showPalette = !showPalette"
+                        id="palette-top" class="pull-right" style="margin-right:20px">
+
+                        <span>
+                            <i class="fa fa-bars"></i>
+                        </span>
+                    </li> -->
+                  </ul>
+
+                </div>
+              </div>
+            </div>
+
+            <!-- <div id="palette" data-ng-show="showPalette && location.path() == '/visualization'">
+                <div data-palladio-palette></div>
+            </div> -->
+
+            <div ui-view id="main"
+                data-ng-class="{'palette-displayed' : showPalette}"></div>
+
+        </div> <!-- wrapper -->
+
+        <div id="spinner"></div>
+
+        <script src="palladio.js"></script>
+        <script src="https://api.tiles.mapbox.com/mapbox.js/v1.0.4/mapbox.js"></script>
+
+        <script src="js/app.js"></script>
+
+        <script>
+            //new gnMenu( document.getElementById( 'gn-menu' ) );
+        </script>
+
+    </body>
+</html>

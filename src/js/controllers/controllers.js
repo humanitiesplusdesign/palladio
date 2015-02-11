@@ -67,11 +67,11 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			if(dataService.isDirty() || data === undefined) {
 				// If data has been added/deleted/changed, we need to wipe out the existing
 				// filters that rely on the old data...
-				if(angular.element("#filters").scope()) {
+			/*	if(angular.element("#filters").scope()) {
 					angular.element("#filters").scope().$broadcast('$destroy');
 					angular.element("#filters").children().remove();
 					$scope.$emit('triggerFilterReset');
-				}
+				}*/
 
 				// ... then we reload the data.
 				dataService.getData().then(function (resolvedData) {
@@ -139,19 +139,19 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		}
 
 		// Alert when leaving
-		$(window).bind('beforeunload', function(){
+		/*$(window).bind('beforeunload', function(){
 			return 'By leaving this page you will loose your work.';
-		});
+		});*/
 
 	})
-	
+
 	.controller('UploadRefineCtrl', function ($scope, $location, parseService, dataService, validationService, $controller) {
 
 		// Instantiate the WorkflowCtrl controller in scope if it is not already.
 		if($scope.refreshData === undefined) {
 			$controller('WorkflowCtrl', { '$scope': $scope });
 		}
-		
+
 		$scope.selectedFieldMetadata = null;
 		$scope.selectedFile = null;
 		$scope.sparqlEndpoint = "";
@@ -186,11 +186,11 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 
 		$scope.setSelected = function(field, file) {
 			$scope.showSpecialCharDetail = false;
-			
+
 			// This is screwy: Don't update links if this is true, which we
 			// only have to do if the augmentID is not null or undefined.
 			if(field.augmentId !== null && field.augmentId !== undefined) field.initial = true;
-			
+
 			$scope.selectedFieldMetadata = field;
 			$scope.selectedFile = file;
 			$scope.selectedSpecialChar = null;
@@ -360,14 +360,15 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		}
 
 		$scope.highlightLink = function (link, source) {
+
 			if (!link) {
-				$('.file-info').css("opacity","1");
+				$('.file').css("opacity","1");
 				return;
 			}
 
-			$('.file-info').css("opacity",".2");
-			$('#file-info-' + source.id).css("opacity","1");
-			$('#file-info-' + link.lookup.file.id).css("opacity","1");
+			$('.file').css("opacity",".2");
+			$('#file-' + source.id).css("opacity","1");
+			$('#file-' + link.lookup.file.id).css("opacity","1");
 		};
 
 		$scope.showNewTableAndSelect = function(field,file) {
@@ -414,7 +415,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 				});
 			});
 
-			
+
 		};
 
 		$scope.hasLinks = function (field) {
@@ -436,7 +437,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			$('.type').tooltip({container:'body'});
 		});
 
-		/* Resizing links 
+		/* Resizing links
 
 		function resizeLinks() {
 			var height = $('#linking-files').height();
@@ -614,7 +615,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			// Intercept 'facet' and 'timeline' type registrations and handle them ourselves.
 			if(type === 'facet' || type === 'timeline' ||
 				type === 'partime' || type === 'timestep') {
-				
+
 				if(type === 'facet') {
 					facetExportFunctions.push(exp);
 					facetImportFunctions.push(imp);

@@ -6,13 +6,15 @@ var app = angular.module('palladioApp', [
 	'palladio.filters',
 	'ui.codemirror',
 	'ui.router',
+	'ui.sortable',
+	'mgcrea.ngStrap',
 
 	'palladioDataUpload',
 	'palladioDataDownload',
 
 	// Palette
 	'palladioPalette',
-	
+
 	// Filters
 	'palladioTimelineFilter',
 	'palladioFacetFilter',
@@ -56,8 +58,3 @@ var app = angular.module('palladioApp', [
 				}
 			});
 	})
-	.value('$strapConfig', {
-		datepicker: {
-			orientation : 'top'
-		}
-	});
