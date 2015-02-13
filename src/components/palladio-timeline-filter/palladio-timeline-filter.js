@@ -1099,6 +1099,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 									fileId: a.originFileId ? a.originFileId : 0
 								};
 							})
+							.filter(function(d) { return countDims.get(d.fileId) ? true : false; })
 							.sort(function (a, b) { return scope.getAggDescription(a) < scope.getAggDescription(b) ? -1 : 1; });
 					// Take the first aggDim from the first file.
 					scope.aggDim = scope.aggDims.filter(function(d) { return d.fileId === 0; })[0] ? 
