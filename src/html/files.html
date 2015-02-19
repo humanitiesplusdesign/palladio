@@ -22,7 +22,7 @@
 			        </ul>
 	                <div class="tab-content front-page-tab-content">
 						<div class="tab-pane" data-ng-class="{'active' : loadFrom =='csv'}" id="csv">
-							<p>Copy and paste out of your spreadsheets, drag-and-drop to upload tabular data (e.g. .csv, .tab, .tsv), or link to a public Google spreadsheet to create a new Palladio project.</p>
+							<p>Copy and paste out of your spreadsheets, drag-and-drop to upload tabular data (e.g. .csv, .tab, .tsv), or link to a tabular data file in a Dropbox Public folder to create a new Palladio project.</p>
 							<div class="alert alert-warning" ng-show="parseError">{{parseError}}</div>
 							<textarea ui-codemirror="{ mode : 'text',  lineNumbers : true, lineWrapping: true, onDrop : onDrop }" placeholder="Paste your data or drop a file here" ng-model="text"></textarea>
 							<div class="">
