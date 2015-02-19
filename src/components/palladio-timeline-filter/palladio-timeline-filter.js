@@ -388,7 +388,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					if(extent.length === 0) return true;
 
 					extent.forEach(function (p) {
-						if( dimFormat(p[0]) <= d && dimFormat(p[1]) >= d ) t = true;
+						if( p[0] <= dimFormat.parse(d) && p[1] >= dimFormat.parse(d) ) t = true;
 					});
 					return t;
 				}

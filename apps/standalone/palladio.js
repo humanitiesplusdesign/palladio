@@ -68683,17 +68683,17 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 					var filterColor = '#9DBCE4';
 
 					function setup() {
+						sel = d3.select(d3.select(element[0]).select(".main-viz")[0][0].children[0]);
+						if(!sel.select('svg').empty()) sel.select('svg').remove();
+						svg = sel.append('svg');
+
+						sel.attr('width', width + margin*2);
+						sel.attr('height', height + margin*2);
+
+						svg.attr('width', width + margin*2);
+						svg.attr('height', height + margin*2);
+
 						if(scope.dateStartDim && scope.dateEndDim && scope.tooltipLabelDim && scope.groupDim) {
-
-							sel = d3.select(d3.select(element[0]).select(".main-viz")[0][0].children[0]);
-							if(!sel.select('svg').empty()) sel.select('svg').remove();
-							svg = sel.append('svg');
-
-							sel.attr('width', width + margin*2);
-							sel.attr('height', height + margin*2);
-
-							svg.attr('width', width + margin*2);
-							svg.attr('height', height + margin*2);
 
 							if(dim) dim.remove();
 
@@ -68898,7 +68898,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 					}
 
 					function update() {
-						if(scope.dateStartDim && scope.dateEndDim && scope.tooltipLabelDim && scope.groupDim) {
+						if(svg && scope.dateStartDim && scope.dateEndDim && scope.tooltipLabelDim && scope.groupDim) {
 
 							var paths = svg.select('g').selectAll('.path')
 								.data(group.top(Infinity)
@@ -69961,7 +69961,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					if(extent.length === 0) return true;
 
 					extent.forEach(function (p) {
-						if( dimFormat(p[0]) <= d && dimFormat(p[1]) >= d ) t = true;
+						if( p[0] <= dimFormat.parse(d) && p[1] >= dimFormat.parse(d) ) t = true;
 					});
 					return t;
 				}
