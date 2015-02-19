@@ -143,15 +143,15 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 							var endValues = dim.top(Infinity).map(function (d) { return format.reformatExternal(d[scope.dateEndDim.key]); })
 									// Check for invalid dates
 									.filter(function (d) { return format.parse(d).valueOf(); });
-							var allValues = startValues.concat(endValues);
+							var allValues = startValues.concat(endValues).map(function(d) { return format.parse(d); });
 
 							// Scales
 							x = d3.time.scale().range([0, width])
-									.domain([ format.parse(d3.min(allValues)), format.parse(d3.max(allValues)) ]);
+									.domain([ d3.min(allValues), d3.max(allValues) ]);
 							xStart = d3.time.scale().range([0, width])
-									.domain([ format.parse(d3.min(allValues)), format.parse(d3.max(allValues)) ]);
+									.domain([ d3.min(allValues), d3.max(allValues) ]);
 							xEnd = d3.time.scale().range([0, width])
-									.domain([ format.parse(d3.min(allValues)), format.parse(d3.max(allValues)) ]);
+									.domain([ d3.min(allValues), d3.max(allValues) ]);
 							y = d3.scale.linear().range([height, 0])
 									.domain([0, 1]);
 							yStep = d3.scale.linear().range([height, 0])
@@ -165,18 +165,18 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 							var xAxisEnd = d3.svg.axis().orient("top")
 									.scale(x);
 
-							var topExtent = xEnd.domain();
-							var bottomExtent = xStart.domain();
+							var topExtent = [];
+							var bottomExtent = [];
 							var midExtent = [];
 
 							filter = function(d) {
 								return (topExtent.length === 0 ||
-										(format(topExtent[0]) <= d[1] && d[1] <= format(topExtent[1]))) &&
+										(topExtent[0] <= format.parse(d[1]) && format.parse(d[1]) <= topExtent[1])) &&
 									(bottomExtent.length === 0 ||
-										(format(bottomExtent[0]) <= d[0] && d[0] <= format(bottomExtent[1]))) &&
+										(bottomExtent[0] <= format.parse(d[0]) && format.parse(d[0]) <= bottomExtent[1])) &&
 									(midExtent.length === 0 ||
-										(!(format(midExtent[0]) > d[0] && format(midExtent[0]) > d[1]) &&
-											!(format(midExtent[1]) < d[0] && format(midExtent[1]) < d[1])));
+										(!(midExtent[0] > format.parse(d[0]) && midExtent[0] > format.parse(d[1])) &&
+											!(midExtent[1] < format.parse(d[0]) && midExtent[1] < format.parse(d[1]))));
 							};
 
 							emitFilterText = function() {
