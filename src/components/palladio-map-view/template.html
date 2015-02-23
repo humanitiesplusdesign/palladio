@@ -28,29 +28,56 @@
 <!-- Settings -->
 <div class="row">
 
-		<div class="settings col-lg-4 col-lg-offset-8 col-md-5 col-md-offset-7">
+		<div class="settings col-lg-5 col-lg-offset-7 col-md-6 col-md-offset-6">
 			<div class="panel panel-default">
 
 				<a class="settings-toggle" data-toggle="tooltip" data-original-title="Settings" data-placement="bottom">
 					<i class="fa fa-cog"></i>
 				</a>
 
+
+				<div class="panel-heading">
+					<span class="title">Settings</span>
+
+				</div>
+
 				<!-- Body -->
 				<div class="panel-body">
 
-					<div class="row">
-						<div class="col-lg-12">
-							<label>Map type</label>
-							<select bs-select ng-model="mapType" ng-options="type.label for type in mapTypes"
-									data-size="5" class="span12 form-control">
-							</select>
+<!--					<div class="row margin-bottom">
+						<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
 						</div>
+						<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
+							<p class="title">Settings</p>
+						</div>
+					</div>
+-->
+					<!--<form class="" role="search">
+						<div class="form-group">
+							<input type="text" class="form-control" placeholder="Search">
+						</div>
+					</form>-->
+
+					<div class="row">
+						<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+							<label class="strong inline">Map type</label>
+						</div>
+						<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
+							<select bs-select ng-model="mapType" ng-options="type.label for type in mapTypes"
+									data-size="5" class="form-control">
+							</select>
+							<p class="help-block" data-ng-show="mapType.value=='points'">Display points on a map</p>
+							<p class="help-block" data-ng-show="mapType.value=='point-to-point'">A point to point map allows you to display - and connect - two location points.</p>
+					</div>
 					</div>
 
 					<div class="row margin-top" ng-show="mapType.value=='points' || mapType.value=='sequence'">
-						<div class="col-lg-12">
-							<label>Places</label>
+						<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+							<label class="inline">Places</label>
+						</div>
+						<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
 							<select bs-select ng-model="mapping.sourceCoordinates"
+									placeholder="Choose"
 									ng-options="field as field.description for field in latlonFields"
 									data-size="5" class="form-control">
 								<option value=""><i>None</i></option>
@@ -59,19 +86,25 @@
 					</div>
 
 					<div class="row margin-top" ng-show="mapType.value=='point-to-point'">
-						<div class="col-lg-6 col-md-6">
-							<label>Source Places</label>
+						<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+							<label class="inline">Source Places</label>
+						</div>
+						<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
 							<select bs-select ng-model="mapping.sourceCoordinates"
-									placeholder="Choose..."
+									placeholder="Choose"
 									ng-options="field as field.description for field in latlonFields"
 									data-size="5" class="form-control">
 								<option value=""><i>None</i></option>
 							</select>
 						</div>
-						<div class="col-lg-6 col-md-6">
-							<label>Destination Places</label>
+					</div>
+					<div class="row margin-top" ng-show="mapType.value=='point-to-point'">
+						<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+							<label class="inline">Destination Places</label>
+						</div>
+						<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
 							<select bs-select ng-model="mapping.destinationCoordinates"
-									placeholder="Choose..."
+									placeholder="Choose"
 									ng-options="field as field.description for field in latlonFields"
 									data-size="5" class="form-control">
 							<option value=""><i>None</i></option>
@@ -81,62 +114,74 @@
 					</div>
 
 					<div class="row margin-top" ng-show="mapType.value=='point-to-point' || mapType.value=='sequence'">
-							<div class="col-lg-12 checkbox">
-								<label class="">
-									<input type="checkbox" ng-model="showLinks"> Show links
-								</label>
+						<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+							<label class="inline">Show links</label>
+						</div>
+						<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
+								<input type="checkbox" ng-model="showLinks">
 						</div>
 					</div>
 
 					<div class="row margin-top">
-						<div class="col-lg-12">
-							<label>Tooltip label</label>
+						<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+							<label class="inline">Tooltip label</label>
+						</div>
+						<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
 							<span class="btn btn-default" ng-click="showDescriptionModal()">
-									{{descriptiveDim.description || "Choose"}}...
+									{{descriptiveDim.description || "Choose"}}
+									<span class="caret"></span>
 							</span>
 						</div>
 					</div>
 
 					<div class="row margin-top">
-						<div class="col-lg-12 checkbox">
-							<label>
-								<input type="checkbox" ng-model="pointSize"> Size points
-							</label>
+						<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+							<label class="inline">Size points</label>
+						</div>
+						<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
+								<input type="checkbox" ng-model="pointSize">
 						</div>
 					</div>
 
-					<div class="row margin-top">
-						<div class="col-lg-6" data-ng-show="pointSize">
-							<label>Point size corresponds to</label>
+					<div class="row margin-top" data-ng-show="pointSize">
+						<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right ">
+							<label class="inline">According to</label>
+						</div>
+						<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
 							<span class="btn btn-default" ng-click="showAggModal()">
-								{{getAggDescription(aggDim) || "Choose"}}...
+								{{getAggDescription(aggDim) || "Choose"}}
+								<span class="caret"></span>
 							</span>
 						</div>
+					</div>
 
-						<div class="col-lg-6" data-ng-show="pointSize">
+					<div class="row margin-top" data-ng-show="pointSize">
+						<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+							<label class="inline">Adjust scale</label>
+						</div>
+						<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
+							<input type="checkbox" ng-model="fixScale">
+						</div>
+					</div>
 
-							<div data-ng-show="pointSize">
-								<label>
-									<input type="checkbox" ng-model="fixScale"> Adjust scale
-								</label>
+					<div class="row margin-top" data-ng-show="fixScale && pointSize">
+							<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+								<label class="inline">Maxim</label>
 							</div>
-
-							<div data-ng-show="fixScale && pointSize">
+							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
 								<input class="form-control" type="number" ng-model="maxPointSize">
 								<p class="help-block">Maximum value</p>
-							</div>
-
 						</div>
-
-
 					</div>
 
 					<div class="row margin-top">
-						<div class="col-lg-6">
-							<label>Layers</label>
+						<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+							<label class="inline">Layers</label>
+						</div>
+						<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
 								<ul class="layer-list list-unstyled" ui-sortable="{axis:'y'}" data-ng-model="tileSets" data-ng-show="tileSets.length">
 									<li class="layer-item" data-ng-repeat="layer in tileSets | orderBy:index">
-										<i class="icon-move"></i>
+										<i class="fa fa-bars text-muted margin-right"></i>
 										<i class="fa fa-eye-slash" data-ng-click="layer.toggle()" ng-show="!layer.enabled" data-toggle="tooltip" data-original-title="Show"></i>
 										<i class="fa fa-eye" data-ng-click="layer.toggle()" ng-show="layer.enabled" data-toggle="tooltip" data-original-title="Hide"></i>
 										<span style="margin-left: 10px">{{layer.description}}</span>
@@ -148,7 +193,7 @@
 										<span>No layers</span>
 									</li>
 								</ul>
-								<button class="btn btn-default" data-ng-click="showLayerModal()">New layer</button>
+								<a data-ng-click="showLayerModal()">Add layer</a>
 
 						</div>
 					</div>
@@ -156,11 +201,11 @@
 				</div>
 
 				<!-- Footer -->
-				<div class="panel-footer">
+				<!--<div class="panel-footer">
 					<a ng-click="exportSvg(this, 'Palladio Map.svg')">
 						<i class="fa fa-download margin-right"></i>Download places and links as .svg
 					</a>
-				</div>
+				</div>-->
 
 			</div>
 		</div>
@@ -298,7 +343,7 @@
 					Layers
 					<span class="tiny muted"> (Layers can overlap. Drag to change order)</span>
 				</label>
-				
+
 				<div class="span12">
 					<ul class="layer-list span8" ui-sortable data-ng-model="tileSets">
 

@@ -735,7 +735,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							// As we cycle through the layers, bring them to the front in order,
 							// resulting in them being re-ordered according to the current sort.
 							ts.layer.bringToBack();
-							
+
 							// Update remove function to the current index.
 							ts.remove = function() {
 								m.removeLayer(ts.layer);
@@ -1179,8 +1179,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						'</div>' +
 
 				  	'<div class="modal-footer">' +
-				  		'<button class="btn btn-default" data-dismiss="modal" data-ng-click="addLayer()">Add layer</button>' +
 				    	'<button class="btn btn-default" data-dismiss="modal">Cancel</button>' +
+							'<button tab-index="1" class="btn btn-primary" data-dismiss="modal" data-ng-click="addLayer()">Add layer</button>' +
 				  	'</div>' +
 					'</div>' +
 				'</div>' +
@@ -1221,7 +1221,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					},
 					{
 						"custom" : true,
-						"description": "Custom...",
+						"description": "Custom",
 						"info" : "A basic layer showing only the..."
 					}
 				]

@@ -20,6 +20,8 @@
         <link href='http://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic,500,700,500italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
         <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:300,700' rel='stylesheet' type='text/css'>
         <link href='http://fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,900,300italic,400italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Karla:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
     </head>
 
     <body data-ng-controller="WorkflowCtrl">
@@ -68,9 +70,12 @@
             </ul>
 
             <ul class="nav navbar-nav navbar-right">
-              <li data-ng-show="files.length">
-                  <a palladio-data-download>Save</a>
-              </li>
+              <form class="navbar-form navbar-left" role="search">
+                <!--<div class="form-group">
+                  <input type="text" class="form-control" placeholder="Search">
+                </div>-->
+                <div palladio-data-download data-ng-show="files.length">Save</div>
+              </form>
             </ul>
 
           </div>
