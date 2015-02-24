@@ -8548,123 +8548,6 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	font: 10px Merriweather, Helvetica, Arial, sans-serif;
 }
 
-[data-palladio-graph-view] {
-	width: 100%;
-	height: 100%;
-}
-/*
-[data-palladio-graph-view] path.link {
-    fill: none;
-    stroke-opacity: .5;
-    stroke: #666;
-    stroke-width: 1px;
-}
-
-[data-palladio-graph-view] .node {
-    fill: #BBBBBB;
-    stroke: #eee;
-    stroke-width: 1px;
-    fill-opacity: .95;
-}
-
-
-[data-palladio-graph-view] .highlighted {
-    fill: #666666;
-}
-
-[data-palladio-graph-view] .node.fixed.target {
-    stroke: #222222;
-}
-
-[data-palladio-graph-view] .node.fixed.source {
-    stroke: #222222;
-}
-
-
-[data-palladio-graph-view] text.label,
-[data-palladio-graph-view] text.shadow {
-    font-family: Helvetica, Arial;
-    font-size: 11px;
-    font-weight: 300;
-}
-
-[data-palladio-graph-view] text {
-    pointer-events: none;
-}
-
-[data-palladio-graph-view] text.shadow {
-    stroke: #fff;
-    stroke-width: 2px;
-    stroke-opacity: .7;
-    stroke-linejoin: round;
-}
-
-*/
-
- .leaflet-bar a {
-    background-color: #fff;
-    border-bottom: 1px solid #ccc;
-    width: 26px;
-    height: 26px;
-    line-height: 26px;
-    display: block;
-    text-align: center;
-    text-decoration: none;
-    color: black;
-}
-
-[data-palladio-graph-view]  .leaflet-bar {
-    box-shadow: none;
-    -webkit-border-radius: 2px;
-    border-radius: 2px;
-}
-
-[data-palladio-graph-view]  .leaflet-control-zoom, .leaflet-control-layers {
-    border: none;
-}
-
-[data-palladio-graph-view]  .leaflet-bar a:first-child {
-    -webkit-border-top-left-radius: 2px;
-    border-top-left-radius: 2px;
-    -webkit-border-top-right-radius: 2px;
-    border-top-right-radius: 2px;
-}
-
-[data-palladio-graph-view]  .leaflet-bar a:last-child {
-    -webkit-border-bottom-left-radius: 2px;
-    border-bottom-left-radius: 2px;
-    -webkit-border-bottom-right-radius: 2px;
-    border-bottom-right-radius: 2px;
-    border-bottom: none;
-}
-
-[data-palladio-graph-view] .node {
-    cursor: pointer;
-}
-
-[data-palladio-graph-view] .node:hover {
-    fill: #DDD;
-    fill-opacity: 1;
-}
-
-[data-palladio-graph-view] .anchor-node.strong {
-    font-weight: 600;
-}
-
-[data-palladio-graph-view] rect.overlay {
-  cursor:hand;
-  cursor:grab;
-  cursor:-moz-grab;
-  cursor:-webkit-grab;
-}
-
-[data-palladio-graph-view] .hidden {
-    opacity: .1;
-}
-
-[data-palladio-graph-view] .link.hidden {
-    display: none;
-}
 [data-palladio-facet-filter] .selection-title {
 	text-transform: uppercase;
 	margin-top: 7px;
@@ -8798,56 +8681,178 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	color: #666;
 	font-size: 12px;
 }
+[data-palladio-graph-view] {
+	width: 100%;
+	height: 100%;
+}
+/*
+[data-palladio-graph-view] path.link {
+    fill: none;
+    stroke-opacity: .5;
+    stroke: #666;
+    stroke-width: 1px;
+}
+
+[data-palladio-graph-view] .node {
+    fill: #BBBBBB;
+    stroke: #eee;
+    stroke-width: 1px;
+    fill-opacity: .95;
+}
+
+
+[data-palladio-graph-view] .highlighted {
+    fill: #666666;
+}
+
+[data-palladio-graph-view] .node.fixed.target {
+    stroke: #222222;
+}
+
+[data-palladio-graph-view] .node.fixed.source {
+    stroke: #222222;
+}
+
+
+[data-palladio-graph-view] text.label,
+[data-palladio-graph-view] text.shadow {
+    font-family: Helvetica, Arial;
+    font-size: 11px;
+    font-weight: 300;
+}
+
+[data-palladio-graph-view] text {
+    pointer-events: none;
+}
+
+[data-palladio-graph-view] text.shadow {
+    stroke: #fff;
+    stroke-width: 2px;
+    stroke-opacity: .7;
+    stroke-linejoin: round;
+}
+
+*/
+
+ .leaflet-bar a {
+    background-color: #fff;
+    border-bottom: 1px solid #ccc;
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    color: black;
+}
+
+[data-palladio-graph-view]  .leaflet-bar {
+    box-shadow: none;
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+}
+
+[data-palladio-graph-view]  .leaflet-control-zoom, .leaflet-control-layers {
+    border: none;
+}
+
+[data-palladio-graph-view]  .leaflet-bar a:first-child {
+    -webkit-border-top-left-radius: 2px;
+    border-top-left-radius: 2px;
+    -webkit-border-top-right-radius: 2px;
+    border-top-right-radius: 2px;
+}
+
+[data-palladio-graph-view]  .leaflet-bar a:last-child {
+    -webkit-border-bottom-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+    -webkit-border-bottom-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+    border-bottom: none;
+}
+
+[data-palladio-graph-view] .node {
+    cursor: pointer;
+}
+
+[data-palladio-graph-view] .node:hover {
+    fill: #DDD;
+    fill-opacity: 1;
+}
+
+[data-palladio-graph-view] .anchor-node.strong {
+    font-weight: 600;
+}
+
+[data-palladio-graph-view] rect.overlay {
+  cursor:hand;
+  cursor:grab;
+  cursor:-moz-grab;
+  cursor:-webkit-grab;
+}
+
+[data-palladio-graph-view] .hidden {
+    opacity: .1;
+}
+
+[data-palladio-graph-view] .link.hidden {
+    display: none;
+}
 [data-palladio-list-view] {
-	margin-bottom: 90px;
-}
-
-[data-palladio-list-view] ul {
-	padding: 0;
-	margin: 0;
-}
-
-[data-palladio-list-view] #list-display {
-	margin: 1em;
-}
-
-[data-palladio-list-view] .list-box {
-	list-style-type: none;
-	float: left;
-	width: 250px;
-	height: 140px;
-	background-color: #dddddd;
-	margin: 5px;
-	padding: 5px;
+	margin-bottom: 20px;
+	margin-top: 20px;
 }
 
 [data-palladio-list-view] .list-title {
-	font-weight: 600;
-	margin: 0.4em 0.2em;
-	font-size: 13px;
+	font-size: 14px;
 }
 
 [data-palladio-list-view] .list-image {
 	height: 130px;
 	width: 100px;
 	float: left;
-	margin: 5px;
 	background-size: cover;
 	background-position: top center;
 	border: none;
 	margin-right: 10px;
 	background-repeat: no-repeat;
+	background-color: #eee;
+	color: #bbb;
+	font-size: 12px;
+
+	padding: 20px;
+	text-align: center;
+
+	/* Internet Explorer 10 */
+	display:-ms-flexbox;
+	-ms-flex-pack:center;
+	-ms-flex-align:center;
+
+	/* Firefox */
+	display:-moz-box;
+	-moz-box-pack:center;
+	-moz-box-align:center;
+
+	/* Safari, Opera, and Chrome */
+	display:-webkit-box;
+	-webkit-box-pack:center;
+	-webkit-box-align:center;
+
+	/* W3C */
+	display:box;
+	box-pack:center;
+	box-align:center;
+
 }
 
+
 [data-palladio-list-view] .list-subtitle {
-	font-weight: 400;
-	color: #525252;
+	color: #888;
 	font-size: 12px;
-	line-height: normal;
 }
 
 [data-palladio-list-view] .list-text {
-	font-size: 11px;
+	font-size: 12px;
 }
 
 [data-palladio-list-view] .list-link {
@@ -8855,8 +8860,17 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	color: black;
 }
 
+
+[data-palladio-list-view] .list-box {
+	height: 150px;
+	padding: 10px;
+	background: #fafafa;
+	margin-bottom: 15px;
+
+}
+
 [data-palladio-list-view] .list-box:hover {
-	background-color: #d0d0d0;
+	background-color: #fff;
 }
 
 [data-palladio-map-view] {
@@ -8865,7 +8879,7 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 }
 
 .leaflet-container {
-  font: normal 12px merriweather, arial, sans-serif;
+  font: normal 12px karla, arial, sans-serif;
 }
 
 [data-palladio-map-view] .legend {
@@ -8896,7 +8910,7 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 
 [data-palladio-map-view] .node {
 	opacity: 0.7;
-	stroke-opacity: 0.2;
+	stroke-opacity: 0.6;
 	cursor: pointer;
 }
 
@@ -9389,7 +9403,7 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	font: 10px Helvetica, Arial, sans-serif;
 }
 body {
-  background-color: #f5f5f5;
+  background-color: #eee;
   font: normal 14px 'karla', 'source sans pro', helvetica, arial, sans-serif;
   padding-top: 50px;
   white-space: normal;
@@ -9539,7 +9553,7 @@ strong {
 
 .file .panel-heading {
   background: #fff;
-  border: none;
+  border-color: #ddd;
 }
 
 .primary .panel-body,
@@ -9744,8 +9758,8 @@ label.inline {
 /* Navbar */
 
 .navbar-default {
-  background-color: #fff;
-  border-bottom: 1px solid #dce0e0;
+  background-color: rgba(255,255,255,.98);
+  border-bottom: none;
 
 }
 
@@ -9757,17 +9771,30 @@ label.inline {
   font-weight: normal;
 }
 
+.navbar-default .navbar-nav > li > a {
+  color: #888;
+}
+
 .navbar-default .navbar-brand {
   padding: 13px 20px;
-  color: #888;
+  color: #4EBDE5;
   font: 700 18px roboto slab;
 }
 
 .navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:hover, .navbar-default .navbar-nav > .active > a:focus {
   background-color: inherit;
-  border-bottom: 2px solid #888;
+  border-bottom: 2px solid #4EBDE5;
+  color: #444;
 }
 
+
+.navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
+  color: #444;
+}
+
+.navbar-default .navbar-toggle {
+  border: none;
+}
 
 .navigation {
   background: #42423E;
@@ -9938,7 +9965,7 @@ label.inline {
 
 
 .settings {
-  position: absolute;
+  position: fixed;
   top: 70px;
   right: 0px;
   left: 0px;
@@ -9963,6 +9990,25 @@ label.inline {
 }
 
 .settings .panel-heading {
+  background-color: #fafafa;
+  border: none;
+}
+
+
+.settings-bar {
+  position: fixed;
+  top: 70px;
+  right: 0px;
+  left: 0px;
+}
+
+.settings-bar .panel {
+  border: none;
+  box-shadow: 0px 1px 2px rgba(0,0,0,.1);
+  background: #444;
+}
+
+.settings-bar .panel-heading {
   background-color: #fafafa;
   border: none;
 }

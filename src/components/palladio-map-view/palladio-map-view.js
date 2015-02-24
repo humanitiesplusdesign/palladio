@@ -798,7 +798,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					},
 					{
 						label : 'Point to point',
-						value : 'point-to-point'
+						value : 'point-to-point',
+						description : 'Use this map to display points on the map...'
 					}/*,
 					{
 						label : 'Sequence of points',

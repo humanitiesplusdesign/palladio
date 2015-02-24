@@ -1,0 +1,202 @@
+<div class="container-fluid">
+
+  <div data-palladio-list-view
+    list-dimension="id"
+    max-to-display="1000"
+    img-url-accessor="imgurlAccessor"
+    title-accessor="titleAccessor"
+    subtitle-accessor="subtitleAccessor"
+    text-accessor="textAccessor"
+    link-accessor="linkAccessor"
+    sort-options="sortOptions"></div>
+
+</div>
+
+<!-- Settings -->
+<div class="row">
+
+  <!--<div class="settings-bar col-lg-5 col-lg-offset-7 col-md-6 col-md-offset-6">
+
+    <div class="panel panel-default">
+
+      <div class="row">
+
+        <div class="col-lg-6 text-center">
+          Settings
+        </div>
+
+        <div class="col-lg-6 text-center">
+          Info
+        </div>
+
+      </div>
+
+
+      <div class="panel-body">
+      </div>
+
+    </div>
+  </div>-->
+
+
+    <div class="settings col-lg-4 col-lg-offset-8 col-md-6 col-md-offset-6">
+      <div class="panel panel-default">
+
+        <a class="settings-toggle" data-toggle="tooltip" data-original-title="Settings" data-placement="bottom">
+          <i class="fa fa-cog"></i>
+        </a>
+
+        <div class="panel-body">
+
+          <div class="row">
+            <div class="col-lg-12">
+              <label class="strong">Settings</label>
+            </div>
+          </div>
+
+          <div class="row margin-top">
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+              <label class="inline">Title</label>
+            </div>
+            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
+              <span class="btn btn-default" ng-click="showTitleModal()">
+                  {{titleDim.description || "Choose"}}
+                  <span class="caret"></span>
+              </span>
+            </div>
+          </div>
+
+          <div class="row margin-top">
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+              <label class="inline">Subtitle</label>
+            </div>
+            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
+              <span class="btn btn-default" ng-click="showSubtitleModal()">
+                  {{subtitleDim.description || "Choose"}}
+                  <span class="caret"></span>
+              </span>
+            </div>
+          </div>
+
+          <div class="row margin-top">
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+              <label class="inline">Text</label>
+            </div>
+            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
+              <span class="btn btn-default" ng-click="showTextModal()">
+                  {{textDim.description || "Choose"}}
+                  <span class="caret"></span>
+              </span>
+            </div>
+          </div>
+
+          <div class="row margin-top">
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+              <label class="inline">Link</label>
+            </div>
+            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
+              <span class="btn btn-default" ng-click="showLinkModal()">
+                  {{linkDim.description || "Choose"}}
+                  <span class="caret"></span>
+              </span>
+            </div>
+          </div>
+
+          <div class="row margin-top">
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+              <label class="inline">Image URL</label>
+            </div>
+            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
+              <span class="btn btn-default" ng-click="showImgURLModal()">
+                  {{imgurlDim.description || "Choose"}}
+                  <span class="caret"></span>
+              </span>
+            </div>
+          </div>
+
+          <div class="row margin-top">
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+              <label class="inline">Sort by</label>
+            </div>
+            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
+              <span class="btn btn-default" ng-click="showSortModal()">
+                  {{sortDim.description || "Choose"}}
+                  <span class="caret"></span>
+              </span>
+            </div>
+          </div>
+
+
+
+        </div>
+
+      </div>
+    </div>
+
+</div>
+
+<div id="title-modal" data-modal dimensions="fields" model="titleDim"></div>
+<div id="subtitle-modal" data-modal dimensions="fields" model="subtitleDim"></div>
+<div id="text-modal" data-modal dimensions="fields" model="textDim"></div>
+<div id="link-modal" data-modal dimensions="urlDims" model="linkDim"></div>
+<div id="imgurl-modal" data-modal dimensions="urlDims" model="imgurlDim"></div>
+<div id="sort-modal" data-modal dimensions="fields" model="sortDim"></div>
+
+
+  <!--
+      '<div class="view">' +
+        '<a class="toggle" data-toggle="tooltip" data-original-title="Settings" data-placement="bottom"><i class="fa fa-cog"></i></a>' +
+          '<div data-palladio-list-view ' +
+            'list-dimension="id"' +
+            'max-to-display="1000"' +
+            'img-url-accessor="imgurlAccessor"' +
+            'title-accessor="titleAccessor"' +
+            'subtitle-accessor="subtitleAccessor"' +
+            'text-accessor="textAccessor"' +
+            'link-accessor="linkAccessor"' +
+            'sort-options="sortOptions"></div>' +
+      '</div> ' +
+
+      '<div class="span4 settings open"> ' +
+        '<div class="row-fluid">' +
+
+          '<div class="setting">' +
+            '<label>Title</label>' +
+            '<span class="field" ng-click="showTitleModal()">{{titleDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
+          '</div>' +
+
+          '<div class="setting">' +
+            '<label>Subtitle</label>' +
+            '<span class="field" ng-click="showSubtitleModal()">{{subtitleDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
+          '</div>' +
+
+          '<div class="setting">' +
+            '<label>Text</label>' +
+            '<span class="field" ng-click="showTextModal()">{{textDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
+          '</div>' +
+
+          '<div class="setting">' +
+            '<label>Link URL</label>' +
+            '<span class="field" ng-click="showLinkModal()">{{linkDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
+          '</div>' +
+
+          '<div class="setting">' +
+            '<label>Image URL</label>' +
+            '<span class="field" ng-click="showImgURLModal()">{{imgurlDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
+          '</div>' +
+
+          '<div class="setting">' +
+            '<label>Sort by</label>' +
+            '<span class="field" ng-click="showSortModal()">{{sortDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
+          '</div>' +
+
+        '</div>' +
+      '</div>' +
+      '<div id="title-modal" data-modal dimensions="fields" model="titleDim"></div>' +
+      '<div id="subtitle-modal" data-modal dimensions="fields" model="subtitleDim"></div>' +
+      '<div id="text-modal" data-modal dimensions="fields" model="textDim"></div>' +
+      '<div id="link-modal" data-modal dimensions="urlDims" model="linkDim"></div>' +
+      '<div id="imgurl-modal" data-modal dimensions="urlDims" model="imgurlDim"></div>' +
+      '<div id="sort-modal" data-modal dimensions="fields" model="sortDim"></div>',
+
+-->

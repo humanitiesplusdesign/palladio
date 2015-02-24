@@ -1,5 +1,5 @@
 body {
-  background-color: #f5f5f5;
+  background-color: #eee;
   font: normal 14px 'karla', 'source sans pro', helvetica, arial, sans-serif;
   padding-top: 50px;
   white-space: normal;
@@ -149,7 +149,7 @@ strong {
 
 .file .panel-heading {
   background: #fff;
-  border: none;
+  border-color: #ddd;
 }
 
 .primary .panel-body,
@@ -354,8 +354,8 @@ label.inline {
 /* Navbar */
 
 .navbar-default {
-  background-color: #fff;
-  border-bottom: 1px solid #dce0e0;
+  background-color: rgba(255,255,255,.98);
+  border-bottom: none;
 
 }
 
@@ -367,17 +367,30 @@ label.inline {
   font-weight: normal;
 }
 
+.navbar-default .navbar-nav > li > a {
+  color: #888;
+}
+
 .navbar-default .navbar-brand {
   padding: 13px 20px;
-  color: #888;
+  color: #4EBDE5;
   font: 700 18px roboto slab;
 }
 
 .navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:hover, .navbar-default .navbar-nav > .active > a:focus {
   background-color: inherit;
-  border-bottom: 2px solid #888;
+  border-bottom: 2px solid #4EBDE5;
+  color: #444;
 }
 
+
+.navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
+  color: #444;
+}
+
+.navbar-default .navbar-toggle {
+  border: none;
+}
 
 .navigation {
   background: #42423E;
@@ -548,7 +561,7 @@ label.inline {
 
 
 .settings {
-  position: absolute;
+  position: fixed;
   top: 70px;
   right: 0px;
   left: 0px;
@@ -573,6 +586,25 @@ label.inline {
 }
 
 .settings .panel-heading {
+  background-color: #fafafa;
+  border: none;
+}
+
+
+.settings-bar {
+  position: fixed;
+  top: 70px;
+  right: 0px;
+  left: 0px;
+}
+
+.settings-bar .panel {
+  border: none;
+  box-shadow: 0px 1px 2px rgba(0,0,0,.1);
+  background: #444;
+}
+
+.settings-bar .panel-heading {
   background-color: #fafafa;
   border: none;
 }

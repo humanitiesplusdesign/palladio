@@ -33,6 +33,28 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 
 					scope.nodeDims = dataService.getFiles();
 
+					scope.layouts = [
+						{
+							label : 'None',
+							value : 'none',
+							description : 'None...'
+						},
+						{
+							label : 'Links',
+							value : 'links',
+							description : 'Links...'
+						},
+						{
+							label : 'Groups',
+							value : 'groups',
+							description : 'Groups'
+						}
+					];
+
+					scope.layout = scope.layouts[0];
+
+					// selection
+					scope.nodeSelection = [];
 
 				}, post: function(scope, element) {
 
@@ -84,7 +106,9 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 						// Incremental updates to existing visualization.
 						graph
 						.width(element.width())
-						.height(500);
+						.height($(window).height())
+						.on('selected', selected)
+
 					/*	.size(size)
 						.key(key)
 						.on('selected', selected)*/
@@ -104,9 +128,17 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 							};
 
 							d3.select(element[0])
+								.select('.view')
 								.datum(data)
 								.call(graph);
 						}
+
+						// BAAAAAD
+						function selected(d){
+							scope.nodeSelection = d;
+							scope.$apply();
+						}
+
 					}
 
 					function reset() {
@@ -208,10 +240,9 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 
 					deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'idiograph', exportState, importState));
 
-					// Set up the toggle.
 					$(document).ready(function(){
-						$(element[0]).find('.toggle').click(function() {
-							$(element[0]).find('.settings').toggleClass('open close');
+						element.find('.settings-toggle').click(function() {
+							element.find('.settings').toggleClass('closed');
 						});
 					});
 				}

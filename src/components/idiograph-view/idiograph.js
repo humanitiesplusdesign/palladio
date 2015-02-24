@@ -139,7 +139,7 @@
 
       // size
       area = d3.scale.linear()
-      .range([10,200])
+      .range([5,200])
 
       // color
       color = d3.scale.category20();

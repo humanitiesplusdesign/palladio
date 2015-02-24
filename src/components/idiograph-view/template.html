@@ -1,4 +1,98 @@
-<div class="row-fluid">
+<div class="view">
+	<div id="{{uniqueToggleId}}"></div>
+	<div id="{{uniqueModalId}}"></div>
+</div>
+
+<div class="row">
+
+		<div class="settings col-lg-5 col-lg-offset-7 col-md-6 col-md-offset-6">
+			<div class="panel panel-default">
+
+				<a class="settings-toggle" data-toggle="tooltip" data-original-title="Settings" data-placement="bottom">
+					<i class="fa fa-cog"></i>
+				</a>
+
+				<!-- Body -->
+				<div class="panel-body">
+
+					<div class="row">
+						<div class="col-lg-12">
+							<label class="strong">Settings</label>
+						</div>
+					</div>
+
+					<div class="row margin-top">
+						<div class="col-lg-3 col-md-4 col-sm-4 col-xs-4 text-right">
+							<label class="inline">Nodes</label>
+						</div>
+						<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
+							<select bs-select ng-model="nodeDim" placeholder="Choose" ng-options="type.label for type in nodeDims" class="form-control">
+								<option value=""><i>None</i></option>
+							</select>
+						</div>
+					</div>
+
+					<div class="row margin-top">
+						<div class="col-lg-3 col-md-4 col-sm-4 col-xs-4 text-right">
+							<label class="inline">Links</label>
+						</div>
+						<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
+							<select bs-select ng-model="linkDim" placeholder="Choose" ng-options="type.label for type in nodeDims" class="form-control">
+								<option value=""><i>None</i></option>
+							</select>
+						</div>
+					</div>
+
+
+					<div class="row margin-top margin-bottom">
+						<div class="col-lg-3 col-md-4 col-sm-4 col-xs-4 text-right">
+							<label class="inline">Selection</label>
+						</div>
+						<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
+							<div class="unique-values" data-ng-show="!nodeSelection.length">
+								<div class="text-muted padding-all small">No values selected. You can select...</div>
+							</div>
+							<div class="unique-values" data-ng-show="nodeSelection.length">
+								<table class="table table-striped">
+									<tbody>
+										<tr data-ng-repeat="node in nodeSelection">
+											<td class="small">{{node.data.name}}</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<div class="row" data-ng-show="nodeSelection.length">
+						<div class="col-lg-3 col-md-4 col-sm-4 col-xs-4 text-right">
+							<label class="inline">Arrange by</label>
+						</div>
+						<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
+							<select bs-select ng-model="layout" placeholder="Choose" ng-options="type.label for type in layouts"
+									data-size="5" class="form-control">
+							</select>
+							<p class="help-block">{{layout.description}}</p>
+						</div>
+					</div>
+
+
+
+				</div>
+
+
+			</div>
+		</div>
+
+
+
+</div>
+
+
+
+
+<!--<div class="row-fluid">
+
 	<div class="span3 settings open">
 		<div class="" ng-show="!collapse">
 
@@ -19,14 +113,14 @@
 
 	<div class="view span12">
 		<div id="{{uniqueToggleId}}" class="row-fluid">
-			<!-- SVG inserted here -->
 			IDIOGRAPH
 		</div>
 		<div id="{{uniqueModalId}}">
-			<!--<div id="nodes-modal" data-modal dimensions="nodeDims" model="nodeDim"></div>-->
 		</div>
 	</div>
 
 	<a class="toggle" data-toggle="tooltip" data-original-title="Settings"
 		data-placement="bottom"><i class="fa fa-cog"></i></a>
 </div>
+
+-->

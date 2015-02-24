@@ -2,7 +2,7 @@
 
 angular.module('palladioListView', ['palladio', 'palladio.services'])
 	.directive('palladioListView', function (palladioService) {
-		
+
 		var directiveDefObj = {
 			scope: {
 				listDimension: '=listDimension',
@@ -96,10 +96,18 @@ angular.module('palladioListView', ['palladio', 'palladio.services'])
 					});
 
 					// If the list already exists, remove it.
-					d3.select(element[0]).select("ul#list-display").remove();
+					d3.select(element[0])
+						.select("div#list-display")
+						.remove();
 
-					listDisplay = d3.select(element[0]).append("ul").attr("id", "list-display");
-					d3.select(element[0]).append("div").attr("class","clearfix");
+					listDisplay = d3.select(element[0])
+						.append("div")
+						.attr("class","row")
+						.attr("id", "list-display");
+
+					/*d3.select(element[0])
+						.append("div")
+						.attr("class","clearfix");*/
 
 					updateList();
 				}
@@ -107,23 +115,21 @@ angular.module('palladioListView', ['palladio', 'palladio.services'])
 				// Function to update the grid in the future.
 				function updateList() {
 
-					listBoxes = listDisplay.selectAll("li")
+					listBoxes = listDisplay.selectAll(".list-wrap")
 						.data(listGroups.top(scope.max).filter(function(d){
 							return d.value !== 0;
 						}), function(d) { return d.key; });
 
 					listBoxes.enter()
-						.append("li")
-						.attr("class", "list-box")
+						.append("div")
+						.attr("class", "col-lg-3 col-md-4 col-sm-6 list-wrap")
 						.append("a")
 							.attr("href", function(d) { return listLookup.get(d.key).link; })
 							.attr("target", "_blank")
 							.attr("class", "list-link")
 						.append("div")
-							.style("padding","1px")
+							.attr("class","list-box")
 							.each(buildListBox)
-						.append("div")
-						.attr("class","clearfix");
 
 					listBoxes.exit().remove();
 
@@ -142,7 +148,11 @@ angular.module('palladioListView', ['palladio', 'palladio.services'])
 
 					listBox.append("div").style("background-image", function(d) {
 						return "url(" + listLookup.get(d.key).imageURL + ")";
-					}).attr("class", "list-image");
+					}).attr("class", "list-image")
+					.append('span').html(function(d){
+						return listLookup.get(d.key).imageURL ? '' : 'Image';
+					})
+
 
 					listBox.append("div").text(function(d){
 						return listLookup.get(d.key).title;
@@ -154,7 +164,7 @@ angular.module('palladioListView', ['palladio', 'palladio.services'])
 
 					listBox.append("div").text(function(d){
 						return listLookup.get(d.key).text;
-					}).attr("class", "list-text");
+					}).attr("class", "list-text margin-top");
 				}
 
 
@@ -168,63 +178,7 @@ angular.module('palladioListView', ['palladio', 'palladio.services'])
 
 		return {
 			scope: true,
-			template :	'<!-- View -->' +
-						'<div class="view">' +
-							'<a class="toggle" data-toggle="tooltip" data-original-title="Settings" data-placement="bottom"><i class="fa fa-cog"></i></a>' +
-								'<div data-palladio-list-view ' +
-									'list-dimension="id"' +
-									'max-to-display="1000"' +
-									'img-url-accessor="imgurlAccessor"' +
-									'title-accessor="titleAccessor"' +
-									'subtitle-accessor="subtitleAccessor"' +
-									'text-accessor="textAccessor"' +
-									'link-accessor="linkAccessor"' +
-									'sort-options="sortOptions"></div>' +
-						'</div> ' +
-
-						'<!-- Settings -->' +
-						'<div class="span4 settings open"> ' +
-							'<div class="row-fluid">' +
-
-								'<div class="setting">' +
-									'<label>Title</label>' +
-									'<span class="field" ng-click="showTitleModal()">{{titleDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
-								'</div>' +
-
-								'<div class="setting">' +
-									'<label>Subtitle</label>' +
-									'<span class="field" ng-click="showSubtitleModal()">{{subtitleDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
-								'</div>' +
-
-								'<div class="setting">' +
-									'<label>Text</label>' +
-									'<span class="field" ng-click="showTextModal()">{{textDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
-								'</div>' +
-
-								'<div class="setting">' +
-									'<label>Link URL</label>' +
-									'<span class="field" ng-click="showLinkModal()">{{linkDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
-								'</div>' +
-
-								'<div class="setting">' +
-									'<label>Image URL</label>' +
-									'<span class="field" ng-click="showImgURLModal()">{{imgurlDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
-								'</div>' +
-
-								'<div class="setting">' +
-									'<label>Sort by</label>' +
-									'<span class="field" ng-click="showSortModal()">{{sortDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
-								'</div>' +
-
-							'</div>' +
-						'</div>' +
-						'<div id="title-modal" data-modal dimensions="fields" model="titleDim"></div>' +
-						'<div id="subtitle-modal" data-modal dimensions="fields" model="subtitleDim"></div>' +
-						'<div id="text-modal" data-modal dimensions="fields" model="textDim"></div>' +
-						'<div id="link-modal" data-modal dimensions="urlDims" model="linkDim"></div>' +
-						'<div id="imgurl-modal" data-modal dimensions="urlDims" model="imgurlDim"></div>' +
-						'<div id="sort-modal" data-modal dimensions="fields" model="sortDim"></div>',
-
+			templateUrl: 'partials/palladio-list-view/template.html',
 			link: {
 
 				pre: function (scope, element, attrs) {
@@ -253,7 +207,7 @@ angular.module('palladioListView', ['palladio', 'palladio.services'])
 					scope.titleAccessor = function (d) { return "" + d[scope.titleDim.key]; };
 					scope.subtitleAccessor = function (d) { return "Select a sub-title dimension"; };
 					scope.textAccessor = function (d) { return "Select a text dimension"; };
-					scope.linkAccessor = function (d) { return "Select a URL dimension"; };
+					scope.linkAccessor = function (d) { return ""; };
 					scope.imgurlAccessor = function (d) { return ""; };
 					scope.sortOptions = [{ attribute: scope.listDim.key }];
 
@@ -352,7 +306,7 @@ angular.module('palladioListView', ['palladio', 'palladio.services'])
 							s.linkDim = scope.metadata.filter(function(f) { return f.key === state.linkDim; })[0];
 							s.imgurlDim = scope.metadata.filter(function(f) { return f.key === state.imgurlDim; })[0];
 							s.sortDim = scope.metadata.filter(function(f) { return f.key === state.sortDim; })[0];
-							
+
 							s.setInternalState(state);
 						});
 					}
@@ -374,8 +328,10 @@ angular.module('palladioListView', ['palladio', 'palladio.services'])
 
 				post: function(scope, element, attrs) {
 
-					$(element).find('.toggle').on("click", function() {
-						element.find('.settings').toggleClass('open close');
+					$(document).ready(function(){
+						element.find('.settings-toggle').click(function() {
+							element.find('.settings').toggleClass('closed');
+						});
 					});
 				}
 			}

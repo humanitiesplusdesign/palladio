@@ -1,6 +1,4 @@
 <div class="view">
-
-
 	<!-- View -->
 
 	<div data-palladio-map-view
@@ -36,13 +34,14 @@
 				</a>
 
 
-				<div class="panel-heading">
-					<span class="title">Settings</span>
-
-				</div>
-
 				<!-- Body -->
 				<div class="panel-body">
+
+					<div class="row">
+						<div class="col-lg-12">
+							<label class="strong">Settings</label>
+						</div>
+					</div>
 
 <!--					<div class="row margin-bottom">
 						<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
@@ -66,8 +65,7 @@
 							<select bs-select ng-model="mapType" ng-options="type.label for type in mapTypes"
 									data-size="5" class="form-control">
 							</select>
-							<p class="help-block" data-ng-show="mapType.value=='points'">Display points on a map</p>
-							<p class="help-block" data-ng-show="mapType.value=='point-to-point'">A point to point map allows you to display - and connect - two location points.</p>
+							<p class="help-block">{{mapType.description}}</p>
 					</div>
 					</div>
 

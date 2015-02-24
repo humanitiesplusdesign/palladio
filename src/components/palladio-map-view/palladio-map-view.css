@@ -4,7 +4,7 @@
 }
 
 .leaflet-container {
-  font: normal 12px merriweather, arial, sans-serif;
+  font: normal 12px karla, arial, sans-serif;
 }
 
 [data-palladio-map-view] .legend {
@@ -35,7 +35,7 @@
 
 [data-palladio-map-view] .node {
 	opacity: 0.7;
-	stroke-opacity: 0.2;
+	stroke-opacity: 0.6;
 	cursor: pointer;
 }
 
