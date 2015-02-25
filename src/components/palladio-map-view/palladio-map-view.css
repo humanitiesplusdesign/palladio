@@ -122,13 +122,13 @@
 }
 
 .layer-img {
-	height: 120px;
+	height: 80px;
 	background-size: cover;
 	background-position: center;
 }
 
 [data-palladio-map-view-with-settings] .layer-item {
-	padding: 10px;
+	padding: 6px 10px;
 	font-size: 12px;
 	background: #f5f5f5;
 	margin-bottom: 2px;

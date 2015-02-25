@@ -34,27 +34,26 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 					scope.nodeDims = dataService.getFiles();
 
 					scope.layouts = [
-						{
-							label : 'None',
-							value : 'none',
-							description : 'None...'
-						},
-						{
-							label : 'Links',
-							value : 'links',
-							description : 'Links...'
-						},
-						{
-							label : 'Groups',
-							value : 'groups',
-							description : 'Groups'
-						}
+					  {
+					    "text": "None",
+					    "click": "$alert()"
+					  },
+					  {
+					    "text": "Links",
+					    "click": "$alert()"
+					  },
+					  {
+					    "text": "Groups",
+					    "href": "#"
+					  }
 					];
-
-					scope.layout = scope.layouts[0];
 
 					// selection
 					scope.nodeSelection = [];
+
+					scope.showNodeModal = function(){
+						$('#node-modal').modal('show');
+					};
 
 				}, post: function(scope, element) {
 

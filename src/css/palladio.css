@@ -27,9 +27,9 @@ h2 a {
 }
 
 h4 {
-  font-size: 21px;
+  font-size: 16px;
   font-weight: normal;
-  margin-bottom: 20px;
+  margin-bottom: 5px;
 }
 
 .title {
@@ -225,13 +225,17 @@ strong {
 
 .btn-default.disabled, .btn-default[disabled], fieldset[disabled] .btn-default, .btn-default.disabled:hover, .btn-default[disabled]:hover, fieldset[disabled] .btn-default:hover, .btn-default.disabled:focus, .btn-default[disabled]:focus, fieldset[disabled] .btn-default:focus, .btn-default.disabled.focus, .btn-default[disabled].focus, fieldset[disabled] .btn-default.focus, .btn-default.disabled:active,
 .btn-default[disabled]:active, fieldset[disabled] .btn-default:active, .btn-default.disabled.active, .btn-default[disabled].active, fieldset[disabled] .btn-default.active {
-  background-color: #CCC;
+
 }
 
 .btn-primary.disabled, .btn-primary[disabled], fieldset[disabled] .btn-primary, .btn-primary.disabled:hover, .btn-primary[disabled]:hover, fieldset[disabled] .btn-primary:hover, .btn-primary.disabled:focus, .btn-primary[disabled]:focus, fieldset[disabled] .btn-primary:focus, .btn-primary.disabled.focus, .btn-primary[disabled].focus, fieldset[disabled] .btn-primary.focus, .btn-primary.disabled:active,
 .btn-primary[disabled]:active, fieldset[disabled] .btn-primary:active, .btn-primary.disabled.active, .btn-primary[disabled].active, fieldset[disabled] .btn-primary.active {
   background-color: #79CAE7;
   border-bottom: 1px solid rgba(0,0,0,.05);
+}
+
+.btn.disabled, .btn[disabled], fieldset[disabled] .btn {
+  opacity: .4;
 }
 
 .btn:active, .btn.active {
@@ -415,6 +419,36 @@ label.inline {
   color: #eee;
 }
 
+.nav-tabs {
+  margin-bottom: 20px;
+  /*background: #fafafa;*/
+}
+
+.nav-tabs > li > a {
+  border-radius: 0px;
+  color: #888;
+  font-size: 13px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding-top: 0px;
+}
+
+.nav-tabs > li:first-child > a {
+}
+
+.nav > li > a:hover, .nav > li > a:focus {
+  text-decoration: none;
+  background-color: transparent;
+}
+
+.nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
+  color: #444;
+  cursor: default;
+  background-color: transparent;
+  border: none;
+  border-bottom: 2px solid #4EBDE5;
+}
+
 /* Modals */
 .modal-backdrop {
   background-color: #eee;
@@ -583,6 +617,13 @@ label.inline {
 .settings .panel {
   border: none;
   box-shadow: 0px 1px 2px rgba(0,0,0,.1);
+  background: rgba(255,255,255,.95);
+}
+
+.settings .panel-body {
+  margin-right: 40px;
+  overflow: hidden;
+  padding-right: 0px;
 }
 
 .settings .panel-heading {

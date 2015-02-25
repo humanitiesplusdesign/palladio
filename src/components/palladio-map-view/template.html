@@ -30,7 +30,7 @@
 			<div class="panel panel-default">
 
 				<a class="settings-toggle" data-toggle="tooltip" data-original-title="Settings" data-placement="bottom">
-					<i class="fa fa-cog"></i>
+					<i class="fa fa-bars"></i>
 				</a>
 
 
@@ -59,12 +59,17 @@
 
 					<div class="row">
 						<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
-							<label class="strong inline">Map type</label>
+							<label class="inline">Map type</label>
 						</div>
 						<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
-							<select bs-select ng-model="mapType" ng-options="type.label for type in mapTypes"
-									data-size="5" class="form-control">
-							</select>
+							<button type="button" class="btn btn-default"
+									ng-model="mapType"
+									data-html="1"
+									placeholder="Choose"
+									ng-options="type.label for type in mapTypes"
+									bs-select>
+								Choose <span class="caret"></span>
+							</button>
 							<p class="help-block">{{mapType.description}}</p>
 					</div>
 					</div>
@@ -74,12 +79,15 @@
 							<label class="inline">Places</label>
 						</div>
 						<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
-							<select bs-select ng-model="mapping.sourceCoordinates"
+							<button type="button"
+									class="btn btn-default"
+									ng-model="mapping.sourceCoordinates"
+									data-html="1"
 									placeholder="Choose"
 									ng-options="field as field.description for field in latlonFields"
-									data-size="5" class="form-control">
-								<option value=""><i>None</i></option>
-							</select>
+									bs-select>
+								Choose <span class="caret"></span>
+							</button>
 						</div>
 					</div>
 
@@ -88,12 +96,15 @@
 							<label class="inline">Source Places</label>
 						</div>
 						<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
-							<select bs-select ng-model="mapping.sourceCoordinates"
+							<button type="button"
+									class="btn btn-default"
+									ng-model="mapping.sourceCoordinates"
+									data-html="1"
 									placeholder="Choose"
 									ng-options="field as field.description for field in latlonFields"
-									data-size="5" class="form-control">
-								<option value=""><i>None</i></option>
-							</select>
+									bs-select>
+								Choose <span class="caret"></span>
+							</button>
 						</div>
 					</div>
 					<div class="row margin-top" ng-show="mapType.value=='point-to-point'">
@@ -101,12 +112,15 @@
 							<label class="inline">Destination Places</label>
 						</div>
 						<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
-							<select bs-select ng-model="mapping.destinationCoordinates"
+							<button type="button"
+									class="btn btn-default"
+									ng-model="mapping.destinationCoordinates"
+									data-html="1"
 									placeholder="Choose"
 									ng-options="field as field.description for field in latlonFields"
-									data-size="5" class="form-control">
-							<option value=""><i>None</i></option>
-							</select>
+									bs-select>
+								Choose <span class="caret"></span>
+							</button>
 						</div>
 
 					</div>

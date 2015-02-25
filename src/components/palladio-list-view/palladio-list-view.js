@@ -205,7 +205,7 @@ angular.module('palladioListView', ['palladio', 'palladio.services'])
 
 					scope.id = scope.xfilter.dimension(function (d) { return "" + d[scope.listDim.key]; });
 					scope.titleAccessor = function (d) { return "" + d[scope.titleDim.key]; };
-					scope.subtitleAccessor = function (d) { return "Select a sub-title dimension"; };
+					scope.subtitleAccessor = function (d) { return "Select a subtitle dimension"; };
 					scope.textAccessor = function (d) { return "Select a text dimension"; };
 					scope.linkAccessor = function (d) { return ""; };
 					scope.imgurlAccessor = function (d) { return ""; };

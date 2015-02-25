@@ -9,72 +9,176 @@
 			<div class="panel panel-default">
 
 				<a class="settings-toggle" data-toggle="tooltip" data-original-title="Settings" data-placement="bottom">
-					<i class="fa fa-cog"></i>
+					<i class="fa fa-bars"></i>
 				</a>
 
 				<!-- Body -->
 				<div class="panel-body">
 
-					<div class="row">
-						<div class="col-lg-12">
-							<label class="strong">Settings</label>
-						</div>
-					</div>
+					<div role="tabpanel" data-ng-init="panelView='settings'">
+            <!-- Nav tabs -->
+						<ul class="nav nav-tabs" role="tablist">
+							<li data-ng-class="{'active' : panelView =='settings'}"><a ng-click="panelView='settings'" role="tab" data-toggle="tab">Settings</a></li>
+							<li data-ng-class="{'active' : panelView =='edit'}"><a ng-click="panelView='edit'" role="tab" data-toggle="tab">Edit</a></li>
+						</ul>
 
-					<div class="row margin-top">
-						<div class="col-lg-3 col-md-4 col-sm-4 col-xs-4 text-right">
-							<label class="inline">Nodes</label>
-						</div>
-						<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
-							<select bs-select ng-model="nodeDim" placeholder="Choose" ng-options="type.label for type in nodeDims" class="form-control">
-								<option value=""><i>None</i></option>
-							</select>
-						</div>
-					</div>
+						<div class="tab-content front-page-tab-content margin-top">
+							<!-- settings -->
+							<div class="tab-pane" data-ng-class="{'active' : panelView =='settings'}" id="settings">
 
-					<div class="row margin-top">
-						<div class="col-lg-3 col-md-4 col-sm-4 col-xs-4 text-right">
-							<label class="inline">Links</label>
-						</div>
-						<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
-							<select bs-select ng-model="linkDim" placeholder="Choose" ng-options="type.label for type in nodeDims" class="form-control">
-								<option value=""><i>None</i></option>
-							</select>
-						</div>
-					</div>
+								<div class="row margin-top">
+									<div class="col-lg-3 col-md-4 col-sm-4 col-xs-4 text-right">
+										<label class="inline">Nodes</label>
+									</div>
+									<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
+										<button type="button" class="btn btn-default"
+										    ng-model="nodeDim"
+										    data-html="1"
+												placeholder="Choose"
+										    ng-options="type.label for type in nodeDims"
+										    bs-select>
+										  Choose <span class="caret"></span>
+										</button>
+										<p class="help-block">Select a table for the nodes. Each row in the table will correspond to a node in the graph.</p>
+									</div>
+								</div>
 
 
-					<div class="row margin-top margin-bottom">
-						<div class="col-lg-3 col-md-4 col-sm-4 col-xs-4 text-right">
-							<label class="inline">Selection</label>
-						</div>
-						<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
-							<div class="unique-values" data-ng-show="!nodeSelection.length">
-								<div class="text-muted padding-all small">No values selected. You can select...</div>
+								<div class="row margin-top">
+									<div class="col-lg-3 col-md-4 col-sm-4 col-xs-4 text-right">
+										<label class="inline">Links</label>
+									</div>
+									<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
+										<button type="button" class="btn btn-default"
+										    ng-model="linkDim"
+										    data-html="1"
+												placeholder="Choose"
+												ng-disabled="!nodeDim"
+										    ng-options="type.label for type in nodeDims"
+										    bs-select>
+										  Choose <span class="caret"></span>
+										</button>
+									</div>
+								</div>
+
+								<div class="row margin-top">
+									<div class="col-lg-3 col-md-4 col-sm-4 col-xs-4 text-right">
+										<label class="inline">Size nodes</label>
+									</div>
+									<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
+										<button type="button" class="btn btn-default"
+										    ng-model="linkDim"
+										    data-html="1"
+												placeholder="Choose"
+												ng-disabled="!nodeDim"
+										    ng-options="type.label for type in nodeDims"
+										    bs-select>
+										  Choose <span class="caret"></span>
+										</button>
+									</div>
+								</div>
+
+
+							</div><!-- end settings -->
+
+							<!-- edit -->
+							<div class="tab-pane" data-ng-class="{'active' : panelView =='edit'}" id="edit">
+
+								<!-- no nodes -->
+
+								<div data-ng-show="!nodeDim">
+									<p class="help-block">You must select nodes...</p>
+								</div>
+
+								<!-- single selection -->
+
+								<div data-ng-show="nodeSelection.length == 1">
+									{{nodeSelection}}
+								</div>
+
+								<!-- Multiple selection -->
+								<div data-ng-show="nodeSelection.length != 1 && nodeDim">
+
+									<p class="help-block">Edit, add and remove nodes and their properties.</p>
+
+									<div class="row margin-top">
+										<div class="col-lg-3 col-md-4 col-sm-4 col-xs-4 text-right">
+											<label class="inline">Selection</label>
+										</div>
+										<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
+
+											<div class="unique-values" data-ng-show="!nodeSelection.length">
+												<div class="text-muted padding-all small">No nodes selected.</div>
+											</div>
+											<p class="help-block" data-ng-show="!nodeSelection.length">You can select nodes by clicking on them. SHIFT + click to select multiple nodes.</p>
+											<div class="unique-values" data-ng-show="nodeSelection.length">
+												<table class="table table-striped">
+													<tbody>
+														<tr data-ng-repeat="node in nodeSelection">
+															<td class="small">{{node.data.name}}</td>
+														</tr>
+													</tbody>
+												</table>
+											</div>
+											<p class="help-block" data-ng-show="nodeSelection.length">{{nodeSelection.length}} nodes selected.</p>
+										</div>
+									</div>
+
+									<div class="row" data-ng-show="nodeSelection.length">
+										<div class="col-lg-3 col-md-4 col-sm-4 col-xs-4 text-right">
+											<label class="inline"></label>
+										</div>
+										<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
+											<button type="button" class="btn btn-default" bs-dropdown="layouts">Arrange selection by <span class="caret"></span></button>
+											<button class="btn btn-default pull-right" ng-click=""><i class="fa fa-trash-o margin-right text-danger"></i>Delete</button>
+										</div>
+									</div>
+
+									<div class="row margin-top" data-ng-show="nodeSelection.length">
+										<div class="col-lg-3 col-md-4 col-sm-4 col-xs-4 text-right">
+											<label class="inline"></label>
+										</div>
+										<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
+											<p class="help-block">{{layout.description}}</p>
+										</div>
+									</div>
+
+									<div class="row margin-top">
+										<div class="col-lg-3 col-md-4 col-sm-4 col-xs-4 text-right">
+											<label class="inline"></label>
+										</div>
+										<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
+											<form class="form-inline">
+												<div class="form-group">
+													<input type="text" class="form-control" ng-model="searchNode" placeholder="Search"></input>
+												</div>
+												<button class="btn btn-default" ng-click="" ng-disabled="!searchNode.length">Add to selection</button>
+											</form>
+										</div>
+									</div>
+
+									<div class="row margin-top">
+										<div class="col-lg-3 col-md-4 col-sm-4 col-xs-4 text-right">
+											<label class="inline">Add</label>
+										</div>
+										<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
+											<button class="btn btn-default" ng-click="showNodeModal()"><i class="fa fa-file-text-o margin-right text-primary"></i>New node</button>
+										</div>
+									</div>
+
+								</div><!-- end multiple -->
+
+
+
 							</div>
-							<div class="unique-values" data-ng-show="nodeSelection.length">
-								<table class="table table-striped">
-									<tbody>
-										<tr data-ng-repeat="node in nodeSelection">
-											<td class="small">{{node.data.name}}</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
 						</div>
-					</div>
 
-					<div class="row" data-ng-show="nodeSelection.length">
-						<div class="col-lg-3 col-md-4 col-sm-4 col-xs-4 text-right">
-							<label class="inline">Arrange by</label>
-						</div>
-						<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
-							<select bs-select ng-model="layout" placeholder="Choose" ng-options="type.label for type in layouts"
-									data-size="5" class="form-control">
-							</select>
-							<p class="help-block">{{layout.description}}</p>
-						</div>
-					</div>
+          </div>
+
+
+
+
+
 
 
 
@@ -88,6 +192,8 @@
 
 </div>
 
+
+<div id="node-modal" data-modal dimensions="[]" model="nodeDim"></div>
 
 
 

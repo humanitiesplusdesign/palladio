@@ -1136,47 +1136,53 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				  	'<div class="modal-body">' +
 
 							'<div class="row">' +
-
-								'<div class="col-lg-6">' +
-									'<p>You can choose one of Palladio default layers or create a custom one.</p>' +
-									'<div class="form-group">' +
-										'<select bs-select data-placeholder="Choose a style" ng-model="layerOption" ng-options="t as t.description for t in layerOptions" class="form-control"></select>' +
-									'</div>' +
-
-									'<p ng-show="layerOption.img" class="layer-img" style="background-image:url(\'{{layerOption.img}}\')"></p>' +
-
-									'<div class="form-group">' +
-										'<p>{{layerOption.info}}</p>' +
-									'</div>' +
-
+								'<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">' +
+									'<label class="inline">Layer type</label>' +
 								'</div>' +
-
-
-								'<div class="col-lg-6">' +
-
-									'<form>' +
-
-										'<div class="form-group">' +
-											'<label for="layerDescription">Layer name</label>' +
-											'<input type="text" placeholder="{{layerOption.description}}" id="layerDescription" ng-model="description" class="form-control">' +
-										'</div>' +
-
-										'<div class="form-group" ng-show="layerOption && layerOption.custom">' +
-											'<label for="layerUrl">Tileset URL</label>' +
-											'<input type="text" id="layerUrl" ng-model="url" class="form-control">' +
-											'<span class="help-block">Includes {x}, {y}, {z}</span>' +
-										'</div>' +
-
-										'<div class="form-group" ng-show="layerOption && layerOption.custom">' +
-											'<label class="control-label" for="layerMbId">Mapbox ID</label>' +
-											'<input type="text" id="layerMbId" ng-model="mbId" class="form-control">' +
-											'<span class="help-block">A Mapbox project ID</span>' +
-										'</div>' +
-
-									'</form>' +
+								'<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">' +
+									'<button type="button" class="btn btn-default" ng-model="layerOption"' +
+											'data-html="1" placeholder="Choose" ng-options="t as t.description for t in layerOptions" bs-select>' +
+										'Choose <span class="caret"></span>' +
+									'</button>' +
+									'<p ng-show="layerOption.img" class="layer-img margin-top" style="background-image:url(\'{{layerOption.img}}\')"></p>' +
+									'<div class="form-group">' +
+										'<p class="help-block">{{layerOption.info}}</p>' +
+									'</div>' +
 								'</div>' +
+							'</div>' +
 
-						'</div>' +
+							'<div class="row">' +
+								'<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">' +
+									'<label class="inline">Layer name</label>' +
+								'</div>' +
+								'<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">' +
+									'<input type="text" placeholder="{{layerOption.description}}" id="layerDescription" ng-model="description" class="form-control">' +
+								'</div>' +
+							'</div>' +
+
+							'<div class="row margin-top" ng-show="layerOption && layerOption.custom">' +
+								'<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">' +
+									'<label class="inline">Tileset URL</label>' +
+								'</div>' +
+								'<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">' +
+									'<input type="text" id="layerUrl" ng-model="url" class="form-control">' +
+									'<span class="help-block">Includes {x}, {y}, {z}</span>' +
+								'</div>' +
+							'</div>' +
+
+							'<div class="row" ng-show="layerOption && layerOption.custom">' +
+								'<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">' +
+									'<label class="inline">Mapbox ID</label>' +
+								'</div>' +
+								'<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">' +
+								'<input type="text" id="layerMbId" ng-model="mbId" class="form-control">' +
+								'<span class="help-block">A Mapbox project ID</span>' +
+								'</div>' +
+							'</div>' +
+
+
+
+
 						'</div>' +
 
 				  	'<div class="modal-footer">' +
