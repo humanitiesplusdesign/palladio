@@ -100,6 +100,11 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						svg.attr('width', width + margin*2);
 						svg.attr('height', height + margin*2);
 
+						// Pre-initialize the brushes - for load/save consistency.
+						topBrush = d3.svg.brush();
+						bottomBrush = d3.svg.brush();
+						midBrush = d3.svg.brush();
+
 						if(scope.dateStartDim && scope.dateEndDim && scope.tooltipLabelDim && scope.groupDim) {
 
 							if(dim) dim.remove();
@@ -532,13 +537,15 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						midBrush.extent(state.midExtent.map(function(d) { return dateService.format.parse(d); }));
 						bottomBrush.extent(state.bottomExtent.map(function(d) { return dateService.format.parse(d); }));
 
-						topBrush.event(top);
-						midBrush.event(middle);
-						bottomBrush.event(bottom);
+						if(top && middle && bottom) {
+							topBrush.event(top);
+							midBrush.event(middle);
+							bottomBrush.event(bottom);
 
-						top.call(topBrush);
-						middle.call(midBrush);
-						bottom.call(bottomBrush);
+							top.call(topBrush);
+							middle.call(midBrush);
+							bottom.call(bottomBrush);
+						}
 
 						scope.stepMode = state.mode;
 
@@ -549,12 +556,12 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						// Return a state object that can be consumed by importState().
 						return {
 							title: scope.title,
-							dateStartDim: scope.dateStartDim.key,
-							dateEndDim: scope.dateEndDim.key,
-							tooltipLabelDim: scope.tooltipLabelDim.key,
-							topExtent: topBrush.extent().map(function(d) { return dateService.format(d); }),
-							midExtent: midBrush.extent().map(function(d) { return dateService.format(d); }),
-							bottomExtent: bottomBrush.extent().map(function(d) { return dateService.format(d); }),
+							dateStartDim: scope.dateStartDim ? scope.dateStartDim.key : undefined,
+							dateEndDim: scope.dateEndDim ? scope.dateEndDim.key : undefined,
+							tooltipLabelDim: scope.tooltipLabelDim ? scope.tooltipLabelDim.key : undefined,
+							topExtent: topBrush && topBrush.extent() ? topBrush.extent().map(function(d) { return dateService.format(d); }) : [],
+							midExtent: midBrush && midBrush.extent() ? midBrush.extent().map(function(d) { return dateService.format(d); }) : [],
+							bottomExtent: bottomBrush && bottomBrush.extent() ? bottomBrush.extent().map(function(d) { return dateService.format(d); }) : [],
 							mode: scope.stepMode
 						};
 					}
