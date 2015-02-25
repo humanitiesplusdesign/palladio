@@ -32,6 +32,7 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 					scope.data = dataService.getDataSync().data;
 
 					scope.nodeDims = dataService.getFiles();
+					scope.linkDims = [];
 
 					scope.layouts = [
 					  {
@@ -97,6 +98,8 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 
 							// Basic count - will overcount.
 							group = dimension.group();
+
+							updateLinks();
 						}
 					}
 
@@ -143,6 +146,22 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 					function reset() {
 						// Tear down visualization.
 
+					}
+
+					function updateLinks() {
+						if(scope.nodeDim) {
+
+							// Links through tables.
+							var linkSources = dataService.getLinks().filter(function(d) {
+								return d.lookup.file.id === scope.nodeDim.id;
+							}).map(function(d) {
+								return d.source.file.id;
+							});
+							scope.linkDims = dataService.getFiles().filter(function(d) {
+								// Used as a source for selected node more than once.
+								return linkSources.filter(function(l) { return l === d.id; }).length > 1;
+							});
+						}
 					}
 
 					// Watch scope elements that should trigger a full rebuild.
