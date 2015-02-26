@@ -111,7 +111,7 @@
 												</label>
 											</div>
 											<div class="col-lg-8 col-md-8 col-sm-7 col-xs-7 col-condensed">
-												<input type="text" class="form-control" ng-model="field.value" ng-options="v for v in getUniques(field.key)" placeholder="{{getFieldType(field.key)}}" bs-typeahead>
+												<input type="text" class="form-control" ng-model="field.value" ng-options="v for v in getUniques(field.key)" placeholder="{{getFieldType(field.key)}}" bs-typeahead="{container:'body'}">
 											</div>
 										</div>
 

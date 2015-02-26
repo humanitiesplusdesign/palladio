@@ -10289,6 +10289,5 @@ input[type="checkbox"]:checked:before {
 
 .values-editor {
   max-height: 400px;
-  overflow-y: scroll;
   overflow-x: hidden;
 }
