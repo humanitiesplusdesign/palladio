@@ -50,7 +50,8 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 					];
 
 					// selection
-					scope.nodeSelection = [];
+					scope.selectedNode = null;
+					scope.selectedNodes = [];
 
 					scope.showNodeModal = function(){
 						$('#node-modal').modal('show');
@@ -203,8 +204,29 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 
 						// BAAAAAD
 						function selected(d){
-							scope.nodeSelection = d;
-							scope.$apply();
+
+							// reset
+							scope.selectedNode = null;
+							scope.selectedNodes = [];
+
+							// only one selected
+							if (d.length == 1) {
+								scope.$apply(function(scope){
+									scope.selectedNode = scope.nodeDim.data.filter(function(f){ return f[nodeKeyField.key] === d[0].data.name; })[0] || {};
+									scope.selectedNode = d3.entries(scope.selectedNode);
+								});
+								return;
+							}
+
+							// more than one selected
+							scope.$apply(function(scope){
+								var lu = d.map(function(a){ return a.data.name; });
+								scope.selectedNodes = scope.nodeDim.data.filter(function(f){ return lu.indexOf(f[nodeKeyField.key]) !== -1; }) || [];
+							});
+						}
+
+						scope.getFieldType = function(field){
+							return scope.nodeDim.fields.filter(function(d){ return d.key == field; })[0].type;
 						}
 
 					}
