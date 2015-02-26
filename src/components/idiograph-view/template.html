@@ -34,7 +34,7 @@
 										<button type="button" class="btn btn-default"
 										    ng-model="nodeDim"
 										    data-html="1"
-												placeholder="Choose"
+											placeholder="Choose"
 										    ng-options="type.label for type in nodeDims"
 										    bs-select>
 										  Choose <span class="caret"></span>
@@ -52,9 +52,9 @@
 										<button type="button" class="btn btn-default"
 										    ng-model="linkDim"
 										    data-html="1"
-												placeholder="Choose"
-												ng-disabled="!nodeDim"
-										    ng-options="type.label for type in nodeDims"
+											placeholder="Choose"
+											ng-disabled="!linkDims.length"
+										    ng-options="type.label for type in linkDims"
 										    bs-select>
 										  Choose <span class="caret"></span>
 										</button>
