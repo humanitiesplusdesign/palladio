@@ -54,16 +54,10 @@ gulp.task('scripts', function () {
         .pipe(concat('palladio.js'))
         .pipe(gulp.dest('./'))
         .pipe(gulp.dest('./apps/palladio/'))
+        .pipe(gulp.dest('./apps/piranesi/'))
         .pipe(gulp.dest('./apps/standalone/'))
         .pipe(gulp.dest('./apps/timespans/'))
         .pipe(gulp.dest('./apps/template/'));
-
-        
-        // .pipe(rename('palladio.min.js'))
-        // .pipe(uglify())
-        // .pipe(gulp.dest('./'))
-        // .pipe(gulp.dest('./apps/palladio/'))
-        // .pipe(gulp.dest('./apps/timespans/'));
 });
 
 gulp.task('css', function () {
@@ -73,6 +67,7 @@ gulp.task('css', function () {
 		.pipe(concat('palladio.css'))
 		.pipe(gulp.dest('./'))
         .pipe(gulp.dest('./apps/palladio/'))
+        .pipe(gulp.dest('./apps/piranesi/'))
         .pipe(gulp.dest('./apps/standalone/'))
         .pipe(gulp.dest('./apps/timespans/'))
         .pipe(gulp.dest('./apps/template/'));
@@ -86,15 +81,22 @@ gulp.task('watch', function() {
     gulp.watch(palladioTemplate, ['scripts']);
 });
 
-gulp.task('webserver-palladio', function() {
+gulp.task('webserver', function() {
 	gulp.src('apps/palladio')
-	// gulp.src('apps/standalone')
 		.pipe(webserver({
 			livereload: true,
-			port: 8000
+			port: 8000,
+			livereload: {enable: true, port: 2345}
+		}));
+
+	gulp.src('apps/piranesi')
+		.pipe(webserver({
+			livereload: true,
+			port: 8001,
+			livereload: {enable: true, port: 2346}
 		}));
 });
 
-gulp.task('default', ['scripts', 'css', 'webserver-palladio', 'watch']);
+gulp.task('default', ['scripts', 'css', 'webserver', 'watch']);
 gulp.task('all', ['scripts', 'css']);
-gulp.task('serve', ['webserver-palladio'])
+gulp.task('serve', ['webserver'])
