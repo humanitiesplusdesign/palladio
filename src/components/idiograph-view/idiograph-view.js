@@ -69,6 +69,9 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 					var graph,
 						data,
 						dimension,
+						linkDimension,
+						linkGroup,
+						linkKeyFields,
 						group,
 						nodeKeyField;
 
@@ -83,6 +86,13 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 							dimension.remove();
 							dimension = undefined;
 							group = undefined;
+						}
+
+						if(linkDimension) {
+							linkDimension.remove();
+							linkKeyFields = [];
+							linkDimension = undefined;
+							linkGroup = undefined;
 						}
 
 						if(scope.nodeDim) {
@@ -100,6 +110,21 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 							group = dimension.group();
 
 							updateLinks();
+
+							if(scope.linkDim) {
+								linkKeyFields = dataService.getLinks().filter(function(l) {
+									return l.source.file.id === scope.linkDim.id &&
+											l.lookup.file.id === scope.nodeDim.id;
+								}).map(function(l) { return l.source.field; });
+
+								linkDimension = scope.xfilter.dimension(function(d) {
+									return linkKeyFields.map(function(k) {
+										return d[k.key];
+									})
+								});
+
+								linkGroup = linkDimension.group();
+							}
 						}
 					}
 
@@ -117,16 +142,57 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 
 						if(scope.nodeDim) {
 
+							// Build nodes.
+							var nodes = group.top(Infinity).map(function(d) {
+								// groups have properties "key" and "value" so we need to
+								// rewrite to what the graph chart expects.
+								return { name: d.key, value: d.value };
+							});
+
+							var nodeMap = d3.map(nodes.map(function(d, i) { d.index = i; return d; }), function(d) { return d.name; });
+
+							var linkMap = d3.map();
+							var links = [];
+
+							if(scope.linkDim) {
+								var i, j;
+								linkGroup.top(Infinity).forEach(function(g) {
+									for(i = 0; i<g.key.length; i++) {
+										for(j = 0; j<g.key.length; j++) {
+											if(i!==j) {
+												if(linkMap.has(g.key[i])) {
+													linkMap.get(g.key[i]).targets.push(g.key[j]);
+												} else {
+													linkMap.set(g.key[i], { targets: [g.key[j]] });
+												}
+											}
+										}
+									}
+								});
+
+								// Consolidate link targets and build link array
+								linkMap.entries().forEach(function(d) {
+									d.value.targets.reduce(function(a,b) {
+										if(a.has(b)) {
+											a.set(b, a.get(b) + 1);
+										} else {
+											a.set(b, 1);
+										}
+										return a;
+									}, d3.map()).entries().forEach(function(a) {
+										links.push({
+											source: nodeMap.get(d.key).index,
+											target: nodeMap.get(a.key).index,
+											value: a.value
+										});
+									});
+								});
+							}
+
 							// fake data
 							data = {
-								nodes: group.top(Infinity).map(function(d) {
-									// groups have properties "key" and "value" so we need to
-									// rewrite to what the graph chart expects.
-									return { name: d.key, value: d.value };
-								}),
-								links: [
-									{source:0,target:1,value:1},{source:0,target:2,value:1}
-								]
+								nodes: nodes,
+								links: links
 							};
 
 							d3.select(element[0])
@@ -165,7 +231,7 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 					}
 
 					// Watch scope elements that should trigger a full rebuild.
-					scope.$watchGroup(['nodeDim'], function () {
+					scope.$watchGroup(['nodeDim', 'linkDim'], function () {
 						reset();
 						setup();
 						update();
