@@ -280,6 +280,7 @@ strong {
   outline: 0;
   -webkit-box-shadow: none;
   box-shadow: none;
+  background: #fafafa;
 }
 
 .editable {
@@ -622,7 +623,6 @@ label.inline {
 
 .settings .panel-body {
   margin-right: 40px;
-  overflow: hidden;
   padding-right: 0px;
 }
 
@@ -878,4 +878,10 @@ input[type="checkbox"]:checked:before {
   border-bottom: 1px solid #eee;
   padding-bottom: 5px;
   margin-bottom: 10px;
+}
+
+.values-editor {
+  max-height: 400px;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
