@@ -620,7 +620,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 		        }
 
 		        // Set up HTTPS URLS for 1.0 API
-		        L.mapbox.config.HTTP_URLS = ["https://a.tiles.mapbox.com/v3/", "https://b.tiles.mapbox.com/v3/", "https://c.tiles.mapbox.com/v3/", "https://d.tiles.mapbox.com/v3/"]
+		        L.mapbox.accessToken = 'pk.eyJ1IjoiY2VzdGEiLCJhIjoiMFo5dmlVZyJ9.Io52RcCMMnYukT77GjDJGA';
 
 				// init map
 				var node,
