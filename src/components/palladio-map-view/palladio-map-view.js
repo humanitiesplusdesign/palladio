@@ -496,7 +496,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				    	// legend
 
 				    	if(scope.pointSize) {
-							
+
 					    	d3.select(element[0]).selectAll("div.legend").remove();
 
 					    	if (!scope.pointSize) return;
@@ -530,7 +530,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 										.attr("class","legend-title")
 										.style("margin-left", function(d){ return (-(pointSize(maxPointSize)-pointSize(d))+pointSize(maxPointSize)*2 + 10) + "px"; })
 										.html(String)
-							
+
 						}
 			        }
 
@@ -686,7 +686,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							// As we cycle through the layers, bring them to the front in order,
 							// resulting in them being re-ordered according to the current sort.
 							ts.layer.bringToBack();
-							
+
 							// Update remove function to the current index.
 							ts.remove = function() {
 								m.removeLayer(ts.layer);
@@ -749,7 +749,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					},
 					{
 						label : 'Point to point',
-						value : 'point-to-point'
+						value : 'point-to-point',
+						description : 'Use this map to display points on the map...'
 					}/*,
 					{
 						label : 'Sequence of points',
@@ -781,6 +782,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 								fileId: a.originFileId ? a.originFileId : 0
 							};
 						})
+						.filter(function(d) { return countDims.get(d.fileId) ? true : false; })
 						.sort(function (a, b) { return scope.getAggDescription(a) < scope.getAggDescription(b) ? -1 : 1; });
 
 
@@ -1058,14 +1060,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 				$(document).ready(function(){
 
-					element.find('.toggle').click(function() {
-
-					  //element.find('a.toggle i').toggleClass('icon-edit icon-arrow-left');
-					  element.find('.settings').toggleClass('open close');
-
-					  // resize signal
-					  //scope.$broadcast("resize")
-
+					element.find('.settings-toggle').click(function() {
+					  element.find('.settings').toggleClass('closed');
 					});
 				});
 			} }
@@ -1079,49 +1075,74 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 			scope : {
 				layers: '='
 			},
-			template: '<div class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">' +
-  				'<div class="modal-header">' +
-			    	'<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>' +
-			    	'<h4 style="line-height: normal">Add a new map layer</h4>' +
-			  	'</div>' +
-			  	'<div class="modal-body" style="min-height: 280px">' +
-			    	'<form class="form-horizontal">' +
-						
-						'<div class="control-group">' +
-							'<label class="control-label" for="layerDescription">Description</label>' +
-							'<div class="controls">' +
-								'<input type="text" placeholder="Description" id="layerDescription" ng-model="description" class="span8">' +
-							'</div>' +
-						'</div>' +
-						
-						'<div class="control-group">' +
-							'<label class="control-label">Choose one of Palladio default layers or create a new one.</label>' +
-							'<div class="controls">' +
-								'<div class="span8">' +
-									'<select bs-select data-placeholder="Choose a style" ng-model="layerOption" ng-options="t as t.description for t in layerOptions" class="form-control show-tick"></select>' +
+			template: '<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">' +
+
+				'<div class="modal-dialog">' +
+					'<div class="modal-content">' +
+
+	  				'<div class="modal-header">' +
+				    	'<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>' +
+				    	'<h4 style="line-height: normal">Add a new map layer</h4>' +
+				  	'</div>' +
+
+				  	'<div class="modal-body">' +
+
+							'<div class="row">' +
+								'<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">' +
+									'<label class="inline">Layer type</label>' +
+								'</div>' +
+								'<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">' +
+									'<button type="button" class="btn btn-default" ng-model="layerOption"' +
+											'data-html="1" placeholder="Choose" ng-options="t as t.description for t in layerOptions" bs-select>' +
+										'Choose <span class="caret"></span>' +
+									'</button>' +
+									'<p ng-show="layerOption.img" class="layer-img margin-top" style="background-image:url(\'{{layerOption.img}}\')"></p>' +
+									'<div class="form-group">' +
+										'<p class="help-block">{{layerOption.info}}</p>' +
+									'</div>' +
 								'</div>' +
 							'</div>' +
+
+							'<div class="row">' +
+								'<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">' +
+									'<label class="inline">Layer name</label>' +
+								'</div>' +
+								'<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">' +
+									'<input type="text" placeholder="{{layerOption.description}}" id="layerDescription" ng-model="description" class="form-control">' +
+								'</div>' +
+							'</div>' +
+
+							'<div class="row margin-top" ng-show="layerOption && layerOption.custom">' +
+								'<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">' +
+									'<label class="inline">Tileset URL</label>' +
+								'</div>' +
+								'<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">' +
+									'<input type="text" id="layerUrl" ng-model="url" class="form-control">' +
+									'<span class="help-block">Includes {x}, {y}, {z}</span>' +
+								'</div>' +
+							'</div>' +
+
+							'<div class="row" ng-show="layerOption && layerOption.custom">' +
+								'<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">' +
+									'<label class="inline">Mapbox ID</label>' +
+								'</div>' +
+								'<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">' +
+								'<input type="text" id="layerMbId" ng-model="mbId" class="form-control">' +
+								'<span class="help-block">A Mapbox project ID</span>' +
+								'</div>' +
+							'</div>' +
+
+
+
+
 						'</div>' +
 
-						'<div class="control-group" ng-show="layerOption && layerOption.custom">' +
-							'<label class="control-label" for="layerUrl">Tileset URL <span class="help-block">Includes {x}, {y}, {z}</span></label>' +
-							'<div class="controls">' +
-								'<input type="text" id="layerUrl" ng-model="url" class="span8">' +
-							'</div>' +
-						'</div>' +
-
-						'<div class="control-group" ng-show="layerOption && layerOption.custom">' +
-							'<label class="control-label" for="layerMbId">Mapbox ID<span class="help-block">A Mapbox project ID</span></label>' +
-							'<div class="controls">' +
-								'<input type="text" id="layerMbId" ng-model="mbId" class="span8">' +
-							'</div>' +
-						'</div>' +
-					'</form>' +
-			  	'</div>' +
-			  	'<div class="modal-footer" style="display:block;">' +
-			  		'<button class="btn" data-dismiss="modal" data-ng-click="addLayer()">Add</button>' +
-			    	'<button class="btn" data-dismiss="modal">Close</button>' +
-			  	'</div>' +
+				  	'<div class="modal-footer">' +
+				    	'<button class="btn btn-default" data-dismiss="modal">Cancel</button>' +
+							'<button tab-index="1" class="btn btn-primary" data-dismiss="modal" data-ng-click="addLayer()">Add layer</button>' +
+				  	'</div>' +
+					'</div>' +
+				'</div>' +
 			'</div>',
 
 			link: function postLink(scope, elements, attrs) {
@@ -1130,31 +1151,42 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					{
 						"mbId": "cesta.hd9ak6ie",
 						"description": "Land",
+						"info" : "A basic layer showing only the...",
+						"img" : "img/map_land.jpg"
 					},
 					{
 						"mbId": "cesta.k8g7eofo",
 						"description": "Buildings and Areas",
+						"info" : "A basic layer showing only the...",
+						"img" : "img/map_buildings.jpg"
 					},
 					{
 						"mbId": "cesta.k8m9p19p",
 						"description": "Streets",
-					},
+						"info" : "A basic layer showing only the...",
+						"img" : "img/map_street.jpg"
+				},
 					{
 						"mbId": "cesta.k8ghh462",
 						"description": "Terrain",
+						"info" : "A basic layer showing only the...",
+						"img" : "img/map_terrain.jpg"
 					},
 					{
 						"mbId": "cesta.k8gof2np",
 						"description": "Satellite",
+						"info" : "A basic layer showing only the...",
+						"img" : "img/map_satellite.jpg"
 					},
 					{
 						"custom" : true,
-						"description": "Custom...",
+						"description": "Custom",
+						"info" : "A basic layer showing only the..."
 					}
 				]
 
 				scope.layerOption = scope.layerOptions[0];
-				
+
 				scope.addLayer = function () {
 
 					if (scope.layerOption && !scope.layerOption.custom) {

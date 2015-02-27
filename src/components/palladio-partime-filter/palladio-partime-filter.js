@@ -89,9 +89,6 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 					height = scope.fullHeight === 'true' ? $(window).height()-200 : height;
 					var filterColor = '#9DBCE4';
 
-					setup();
-					update();
-
 					function setup() {
 						sel = d3.select(d3.select(element[0]).select(".main-viz")[0][0].children[0]);
 						if(!sel.select('svg').empty()) sel.select('svg').remove();
@@ -103,326 +100,339 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						svg.attr('width', width + margin*2);
 						svg.attr('height', height + margin*2);
 
-						if(dim) dim.remove();
+						// Pre-initialize the brushes - for load/save consistency.
+						topBrush = d3.svg.brush();
+						bottomBrush = d3.svg.brush();
+						midBrush = d3.svg.brush();
 
-						// Dimension has structure [startDate, endDate, label, group]
-						dim = scope.xfilter.dimension(
-							function(d) {
-								if((format.reformatExternal(d[scope.dateStartDim.key]) !== '' &&
-									format.reformatExternal(d[scope.dateEndDim.key]) !== '') ||
-									format.reformatExternal(d[scope.dateStartDim.key]) ===
-									format.reformatExternal(d[scope.dateEndDim.key]) ) {
-										// Both populated OR both equal (i.e. blank)
-										return [ format.reformatExternal(d[scope.dateStartDim.key]),
-												format.reformatExternal(d[scope.dateEndDim.key]),
-												d[scope.tooltipLabelDim.key],
-												d[scope.groupDim.key] ];
-								} else {
-									// Otherwise set the blank one equal to the populated one.
-									if(format.reformatExternal(d[scope.dateStartDim.key]) === '') {
-										return [ format.reformatExternal(d[scope.dateEndDim.key]),
-												format.reformatExternal(d[scope.dateEndDim.key]),
-												d[scope.tooltipLabelDim.key],
-												d[scope.groupDim.key] ];
+						if(scope.dateStartDim && scope.dateEndDim && scope.tooltipLabelDim && scope.groupDim) {
+
+							if(dim) dim.remove();
+
+							// Dimension has structure [startDate, endDate, label, group]
+							dim = scope.xfilter.dimension(
+								function(d) {
+									if((format.reformatExternal(d[scope.dateStartDim.key]) !== '' &&
+										format.reformatExternal(d[scope.dateEndDim.key]) !== '') ||
+										format.reformatExternal(d[scope.dateStartDim.key]) ===
+										format.reformatExternal(d[scope.dateEndDim.key]) ) {
+											// Both populated OR both equal (i.e. blank)
+											return [ format.reformatExternal(d[scope.dateStartDim.key]),
+													format.reformatExternal(d[scope.dateEndDim.key]),
+													d[scope.tooltipLabelDim.key],
+													d[scope.groupDim.key] ];
 									} else {
-										return [ format.reformatExternal(d[scope.dateStartDim.key]),
-												format.reformatExternal(d[scope.dateStartDim.key]),
-												d[scope.tooltipLabelDim.key],
-												d[scope.groupDim.key] ];
+										// Otherwise set the blank one equal to the populated one.
+										if(format.reformatExternal(d[scope.dateStartDim.key]) === '') {
+											return [ format.reformatExternal(d[scope.dateEndDim.key]),
+													format.reformatExternal(d[scope.dateEndDim.key]),
+													d[scope.tooltipLabelDim.key],
+													d[scope.groupDim.key] ];
+										} else {
+											return [ format.reformatExternal(d[scope.dateStartDim.key]),
+													format.reformatExternal(d[scope.dateStartDim.key]),
+													d[scope.tooltipLabelDim.key],
+													d[scope.groupDim.key] ];
+										}
 									}
 								}
-							}
-						);
+							);
 
-						// For now we keep the grouping simple and just do a naive count. To enable
-						// 'countBy' functionality we need to use the Crossfilter helpers or Reductio.
-						group = dim.group();
+							// For now we keep the grouping simple and just do a naive count. To enable
+							// 'countBy' functionality we need to use the Crossfilter helpers or Reductio.
+							group = dim.group();
 
-						var startValues = dim.top(Infinity).map(function (d) { return format.reformatExternal(d[scope.dateStartDim.key]); })
-								// Check for invalid dates
-								.filter(function (d) { return format.parse(d).valueOf(); });
-						var endValues = dim.top(Infinity).map(function (d) { return format.reformatExternal(d[scope.dateEndDim.key]); })
-								// Check for invalid dates
-								.filter(function (d) { return format.parse(d).valueOf(); });
-						var allValues = startValues.concat(endValues);
+							var startValues = dim.top(Infinity).map(function (d) { return format.reformatExternal(d[scope.dateStartDim.key]); })
+									// Check for invalid dates
+									.filter(function (d) { return format.parse(d).valueOf(); });
+							var endValues = dim.top(Infinity).map(function (d) { return format.reformatExternal(d[scope.dateEndDim.key]); })
+									// Check for invalid dates
+									.filter(function (d) { return format.parse(d).valueOf(); });
+							var allValues = startValues.concat(endValues).map(function(d) { return format.parse(d); });
 
-						// Scales
-						x = d3.time.scale().range([0, width])
-								.domain([ format.parse(d3.min(allValues)), format.parse(d3.max(allValues)) ]);
-						xStart = d3.time.scale().range([0, width])
-								.domain([ format.parse(d3.min(allValues)), format.parse(d3.max(allValues)) ]);
-						xEnd = d3.time.scale().range([0, width])
-								.domain([ format.parse(d3.min(allValues)), format.parse(d3.max(allValues)) ]);
-						y = d3.scale.linear().range([height, 0])
-								.domain([0, 1]);
-						yStep = d3.scale.linear().range([height, 0])
-								.domain([-1, group.top(Infinity)
-									.filter(function (d) {
-										return d.key[0] !== "" && d.key[1] !== "" && d.value !== 0;
-									}).length]);
+							// Scales
+							x = d3.time.scale().range([0, width])
+									.domain([ d3.min(allValues), d3.max(allValues) ]);
+							xStart = d3.time.scale().range([0, width])
+									.domain([ d3.min(allValues), d3.max(allValues) ]);
+							xEnd = d3.time.scale().range([0, width])
+									.domain([ d3.min(allValues), d3.max(allValues) ]);
+							y = d3.scale.linear().range([height, 0])
+									.domain([0, 1]);
+							yStep = d3.scale.linear().range([height, 0])
+									.domain([-1, group.top(Infinity)
+										.filter(function (d) {
+											return d.key[0] !== "" && d.key[1] !== "" && d.value !== 0;
+										}).length]);
 
-						var xAxisStart = d3.svg.axis().orient("bottom")
-								.scale(x);
-						var xAxisEnd = d3.svg.axis().orient("top")
-								.scale(x);
+							var xAxisStart = d3.svg.axis().orient("bottom")
+									.scale(x);
+							var xAxisEnd = d3.svg.axis().orient("top")
+									.scale(x);
 
-						var topExtent = xEnd.domain();
-						var bottomExtent = xStart.domain();
-						var midExtent = [];
+							var topExtent = [];
+							var bottomExtent = [];
+							var midExtent = [];
 
-						filter = function(d) {
-							return (topExtent.length === 0 ||
-									(format(topExtent[0]) <= d[1] && d[1] <= format(topExtent[1]))) &&
-								(bottomExtent.length === 0 ||
-									(format(bottomExtent[0]) <= d[0] && d[0] <= format(bottomExtent[1]))) &&
-								(midExtent.length === 0 ||
-									(!(format(midExtent[0]) > d[0] && format(midExtent[0]) > d[1]) &&
-										!(format(midExtent[1]) < d[0] && format(midExtent[1]) < d[1])));
-						};
+							filter = function(d) {
+								return (topExtent.length === 0 ||
+										(topExtent[0] <= format.parse(d[1]) && format.parse(d[1]) <= topExtent[1])) &&
+									(bottomExtent.length === 0 ||
+										(bottomExtent[0] <= format.parse(d[0]) && format.parse(d[0]) <= bottomExtent[1])) &&
+									(midExtent.length === 0 ||
+										(!(midExtent[0] > format.parse(d[0]) && midExtent[0] > format.parse(d[1])) &&
+											!(midExtent[1] < format.parse(d[0]) && midExtent[1] < format.parse(d[1]))));
+							};
 
-						emitFilterText = function() {
-							var texts = [];
-							
-							if(bottomExtent.length) {
-								texts.push(scope.dateStartDim.description + " from " + format(bottomExtent[0]) + " to " + format(bottomExtent[1]));
-							}
-							if(midExtent.length) {
-								texts.push("between " + format(midExtent[0]) + " and  " + format(midExtent[1]));
-							}
-							if(topExtent.length) {
-								texts.push(scope.dateEndDim.description + " from " + format(topExtent[0]) + " to " + format(topExtent[1]));
-							}
+							emitFilterText = function() {
+								var texts = [];
+								
+								if(bottomExtent.length) {
+									texts.push(scope.dateStartDim.description + " from " + format(bottomExtent[0]) + " to " + format(bottomExtent[1]));
+								}
+								if(midExtent.length) {
+									texts.push("between " + format(midExtent[0]) + " and  " + format(midExtent[1]));
+								}
+								if(topExtent.length) {
+									texts.push(scope.dateEndDim.description + " from " + format(topExtent[0]) + " to " + format(topExtent[1]));
+								}
 
-							if(texts.length) {
-								deregister.push(palladioService.setFilter(scope.uniqueToggleId, scope.title, texts.join(", "), scope.filterReset));
+								if(texts.length) {
+									deregister.push(palladioService.setFilter(scope.uniqueToggleId, scope.title, texts.join(", "), scope.filterReset));
+									palladioService.update();
+								} else {
+									removeFilterText();
+								}
+							};
+
+							removeFilterText = function() {
+								palladioService.removeFilter(scope.uniqueToggleId);
 								palladioService.update();
-							} else {
-								removeFilterText();
+							};
+
+							// Brush on end date
+							topBrush = d3.svg.brush()
+								.x(xEnd);
+							topBrush.on('brush', function () {
+								topExtent = topBrush.empty() ? [] : topBrush.extent();
+								dim.filterFunction(filter);
+								palladioService.update();
+							});
+							topBrush.on('brushend', function () {
+								emitFilterText();
+							});
+
+							// Brush on start date
+							bottomBrush = d3.svg.brush()
+								.x(xStart);
+							bottomBrush.on('brush', function () {
+								bottomExtent = bottomBrush.empty() ? [] : bottomBrush.extent();
+								dim.filterFunction(filter);
+								palladioService.update();
+							});
+							bottomBrush.on('brushend', function () {
+								emitFilterText();
+							});
+
+							// Brush to select current events
+							midBrush = d3.svg.brush()
+								.x(x);
+							midBrush.on('brush', function () {
+								midExtent = midBrush.empty() ? [] : midBrush.extent();
+								dim.filterFunction(filter);
+								palladioService.update();
+							});
+							midBrush.on('brushend', function () {
+								emitFilterText();
+							});
+
+							// Build the visualization.
+
+
+							var g = svg.append('g')
+									.attr("transform", "translate(" + 10 + "," + margin + ")");
+
+							bottom = g.append('g')
+								.attr("class", "axis x-axis")
+								.attr("transform", "translate(" + 0 + "," + (height) + ")")
+								.call(bottomBrush)
+								.call(xAxisStart);
+
+							bottom.selectAll('rect').attr('height', margin);
+
+							top = g.append('g')
+								.attr("class", "axis x-axis")
+								.call(topBrush)
+								.call(xAxisEnd);
+
+							top.selectAll('rect')
+								.attr('height', margin)
+								.attr('transform', "translate(0,-" + margin +")");
+
+							middle = g.append('g')
+								.attr("transform", "translate(" + 0 + "," + (margin + 0.5) + ")")
+								.call(midBrush);
+
+							middle.selectAll('rect')
+								.attr('height', height - 1)
+								.attr('transform', "translate(0,-" + margin + ")");
+
+							g.selectAll('.extent')
+								.attr('fill', filterColor)
+								.attr('opacity', 0.6);
+
+							tooltip = g.select(".timespan-tooltip");
+							// Set up the tooltip.
+							if(tooltip.empty()) {
+								tooltip = g.append("g")
+										.attr("class", "timespan-tooltip")
+										.attr("pointer-events", "none")
+										.style("display", "none");
+
+								tooltip.append("foreignObject")
+										.attr("width", 100)
+										.attr("height", 26)
+										.attr("pointer-events", "none")
+									.append("html")
+										.style("background-color", "rgba(0,0,0,0)")
+									.append("div")
+										.style("padding-left", 3)
+										.style("padding-right", 3)
+										.style("text-align", "center")
+										.style("white-space", "nowrap")
+										.style("overflow", "hidden")
+										.style("text-overflow", "ellipsis")
+										.style("border-radius", "5px")
+										.style("background-color", "white")
+										.style("border", "3px solid grey");
 							}
-						};
-
-						removeFilterText = function() {
-							palladioService.removeFilter(scope.uniqueToggleId);
-							palladioService.update();
-						};
-
-						// Brush on end date
-						topBrush = d3.svg.brush()
-							.x(xEnd);
-						topBrush.on('brush', function () {
-							topExtent = topBrush.empty() ? [] : topBrush.extent();
-							dim.filterFunction(filter);
-							palladioService.update();
-						});
-						topBrush.on('brushend', function () {
-							emitFilterText();
-						});
-
-						// Brush on start date
-						bottomBrush = d3.svg.brush()
-							.x(xStart);
-						bottomBrush.on('brush', function () {
-							bottomExtent = bottomBrush.empty() ? [] : bottomBrush.extent();
-							dim.filterFunction(filter);
-							palladioService.update();
-						});
-						bottomBrush.on('brushend', function () {
-							emitFilterText();
-						});
-
-						// Brush to select current events
-						midBrush = d3.svg.brush()
-							.x(x);
-						midBrush.on('brush', function () {
-							midExtent = midBrush.empty() ? [] : midBrush.extent();
-							dim.filterFunction(filter);
-							palladioService.update();
-						});
-						midBrush.on('brushend', function () {
-							emitFilterText();
-						});
-
-						// Build the visualization.
-
-
-						var g = svg.append('g')
-								.attr("transform", "translate(" + 10 + "," + margin + ")");
-
-						bottom = g.append('g')
-							.attr("class", "axis x-axis")
-							.attr("transform", "translate(" + 0 + "," + (height) + ")")
-							.call(bottomBrush)
-							.call(xAxisStart);
-
-						bottom.selectAll('rect').attr('height', margin);
-
-						top = g.append('g')
-							.attr("class", "axis x-axis")
-							.call(topBrush)
-							.call(xAxisEnd);
-
-						top.selectAll('rect')
-							.attr('height', margin)
-							.attr('transform', "translate(0,-" + margin +")");
-
-						middle = g.append('g')
-							.attr("transform", "translate(" + 0 + "," + (margin + 0.5) + ")")
-							.call(midBrush);
-
-						middle.selectAll('rect')
-							.attr('height', height - 1)
-							.attr('transform', "translate(0,-" + margin + ")");
-
-						g.selectAll('.extent')
-							.attr('fill', filterColor)
-							.attr('opacity', 0.6);
-
-						tooltip = g.select(".timespan-tooltip");
-						// Set up the tooltip.
-						if(tooltip.empty()) {
-							tooltip = g.append("g")
-									.attr("class", "timespan-tooltip")
-									.attr("pointer-events", "none")
-									.style("display", "none");
-
-							tooltip.append("foreignObject")
-									.attr("width", 100)
-									.attr("height", 26)
-									.attr("pointer-events", "none")
-								.append("html")
-									.style("background-color", "rgba(0,0,0,0)")
-								.append("div")
-									.style("padding-left", 3)
-									.style("padding-right", 3)
-									.style("text-align", "center")
-									.style("white-space", "nowrap")
-									.style("overflow", "hidden")
-									.style("text-overflow", "ellipsis")
-									.style("border-radius", "5px")
-									.style("background-color", "white")
-									.style("border", "3px solid grey");
 						}
 					}
 
 					function update() {
-						var paths = svg.select('g').selectAll('.path')
-							.data(group.top(Infinity)
-									.filter(function (d) {
-										// Require start OR end date.
-										return (d.key[0] !== "" || d.key[1] !== "") && d.value !== 0;
-									}).sort(function (a, b) {
-										if(scope.stepMode !== 'Grouped Bars' || a.key[3] === b.key[3]) {
-											return a.key[0] < b.key[0] ? -1 : 1;
-										} else {
-											return a.key[3] < b.key[3] ? -1 : 1;
-										}
-									}),
-								function (d) { return d.key[0] + " - " + d.key[1] + " - " + d.key[3]; });
+						if(svg && scope.dateStartDim && scope.dateEndDim && scope.tooltipLabelDim && scope.groupDim) {
 
-						function fill(d) {
-							return filter(d.key) ? "#555555" : "#CCCCCC";
-						}
+							var paths = svg.select('g').selectAll('.path')
+								.data(group.top(Infinity)
+										.filter(function (d) {
+											// Require start OR end date.
+											return (d.key[0] !== "" || d.key[1] !== "") && d.value !== 0;
+										}).sort(function (a, b) {
+											if(scope.stepMode !== 'Grouped Bars' || a.key[3] === b.key[3]) {
+												return a.key[0] < b.key[0] ? -1 : 1;
+											} else {
+												return a.key[3] < b.key[3] ? -1 : 1;
+											}
+										}),
+									function (d) { return d.key[0] + " - " + d.key[1] + " - " + d.key[3]; });
 
-						paths.exit().remove();
-						var newPaths = paths.enter()
-								.append('g')
-									.attr('class', 'path');
+							function fill(d) {
+								return filter(d.key) ? "#555555" : "#CCCCCC";
+							}
 
-						newPaths
-							.tooltip(function (d){
-								return {
-									text : d.key[2] + ": " + d.key[0] + " - " + d.key[1],
-									displacement : [0,20],
-									position: [0,0],
-									gravity: "right",
-									placement: "mouse",
-									mousemove : true
-								};
-							});
+							paths.exit().remove();
+							var newPaths = paths.enter()
+									.append('g')
+										.attr('class', 'path');
 
-						newPaths
-								.append('circle')
-									.attr('class', 'path-start')
-									.attr('r', 1)
-									.attr('fill-opacity', 0.8)
-									.attr('stroke-opacity', 0.8)
-									.attr('stroke-width', 0.8)
-									.style("display", "none");
+							newPaths
+								.tooltip(function (d){
+									return {
+										text : d.key[2] + ": " + d.key[0] + " - " + d.key[1],
+										displacement : [0,20],
+										position: [0,0],
+										gravity: "right",
+										placement: "mouse",
+										mousemove : true
+									};
+								});
 
-						newPaths
-								.append('circle')
-									.attr('class', 'path-end')
-									.attr('r', 1)
-									.attr('fill-opacity', 0.8)
-									.attr('stroke-opacity', 0.8)
-									.attr('stroke-width', 0.8)
-									.style("display", "none");
+							newPaths
+									.append('circle')
+										.attr('class', 'path-start')
+										.attr('r', 1)
+										.attr('fill-opacity', 0.8)
+										.attr('stroke-opacity', 0.8)
+										.attr('stroke-width', 0.8)
+										.style("display", "none");
 
-						newPaths
-								.append('line')
-									.attr('stroke-width', 1)
-									.attr('stroke-opacity', 0.8);
+							newPaths
+									.append('circle')
+										.attr('class', 'path-end')
+										.attr('r', 1)
+										.attr('fill-opacity', 0.8)
+										.attr('stroke-opacity', 0.8)
+										.attr('stroke-width', 0.8)
+										.style("display", "none");
 
-						var lines = paths.selectAll('line');
-						var circles = paths.selectAll('circle');
-						var startCircles = paths.selectAll('.path-start');
-						var endCircles = paths.selectAll('.path-end');
+							newPaths
+									.append('line')
+										.attr('stroke-width', 1)
+										.attr('stroke-opacity', 0.8);
 
-						if(scope.stepMode === "Bars" || scope.stepMode === 'Grouped Bars') {
-							// We need to refigure the yStep scale since the number of groups can change.
-							yStep.domain([-1, group.top(Infinity)
-									.filter(function (d) {
-										// Require start OR end date.
-										return (d.key[0] !== "" || d.key[1] !== "") && d.value !== 0;
-									}).length]);
+							var lines = paths.selectAll('line');
+							var circles = paths.selectAll('circle');
+							var startCircles = paths.selectAll('.path-start');
+							var endCircles = paths.selectAll('.path-end');
 
-							// Calculate fille based on selection.
-							lines.attr('stroke', fill);
-							circles.attr('stroke', fill);
-							circles.attr('fill', fill);
+							if(scope.stepMode === "Bars" || scope.stepMode === 'Grouped Bars') {
+								// We need to refigure the yStep scale since the number of groups can change.
+								yStep.domain([-1, group.top(Infinity)
+										.filter(function (d) {
+											// Require start OR end date.
+											return (d.key[0] !== "" || d.key[1] !== "") && d.value !== 0;
+										}).length]);
 
-							lines
-								.transition()
-									.attr('x1', function (d) { return x(format.parse(d.key[0])); } )
-									.attr('y1', 0)
-									.attr('x2', function (d) { return x(format.parse(d.key[1])); })
-									.attr('y2', 0);
+								// Calculate fille based on selection.
+								lines.attr('stroke', fill);
+								circles.attr('stroke', fill);
+								circles.attr('fill', fill);
 
-							startCircles.attr('cx', function (d) { return x(format.parse(d.key[0])); });
-							endCircles.attr('cx', function (d) { return x(format.parse(d.key[1])); });
+								lines
+									.transition()
+										.attr('x1', function (d) { return x(format.parse(d.key[0])); } )
+										.attr('y1', 0)
+										.attr('x2', function (d) { return x(format.parse(d.key[1])); })
+										.attr('y2', 0);
 
-							// Translate the paths to their proper height.
-							paths
-								.transition()
-									.attr("transform", function (d, i) { return "translate(0," + yStep(i) + ")"; });
+								startCircles.attr('cx', function (d) { return x(format.parse(d.key[0])); });
+								endCircles.attr('cx', function (d) { return x(format.parse(d.key[1])); });
 
-							// Show the circles.
-							circles.style("display", "inline");
-						} else {
-							// Hide the circles.
-							circles.style("display", "none");
+								// Translate the paths to their proper height.
+								paths
+									.transition()
+										.attr("transform", function (d, i) { return "translate(0," + yStep(i) + ")"; });
 
-							lines.attr('stroke', fill);
-							lines
-								.transition()
-									.attr('x1', function (d) { return x(format.parse(d.key[0])); })
-									.attr('y1', y(0))
-									.attr('x2', function (d) { return x(format.parse(d.key[1])); })
-									.attr('y2', y(1));
+								// Show the circles.
+								circles.style("display", "inline");
+							} else {
+								// Hide the circles.
+								circles.style("display", "none");
 
-							// All parallel bars start at 0.
-							paths
-								.transition()
-									.attr("transform", "translate(0,0)");
+								lines.attr('stroke', fill);
+								lines
+									.transition()
+										.attr('x1', function (d) { return x(format.parse(d.key[0])); })
+										.attr('y1', y(0))
+										.attr('x2', function (d) { return x(format.parse(d.key[1])); })
+										.attr('y2', y(1));
+
+								// All parallel bars start at 0.
+								paths
+									.transition()
+										.attr("transform", "translate(0,0)");
+							}
 						}
 					}
 
 					function reset() {
-						group.remove();
-						dim.filterAll();
-						dim.remove();
-						svg.remove();
-						removeFilterText();
+						if (group) group.remove();
+						if (dim) {
+							dim.filterAll();
+							dim.remove();
+							removeFilterText();
+						}
+						if (svg) svg.remove();
 						palladioService.update();
 					}
 
@@ -527,13 +537,15 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						midBrush.extent(state.midExtent.map(function(d) { return dateService.format.parse(d); }));
 						bottomBrush.extent(state.bottomExtent.map(function(d) { return dateService.format.parse(d); }));
 
-						topBrush.event(top);
-						midBrush.event(middle);
-						bottomBrush.event(bottom);
+						if(top && middle && bottom) {
+							topBrush.event(top);
+							midBrush.event(middle);
+							bottomBrush.event(bottom);
 
-						top.call(topBrush);
-						middle.call(midBrush);
-						bottom.call(bottomBrush);
+							top.call(topBrush);
+							middle.call(midBrush);
+							bottom.call(bottomBrush);
+						}
 
 						scope.stepMode = state.mode;
 
@@ -544,12 +556,12 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						// Return a state object that can be consumed by importState().
 						return {
 							title: scope.title,
-							dateStartDim: scope.dateStartDim.key,
-							dateEndDim: scope.dateEndDim.key,
-							tooltipLabelDim: scope.tooltipLabelDim.key,
-							topExtent: topBrush.extent().map(function(d) { return dateService.format(d); }),
-							midExtent: midBrush.extent().map(function(d) { return dateService.format(d); }),
-							bottomExtent: bottomBrush.extent().map(function(d) { return dateService.format(d); }),
+							dateStartDim: scope.dateStartDim ? scope.dateStartDim.key : undefined,
+							dateEndDim: scope.dateEndDim ? scope.dateEndDim.key : undefined,
+							tooltipLabelDim: scope.tooltipLabelDim ? scope.tooltipLabelDim.key : undefined,
+							topExtent: topBrush && topBrush.extent() ? topBrush.extent().map(function(d) { return dateService.format(d); }) : [],
+							midExtent: midBrush && midBrush.extent() ? midBrush.extent().map(function(d) { return dateService.format(d); }) : [],
+							bottomExtent: bottomBrush && bottomBrush.extent() ? bottomBrush.extent().map(function(d) { return dateService.format(d); }) : [],
 							mode: scope.stepMode
 						};
 					}

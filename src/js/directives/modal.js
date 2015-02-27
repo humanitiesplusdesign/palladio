@@ -10,30 +10,39 @@ angular.module('palladio.directives.modal', [])
 				sortable: '@',
 				descriptionAccessor: '='
 			},
-			template: '<div class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">' +
-  				'<div class="modal-header">' +
-			    	'<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>' +
-			    	'<h4 style="line-height: normal">Choose the dimensions</h4>' +
-			  	'</div>' +
-			  	'<div class="modal-body">' +
-			    	'<ul ui-sortable="sortableOptions" class="unstyled" data-ng-model="internalDimensions">' +
-			    		'<li ng-repeat="field in internalDimensions" class="pill" data-ng-class="{checked: check(field)}">' +
-			    			'<i data-ng-show="!sortableOptions.disabled" class="icon-move"></i>' +
-			    			'<label class="checkbox">' +
-		    					'<input type="checkbox" ng-checked="check(field)" ng-click="change(field)"> {{getDescription(field)}}' +
-					    	'</label>' +
-			    		'</li>' +
-			    	'</ul>' +
-			  	'</div>' +
-			  	'<div class="modal-footer">' +
-			    	'<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>' +
-			  	'</div>' +
+			template: '<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">' +
+
+				'<div class="modal-dialog">' +
+					'<div class="modal-content">' +
+
+	  				'<div class="modal-header">' +
+				    	'<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>' +
+				    	'<h4 style="line-height: normal">Choose the dimension(s)</h4>' +
+				  	'</div>' +
+
+				  	'<div class="modal-body">' +
+				    	'<ul ui-sortable="sortableOptions" class="unstyled" data-ng-model="internalDimensions">' +
+				    		'<li ng-repeat="field in internalDimensions" class="pill" data-ng-class="{checked: check(field)}">' +
+				    			'<i data-ng-show="!sortableOptions.disabled" class="icon-move"></i>' +
+				    			'<label class="checkbox">' +
+			    					'<input type="checkbox" ng-checked="check(field)" ng-click="change(field)"> {{getDescription(field)}}' +
+						    	'</label>' +
+				    		'</li>' +
+				    	'</ul>' +
+				  	'</div>' +
+				  	'<div class="modal-footer">' +
+				    	'<button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Close</button>' +
+				  	'</div>' +
+
+						'</div>' +
+				'</div>' +
+
 			'</div>',
 
 			link: function postLink(scope, elements, attrs) {
 
 				scope.internalDimensions = scope.dimensions.map(copyDimension);
-				
+
 				scope.change = function(field) {
 					if(Array.isArray(scope.model)) {
 						if(scope.check(field)) {
