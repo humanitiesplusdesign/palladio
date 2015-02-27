@@ -53,7 +53,7 @@ Then run gulp, which will launch a webserver on port 8000. If you get an error, 
 $ gulp
 ```
 
-Once this is running, go to [http://localhost:8000/](http://localhost:8000/).
+Once this is running, go to [http://localhost:8000/](http://localhost:8000/) for Palladio or [http://localhost:8001/](http://localhost:8001/) for Piranesi.
 
 Use Ctrl-C to stop the server.
 
