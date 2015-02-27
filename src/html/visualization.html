@@ -1,70 +1,26 @@
 <div id="visualization">
+
   <div class="row-fluid" data-ng-show="layout==='geo'">
     <div class="with-settings" data-palladio-map-view-with-settings></div>
   </div>
-  <div class="row-fluid" data-ng-show="layout==='time'">
-    <div class="with-settings" data-full-height="true" data-full-width="true"
-      data-show-controls = "false" data-show-accordion = "false"
-      data-view = "true"
-      data-palladio-partime-filter></div>
-  </div>
-  <div class="row-fluid" data-ng-show="layout==='graph'">
-    <div class="with-settings" data-palladio-graph-view-with-settings></div>
-  </div>
-  <div class="row-fluid" data-ng-show="layout==='table'">
-    <div style="position: absolute; right: 40px; top:10px; z-index:20" data-palladio-download-widget></div>
-    <div class="with-settings" data-palladio-table-view-with-settings></div>
-  </div>
+
   <div class="row-fluid" data-ng-show="layout==='grid'">
-    <div style="position: absolute; right: 40px; top:10px; z-index:20" data-palladio-download-widget></div>
     <div class="with-settings" data-palladio-list-view-with-settings></div>
   </div>
+
+  <div class="row-fluid" data-ng-show="layout==='table'">
+    <div class="with-settings" data-palladio-table-view-with-settings></div>
+  </div>
+
   <div class="row-fluid" data-ng-show="layout==='duration'">
     <div class="with-settings" data-full-height="true" data-full-width="true"
       data-show-controls = "false" data-show-accordion = "false"
       data-view = "true"
       data-palladio-duration-view></div>
   </div>
+
+  <div class="row-fluid" data-ng-show="layout==='idiograph'">
+    <div data-palladio-idiograph-view></div>
+  </div>
+
 </div>
-<div id="footer" data-ng-show="showFilters()">
-                <div class="">
-                    <div id="filters-wrapper" class="">
-                        <div class="row-fluid filters-header">
-                            <a style="line-height:30px" data-ng-click="expandedFilters = !expandedFilters" data-ng-init="expandedFilters = true" class="pull-left">
-                                <span data-ng-show="expandedFilters"><i class="fa fa-angle-down text-center" style="width:10px"></i></span>
-                                <span data-ng-show="!expandedFilters"><i class="fa fa-angle-right text-center" style="width:10px"></i></span>
-                            </a>
-
-                            <div class="row-fluid" style="padding: 0px 10px 0px 20px;">
-                                <a  data-toggle="tooltip"
-                                    data-original-title="Add a new Facet Filter"
-                                    class="view-link selected alert alert-info"
-                                    data-ng-click="addFilter('facet')"
-                                    data-ng-class="{selected: filter.indexOf('facet') !== -1, blur: blurFacet}">Facet</a>
-
-                                <a  data-toggle="tooltip"
-                                    data-original-title="Add a new Timeline Filter"
-                                    class="view-link selected alert alert-info"
-                                    data-ng-click="addFilter('timeline')"
-                                    data-ng-class="{selected: filter.indexOf('timeline') !== -1, blur: blurTimeline}">TimeLine</a>
-
-                                <a  data-toggle="tooltip"
-                                    data-original-title="Add a new Time Spans Filter"
-                                    class="view-link selected alert alert-info"
-                                    data-ng-click="addFilter('partime')"
-                                    data-ng-class="{selected: filter.indexOf('partime') !== -1, blur: blurTimeSpan}">TimeSpan</a>
-
-                                <div class="" data-palladio-selection-view></div>
-                            </div>
-
-
-                            <div class="clearfix"></div>
-                        </div>
-
-
-
-                        <div class="row-fluid" data-ng-show="expandedFilters"></div>
-                        <ul data-ng-show="expandedFilters" class="unstyled accordion" id="filters"></ul>
-                    </div>
-                </div>
-            </div>

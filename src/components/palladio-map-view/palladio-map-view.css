@@ -4,7 +4,7 @@
 }
 
 .leaflet-container {
-  font: normal 12px merriweather, arial, sans-serif;
+  font: normal 12px karla, arial, sans-serif;
 }
 
 [data-palladio-map-view] .legend {
@@ -35,7 +35,7 @@
 
 [data-palladio-map-view] .node {
 	opacity: 0.7;
-	stroke-opacity: 0.2;
+	stroke-opacity: 0.6;
 	cursor: pointer;
 }
 
@@ -108,20 +108,32 @@
 [data-palladio-map-view-with-settings] .layer-list {
 	list-style-type: none;
 	margin-left: 0px;
+	border-radius: 0px;
+	background: #fafafa;
 	border: 1px solid #ddd;
-	border-radius: 2px;
 }
 
 [data-palladio-map-view-with-settings] .layer-list i {
 	cursor: pointer;
 }
 
-[data-palladio-map-view-with-settings] .layer-item {
-	padding: 6px 10px;
-	border-top: 1px solid #ddd;
-	font-size: 11px;
+[data-palladio-map-view-with-settings] .layer-list i.fa.fa-bars {
+	cursor: move;
 }
 
-[data-palladio-map-view-with-settings] .layer-item:first-child {
-	border: none;
+.layer-img {
+	height: 80px;
+	background-size: cover;
+	background-position: center;
+}
+
+[data-palladio-map-view-with-settings] .layer-item {
+	padding: 6px 10px;
+	font-size: 12px;
+	background: #f5f5f5;
+	margin-bottom: 2px;
+}
+
+[data-palladio-map-view-with-settings] .layer-item:last-child {
+		margin-bottom: 0px
 }

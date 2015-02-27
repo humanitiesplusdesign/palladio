@@ -178,7 +178,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 
 				link.lookup.field = bestField;
 			}
-			
+
 			// If metadata is undefined, calculate it.
 			if(link.metadata === undefined) {
 				link.metadata = calcLinkMetadata(link.source, link.lookup);
@@ -194,7 +194,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 		}
 
 		var deleteLink = function (link, index) {
-			
+
 			// Figure out the index if we need to.
 			if(index === undefined) {
 				links.forEach(function(l, i) {
@@ -244,20 +244,26 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 					.length;
 
 			var color = "#33C44A"; //"rgba(0, 255, 0, 0.5)";
+			var clas = "text-success";
 
 			if(matches/total < 0.99) {
 				color = "rgba(226, 217, 0, 1)";
+				clas = "text-warning";
 			}
 
 			if(matches/total < 0.30) {
 				color = "rgb(247, 0, 69)"
+				clas = "text-danger"
 			}
+
+			console.log(clas)
 
 			return {
 				matches: matches,
 				total: total,
 				lookup: lookup.file.data.length,
-				background: color
+				background: color,
+				claz : clas
 			};
 		};
 
@@ -317,8 +323,8 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 			});
 			filesToProcess = [];
 
-			// Functions to populate incoming and outgoing links for each file and link file. 
-			// Note, the function is using the uniqueId on 'f' in the forEach scope, so it is 
+			// Functions to populate incoming and outgoing links for each file and link file.
+			// Note, the function is using the uniqueId on 'f' in the forEach scope, so it is
 			// always the old uniqueId even though we copy the files during the lookup process.
 			// filesToProcess = links.map(function (link) { return link.source.file; });
 
@@ -425,7 +431,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 						var originalData = nf.data.map(function (d) {
 							return angular.extend({}, d);
 						});
-						
+
 						originalData.forEach( function (d) {
 							// Perform the lookup.
 							lookup(d);
@@ -707,7 +713,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 				return tempRow;
 			}).forEach(function(r) {  // Then we have to add several rows for each record.
 
-				// Start by getting the cardinality (number of rows we need to create) by multiplying the 
+				// Start by getting the cardinality (number of rows we need to create) by multiplying the
 				// length of all the arrays in the attributes we need to explode.
 				card = dimsToExplode.reduce(function(p, c) {
 					// What if the length is 0? Then treat it as 1.
@@ -792,7 +798,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 				process();
 				dirty = false;
 			}
-			
+
 			return {
 				data: data,
 				metadata: metadata,
@@ -826,7 +832,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 		};
 
 		// Helper function for munging data with multiple values in a field.
-		// Cribbed from: 
+		// Cribbed from:
 		// http://stackoverflow.com/questions/15298912/javascript-generating-combinations-from-n-arrays-with-m-elements
 		function cartesian(arg) {
 			var r = [], max = arg.length-1;
