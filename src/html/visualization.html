@@ -1,18 +1,26 @@
 <div id="visualization">
+
   <div class="row-fluid" data-ng-show="layout==='geo'">
     <div class="with-settings" data-palladio-map-view-with-settings></div>
   </div>
+
   <div class="row-fluid" data-ng-show="layout==='grid'">
-    <div style="position: absolute; right: 40px; top:10px; z-index:20" data-palladio-download-widget></div>
     <div class="with-settings" data-palladio-list-view-with-settings></div>
   </div>
+
+  <div class="row-fluid" data-ng-show="layout==='table'">
+    <div class="with-settings" data-palladio-table-view-with-settings></div>
+  </div>
+
   <div class="row-fluid" data-ng-show="layout==='duration'">
     <div class="with-settings" data-full-height="true" data-full-width="true"
       data-show-controls = "false" data-show-accordion = "false"
       data-view = "true"
       data-palladio-duration-view></div>
   </div>
+
   <div class="row-fluid" data-ng-show="layout==='idiograph'">
     <div data-palladio-idiograph-view></div>
   </div>
+
 </div>
