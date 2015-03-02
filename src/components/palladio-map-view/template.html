@@ -67,10 +67,10 @@
 						<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
 								<ul class="layer-list list-unstyled" ui-sortable="{axis:y, containment: 'parent'}" data-ng-model="tileSets" data-ng-show="tileSets.length">
 									<li class="layer-item" data-ng-repeat="layer in tileSets | orderBy:index">
-										<i class="fa fa-bars text-muted margin-right"></i>
-										<i class="fa" data-ng-class="layer.enabled ? 'fa-eye' : 'fa-eye-slash'" data-ng-click="layer.toggle()" data-title="{{layer.enabled ? 'Hide' : 'Show'}}" bs-tooltip></i>
+										<i class="fa text-muted" data-ng-class="layer.enabled ? 'fa-eye' : 'fa-eye-slash'" data-ng-click="layer.toggle()" data-title="{{layer.enabled ? 'Hide' : 'Show'}}" bs-tooltip></i>
 										<span style="margin-left: 10px">{{layer.description}}</span>
-										<i class="fa fa-trash-o pull-right" data-title="Delete" bs-tooltip data-ng-click="layer.remove();" style="line-height: 1.6"></i>
+										<i class="fa fa-trash-o pull-right text-danger" data-container="body" data-title="Delete" bs-tooltip data-ng-click="layer.remove();" style="line-height: 1.6"></i>
+										<i class="fa fa-pencil pull-right margin-right text-primary" data-container="body" data-title="Edit" bs-tooltip data-ng-click="" style="line-height: 1.6"></i>
 									</li>
 								</ul>
 								<ul data-ng-show="!tileSets.length" class="list-unstyled">
@@ -78,7 +78,7 @@
 										<span>No layers</span>
 									</li>
 								</ul>
-								<p class="help-block">Layers can be draged</p>
+								<p class="help-block">Sort layers by dragging them</p>
 								<a class="btn btn-default pull-right" data-ng-click="addNewLayer=true"><i class="fa fa-file-o text-primary margin-right"></i>New layer</a>
 						</div>
 					</div>

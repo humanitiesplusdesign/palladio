@@ -75,6 +75,7 @@ angular.module('palladio.directives.files', [
 					saveAs(blob, fileName);
 				};
 
+
 				/* Creates a new file */
 
 				var addFile = function(data, label) {

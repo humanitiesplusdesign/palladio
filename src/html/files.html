@@ -100,6 +100,7 @@
 
 			<!-- Each file -->
 			<div
+				file
 				data-ng-repeat="file in files"
 				data-ng-class="{primary:$index==0}"
 				class="file col-lg-3 col-md-4 col-sm-6">
@@ -107,18 +108,27 @@
 				<div class="panel panel-default">
 					<!-- File Header -->
 					<div class="panel-heading">
+
 						<input
-							data-toggle="tooltip"
-							data-original-title="Rename"
+							bs-tooltip
+							data-title="Rename"
+							data-container="body"
 							data-placement="top"
 							type="text"
 							class="form-control editable"
 							ng-model="file.label"
 							placeholder="Untitled">
 						</input>
-						<span class="">
+
+						<div class="margin-top">
 							<span ng-show="$index==0" class="small text-muted">Primary table</span>
-						</span>
+							<span class="text-muted pull-right">{{file.data.length}} rows</span>
+							<span class="clearfix"></span>
+						</div>
+
+						<a ng-click="setView('field-view-list')">list</a>
+						<a ng-click="setView('field-view-fingerprint')">fingerprint</a>
+
 					</div>
 					<!-- File Body -->
 					<!--<div class="panel-body">
@@ -132,89 +142,103 @@
 
 					</div>-->
 
-					<ul class="list-group">
 
-						<li
-							class="field list-group-item bg-danger"
-							ng-class="{muted:field.delete}"
-							ng-repeat="field in file.fields"
-							>
+					<div class="overflow-hidden">
 
-							<span class="control">
-								<i
-									class="text-muted fa"
-									data-toggle="tooltip"
-									data-original-title="Click to disable"
-									data-ng-click="toggleDelete(field)"
-									ng-hide="field.delete || hasLinks(field).lookup.file || !field.confirmed && field.unassignedSpecialChars.length > 0 && !hasLinks(field).lookup.file && !field.errors.length"></i>
+						<div class="field-view field-view-fingerprint pt-page">soemthing else</div>
 
-								<i
-									class="text-muted fa fa-bell"
-									data-toggle="tooltip"
-									data-original-title="Some"
-									data-ng-click="toggleDelete(field)" ng-show="!field.delete && !hasLinks(field).lookup.file && !field.confirmed && field.unassignedSpecialChars.length > 0 && !hasLinks(field).lookup.file && !field.errors.length"></i>
+						<div class="field-view field-view-list pt-page pt-page-current">
 
-								<i
-									class="text-muted fa fa-eye-slash"
-									data-toggle="tooltip"
-									data-original-title="Click to enable"
-									data-ng-click="toggleDelete(field)" ng-show="field.delete && !hasLinks(field).lookup.file"></i>
+							<ul class="list-group">
 
-								<i
-									class="fa {{hasLinks(field).metadata.class}} text-success"
-									ng-show="hasLinks(field).lookup.file"
-									ng-class="{'fa-arrow-right':file.id==0, 'fa-arrow-left':file.id!=0}"></i>
+								<li
+									class="field list-group-item bg-danger"
+									ng-class="{muted:field.delete}"
+									ng-repeat="field in file.fields"
+									>
 
-							</span>
+									<span class="control">
+										<i
+											class="text-muted fa"
+											data-toggle="tooltip"
+											data-original-title="Click to disable"
+											data-ng-click="toggleDelete(field)"
+											ng-hide="field.delete || hasLinks(field).lookup.file || !field.confirmed && field.unassignedSpecialChars.length > 0 && !hasLinks(field).lookup.file && !field.errors.length"></i>
 
-							<span class="field-description">
-							<a class="margin-left" ng-class="{strong:field.uniqueKey}"
-								data-toggle="modal"
-								data-target="#myModal"
-								data-ng-show="!field.delete"
-								data-ng-click="setSelected(field,file)">{{field.description}}</a>
-								<i class="fa fa-pencil field-edit"></i>
-							</span>
+										<i
+											class="text-muted fa fa-bell"
+											data-toggle="tooltip"
+											data-original-title="Some"
+											data-ng-click="toggleDelete(field)" ng-show="!field.delete && !hasLinks(field).lookup.file && !field.confirmed && field.unassignedSpecialChars.length > 0 && !hasLinks(field).lookup.file && !field.errors.length"></i>
 
-							<span data-ng-show="field.delete" class="margin-left" ng-class="{strong:field.uniqueKey}">{{field.description}}</span>
+										<i
+											class="text-muted fa fa-eye-slash"
+											data-toggle="tooltip"
+											data-original-title="Click to enable"
+											data-ng-click="toggleDelete(field)" ng-show="field.delete && !hasLinks(field).lookup.file"></i>
 
-							<span class="pull-right">
+										<i
+											class="fa {{hasLinks(field).metadata.class}} text-success"
+											ng-show="hasLinks(field).lookup.file"
+											ng-class="{'fa-arrow-right':file.id==0, 'fa-arrow-left':file.id!=0}"></i>
 
-								<span ng-hide="hasLinks(field).lookup.file" class="text-capitalize" ng-class="{'text-muted':!field.errors.length, 'text-danger':field.errors.length}">{{field.type}}</span>
+									</span>
 
-								<span
-									data-toggle="tooltip"
-									data-html="true"
-									data-original-title="<b>{{hasLinks(field).metadata.matches}}</b> in <b>{{hasLinks(field).lookup.file.label}}</b> (via {{hasLinks(field).lookup.field.description}})"
-									ng-show="hasLinks(field).lookup.file"
-									class="pointer text-capitalize text-success">{{hasLinks(field).metadata.matches}} {{hasLinks(field).lookup.file.label}}
-								</span>
-							</span>
+									<span class="field-description">
+									<a class="margin-left" ng-class="{strong:field.uniqueKey}"
+										data-toggle="modal"
+										data-target="#myModal"
+										data-ng-show="!field.delete"
+										data-ng-click="setSelected(field,file)">{{field.description}}</a>
+										<i class="fa fa-pencil field-edit"></i>
+									</span>
+
+									<span data-ng-show="field.delete" class="margin-left" ng-class="{strong:field.uniqueKey}">{{field.description}}</span>
+
+									<span class="pull-right">
+
+										<span ng-hide="hasLinks(field).lookup.file" class="text-capitalize" ng-class="{'text-muted':!field.errors.length, 'text-danger':field.errors.length}">{{field.type}}</span>
+
+										<span
+											bs-tooltip
+											data-html="true"
+											data-container="body"
+											data-title="<b>{{hasLinks(field).metadata.matches}}</b> in <b>{{hasLinks(field).lookup.file.label}}</b> (via {{hasLinks(field).lookup.field.description}})"
+											ng-show="hasLinks(field).lookup.file"
+											class="pointer text-capitalize text-success">{{hasLinks(field).metadata.matches}} {{hasLinks(field).lookup.file.label}}
+										</span>
+									</span>
+									<span class="clearfix"></span>
 
 
-						</li>
-						<!-- Button trigger modal -->
-					</ul>
+								</li>
+								<!-- Button trigger modal -->
+							</ul>
+
+						</div>
+
+					</div>
 
 					<div class="panel-footer dark">
 
 
 
-						<a
-							class=""
-							data-toggle="tooltip"
-							data-original-title="Download this table"
+						<span
+							class="pointer"
+							data-title="Download data"
+							data-placement="top"
+							bs-tooltip
 							data-ng-click="downloadFile(file)">
 								<i class="fa fa-download"></i>
-						</a>
+						</span>
 
-						<a
-							class="pull-right text-danger"
-							data-toggle="tooltip"
-							data-original-title="Delete this table"
+						<span
+							class="pointer pull-right text-danger"
+							data-title="Delete table" bs-tooltip
+							data-container="body"
 							data-ng-click="deleteFile(file.uniqueId)">
 								<i class="fa fa-trash-o"></i>
-						</a>
+						</span>
 					</div>
 
 				</div>

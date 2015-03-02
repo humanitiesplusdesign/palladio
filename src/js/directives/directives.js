@@ -3,6 +3,7 @@ angular.module('palladio.directives', [
 	'palladio.directives.dimension',
 	'palladio.directives.refine',
 	'palladio.directives.files',
+	'palladio.directives.file',
 	'palladio.directives.yasgui',
 	'palladio.directives.group',
 	'palladio.directives.tag',
