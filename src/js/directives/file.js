@@ -14,32 +14,32 @@ angular.module('palladio.directives.file', [])
 
         var current = element.find('.' + scope.currentFieldView);
 
+        var animationIn = 'pt-page-moveFromRight',
+            animationOut = 'pt-page-moveToRight';
+
         element
           .find('.field-view')
           .off('webkitAnimationEnd oAnimationEnd MSAnimationEnd animationend');
 
         current
-        .addClass('pt-page-moveToLeft')
+        .addClass(animationOut)
         .on('webkitAnimationEnd oAnimationEnd MSAnimationEnd animationend',
           function(e) {
-
             $(this)
               .removeClass('pt-page-current')
-              .removeClass('pt-page-moveToLeft')
-              .removeClass('pt-page-moveFromRight')
+              .removeClass(animationOut)
+              .removeClass(animationIn)
               .off('webkitAnimationEnd oAnimationEnd MSAnimationEnd animationend');
         });
 
         element.find('.' + v)
-        .addClass('pt-page-current pt-page-moveFromRight')
+        .addClass('pt-page-current')
+        .addClass(animationIn)
         .on('webkitAnimationEnd oAnimationEnd MSAnimationEnd animationend',
           function(e) {
             $(e.currentTarget)
-            .removeClass('pt-page-moveToLeft')
-            .removeClass('pt-page-moveFromRight');
-
-            /*element.find('.field-view')
-            .off('webkitAnimationEnd oAnimationEnd MSAnimationEnd animationend');*/
+            .removeClass(animationOut)
+            .removeClass(animationIn);
         });
 
 

@@ -126,8 +126,25 @@
 							<span class="clearfix"></span>
 						</div>
 
-						<a ng-click="setView('field-view-list')">list</a>
-						<a ng-click="setView('field-view-fingerprint')">fingerprint</a>
+						<div class="margin-top">
+								<i
+									class="pull-right fa fa-th-list"
+									bs-tooltip
+									data-title="List"
+									data-container="body"
+									ng-click="setView('field-view-list')"
+								></i>
+
+								<i
+									class="pull-right fa fa-th-large margin-right"
+									bs-tooltip
+									data-title="List"
+									data-container="body"
+									ng-click="setView('field-view-fingerprint')"
+								></i>
+
+							<span class="clearfix">
+						</div>
 
 					</div>
 					<!-- File Body -->
@@ -143,10 +160,9 @@
 					</div>-->
 
 
-					<div class="overflow-hidden">
+					<div class="fieldview-container" ng-style="myStyle={'height':file.fields.length*41}">
 
-						<div class="field-view field-view-fingerprint pt-page">soemthing else</div>
-
+						<!-- Deafult view list -->
 						<div class="field-view field-view-list pt-page pt-page-current">
 
 							<ul class="list-group">
@@ -214,6 +230,33 @@
 								</li>
 								<!-- Button trigger modal -->
 							</ul>
+
+						</div>
+
+						<div class="field-view field-view-fingerprint pt-page">
+
+						<ul class="list-group">
+
+							<li
+								class="field list-group-item bg-danger"
+								ng-class="{muted:field.delete}"
+								ng-repeat="field in file.fields"
+								>
+
+								<span class="field-description">
+									<a ng-class="{strong:field.uniqueKey}"
+										data-toggle="modal"
+										data-target="#myModal"
+										data-ng-show="!field.delete"
+										data-ng-click="setSelected(field,file)">{{field.description}}</a>
+										<i class="fa fa-pencil field-edit"></i>
+								</span>
+
+								<span data-ng-show="field.delete" class="margin-left" ng-class="{strong:field.uniqueKey}">{{field.description}}</span>
+
+							</li>
+							<!-- Button trigger modal -->
+						</ul>
 
 						</div>
 
