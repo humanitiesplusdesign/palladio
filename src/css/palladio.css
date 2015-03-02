@@ -209,6 +209,10 @@ strong {
   font-size: 13px;
 }
 
+.btn-cancel {
+  color: #FF0057;
+}
+
 .btn-primary {
   border: none;
   background: #4EBDE5;
@@ -226,6 +230,12 @@ strong {
 .btn-default:focus,
 .btn-default:hover {
   border-color: #ddd;
+  background-color: #fafafa;
+}
+
+.btn-cancel:focus,
+.btn-cancel:hover {
+  color: #FF0057;
   background-color: #fafafa;
 }
 
@@ -427,33 +437,14 @@ label.inline {
 }
 
 .nav-tabs {
-  margin-bottom: 20px;
-  /*background: #fafafa;*/
+  margin-bottom: 15px;
 }
 
 .nav-tabs > li > a {
-  border-radius: 0px;
-  color: #888;
   font-size: 13px;
-  border: none;
-  border-bottom: 2px solid transparent;
-  padding-top: 0px;
-}
-
-.nav-tabs > li:first-child > a {
-}
-
-.nav > li > a:hover, .nav > li > a:focus {
-  text-decoration: none;
-  background-color: transparent;
-}
-
-.nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
-  color: #444;
-  cursor: default;
-  background-color: transparent;
-  border: none;
-  border-bottom: 2px solid #4EBDE5;
+  border-radius: 2px 2px 0 0;
+  line-height: 1;
+  color: #888;
 }
 
 /* Modals */
@@ -563,6 +554,7 @@ label.inline {
 .tooltip {
   z-index: 100000;
   opacity: .9;
+  font: normal 12px 'karla', 'source sans pro', helvetica, arial, sans-serif;
 }
 
 .tooltip-inner {

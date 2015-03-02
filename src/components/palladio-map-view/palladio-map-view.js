@@ -743,20 +743,20 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 				scope.mapTypes = [
 					{
-						label : 'Points',
+						description : 'Points',
 						value : 'points',
-						description : 'Use this map to display points on the map...'
+						info : "A basic layer showing only the...",
+						img : "img/data_point.jpg"
 					},
 					{
-						label : 'Point to point',
+						description : 'Point to point',
 						value : 'point-to-point',
-						description : 'Use this map to display points on the map...'
-					}/*,
-					{
-						label : 'Sequence of points',
-						value : 'sequence'
-					}*/
+						info : "A basic layer showing only the...",
+						img : "img/data_points.jpg"
+					}
 				];
+
+				scope.mapType = scope.mapTypes[0];
 
 				// Set up aggregation selection.
 				scope.getAggDescription = function (field) {
@@ -1054,6 +1054,107 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					};
 				}
 
+				scope.layerTypes = [
+					{
+						"description": "Data",
+						"value": "data",
+						"info": "Data layers allow you to display your data on the map as points and connections between them."
+					},
+					{
+						"description": "Map tiles",
+						"value": "tiles",
+						"info": "Map tiles provide... "
+					},
+					{
+						"description": "geoJSON",
+						"value": "geoJSON",
+						"info": "TBD"
+					}
+				];
+
+				// layers
+				scope.tilesTypes = [
+					{
+						"mbId": "cesta.hd9ak6ie",
+						"description": "Land",
+						"info" : "A basic layer, showing only lands.",
+						"img" : "img/map_land.jpg"
+					},
+					{
+						"mbId": "cesta.k8g7eofo",
+						"description": "Buildings and Areas",
+						"info" : "Shows buildings",
+						"img" : "img/map_buildings.jpg"
+					},
+					{
+						"mbId": "cesta.k8m9p19p",
+						"description": "Streets",
+						"info" : "A layer containing only topographical information (e.g. streets, cities, countries)",
+						"img" : "img/map_street.jpg"
+				},
+					{
+						"mbId": "cesta.k8ghh462",
+						"description": "Terrain",
+						"info" : "Shows natural features of the territories (e.g. mountains, lakes, rivers, green areas)",
+						"img" : "img/map_terrain.jpg"
+					},
+					{
+						"mbId": "cesta.k8gof2np",
+						"description": "Satellite",
+						"info" : "Satellite photos",
+						"img" : "img/map_satellite.jpg"
+					},
+					{
+						"custom" : true,
+						"description": "Custom...",
+						"info" : "Choose one of the following methods to add custom tiles."
+					}
+				]
+
+				scope.tilesType = scope.tilesTypes[0];
+
+				scope.url = null;
+				scope.mbId = null;
+				scope.description = null;
+
+				scope.addLayer = function () {
+
+					if (scope.tilesType && !scope.tilesType.custom) {
+						scope.tileSets.unshift({
+							"url": null,
+							"mbId": scope.tilesType.mbId,
+							"enabled": true,
+							"description": scope.description ? scope.description : scope.tilesType.description,
+							"layer": null
+						});
+					}
+					else if (scope.url || scope.mbId) {
+						scope.tileSets.unshift({
+							"url": scope.url ? scope.url : null,
+							"mbId": scope.mbId ? scope.mbId : null,
+							"enabled": true,
+							"description": scope.description,
+							"layer": null
+						});
+					}
+
+					scope.url = null;
+					scope.mbId = null;
+					scope.description = null;
+				}
+
+				scope.tilesType = scope.tilesTypes[0];
+
+				scope.selectTile = function(d){
+					scope.tilesType = d;
+				}
+
+				scope.selectMap = function(d){
+					scope.mapType = d;
+				}
+
+
+
 				deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'mapView', exportState, importState));
 
 			}, post: function(scope, element, attrs) {
@@ -1069,6 +1170,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 		return directiveObj;
 	})
+
 	.directive('layerModal', function () {
 		return {
 			replace : true,
@@ -1190,7 +1292,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				scope.addLayer = function () {
 
 					if (scope.layerOption && !scope.layerOption.custom) {
-						scope.layers.unshift({
+						scope.tileSets.unshift({
 							"url": null,
 							"mbId": scope.layerOption.mbId,
 							"enabled": true,
@@ -1199,7 +1301,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						});
 					}
 					else if (scope.url || scope.mbId) {
-						scope.layers.unshift({
+						scope.tileSets.unshift({
 							"url": scope.url ? scope.url : null,
 							"mbId": scope.mbId ? scope.mbId : null,
 							"enabled": true,

@@ -56,6 +56,8 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			url : 'URL'
 		};
 
+		$scope.version = version;
+
 		$scope.$watch(function(){ return $('#footer').html(); }, function(){
 			$('*[data-toggle="tooltip"]').tooltip({container:'body'});
 		});
