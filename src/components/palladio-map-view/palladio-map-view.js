@@ -34,18 +34,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					}
 				});
 
-				scope.$watch('sourceCoordinatesAccessor', function (nv, ov) {
-					if(scope.sourceCoordinatesAccessor) {
-						clearAllGroups();
-					}
-				});
-
-				scope.$watch('destinationCoordinatesAccessor', function (nv, ov) {
-					if(scope.destinationCoordinatesAccessor) {
-						clearAllGroups();
-					}
-				});
-
 				function clearAllGroups() {
 					scope.layers.forEach(clearGroups);
 				}
@@ -59,8 +47,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					layer.nestedGroups = null;
 				}
 
-				scope.$watchGroup(['sourceAccessor', 'destinationAccessor', 'sourceDimension',
-					'destinationDimension', 'sequenceAccessor', 'pointSize', 'showLinks'] , update);
 				scope.$watch('filterDimension', function () {
 					palladioService.removeFilter(identifier);
 					palladioService.update();
@@ -69,7 +55,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 				deregister.push(palladioService.onSearch(uniqueId, function(text) {
 					search = text;
-					highlight();
+					layers.forEach(highlight);
 				}));
 
 				/* Creates geoJson features for points */
@@ -120,7 +106,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					return obj;
 				}
 
-				function points(layer) {
+				function generatePoints(layer) {
 
 					var helpers;
 
@@ -134,7 +120,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 									description: function (g, v) { return sourceAccessor(v); },
 									agg: function (g) { return g.agg + 1; },
 									initialAgg: function(g) { return isNaN(g.initialAgg) || g.agg > +g.initialAgg ? g.agg : g.initialAgg; }
-								})(layer.sourceDimension.group())
+								})(layer.source.group())
 									.order(function (p) { return p.agg; });
 						} else {
 							var reducer = reductio()
@@ -155,19 +141,19 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 									initialAgg: function(g) { return isNaN(g.initialAgg) || g.exceptionSum > +g.initialAgg ? g.exceptionSum : g.initialAgg; }
 								});
 							}
-							layer.sourceGroups = reducer(layer.sourceDimension.group())
+							layer.sourceGroups = reducer(layer.source.group())
 									.order(function (p) { return p.agg; });
 						}
 					}
 
-					if(layer.type == "point-to-point" && layer.destinationDimension && !layer.destGroups) {
+					if(layer.type == "point-to-point" && layer.destination && !layer.destGroups) {
 						if(!layer.countBy) {
 							layer.destGroups = reductio()
 								.aliasProp({
 									description: function (g, v) { return destinationAccessor(v); },
 									agg: function (g) { return g.agg + 1; },
 									initialAgg: function(g) { return isNaN(g.initialAgg) || g.agg > +g.initialAgg ? g.agg : g.initialAgg; }
-								})(layer.destinationDimension.group())
+								})(layer.destination.group())
 									.order(function (p) { return p.agg; });
 						} else {
 							var reducer = reductio()
@@ -188,7 +174,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 									initialAgg: function(g) { return isNaN(g.initialAgg) || g.exceptionSum > +g.initialAgg ? g.exceptionSum : g.initialAgg; }
 								});
 							}
-							layer.destGroups = reducer(layer.destinationDimension.group())
+							layer.destGroups = reducer(layer.destination.group())
 									.order(function (p) { return p.agg; });
 						}
 					}
@@ -226,7 +212,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				}
 
 
-				function links(layer) {
+				function generateLinks(layer) {
 					if (layer.type == "points") return [];
 					return layer.type == "point-to-point" ? pointToPoint(layer) : sequence(layer);
 				}
@@ -236,7 +222,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				function pointToPoint(layer) {
 
 					// aggregating links with same source and dest
-					if (!layer.destinationDimension) return [];
+					if (!layer.destination) return [];
 
 					if(!layer.nestedGroups) {
 						var reducer = reductio()
@@ -295,7 +281,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					// aggregating links with same source and dest
 		        	if (!layer.sequenceAccessor) return [];
 
-		        	var nodes = layer.sourceDimension.top(Infinity).filter( function (d) { return layer.sourceDimension.accessor(d); });
+		        	var nodes = layer.source.top(Infinity).filter( function (d) { return layer.source.accessor(d); });
 
 		        	nodes = nodes.sort( function(a,b){ return layer.sequenceAccessor(a) - layer.sequenceAccessor(b); });
 
@@ -318,46 +304,47 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 				function update() {
 
-					scope.layers.forEach(function(layer) {
-						if (!layer.sourceDimension) return;
+					// scope.layers.forEach(function(layer) {
 
-						var svg = d3.select(m.getPanes().overlayPane).selectAll("svg")
-			          		.data([Object])
-			          	svg.enter().append("svg");
-			          	svg.exit().remove();
+					// 	if (!layer.source) return;
 
-			        	var g = svg.selectAll("g.leaflet-zoom-hide")
-			          		.data(function(d){ return [d]; })
-			          	g.enter().append("g").attr("class", "leaflet-zoom-hide");
-						g.exit().remove();
+						var svgs = d3.select(m.getPanes().overlayPane).selectAll("svg")
+			          		.data(scope.layers)
+			          	svgs.enter().append("svg");
+			          	svgs.exit().remove();
 
-						// creation of nodes and links
+				        m.on("viewreset", function() { svgs.each(draw); });
+				        m.on("moveend", function() { svgs.each(draw); });
 
-						var nodes = points(layer),
-							edges = links(layer),
-							line = d3.svg.line().interpolate('bundle'),
-							maxPointSize = layer.maxPointSize ? +layer.maxPointSize : d3.max(nodes.features, function(d){ return d.properties.value.initialAgg; });
-							pointSize = layer.pointSize ?
-								d3.scale.sqrt().domain(
-						       		[ 1, maxPointSize ]
-						       	).range([3,26]) :
-						       	function(){ return 3; },
-							path = d3.geo.path()
-								.pointRadius(function(d){ return pointSize(d.properties.value.agg);})
-								.projection(project),
-	   						value = edges.feature ? d3.scale.linear().domain([ d3.min(edges.features, function(d){ return d.properties.value; }), d3.max(edges.features, function(d){ return d.properties.value; }) ]).range([2,20]) : function(d){ return 2; };
+				        svgs.each(draw);
 
-	   					if(!layer.maxPointSize) layer.maxPointSize = maxPointSize;
+				        function draw(layer) {
 
-						svg.call(nodeTip);
-						svg.call(linkTip);
+				        	var svg = d3.select(this);
+				        	var g = svg.selectAll("g.leaflet-zoom-hide")
+				          		.data(function(d){ return [d]; })
+				          	g.enter().append("g").attr("class", "leaflet-zoom-hide");
+							g.exit().remove();
 
-				        m.on("viewreset", draw);
-				        m.on("moveend", draw);
+				        	svg.call(nodeTip);
+							svg.call(linkTip);
 
-				        draw();
+				        	// creation of nodes and links
+							var nodes = generatePoints(layer),
+								edges = generateLinks(layer),
+								line = d3.svg.line().interpolate('bundle'),
+								maxPointSize = layer.maxPointSize ? +layer.maxPointSize : d3.max(nodes.features, function(d){ return d.properties.value.initialAgg; });
+								pointSize = layer.pointSize ?
+									d3.scale.sqrt().domain(
+							       		[ 1, maxPointSize ]
+							       	).range([3,26]) :
+							       	function(){ return 3; },
+								path = d3.geo.path()
+									.pointRadius(function(d){ return pointSize(d.properties.value.agg);})
+									.projection(project),
+		   						value = edges.feature ? d3.scale.linear().domain([ d3.min(edges.features, function(d){ return d.properties.value; }), d3.max(edges.features, function(d){ return d.properties.value; }) ]).range([2,20]) : function(d){ return 2; };
 
-				        function draw() {
+		   					if(!layer.maxPointSize) layer.maxPointSize = maxPointSize;
 
 				        	var w = d3.select(element[0]).style("width"),
 				        		h = d3.select(element[0]).style("height")
@@ -392,8 +379,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 										return c[0] === d.properties.source &&
 											c[1] === d.properties.destination;
 									});
-							    	// scope.sourceDimension.filter(d.properties.source);
-							    	// scope.destinationDimension.filter(d.properties.destination);
 							    	deregister.push(palladioService.setFilter(identifier, layer.title, layer.sourceAccessor(d.properties.data) + "/" + layer.destinationAccessor(d.properties.data), resetLink));
 									palladioService.update();
 							    })
@@ -414,8 +399,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 										return c[0] === d.properties.source &&
 											c[1] === d.properties.destination;
 									});
-							    	// scope.sourceDimension.filter(d.properties.source);
-							    	// scope.destinationDimension.filter(d.properties.destination);
 							    	deregister.push(palladioService.setFilter(identifier, layer.title, layer.sourceAccessor(d.properties.data) + "/" + layer.destinationAccessor(d.properties.data), resetLink));
 									palladioService.update();
 							    })
@@ -445,7 +428,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 										return c[0] === d.properties.key ||
 											c[1] === d.properties.key;
 									});
-							    	// scope.sourceDimension.filter(d.properties.key);
 							    	deregister.push(palladioService.setFilter(identifier, layer.title, d.properties.value.description, resetNode));
 									palladioService.update();
 							    })
@@ -464,7 +446,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 										return c[0] === d.properties.key ||
 											c[1] === d.properties.key;
 									});
-							    	// scope.sourceDimension.filter(d.properties.key);
 							    	deregister.push(palladioService.setFilter(identifier, layer.title, d.properties.value.description, resetNode));
 									palladioService.update();
 							    })
@@ -478,7 +459,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					    		palladioService.update();
 					    	}
 
-					    	highlight();
+					    	highlight(layer);
 
 					    	// legend
 
@@ -570,10 +551,10 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 								[target[0],target[1]]
 							]);
 				        }
-					});
+					// });
 				}
 
-				function highlight(){
+				function highlight(layer){
 
 					if (!node) return;
 
@@ -642,6 +623,11 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 		       	var identifier = "" + scope.title + Math.floor(Math.random() * 10000);
 
 		       	var filterDimension = null;
+
+		       	scope.$watchCollection('layers', function () {
+		       		clearAllGroups();
+		       		update();
+		       	});
 
 		       	scope.$watchCollection('tileSets', function () {
 					scope.tileSets.forEach(function(ts, i) {
@@ -1116,10 +1102,28 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					var layer = {};
 
 					layer.description = scope.description;
+
+					if(!layer.description) {
+						if(scope.mapping.sourceCoordinates && scope.mapping.destinationCoordinates) {
+							layer.description = "" + scope.mapping.sourceCoordinates.description +
+									" - " + scope.mapping.destinationCoordinates.description;
+						} else {
+							layer.description = "" + scope.mapping.sourceCoordinates.description;
+						}
+					}
+
+					layer.index = scope.layers.length;
 					layer.enabled = true;
 					layer.layer = null;
 
 					buildLayerAttributes(layer);
+
+					layer.remove = function() {
+						if(this.source) this.source.remove();
+						if(this.destination) this.destination.remove();
+						if(this.filterDimension) this.filterDimension.remove();
+						scope.layers.splice(scope.layers.indexOf(this),1);
+					}
 
 					return layer;
 				}
