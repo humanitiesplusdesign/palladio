@@ -2,24 +2,8 @@
 	<!-- View -->
 
 	<div data-palladio-map-view
-		type="mapType.value"
-		source-dimension="source"
-		source-accessor="sourceAccessor"
-		source-coordinates-accessor="sourceCoordinatesAccessor"
-		destination-dimension="destination"
-		destination-accessor="destinationAccessor"
-		destination-coordinates-accessor="destinationCoordinatesAccessor"
-		description-field="descriptiveDim"
-		sequence-accessor="sequenceAccessor"
-		filter-dimension="filterDimension"
 		tile-sets="tileSets"
-		point-size="pointSize"
-		max-point-size="maxPointSize"
-		show-links="showLinks"
-		data-aggregation-type="{{aggregationType}}"
-		data-aggregate-key="{{aggregateKey}}"
-		count-by="{{countBy}}"
-		count-description="{{aggDescription}}">
+		layers="layers">
 	</div>
 </div>
 
@@ -37,26 +21,11 @@
 				<!-- Body -->
 				<div class="panel-body">
 
-
-<!--					<div class="row margin-bottom">
-						<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
-						</div>
-						<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
-							<p class="title">Settings</p>
-						</div>
-					</div>
--->
-					<!--<form class="" role="search">
-						<div class="form-group">
-							<input type="text" class="form-control" placeholder="Search">
-						</div>
-					</form>-->
-
 					<div class="row margin-top" data-ng-show="!addNewLayer">
 							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
 							</div>
 							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
-								<span class="">Layers</span>
+								<span class="">Tile layers</span>
 						</div>
 					</div>
 
@@ -67,18 +36,58 @@
 						<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
 								<ul class="layer-list list-unstyled" ui-sortable="{axis:y, containment: 'parent'}" data-ng-model="tileSets" data-ng-show="tileSets.length">
 									<li class="layer-item" data-ng-repeat="layer in tileSets | orderBy:index">
+										<i class="fa fa-bars text-muted margin-right"></i>
+										<i class="fa" data-ng-class="layer.enabled ? 'fa-eye' : 'fa-eye-slash'" data-ng-click="layer.toggle()" data-title="{{layer.enabled ? 'Hide' : 'Show'}}" bs-tooltip></i>
+										<span style="margin-left: 10px">{{layer.description}}</span>
+										<i class="fa fa-trash-o pull-right" data-title="Delete" bs-tooltip data-ng-click="layer.remove();" style="line-height: 1.6"></i>
+									</li>
+								</ul>
+								<ul data-ng-show="!tileSets.length" class="list-unstyled">
+									<li class="layer-item">
+										<span>No tile-sets</span>
+									</li>
+								</ul>
+						</div>
+					</div>
+
+					<div class="row margin-top" data-ng-show="!addNewLayer">
+							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
+							</div>
+							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
+								<span class="">Data layers</span>
+						</div>
+					</div>
+
+					<div class="row margin-top" data-ng-show="!addNewLayer">
+						<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
+							<label class="inline"></label>
+						</div>
+						<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
+<<<<<<< HEAD
+								<ul class="layer-list list-unstyled" ui-sortable="{axis:y, containment: 'parent'}" data-ng-model="tileSets" data-ng-show="tileSets.length">
+									<li class="layer-item" data-ng-repeat="layer in tileSets | orderBy:index">
 										<i class="fa text-muted" data-ng-class="layer.enabled ? 'fa-eye' : 'fa-eye-slash'" data-ng-click="layer.toggle()" data-title="{{layer.enabled ? 'Hide' : 'Show'}}" bs-tooltip></i>
+=======
+								<ul class="layer-list list-unstyled" ui-sortable="{axis:y, containment: 'parent'}" data-ng-model="layers" data-ng-show="layers.length">
+									<li class="layer-item" data-ng-repeat="layer in layers | orderBy:index">
+										<i class="fa fa-bars text-muted margin-right"></i>
+										<i class="fa" data-ng-class="layer.enabled ? 'fa-eye' : 'fa-eye-slash'" data-ng-click="layer.toggle()" data-title="{{layer.enabled ? 'Hide' : 'Show'}}" bs-tooltip></i>
+>>>>>>> mapRewrite
 										<span style="margin-left: 10px">{{layer.description}}</span>
 										<i class="fa fa-trash-o pull-right text-danger" data-container="body" data-title="Delete" bs-tooltip data-ng-click="layer.remove();" style="line-height: 1.6"></i>
 										<i class="fa fa-pencil pull-right margin-right text-primary" data-container="body" data-title="Edit" bs-tooltip data-ng-click="" style="line-height: 1.6"></i>
 									</li>
 								</ul>
-								<ul data-ng-show="!tileSets.length" class="list-unstyled">
+								<ul data-ng-show="!layers.length" class="list-unstyled">
 									<li class="layer-item">
 										<span>No layers</span>
 									</li>
 								</ul>
+<<<<<<< HEAD
 								<p class="help-block">Sort layers by dragging them</p>
+=======
+								<p class="help-block">Layers can be dragged</p>
+>>>>>>> mapRewrite
 								<a class="btn btn-default pull-right" data-ng-click="addNewLayer=true"><i class="fa fa-file-o text-primary margin-right"></i>New layer</a>
 						</div>
 					</div>
@@ -105,19 +114,6 @@
 							</div>
 						</div>
 
-						<!--<div class="row margin-top">
-							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
-								<label class="inline">Layer type</label>
-							</div>
-							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
-								<button type="button" class="btn btn-default" ng-model="layerType"
-										data-html="1" placeholder="Choose" ng-options="t as t.description for t in layerTypes" bs-select>
-									Choose <span class="caret"></span>
-								</button>
-								<span class="help-block">{{layerType.info}}</span>
-							</div>
-						</div>-->
-
 						<div class="row margin-top">
 							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
 								<label class="inline">Type</label>
@@ -129,11 +125,6 @@
 									<li data-ng-class="{'active' : layerType.value =='geoJSON'}"><a ng-click="layerType=layerTypes[2]" role="tab" data-toggle="tab">Polygons</a></li>
 								</ul>
 								<span class="help-block">{{layerType.info}}</span>
-
-								<!--<div class="tab-content front-page-tab-content">
-									<div class="tab-pane" data-ng-class="{'active' : layerType.value =='data'}">
-									</div>
-								</div>-->
 							</div>
 						</div>
 
@@ -193,23 +184,6 @@
 					<!-- Map -->
 
 					<div class="" data-ng-show="layerType.value=='data'">
-
-						<!--<div class="row margin-top">
-							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
-								<label class="inline">Map type</label>
-							</div>
-							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
-								<button type="button" class="btn btn-default"
-										ng-model="mapType"
-										data-html="1"
-										placeholder="Choose"
-										ng-options="type.label for type in mapTypes"
-										bs-select>
-									Choose <span class="caret"></span>
-								</button>
-								<p class="help-block">{{mapType.description}}</p>
-							</div>
-						</div>-->
 
 						<div class="row margin-top">
 							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
@@ -369,169 +343,6 @@
 
 
 </div>
-
-
-<!--<div class="span4 settings open">
-	<div class="row-fluid">
-		<div class="span6">
-			<div class="setting">
-				<label>Map type</label>
-				<select bs-select ng-model="mapType" ng-options="type.label for type in mapTypes"
-						data-size="5" class="span12 form-control show-tick">
-				</select>
-			</div>
-		</div>
-		<div class="span6">
-			<label>&nbsp;</label>
-			<span class="help-block"></span>
-		</div>
-	</div>
-
-	<div class="row-fluid">
-		<div class="span6">
-
-			<div class="setting" ng-show="mapType.value==points || mapType.value==sequence">
-				<label>Places</label>
-				<select bs-select ng-model="mapping.sourceCoordinates"
-						ng-options="field as field.description for field in latlonFields"
-						data-size="5" class="span12 form-control show-tick">
-					<option value=""><i>None</i></option>
-				</select>
-			</div>
-
-			<div class="setting" ng-show="mapType.value==point-to-point">
-				<label>Source Places</label>
-				<select bs-select ng-model="mapping.sourceCoordinates"
-						ng-options="field as field.description for field in latlonFields"
-						data-size="5" class="span12 form-control show-tick">
-					<option value=""><i>None</i></option>
-				</select>
-			</div>
-
-		</div>
-
-		<div class="span6">
-
-			<div class="setting" ng-show="mapType.value==point-to-point">
-					<label>Destination Places</label>
-					<select bs-select ng-model="mapping.destinationCoordinates"
-							ng-options="field as field.description for field in latlonFields"
-							data-size="5" class="span12 form-control show-tick">
-					<option value=""><i>None</i></option>
-				</select>
-			</div>
-
-			<div class="setting" ng-show="mapType.value==sequence">
-				<label>Establish sequence by</label>
-				<select bs-select ng-model="mapping.sequence"
-						ng-options="field.description for field in dateFields"
-						data-size="5" class="span12 form-control show-tick">
-					<option value=""><i>None</i></option>
-				</select>
-			</div>
-
-			<div class="setting" ng-show="mapType.value==point-to-point || mapType.value==sequence">
-				<label class="checkbox">
-					<input type="checkbox" ng-model="showLinks"> Show links
-				</label>
-			</div>
-
-		</div>
-
-	</div>
-
-	<div class="space"></div>
-
-	<div class="row-fluid">
-		<div class="span6">
-
-			<div class="setting">
-				<label class="checkbox">
-					<input type="checkbox" ng-model="pointSize"> Size points
-				</label>
-			</div>
-
-			<div class="setting" data-ng-show="pointSize">
-				<label class="">Point size corresponds to</label>
-				<span class="field" ng-click="showAggModal()">
-						{{getAggDescription(aggDim) || "Choose..."}}
-					<i class="fa fa-bars pull-right"></i>
-				</span>
-			</div>
-		</div>
-		<div class="span6">
-
-			<div class="setting" data-ng-show="pointSize">
-				<label class="checkbox">
-					<input type="checkbox" ng-model="fixScale"> Adjust scale
-				</label>
-			</div>
-
-			<div class="setting" data-ng-show="fixScale && pointSize">
-				<label class="text">Maximum value</label>
-				<div class="row-fluid">
-					<input class="span12" type="number" ng-model="maxPointSize">
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<div class="row-fluid">
-		<div class="span6">
-
-			<div class="space"></div>
-
-			<div class="setting">
-				<label class="">Tooltip label</label>
-				<span class="field" ng-click="showDescriptionModal()">
-						{{descriptiveDim.description || "Choose..."}}
-					<i class="fa fa-bars pull-right"></i>
-				</span>
-			</div>
-		</div>
-	</div>
-
-	<div class="row-fluid">
-		<div class="span12">
-			<div class="space"></div>
-			<div class="setting">
-				<label class="text">
-					Layers
-					<span class="tiny muted"> (Layers can overlap. Drag to change order)</span>
-				</label>
-
-				<div class="span12">
-					<ul class="layer-list span8" ui-sortable data-ng-model="tileSets">
-
-						<li class="layer-item" data-ng-repeat="layer in tileSets | orderBy:index">
-							<i class="fa fa-arrows" style="margin-right:3px;"></i>
-							<i class="fa fa-eye-slash" data-ng-click="layer.toggle()" ng-show="!layer.enabled" data-toggle="tooltip" data-original-title="Show"></i>
-							<i class="fa fa-eye" data-ng-click="layer.toggle()" ng-show="layer.enabled" data-toggle="tooltip" data-original-title="Hide"></i>
-							<span style="margin-left: 10px">{{layer.description}}</span>
-							<i class="fa fa-times pull-right" data-ng-click="layer.remove();" style="line-height: 1.6"></i>
-						</li>
-						<li class="layer-item" data-ng-show="!tileSets.length">
-							<span>No layers</span>
-						</li>
-					</ul>
-				</div>
-
-				<button class="btn" data-ng-click="showLayerModal()">Add new layer</button>
-			</div>
-		</div>
-	</div>
-	<div class="row-fluid">
-		<div class="span12">
-			<div class="space"></div>
-
-			<div class="setting">
-				<a ng-click="exportSvg(this, Palladio Map.svg)">
-					<i class="fa fa-arrow-circle-down margin-right"></i> Export places and links as .svg
-				</a>
-			</div>
-		</div>
-	</div>
-</div>-->
 
 <div id="{{uniqueModalId}}">
 	<div id="agg-modal" data-modal dimensions="aggDims" model="aggDim"

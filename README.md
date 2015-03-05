@@ -53,13 +53,17 @@ Then run gulp, which will launch a webserver on port 8000. If you get an error, 
 $ gulp
 ```
 
-Once this is running, go to [http://localhost:8000/](http://localhost:8000/).
+Once this is running, go to [http://localhost:8000/](http://localhost:8000/) for Palladio or [http://localhost:8001/](http://localhost:8001/) for Piranesi.
 
 Use Ctrl-C to stop the server.
 
 ## Development
 
-Generally, update files in the /src directory, not the palladio.js/palladio.css files in the root directory or in the apps directories. When running, Gulp will automatically detect changes in the /src directory and update the compiled Palladio files as required.
+Generally, update files in the /src directory, not the palladio.js/palladio.css files in the root directory or in the apps directories. When running, Gulp will automatically detect changes in the /src directory and update the compiled Palladio files as required. If you want to rebuild the entire application and not leave gulp running, you can run
+
+``` sh
+gulp all
+```
 
 ### Running tests
 
@@ -67,12 +71,6 @@ Test coverage in Palladio is not great at the moment, but there are tests coveri
 
 From the command line at the root directory run:
 
-```
-karma start ./test/karma.conf.js
-```
-
-If you don't have karma installed, you may need to install it first:
-
-```
-npm install -g karma
+``` sh
+npm test
 ```

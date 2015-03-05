@@ -81,6 +81,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 								fileId: a.originFileId ? a.originFileId : 0
 							};
 						})
+						.filter(function(d) { return countDims.get(d.fileId) ? true : false; })
 						.sort(function (a, b) { return scope.getAggDescription(a) < scope.getAggDescription(b) ? -1 : 1; });
 
 							

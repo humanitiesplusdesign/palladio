@@ -388,7 +388,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					if(extent.length === 0) return true;
 
 					extent.forEach(function (p) {
-						if( dimFormat(p[0]) <= d && dimFormat(p[1]) >= d ) t = true;
+						if( p[0] <= dimFormat.parse(d) && p[1] >= dimFormat.parse(d) ) t = true;
 					});
 					return t;
 				}
@@ -460,11 +460,17 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 				function buildTimelineGroups(groups) {
 					var lowestTime = format(d3.min(groups, function(d) { return format.parse(d.key); })),
 							highestTime = format(d3.max(groups, function(d) { return format.parse(d.key); })),
-							divisions = [highestTime],
 							groupPosition = 0,
 							defaultGroups = d3.map(),
 							filledGroups = null,
 							tempDate = null;
+
+					// Hack to include end-dates that are not UTC.
+					var interimHT = format.parse(highestTime);
+					interimHT.setUTCDate(interimHT.getUTCDate() + 1);
+					highestTime = format(interimHT);
+
+					var divisions = [highestTime];
 
 					// Populate empty countByGroups
 					stackGroups.forEach(function(d) {
@@ -509,7 +515,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					}
 
 					filledGroups = divisions.map(function(d) {
-						if(groups[groupPosition].key === d) {
+						if(groups[groupPosition] && groups[groupPosition].key === d) {
 							groupPosition++;
 							return { key: d, value: groups[groupPosition-1].value };
 						} else {
@@ -689,6 +695,9 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 
 					lowestTime = d3.min(groups, function(d) { return format.parse(d.key); });
 					highestTime = d3.max(groups, function(d) { return format.parse(d.key); });
+
+					// Hack to include end-dates that are not UTC.
+					highestTime.setUTCDate(highestTime.getUTCDate()+1);
 
 					if(lowestTime instanceof Date) {
 						x = d3.time.scale().range([0, mainWidth])
@@ -1090,6 +1099,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 									fileId: a.originFileId ? a.originFileId : 0
 								};
 							})
+							.filter(function(d) { return countDims.get(d.fileId) ? true : false; })
 							.sort(function (a, b) { return scope.getAggDescription(a) < scope.getAggDescription(b) ? -1 : 1; });
 					// Take the first aggDim from the first file.
 					scope.aggDim = scope.aggDims.filter(function(d) { return d.fileId === 0; })[0] ? 

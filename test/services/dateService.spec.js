@@ -77,8 +77,10 @@ describe("Date Service:", function () {
 		expect(d.format.parseExternal("-0001-1-1")).toEqual(nd);
 		expect(d.format.parseExternal("-0001")).toEqual(nd);
 
+		expect(d.format.parseExternal("1999-01-01T15:30:57Z")).toEqual(td);
 		expect(d.format.parseExternal("1999-01-01T15:30:57")).toEqual(td);
-		// expect(d.format.parseExternal("1999-01-31T15:30:57.123456Z")).toEqual(td);
+		expect(d.format.parseExternal("1999-01-01T15:30:57.123456Z")).toEqual(td);
+		expect(d.format.parseExternal("1999-01-01T15:30:57.123456")).toEqual(td);
 	}]));
 
 	it('should provide a .reformatExternal method to build strings based on supported external formats',
@@ -102,6 +104,7 @@ describe("Date Service:", function () {
 
 		expect(d.format.reformatExternal("-100")).toEqual("-0100-01-01");
 
+		expect(d.format.reformatExternal("1999-01-01T15:30:57Z")).toEqual("1999-01-01");
 		expect(d.format.reformatExternal("1999-01-01T15:30:57")).toEqual("1999-01-01");
 
 		expect(d.format.reformatExternal("")).toEqual("");

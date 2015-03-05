@@ -9,7 +9,6 @@
 					</ul>
 
 				</div>
-
 				<div class="col-lg-9 col-md-8">
 
 					<div class="row">
@@ -39,7 +38,7 @@
 
 										<div class="col-lg-12 margin-top">
 											<p class="title">Load .csv or spreadsheet</p>
-											<p>Copy and paste out of your spreadsheets, drag-and-drop to upload tabular data (e.g. .csv, .tab, .tsv), or link to a public Google spreadsheet to create a new Palladio project. <a target="_blank" href="http://hdlab.stanford.edu/lab-notebook/palladio/2014/11/18/palladio-faqs-0-8-0/#2">Not sure how to structure your data?</a></p>
+											<p>Copy and paste out of your spreadsheets, drag-and-drop to upload tabular data (e.g. .csv, .tab, .tsv), or link to a file in a public Dropbox folder to create a new Palladio project. <a target="_blank" href="http://hdlab.stanford.edu/lab-notebook/palladio/2014/11/18/palladio-faqs-0-8-0/#2">Not sure how to structure your data?</a></p>
 											<textarea ui-codemirror="{ mode : 'text',  lineNumbers : true, lineWrapping: true, onDrop : onDrop }" placeholder="Paste your data or drop a file here" ng-model="text"></textarea>
 											<div class="alert alert-warning" ng-show="parseError">{{parseError}}</div>
 											<a class="btn btn-primary" ng-click="parseExtendTable()" ng-disabled="!text">Load</a>
