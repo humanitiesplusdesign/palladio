@@ -8528,6 +8528,26 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
   stroke-width: 1.5px;
 }
 
+[data-palladio-duration-view] path {
+	fill: #dddddd;
+}
+
+[data-palladio-duration-view] .axis path, [data-palladio-duration-view] .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-duration-view] .x-grid line {
+	fill: none;
+	stroke: #DDD;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-duration-view] .axis text {
+	font: 10px Merriweather, Helvetica, Arial, sans-serif;
+}
+
 [data-palladio-facet-filter] .selection-title {
 	text-transform: uppercase;
 	margin-top: 7px;
@@ -8661,26 +8681,6 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	color: #666;
 	font-size: 12px;
 }
-[data-palladio-duration-view] path {
-	fill: #dddddd;
-}
-
-[data-palladio-duration-view] .axis path, [data-palladio-duration-view] .axis line {
-	fill: none;
-	stroke: #000;
-	shape-rendering: crispEdges;
-}
-
-[data-palladio-duration-view] .x-grid line {
-	fill: none;
-	stroke: #DDD;
-	shape-rendering: crispEdges;
-}
-
-[data-palladio-duration-view] .axis text {
-	font: 10px Merriweather, Helvetica, Arial, sans-serif;
-}
-
 [data-palladio-graph-view] {
 	width: 100%;
 	height: 100%;
@@ -9455,6 +9455,7 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	left: 0;
 	visibility: hidden;
 	overflow: hidden;
+	z-index: 199;
 	-webkit-backface-visibility: hidden;
 	-moz-backface-visibility: hidden;
 	backface-visibility: hidden;
@@ -9469,7 +9470,7 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 .pt-page-current,
 .no-js .pt-page {
 	visibility: visible;
-	z-index: 1;
+	z-index: 200;
 }
 
 .no-js body {
@@ -11052,6 +11053,15 @@ strong {
 
 .btn-default:hover, .btn-default:focus, .btn-default.focus, .btn-default:active, .btn-default.active, .open > .dropdown-toggle.btn-default {
   background-color: #fafafa;
+}
+
+.btn-group > .btn {
+  font-size: 12px;
+  padding: 5px 10px;
+}
+
+.btn-group > .btn.active {
+  background-color: #eee;
 }
 
 .dropdown-menu {

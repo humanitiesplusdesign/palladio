@@ -110,8 +110,7 @@
 					<div class="panel-heading">
 
 						<input
-							bs-tooltip
-							data-title="Rename"
+							tooltip="Rename"
 							data-container="body"
 							data-placement="top"
 							type="text"
@@ -127,7 +126,15 @@
 						</div>
 
 						<div class="margin-top">
-								<i
+
+							<div class="text-right">
+								<div class="btn-group">
+					        <label class="btn btn-default" ng-model="fieldView" btn-radio="'field-view-list'" uncheckable>List</label>
+					        <label class="btn btn-default" ng-model="fieldView" btn-radio="'field-view-fingerprint'" uncheckable>Vis</label>
+					    	</div>
+							</div>
+
+								<!--<i
 									class="pull-right fa fa-th-list"
 									bs-tooltip
 									data-title="List"
@@ -141,7 +148,7 @@
 									data-title="List"
 									data-container="body"
 									ng-click="setView('field-view-fingerprint')"
-								></i>
+								></i>-->
 
 							<span class="clearfix">
 						</div>
@@ -268,16 +275,15 @@
 
 						<span
 							class="pointer"
-							data-title="Download data"
+							tooltip="Download data"
 							data-placement="top"
-							bs-tooltip
 							data-ng-click="downloadFile(file)">
 								<i class="fa fa-download"></i>
 						</span>
 
 						<span
 							class="pointer pull-right text-danger"
-							data-title="Delete table" bs-tooltip
+							tooltip="Delete table"
 							data-container="body"
 							data-ng-click="deleteFile(file.uniqueId)">
 								<i class="fa fa-trash-o"></i>

@@ -267,6 +267,15 @@ strong {
   background-color: #fafafa;
 }
 
+.btn-group > .btn {
+  font-size: 12px;
+  padding: 5px 10px;
+}
+
+.btn-group > .btn.active {
+  background-color: #eee;
+}
+
 .dropdown-menu {
   border-color: #ddd;
   -webkit-border-radius: 2px;

@@ -5,6 +5,7 @@ var app = angular.module('palladioApp', [
 	'palladio.directives',
 	'palladio.filters',
 	'ui.codemirror',
+	'ui.bootstrap',
 	'ui.router',
 	'ui.sortable',
 	'mgcrea.ngStrap',

@@ -2,17 +2,17 @@ angular.module('palladio.directives.file', [])
 .directive('file', function ($rootScope, parseService, dataService) {
   var directiveDefObj = {
 
-    link: function (scope, element, attrs) {
+    link: function postLink(scope, element, attrs) {
 
       // EXPERIMENTAL
 
-      scope.currentFieldView = 'field-view-list';
+      scope.fieldView = 'field-view-list';
 
-      scope.setView = function(v){
+      scope.$watch('fieldView', function(v, previous){
 
-        if (v === scope.currentFieldView) return;
+        if (v == previous) return;
 
-        var current = element.find('.' + scope.currentFieldView);
+        var current = element.find('.' + previous);
 
         var animationIn = 'pt-page-moveFromRight',
             animationOut = 'pt-page-moveToRight';
@@ -41,11 +41,7 @@ angular.module('palladio.directives.file', [])
             .removeClass(animationOut)
             .removeClass(animationIn);
         });
-
-
-        scope.currentFieldView = v;
-
-      }
+      })
 
 
     }
