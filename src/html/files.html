@@ -128,8 +128,9 @@
 
 							<div class="text-right">
 								<div class="btn-group">
-					        <label class="btn btn-default" ng-model="fieldView" btn-radio="'field-view-list'" uncheckable>List</label>
-					        <label class="btn btn-default" ng-model="fieldView" btn-radio="'field-view-fingerprint'" uncheckable>Vis</label>
+					        <label class="btn btn-default" ng-model="fieldView" btn-radio="'field-view-list'">List</label>
+					        <label class="btn btn-default" ng-model="fieldView" btn-radio="'field-view-fingerprint'">Fingerprint</label>
+									<label class="btn btn-default" ng-model="fieldView" btn-radio="'field-view-overview'">Overview</label>
 					    	</div>
 							</div>
 
@@ -165,7 +166,7 @@
 
 					</div>-->
 
-
+					<!-- SOOOOO BAD -->
 					<div class="fieldview-container" ng-style="myStyle={'height':file.fields.length*41}">
 
 						<!-- Deafult view list -->
@@ -265,6 +266,13 @@
 						</ul>
 
 						</div>
+
+
+						<div class="field-view field-view-overview pt-page">
+							overview
+						</div>
+
+
 
 					</div>
 

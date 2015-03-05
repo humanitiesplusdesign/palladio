@@ -122,7 +122,7 @@
 }
 
 .layer-img {
-	height: 50px;
+	height: 60px;
 	background-color: #eee;
 	background-size: cover;
 	background-position: center;
@@ -146,13 +146,19 @@
 	display:box;
 	box-pack:center;
 	box-align:center;
+	border-radius: 2px;
 
 	cursor: pointer;
 	opacity: .8;
+
+
 }
 
 .layer-img:hover {
 	opacity: 1;
+	-webkit-transition: opacity ease-out .15s;
+	-o-transition: opacity ease-out .15s;
+	transition: opacity ease-out .15s;
 }
 
 .layer-img.active {

@@ -26,7 +26,6 @@
     "bootstrap": "~3.3.2",
     "d3": "~3.5.3",
     "angular-bootstrap": "~0.12.1",
-    "angular-strap": "~2.1.6",
     "angular-ui-sortable": "~0.13.3",
     "angular-ui-codemirror": "~0.2.2",
     "spin.js": "~2.0.2",
@@ -38,7 +37,8 @@
     "Blob": "*",
     "FileSaver": "*",
     "YASQE": "https://github.com/YASGUI/YASQE.git#~1.4.0",
-    "YASR": "https://github.com/YASGUI/YASR.git#~1.2.0"
+    "YASR": "https://github.com/YASGUI/YASR.git#~1.2.0",
+    "angular-ui-select": "~0.10.0"
   },
   "overrides": {
     "FileSaver": {

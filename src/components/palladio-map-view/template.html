@@ -21,74 +21,69 @@
 				<!-- Body -->
 				<div class="panel-body">
 
+
+
+
+
+					<!--<div class="row margin-top" data-ng-show="!addNewLayer">
+							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
+							</div>
+							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
+								<span class="">Data layers</span>
+						</div>
+					</div>-->
+
 					<div class="row margin-top" data-ng-show="!addNewLayer">
+						<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
+							<label class="inline">Data</label>
+						</div>
+						<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
+								<ul class="layer-list list-unstyled" ui-sortable="{axis:y, containment: 'parent'}" data-ng-model="layers" data-ng-show="layers.length">
+									<li class="layer-item" data-ng-repeat="layer in layers | orderBy:index">
+										<i class="fa text-muted" data-ng-class="layer.enabled ? 'fa-eye' : 'fa-eye-slash'" data-ng-click="layer.toggle()" data-title="{{layer.enabled ? 'Hide' : 'Show'}}" bs-tooltip></i>
+
+										<span style="margin-left: 10px">{{layer.description}}</span>
+										<i class="fa fa-trash-o pull-right text-danger" data-container="body" data-title="Delete" bs-tooltip data-ng-click="layer.remove();" style="line-height: 1.6"></i>
+										<i class="fa fa-pencil pull-right margin-right text-primary" data-container="body" data-title="Edit" bs-tooltip data-ng-click="" style="line-height: 1.6"></i>
+									</li>
+								</ul>
+
+								<ul data-ng-show="!layers.length" class="list-unstyled">
+									<li class="layer-item">
+										<span>No data layers</span>
+									</li>
+								</ul>
+						</div>
+					</div>
+
+					<!--<div class="row margin-top" data-ng-show="!addNewLayer">
 							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
 							</div>
 							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
 								<span class="">Tile layers</span>
 						</div>
-					</div>
+					</div>-->
 
-					<div class="row margin-top" data-ng-show="!addNewLayer">
+					<div class="row" data-ng-show="!addNewLayer">
 						<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
-							<label class="inline"></label>
+							<label class="inline">Tiles</label>
 						</div>
 						<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
 								<ul class="layer-list list-unstyled" ui-sortable="{axis:y, containment: 'parent'}" data-ng-model="tileSets" data-ng-show="tileSets.length">
 									<li class="layer-item" data-ng-repeat="layer in tileSets | orderBy:index">
-										<i class="fa fa-bars text-muted margin-right"></i>
-										<i class="fa" data-ng-class="layer.enabled ? 'fa-eye' : 'fa-eye-slash'" data-ng-click="layer.toggle()" data-title="{{layer.enabled ? 'Hide' : 'Show'}}" bs-tooltip></i>
+										<i class="fa text-muted" data-ng-class="layer.enabled ? 'fa-eye' : 'fa-eye-slash'" data-ng-click="layer.toggle()" data-title="{{layer.enabled ? 'Hide' : 'Show'}}" bs-tooltip></i>
 										<span style="margin-left: 10px">{{layer.description}}</span>
 										<i class="fa fa-trash-o pull-right" data-title="Delete" bs-tooltip data-ng-click="layer.remove();" style="line-height: 1.6"></i>
 									</li>
 								</ul>
 								<ul data-ng-show="!tileSets.length" class="list-unstyled">
 									<li class="layer-item">
-										<span>No tile-sets</span>
+										<span>No tilesets</span>
 									</li>
 								</ul>
-						</div>
-					</div>
-
-					<div class="row margin-top" data-ng-show="!addNewLayer">
-							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
-							</div>
-							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
-								<span class="">Data layers</span>
-						</div>
-					</div>
-
-					<div class="row margin-top" data-ng-show="!addNewLayer">
-						<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
-							<label class="inline"></label>
-						</div>
-						<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
-<<<<<<< HEAD
-								<ul class="layer-list list-unstyled" ui-sortable="{axis:y, containment: 'parent'}" data-ng-model="tileSets" data-ng-show="tileSets.length">
-									<li class="layer-item" data-ng-repeat="layer in tileSets | orderBy:index">
-										<i class="fa text-muted" data-ng-class="layer.enabled ? 'fa-eye' : 'fa-eye-slash'" data-ng-click="layer.toggle()" data-title="{{layer.enabled ? 'Hide' : 'Show'}}" bs-tooltip></i>
-=======
-								<ul class="layer-list list-unstyled" ui-sortable="{axis:y, containment: 'parent'}" data-ng-model="layers" data-ng-show="layers.length">
-									<li class="layer-item" data-ng-repeat="layer in layers | orderBy:index">
-										<i class="fa fa-bars text-muted margin-right"></i>
-										<i class="fa" data-ng-class="layer.enabled ? 'fa-eye' : 'fa-eye-slash'" data-ng-click="layer.toggle()" data-title="{{layer.enabled ? 'Hide' : 'Show'}}" bs-tooltip></i>
->>>>>>> mapRewrite
-										<span style="margin-left: 10px">{{layer.description}}</span>
-										<i class="fa fa-trash-o pull-right text-danger" data-container="body" data-title="Delete" bs-tooltip data-ng-click="layer.remove();" style="line-height: 1.6"></i>
-										<i class="fa fa-pencil pull-right margin-right text-primary" data-container="body" data-title="Edit" bs-tooltip data-ng-click="" style="line-height: 1.6"></i>
-									</li>
-								</ul>
-								<ul data-ng-show="!layers.length" class="list-unstyled">
-									<li class="layer-item">
-										<span>No layers</span>
-									</li>
-								</ul>
-<<<<<<< HEAD
 								<p class="help-block">Sort layers by dragging them</p>
-=======
-								<p class="help-block">Layers can be dragged</p>
->>>>>>> mapRewrite
 								<a class="btn btn-default pull-right" data-ng-click="addNewLayer=true"><i class="fa fa-file-o text-primary margin-right"></i>New layer</a>
+
 						</div>
 					</div>
 
@@ -97,22 +92,15 @@
 
 					<div class="" data-ng-show="addNewLayer">
 
-						<div class="row margin-top">
+						<!--<div class="row margin-top">
 								<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
 								</div>
 								<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
 									<span class="">New Layer</span>
 							</div>
-						</div>
+						</div>-->
 
-						<div class="row margin-top">
-								<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
-									<label class="inline">Name</label>
-								</div>
-								<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
-									<input class="form-control" type="text" ng-model="description" placeholder="Layer {{tileSets.length}}">
-							</div>
-						</div>
+
 
 						<div class="row margin-top">
 							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
@@ -128,6 +116,14 @@
 							</div>
 						</div>
 
+						<div class="row margin-top">
+								<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
+									<label class="inline">Name</label>
+								</div>
+								<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
+									<input class="form-control" type="text" ng-model="description" placeholder="Layer {{tileSets.length}}">
+							</div>
+						</div>
 
 
 					<!-- tiles -->
@@ -205,15 +201,17 @@
 								<label class="inline">Places</label>
 							</div>
 							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
-								<button type="button"
-										class="btn btn-default"
-										ng-model="mapping.sourceCoordinates"
-										data-html="1"
-										placeholder="Choose"
-										ng-options="field as field.description for field in latlonFields"
-										bs-select>
-									Choose <span class="caret"></span>
-								</button>
+
+								<ui-select ng-model="mapping.sourceCoordinates" theme="selectize" ng-disabled="disabled">
+							    <ui-select-match placeholder="Select or search">
+										{{$select.selected.description}}
+										<span class="caret"></span>
+									</ui-select-match>
+							    <ui-select-choices repeat="field in latlonFields | filter: {description:$select.search}">
+							      <span ng-bind-html="field.description | highlight: $select.search"></span>
+							    </ui-select-choices>
+							  </ui-select>
+
 							</div>
 						</div>
 
@@ -222,15 +220,17 @@
 								<label class="inline">Source Places</label>
 							</div>
 							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
-								<button type="button"
-										class="btn btn-default"
-										ng-model="mapping.sourceCoordinates"
-										data-html="1"
-										placeholder="Choose"
-										ng-options="field as field.description for field in latlonFields"
-										bs-select>
-									Choose <span class="caret"></span>
-								</button>
+
+								<ui-select ng-model="mapping.sourceCoordinates" theme="selectize" ng-disabled="disabled">
+							    <ui-select-match placeholder="Select or search">
+										{{$select.selected.description}}
+										<span class="caret"></span>
+									</ui-select-match>
+							    <ui-select-choices repeat="field in latlonFields | filter: {description:$select.search}">
+							      <span ng-bind-html="field.description | highlight: $select.search"></span>
+							    </ui-select-choices>
+							  </ui-select>
+
 							</div>
 						</div>
 						<div class="row margin-top" ng-show="mapType.value=='point-to-point'">
@@ -238,15 +238,17 @@
 								<label class="inline">Target Places</label>
 							</div>
 							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
-								<button type="button"
-										class="btn btn-default"
-										ng-model="mapping.destinationCoordinates"
-										data-html="1"
-										placeholder="Choose"
-										ng-options="field as field.description for field in latlonFields"
-										bs-select>
-									Choose <span class="caret"></span>
-								</button>
+
+								<ui-select ng-model="mapping.destinationCoordinates" theme="selectize" ng-disabled="disabled">
+							    <ui-select-match placeholder="Select or search">
+										{{$select.selected.description}}
+										<span class="caret"></span>
+									</ui-select-match>
+							    <ui-select-choices repeat="field in latlonFields | filter: {description:$select.search}">
+							      <span ng-bind-html="field.description | highlight: $select.search"></span>
+							    </ui-select-choices>
+							  </ui-select>
+								
 							</div>
 
 						</div>

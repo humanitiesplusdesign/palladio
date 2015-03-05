@@ -1,5 +1,5 @@
 angular.module('palladio.directives', [
-	'mgcrea.ngStrap',
+//	'mgcrea.ngStrap',
 	'palladio.directives.dimension',
 	'palladio.directives.refine',
 	'palladio.directives.files',

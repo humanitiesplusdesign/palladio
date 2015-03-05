@@ -4,11 +4,13 @@ var app = angular.module('palladioApp', [
 	'palladio.services',
 	'palladio.directives',
 	'palladio.filters',
+
 	'ui.codemirror',
 	'ui.bootstrap',
 	'ui.router',
 	'ui.sortable',
-	'mgcrea.ngStrap',
+	'ui.select',
+//	'mgcrea.ngStrap',
 
 	'palladioDataUpload',
 	'palladioDataDownload',

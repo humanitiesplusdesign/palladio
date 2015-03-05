@@ -7363,1033 +7363,219 @@ span.CodeMirror-selectedtext { background: none; }
 	border: 1px solid #666;
 	}
 
-/**
- * angular-motion
- * @version v0.3.4 - 2014-10-14
- * @link https://github.com/mgcrea/angular-motion
- * @author Olivier Louvignes <olivier@mg-crea.com>
- * @license MIT License, http://www.opensource.org/licenses/MIT
+/*!
+ * ui-select
+ * http://github.com/angular-ui/ui-select
+ * Version: 0.10.0 - 2015-02-26T06:35:06.243Z
+ * License: MIT
  */
-.am-collapse {
-  -webkit-animation-duration: 0.3s;
-  animation-duration: 0.3s;
-  -webkit-animation-timing-function: ease;
-  animation-timing-function: ease;
-  -webkit-animation-fill-mode: backwards;
-  animation-fill-mode: backwards;
-  opacity: 1;
-}
-.am-collapse.am-collapse-add,
-.am-collapse.ng-hide-remove,
-.am-collapse.ng-move {
-  -webkit-animation-name: expand;
-  animation-name: expand;
-}
-.am-collapse.am-collapse-remove,
-.am-collapse.ng-hide {
-  -webkit-animation-name: collapse;
-  animation-name: collapse;
-}
-.am-collapse.ng-enter {
-  visibility: hidden;
-  -webkit-animation-name: expand;
-  animation-name: expand;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-collapse.ng-enter.ng-enter-active {
-  visibility: visible;
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-.am-collapse.ng-leave {
-  -webkit-animation-name: collapse;
-  animation-name: collapse;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-collapse.ng-leave.ng-leave-active {
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-@-webkit-keyframes expand {
-  from {
-    max-height: 0px;
-  }
-  to {
-    max-height: 500px;
-  }
-}
-@keyframes expand {
-  from {
-    max-height: 0px;
-  }
-  to {
-    max-height: 500px;
-  }
-}
-@-webkit-keyframes collapse {
-  from {
-    max-height: 500px;
-  }
-  to {
-    max-height: 0px;
-  }
-}
-@keyframes collapse {
-  from {
-    max-height: 500px;
-  }
-  to {
-    max-height: 0px;
-  }
-}
-.panel-collapse.am-collapse.in-remove {
-  -webkit-animation-name: collapse;
-  animation-name: collapse;
-  display: block;
-}
-.panel-collapse.am-collapse.in-add {
-  -webkit-animation-name: expand;
-  animation-name: expand;
+
+
+/* Style when highlighting a search. */
+.ui-select-highlight {
+  font-weight: bold;
 }
 
-.am-fade-and-scale {
-  -webkit-animation-duration: 0.3s;
-  animation-duration: 0.3s;
-  -webkit-animation-timing-function: ease-in-out;
-  animation-timing-function: ease-in-out;
-  -webkit-animation-fill-mode: backwards;
-  animation-fill-mode: backwards;
-}
-.am-fade-and-scale.ng-enter,
-.am-fade-and-scale.am-fade-and-scale-add,
-.am-fade-and-scale.ng-hide-remove,
-.am-fade-and-scale.ng-move {
-  -webkit-animation-name: fadeAndScaleIn;
-  animation-name: fadeAndScaleIn;
-}
-.am-fade-and-scale.ng-leave,
-.am-fade-and-scale.am-fade-and-scale-remove,
-.am-fade-and-scale.ng-hide {
-  -webkit-animation-name: fadeAndScaleOut;
-  animation-name: fadeAndScaleOut;
-}
-.am-fade-and-scale.ng-enter {
-  visibility: hidden;
-  -webkit-animation-name: fadeAndScaleIn;
-  animation-name: fadeAndScaleIn;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-fade-and-scale.ng-enter.ng-enter-active {
-  visibility: visible;
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-.am-fade-and-scale.ng-leave {
-  -webkit-animation-name: fadeAndScaleOut;
-  animation-name: fadeAndScaleOut;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-fade-and-scale.ng-leave.ng-leave-active {
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-@-webkit-keyframes fadeAndScaleIn {
-  from {
-    opacity: 0;
-    -webkit-transform: scale(0.7);
-    transform: scale(0.7);
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes fadeAndScaleIn {
-  from {
-    opacity: 0;
-    -webkit-transform: scale(0.7);
-    transform: scale(0.7);
-  }
-  to {
-    opacity: 1;
-  }
-}
-@-webkit-keyframes fadeAndScaleOut {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-    -webkit-transform: scale(0.7);
-    transform: scale(0.7);
-  }
-}
-@keyframes fadeAndScaleOut {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-    -webkit-transform: scale(0.7);
-    transform: scale(0.7);
-  }
+.ui-select-offscreen {
+  clip: rect(0 0 0 0) !important;
+  width: 1px !important;
+  height: 1px !important;
+  border: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  outline: 0 !important;
+  left: 0px !important;
+  top: 0px !important;
 }
 
-.am-fade-and-slide-top {
-  -webkit-animation-duration: 0.3s;
-  animation-duration: 0.3s;
-  -webkit-animation-timing-function: ease-in-out;
-  animation-timing-function: ease-in-out;
-  -webkit-animation-fill-mode: backwards;
-  animation-fill-mode: backwards;
-}
-.am-fade-and-slide-top.am-fade-and-slide-top-add,
-.am-fade-and-slide-top.ng-hide-remove,
-.am-fade-and-slide-top.ng-move {
-  -webkit-animation-name: fadeAndSlideFromTop;
-  animation-name: fadeAndSlideFromTop;
-}
-.am-fade-and-slide-top.am-fade-and-slide-top-remove,
-.am-fade-and-slide-top.ng-hide {
-  -webkit-animation-name: fadeAndSlideToTop;
-  animation-name: fadeAndSlideToTop;
-}
-.am-fade-and-slide-top.ng-enter {
-  visibility: hidden;
-  -webkit-animation-name: fadeAndSlideFromTop;
-  animation-name: fadeAndSlideFromTop;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-fade-and-slide-top.ng-enter.ng-enter-active {
-  visibility: visible;
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-.am-fade-and-slide-top.ng-leave {
-  -webkit-animation-name: fadeAndSlideToTop;
-  animation-name: fadeAndSlideToTop;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-fade-and-slide-top.ng-leave.ng-leave-active {
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-.am-fade-and-slide-right {
-  -webkit-animation-duration: 0.3s;
-  animation-duration: 0.3s;
-  -webkit-animation-timing-function: ease-in-out;
-  animation-timing-function: ease-in-out;
-  -webkit-animation-fill-mode: backwards;
-  animation-fill-mode: backwards;
-}
-.am-fade-and-slide-right.am-fade-and-slide-right-add,
-.am-fade-and-slide-right.ng-hide-remove,
-.am-fade-and-slide-right.ng-move {
-  -webkit-animation-name: fadeAndSlideFromRight;
-  animation-name: fadeAndSlideFromRight;
-}
-.am-fade-and-slide-right.am-fade-and-slide-right-remove,
-.am-fade-and-slide-right.ng-hide {
-  -webkit-animation-name: fadeAndSlideToRight;
-  animation-name: fadeAndSlideToRight;
-}
-.am-fade-and-slide-right.ng-enter {
-  visibility: hidden;
-  -webkit-animation-name: fadeAndSlideFromRight;
-  animation-name: fadeAndSlideFromRight;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-fade-and-slide-right.ng-enter.ng-enter-active {
-  visibility: visible;
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-.am-fade-and-slide-right.ng-leave {
-  -webkit-animation-name: fadeAndSlideToRight;
-  animation-name: fadeAndSlideToRight;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-fade-and-slide-right.ng-leave.ng-leave-active {
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-.am-fade-and-slide-bottom {
-  -webkit-animation-duration: 0.3s;
-  animation-duration: 0.3s;
-  -webkit-animation-timing-function: ease-in-out;
-  animation-timing-function: ease-in-out;
-  -webkit-animation-fill-mode: backwards;
-  animation-fill-mode: backwards;
-}
-.am-fade-and-slide-bottom.am-fade-and-slide-bottom-add,
-.am-fade-and-slide-bottom.ng-hide-remove,
-.am-fade-and-slide-bottom.ng-move {
-  -webkit-animation-name: fadeAndSlideFromBottom;
-  animation-name: fadeAndSlideFromBottom;
-}
-.am-fade-and-slide-bottom.am-fade-and-slide-bottom-remove,
-.am-fade-and-slide-bottom.ng-hide {
-  -webkit-animation-name: fadeAndSlideToBottom;
-  animation-name: fadeAndSlideToBottom;
-}
-.am-fade-and-slide-bottom.ng-enter {
-  visibility: hidden;
-  -webkit-animation-name: fadeAndSlideFromBottom;
-  animation-name: fadeAndSlideFromBottom;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-fade-and-slide-bottom.ng-enter.ng-enter-active {
-  visibility: visible;
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-.am-fade-and-slide-bottom.ng-leave {
-  -webkit-animation-name: fadeAndSlideToBottom;
-  animation-name: fadeAndSlideToBottom;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-fade-and-slide-bottom.ng-leave.ng-leave-active {
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-.am-fade-and-slide-left {
-  -webkit-animation-duration: 0.3s;
-  animation-duration: 0.3s;
-  -webkit-animation-timing-function: ease-in-out;
-  animation-timing-function: ease-in-out;
-  -webkit-animation-fill-mode: backwards;
-  animation-fill-mode: backwards;
-}
-.am-fade-and-slide-left.am-fade-and-slide-left-add,
-.am-fade-and-slide-left.ng-hide-remove,
-.am-fade-and-slide-left.ng-move {
-  -webkit-animation-fill-mode: backwards;
-  animation-fill-mode: backwards;
-  -webkit-animation-name: fadeAndSlideFromLeft;
-  animation-name: fadeAndSlideFromLeft;
-}
-.am-fade-and-slide-left.am-fade-and-slide-left-remove,
-.am-fade-and-slide-left.ng-hide {
-  -webkit-animation-name: fadeAndSlideToLeft;
-  animation-name: fadeAndSlideToLeft;
-}
-.am-fade-and-slide-left.ng-enter {
-  visibility: hidden;
-  -webkit-animation-name: fadeAndSlideFromLeft;
-  animation-name: fadeAndSlideFromLeft;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-fade-and-slide-left.ng-enter.ng-enter-active {
-  visibility: visible;
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-.am-fade-and-slide-left.ng-leave {
-  -webkit-animation-name: fadeAndSlideToLeft;
-  animation-name: fadeAndSlideToLeft;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-fade-and-slide-left.ng-leave.ng-leave-active {
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-@-webkit-keyframes fadeAndSlideFromTop {
-  from {
-    opacity: 0;
-    -webkit-transform: translateY(-20%);
-    transform: translateY(-20%);
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes fadeAndSlideFromTop {
-  from {
-    opacity: 0;
-    -webkit-transform: translateY(-20%);
-    transform: translateY(-20%);
-  }
-  to {
-    opacity: 1;
-  }
-}
-@-webkit-keyframes fadeAndSlideToTop {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-    -webkit-transform: translateY(-20%);
-    transform: translateY(-20%);
-  }
-}
-@keyframes fadeAndSlideToTop {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-    -webkit-transform: translateY(-20%);
-    transform: translateY(-20%);
-  }
-}
-@-webkit-keyframes fadeAndSlideFromRight {
-  from {
-    opacity: 0;
-    -webkit-transform: translateX(20%);
-    transform: translateX(20%);
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes fadeAndSlideFromRight {
-  from {
-    opacity: 0;
-    -webkit-transform: translateX(20%);
-    transform: translateX(20%);
-  }
-  to {
-    opacity: 1;
-  }
-}
-@-webkit-keyframes fadeAndSlideToRight {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-    -webkit-transform: translateX(20%);
-    transform: translateX(20%);
-  }
-}
-@keyframes fadeAndSlideToRight {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-    -webkit-transform: translateX(20%);
-    transform: translateX(20%);
-  }
-}
-@-webkit-keyframes fadeAndSlideFromBottom {
-  from {
-    opacity: 0;
-    -webkit-transform: translateY(20%);
-    transform: translateY(20%);
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes fadeAndSlideFromBottom {
-  from {
-    opacity: 0;
-    -webkit-transform: translateY(20%);
-    transform: translateY(20%);
-  }
-  to {
-    opacity: 1;
-  }
-}
-@-webkit-keyframes fadeAndSlideToBottom {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-    -webkit-transform: translateY(20%);
-    transform: translateY(20%);
-  }
-}
-@keyframes fadeAndSlideToBottom {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-    -webkit-transform: translateY(20%);
-    transform: translateY(20%);
-  }
-}
-@-webkit-keyframes fadeAndSlideFromLeft {
-  from {
-    opacity: 0;
-    -webkit-transform: translateX(-20%);
-    transform: translateX(-20%);
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes fadeAndSlideFromLeft {
-  from {
-    opacity: 0;
-    -webkit-transform: translateX(-20%);
-    transform: translateX(-20%);
-  }
-  to {
-    opacity: 1;
-  }
-}
-@-webkit-keyframes fadeAndSlideToLeft {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-    -webkit-transform: translateX(-20%);
-    transform: translateX(-20%);
-  }
-}
-@keyframes fadeAndSlideToLeft {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-    -webkit-transform: translateX(-20%);
-    transform: translateX(-20%);
-  }
+/* Select2 theme */
+
+/* Mark invalid Select2 */
+.ng-dirty.ng-invalid > a.select2-choice {
+    border-color: #D44950;
 }
 
-.am-fade {
-  -webkit-animation-duration: 0.3s;
-  animation-duration: 0.3s;
-  -webkit-animation-timing-function: linear;
-  animation-timing-function: linear;
-  -webkit-animation-fill-mode: backwards;
-  animation-fill-mode: backwards;
-  opacity: 1;
-}
-.am-fade.am-fade-add,
-.am-fade.ng-hide-remove,
-.am-fade.ng-move {
-  -webkit-animation-name: fadeIn;
-  animation-name: fadeIn;
-}
-.am-fade.am-fade-remove,
-.am-fade.ng-hide {
-  -webkit-animation-name: fadeOut;
-  animation-name: fadeOut;
-}
-.am-fade.ng-enter {
-  visibility: hidden;
-  -webkit-animation-name: fadeIn;
-  animation-name: fadeIn;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-fade.ng-enter.ng-enter-active {
-  visibility: visible;
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-.am-fade.ng-leave {
-  -webkit-animation-name: fadeOut;
-  animation-name: fadeOut;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-fade.ng-leave.ng-leave-active {
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-@-webkit-keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@-webkit-keyframes fadeOut {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
-@keyframes fadeOut {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
-.tab-pane.am-fade.active-remove {
-  display: none !important;
-}
-.tab-pane.am-fade.active-add {
-  -webkit-animation-name: fadeIn;
-  animation-name: fadeIn;
-}
-.modal-backdrop.am-fade,
-.aside-backdrop.am-fade {
-  background: rgba(0, 0, 0, 0.5);
-  -webkit-animation-duration: 0.15s;
-  animation-duration: 0.15s;
-}
-.modal-backdrop.am-fade.ng-leave,
-.aside-backdrop.am-fade.ng-leave {
-  -webkit-animation-delay: 0.3s;
-  animation-delay: 0.3s;
+.select2-result-single {
+  padding-left: 0;
 }
 
-.am-flip-x {
-  -webkit-animation-duration: 0.4s;
-  animation-duration: 0.4s;
-  -webkit-animation-timing-function: ease;
-  animation-timing-function: ease;
-  -webkit-animation-fill-mode: backwards;
-  animation-fill-mode: backwards;
-}
-.am-flip-x.am-flip-x-add,
-.am-flip-x.ng-hide-remove,
-.am-flip-x.ng-move {
-  -webkit-animation-name: flipInXBounce;
-  animation-name: flipInXBounce;
-}
-.am-flip-x.am-flip-x-remove,
-.am-flip-x.ng-hide {
-  -webkit-animation-name: flipOutX;
-  animation-name: flipOutX;
-}
-.am-flip-x.ng-enter {
-  visibility: hidden;
-  -webkit-animation-name: flipInXBounce;
-  animation-name: flipInXBounce;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-flip-x.ng-enter.ng-enter-active {
-  visibility: visible;
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-.am-flip-x.ng-leave {
-  -webkit-animation-name: flipOutX;
-  animation-name: flipOutX;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-flip-x.ng-leave.ng-leave-active {
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-.am-flip-x-linear {
-  -webkit-animation-duration: 0.4s;
-  animation-duration: 0.4s;
-  -webkit-animation-timing-function: ease;
-  animation-timing-function: ease;
-  -webkit-animation-fill-mode: backwards;
-  animation-fill-mode: backwards;
-}
-.am-flip-x-linear.am-flip-x-add,
-.am-flip-x-linear.ng-hide-remove,
-.am-flip-x-linear.ng-move {
-  -webkit-animation-name: flipInX;
-  animation-name: flipInX;
-}
-.am-flip-x-linear.am-flip-x-remove,
-.am-flip-x-linear.ng-hide {
-  -webkit-animation-name: flipOutX;
-  animation-name: flipOutX;
-}
-.am-flip-x-linear.ng-enter {
-  visibility: hidden;
-  -webkit-animation-name: flipInX;
-  animation-name: flipInX;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-flip-x-linear.ng-enter.ng-enter-active {
-  visibility: visible;
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-.am-flip-x-linear.ng-leave {
-  -webkit-animation-name: flipOutX;
-  animation-name: flipOutX;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-flip-x-linear.ng-leave.ng-leave-active {
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-@-webkit-keyframes flipInX {
-  from {
-    opacity: 0;
-    -webkit-transform: perspective(400px) rotateX(90deg);
-    transform: perspective(400px) rotateX(90deg);
-  }
-  to {
-    opacity: 1;
-    -webkit-transform: perspective(400px) rotateX(0deg);
-    transform: perspective(400px) rotateX(0deg);
-  }
-}
-@keyframes flipInX {
-  from {
-    opacity: 0;
-    -webkit-transform: perspective(400px) rotateX(90deg);
-    transform: perspective(400px) rotateX(90deg);
-  }
-  to {
-    opacity: 1;
-    -webkit-transform: perspective(400px) rotateX(0deg);
-    transform: perspective(400px) rotateX(0deg);
-  }
-}
-@-webkit-keyframes flipInXBounce {
-  from {
-    opacity: 0;
-    -webkit-transform: perspective(400px) rotateX(90deg);
-    transform: perspective(400px) rotateX(90deg);
-  }
-  40% {
-    -webkit-transform: perspective(400px) rotateX(-10deg);
-    transform: perspective(400px) rotateX(-10deg);
-  }
-  70% {
-    -webkit-transform: perspective(400px) rotateX(10deg);
-    transform: perspective(400px) rotateX(10deg);
-  }
-  to {
-    opacity: 1;
-    -webkit-transform: perspective(400px) rotateX(0deg);
-    transform: perspective(400px) rotateX(0deg);
-  }
-}
-@keyframes flipInXBounce {
-  from {
-    opacity: 0;
-    -webkit-transform: perspective(400px) rotateX(90deg);
-    transform: perspective(400px) rotateX(90deg);
-  }
-  40% {
-    -webkit-transform: perspective(400px) rotateX(-10deg);
-    transform: perspective(400px) rotateX(-10deg);
-  }
-  70% {
-    -webkit-transform: perspective(400px) rotateX(10deg);
-    transform: perspective(400px) rotateX(10deg);
-  }
-  to {
-    opacity: 1;
-    -webkit-transform: perspective(400px) rotateX(0deg);
-    transform: perspective(400px) rotateX(0deg);
-  }
-}
-@-webkit-keyframes flipOutX {
-  from {
-    opacity: 1;
-    -webkit-transform: perspective(400px) rotateX(0deg);
-    transform: perspective(400px) rotateX(0deg);
-  }
-  to {
-    opacity: 0;
-    -webkit-transform: perspective(400px) rotateX(90deg);
-    transform: perspective(400px) rotateX(90deg);
-  }
-}
-@keyframes flipOutX {
-  from {
-    opacity: 1;
-    -webkit-transform: perspective(400px) rotateX(0deg);
-    transform: perspective(400px) rotateX(0deg);
-  }
-  to {
-    opacity: 0;
-    -webkit-transform: perspective(400px) rotateX(90deg);
-    transform: perspective(400px) rotateX(90deg);
-  }
+.select2-locked > .select2-search-choice-close{
+  display:none;
 }
 
-.am-slide-top {
-  -webkit-animation-duration: 0.3s;
-  animation-duration: 0.3s;
-  -webkit-animation-timing-function: ease-in-out;
-  animation-timing-function: ease-in-out;
-  -webkit-animation-fill-mode: backwards;
-  animation-fill-mode: backwards;
-}
-.am-slide-top.am-slide-top-add,
-.am-slide-top.ng-hide-remove,
-.am-slide-top.ng-move {
-  -webkit-animation-name: slideFromTop;
-  animation-name: slideFromTop;
-}
-.am-slide-top.am-slide-top-remove,
-.am-slide-top.ng-hide {
-  -webkit-animation-name: slideToTop;
-  animation-name: slideToTop;
-}
-.am-slide-top.ng-enter {
-  visibility: hidden;
-  -webkit-animation-name: slideFromTop;
-  animation-name: slideFromTop;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-slide-top.ng-enter.ng-enter-active {
-  visibility: visible;
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-.am-slide-top.ng-leave {
-  -webkit-animation-name: slideToTop;
-  animation-name: slideToTop;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-slide-top.ng-leave.ng-leave-active {
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-.am-slide-right {
-  -webkit-animation-duration: 0.3s;
-  animation-duration: 0.3s;
-  -webkit-animation-timing-function: ease-in-out;
-  animation-timing-function: ease-in-out;
-  -webkit-animation-fill-mode: backwards;
-  animation-fill-mode: backwards;
-}
-.am-slide-right.am-slide-right-add,
-.am-slide-right.ng-hide-remove,
-.am-slide-right.ng-move {
-  -webkit-animation-name: slideFromRight;
-  animation-name: slideFromRight;
-}
-.am-slide-right.am-slide-right-remove,
-.am-slide-right.ng-hide {
-  -webkit-animation-name: slideToRight;
-  animation-name: slideToRight;
-}
-.am-slide-right.ng-enter {
-  visibility: hidden;
-  -webkit-animation-name: slideFromRight;
-  animation-name: slideFromRight;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-slide-right.ng-enter.ng-enter-active {
-  visibility: visible;
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-.am-slide-right.ng-leave {
-  -webkit-animation-name: slideToRight;
-  animation-name: slideToRight;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-slide-right.ng-leave.ng-leave-active {
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-.am-slide-bottom {
-  -webkit-animation-duration: 0.3s;
-  animation-duration: 0.3s;
-  -webkit-animation-timing-function: ease-in-out;
-  animation-timing-function: ease-in-out;
-  -webkit-animation-fill-mode: backwards;
-  animation-fill-mode: backwards;
-}
-.am-slide-bottom.am-slide-bottom-add,
-.am-slide-bottom.ng-hide-remove,
-.am-slide-bottom.ng-move {
-  -webkit-animation-name: slideFromBottom;
-  animation-name: slideFromBottom;
-}
-.am-slide-bottom.am-slide-bottom-remove,
-.am-slide-bottom.ng-hide {
-  -webkit-animation-name: slideToBottom;
-  animation-name: slideToBottom;
-}
-.am-slide-bottom.ng-enter {
-  visibility: hidden;
-  -webkit-animation-name: slideFromBottom;
-  animation-name: slideFromBottom;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-slide-bottom.ng-enter.ng-enter-active {
-  visibility: visible;
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-.am-slide-bottom.ng-leave {
-  -webkit-animation-name: slideToBottom;
-  animation-name: slideToBottom;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-slide-bottom.ng-leave.ng-leave-active {
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-.am-slide-left {
-  -webkit-animation-duration: 0.3s;
-  animation-duration: 0.3s;
-  -webkit-animation-timing-function: ease-in-out;
-  animation-timing-function: ease-in-out;
-  -webkit-animation-fill-mode: backwards;
-  animation-fill-mode: backwards;
-}
-.am-slide-left.am-slide-left-add,
-.am-slide-left.ng-hide-remove,
-.am-slide-left.ng-move {
-  -webkit-animation-name: slideFromLeft;
-  animation-name: slideFromLeft;
-}
-.am-slide-left.am-slide-left-remove,
-.am-slide-left.ng-hide {
-  -webkit-animation-name: slideToLeft;
-  animation-name: slideToLeft;
-}
-.am-slide-left.ng-enter {
-  visibility: hidden;
-  -webkit-animation-name: slideFromLeft;
-  animation-name: slideFromLeft;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-slide-left.ng-enter.ng-enter-active {
-  visibility: visible;
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-.am-slide-left.ng-leave {
-  -webkit-animation-name: slideToLeft;
-  animation-name: slideToLeft;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused;
-}
-.am-slide-left.ng-leave.ng-leave-active {
-  -webkit-animation-play-state: running;
-  animation-play-state: running;
-}
-@-webkit-keyframes slideFromTop {
-  from {
-    -webkit-transform: translateY(-100%);
-    transform: translateY(-100%);
-  }
-}
-@keyframes slideFromTop {
-  from {
-    -webkit-transform: translateY(-100%);
-    transform: translateY(-100%);
-  }
-}
-@-webkit-keyframes slideToTop {
-  to {
-    -webkit-transform: translateY(-100%);
-    transform: translateY(-100%);
-  }
-}
-@keyframes slideToTop {
-  to {
-    -webkit-transform: translateY(-100%);
-    transform: translateY(-100%);
-  }
-}
-@-webkit-keyframes slideFromRight {
-  from {
-    -webkit-transform: translateX(100%);
-    transform: translateX(100%);
-  }
-}
-@keyframes slideFromRight {
-  from {
-    -webkit-transform: translateX(100%);
-    transform: translateX(100%);
-  }
-}
-@-webkit-keyframes slideToRight {
-  to {
-    -webkit-transform: translateX(100%);
-    transform: translateX(100%);
-  }
-}
-@keyframes slideToRight {
-  to {
-    -webkit-transform: translateX(100%);
-    transform: translateX(100%);
-  }
-}
-@-webkit-keyframes slideFromBottom {
-  from {
-    -webkit-transform: translateY(100%);
-    transform: translateY(100%);
-  }
-}
-@keyframes slideFromBottom {
-  from {
-    -webkit-transform: translateY(100%);
-    transform: translateY(100%);
-  }
-}
-@-webkit-keyframes slideToBottom {
-  to {
-    -webkit-transform: translateY(100%);
-    transform: translateY(100%);
-  }
-}
-@keyframes slideToBottom {
-  to {
-    -webkit-transform: translateY(100%);
-    transform: translateY(100%);
-  }
-}
-@-webkit-keyframes slideFromLeft {
-  from {
-    -webkit-transform: translateX(-100%);
-    transform: translateX(-100%);
-  }
-}
-@keyframes slideFromLeft {
-  from {
-    -webkit-transform: translateX(-100%);
-    transform: translateX(-100%);
-  }
-}
-@-webkit-keyframes slideToLeft {
-  to {
-    -webkit-transform: translateX(-100%);
-    transform: translateX(-100%);
-  }
-}
-@keyframes slideToLeft {
-  to {
-    -webkit-transform: translateX(-100%);
-    transform: translateX(-100%);
-  }
+.select-locked > .ui-select-match-close{
+    display:none;
 }
 
+/* Selectize theme */
+
+/* Helper class to show styles when focus */
+.selectize-input.selectize-focus{
+  border-color: #007FBB !important;
+}
+
+/* Fix input width for Selectize theme */
+.selectize-control > .selectize-input > input {
+  width: 100%;
+}
+
+/* Fix dropdown width for Selectize theme */
+.selectize-control > .selectize-dropdown {
+  width: 100%;
+}
+
+/* Mark invalid Selectize */
+.ng-dirty.ng-invalid > div.selectize-input {
+    border-color: #D44950;
+}
+
+
+/* Bootstrap theme */
+
+/* Helper class to show styles when focus */
+.btn-default-focus {
+  color: #333;
+  background-color: #EBEBEB;
+  border-color: #ADADAD;
+  text-decoration: none;
+  outline: 5px auto -webkit-focus-ring-color;
+  outline-offset: -2px;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+}
+
+.ui-select-bootstrap .ui-select-toggle {
+  position: relative;
+}
+
+.ui-select-bootstrap .ui-select-toggle > .caret {
+  position: absolute;
+  height: 10px;
+  top: 50%;
+  right: 10px;
+  margin-top: -2px;
+}
+
+/* Fix Bootstrap dropdown position when inside a input-group */
+.input-group > .ui-select-bootstrap.dropdown {
+  /* Instead of relative */
+  position: static;
+}
+
+.input-group > .ui-select-bootstrap > input.ui-select-search.form-control {
+  border-radius: 4px; /* FIXME hardcoded value :-/ */
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.ui-select-bootstrap > .ui-select-match {
+  /* Instead of center because of .btn */
+  text-align: left;
+}
+
+.ui-select-bootstrap > .ui-select-match > .caret {
+  position: absolute;
+  top: 45%;
+  right: 15px;
+}
+
+/* See Scrollable Menu with Bootstrap 3 http://stackoverflow.com/questions/19227496 */
+.ui-select-bootstrap > .ui-select-choices {
+  width: 100%;
+  height: auto;
+  max-height: 200px;
+  overflow-x: hidden;
+  margin-top: -1px;
+}
+
+.ui-select-multiple.ui-select-bootstrap {
+  height: auto;
+  padding: 3px 3px 0 3px;
+}
+
+.ui-select-multiple.ui-select-bootstrap input.ui-select-search {
+  background-color: transparent !important; /* To prevent double background when disabled */
+  border: none;
+  outline: none;
+  height: 1.666666em;
+  margin-bottom: 3px;
+}
+
+.ui-select-multiple.ui-select-bootstrap .ui-select-match .close {
+  font-size: 1.6em;
+  line-height: 0.75;
+}
+
+.ui-select-multiple.ui-select-bootstrap .ui-select-match-item {
+  outline: 0;
+  margin: 0 3px 3px 0;
+}
+
+.ui-select-multiple .ui-select-match-item {
+  position: relative;
+}
+
+.ui-select-multiple .ui-select-match-item.dropping-before:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 100%;
+  height: 100%;
+  margin-right: 2px;
+  border-left: 1px solid #428bca;
+}
+
+.ui-select-multiple .ui-select-match-item.dropping-after:after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 100%;
+  height: 100%;
+  margin-left: 2px;
+  border-right: 1px solid #428bca;
+}
+
+.ui-select-bootstrap .ui-select-choices-row>a {
+    display: block;
+    padding: 3px 20px;
+    clear: both;
+    font-weight: 400;
+    line-height: 1.42857143;
+    color: #333;
+    white-space: nowrap;
+}
+
+.ui-select-bootstrap .ui-select-choices-row>a:hover, .ui-select-bootstrap .ui-select-choices-row>a:focus {
+    text-decoration: none;
+    color: #262626;
+    background-color: #f5f5f5;
+}
+
+.ui-select-bootstrap .ui-select-choices-row.active>a {
+    color: #fff;
+    text-decoration: none;
+    outline: 0;
+    background-color: #428bca;
+}
+
+.ui-select-bootstrap .ui-select-choices-row.disabled>a,
+.ui-select-bootstrap .ui-select-choices-row.active.disabled>a {
+    color: #777;
+    cursor: not-allowed;
+    background-color: #fff;
+}
+
+/* fix hide/show angular animation */
+.ui-select-match.ng-hide-add,
+.ui-select-search.ng-hide-add {
+    display: none !important;
+}
+
+/* Mark invalid Bootstrap */
+.ui-select-bootstrap.ng-dirty.ng-invalid > button.btn.ui-select-match {
+    border-color: #D44950;
+}
 .CodeMirror{font-family:monospace;height:300px}.CodeMirror-scroll{overflow:auto}.CodeMirror-lines{padding:4px 0}.CodeMirror pre{padding:0 4px}.CodeMirror-gutter-filler,.CodeMirror-scrollbar-filler{background-color:#fff}.CodeMirror-gutters{border-right:1px solid #ddd;background-color:#f7f7f7;white-space:nowrap}.CodeMirror-linenumber{padding:0 3px 0 5px;min-width:20px;text-align:right;color:#999;-moz-box-sizing:content-box;box-sizing:content-box}.CodeMirror div.CodeMirror-cursor{border-left:1px solid #000}.CodeMirror div.CodeMirror-secondarycursor{border-left:1px solid silver}.CodeMirror.cm-keymap-fat-cursor div.CodeMirror-cursor{width:auto;border:0;background:#7e7}.cm-tab{display:inline-block}.CodeMirror-ruler{border-left:1px solid #ccc;position:absolute}.cm-s-default .cm-keyword{color:#708}.cm-s-default .cm-atom{color:#219}.cm-s-default .cm-number{color:#164}.cm-s-default .cm-def{color:#00f}.cm-s-default .cm-variable-2{color:#05a}.cm-s-default .cm-variable-3{color:#085}.cm-s-default .cm-comment{color:#a50}.cm-s-default .cm-string{color:#a11}.cm-s-default .cm-string-2{color:#f50}.cm-s-default .cm-meta,.cm-s-default .cm-qualifier{color:#555}.cm-s-default .cm-builtin{color:#30a}.cm-s-default .cm-bracket{color:#997}.cm-s-default .cm-tag{color:#170}.cm-s-default .cm-attribute{color:#00c}.cm-s-default .cm-header{color:#00f}.cm-s-default .cm-quote{color:#090}.cm-s-default .cm-hr{color:#999}.cm-s-default .cm-link{color:#00c}.cm-negative{color:#d44}.cm-positive{color:#292}.cm-header,.cm-strong{font-weight:700}.cm-em{font-style:italic}.cm-link{text-decoration:underline}.cm-invalidchar,.cm-s-default .cm-error{color:red}div.CodeMirror span.CodeMirror-matchingbracket{color:#0f0}div.CodeMirror span.CodeMirror-nonmatchingbracket{color:#f22}.CodeMirror-activeline-background{background:#e8f2ff}.CodeMirror{position:relative;overflow:hidden;background:#fff;color:#000}.CodeMirror-scroll{margin-bottom:-30px;margin-right:-30px;padding-bottom:30px;height:100%;outline:0;position:relative;-moz-box-sizing:content-box;box-sizing:content-box}.CodeMirror-sizer{position:relative;border-right:30px solid transparent;-moz-box-sizing:content-box;box-sizing:content-box}.CodeMirror-gutter-filler,.CodeMirror-hscrollbar,.CodeMirror-scrollbar-filler,.CodeMirror-vscrollbar{position:absolute;z-index:6;display:none}.CodeMirror-vscrollbar{right:0;top:0;overflow-x:hidden;overflow-y:scroll}.CodeMirror-hscrollbar{bottom:0;left:0;overflow-y:hidden;overflow-x:scroll}.CodeMirror-scrollbar-filler{right:0;bottom:0}.CodeMirror-gutter-filler{left:0;bottom:0}.CodeMirror-gutters{position:absolute;left:0;top:0;padding-bottom:30px;z-index:3}.CodeMirror-gutter{white-space:normal;height:100%;-moz-box-sizing:content-box;box-sizing:content-box;padding-bottom:30px;margin-bottom:-32px;display:inline-block}.CodeMirror-gutter-elt{position:absolute;cursor:default;z-index:4}.CodeMirror-lines{cursor:text}.CodeMirror pre{-moz-border-radius:0;-webkit-border-radius:0;border-radius:0;border-width:0;background:0 0;font-family:inherit;margin:0;white-space:pre;word-wrap:normal;line-height:inherit;color:inherit;z-index:2;position:relative;overflow:visible}.CodeMirror-wrap pre{word-wrap:break-word;white-space:pre-wrap;word-break:normal}.CodeMirror-linebackground{position:absolute;left:0;right:0;top:0;bottom:0;z-index:0}.CodeMirror-linewidget{position:relative;z-index:2;overflow:auto}.CodeMirror-wrap .CodeMirror-scroll{overflow-x:hidden}.CodeMirror-measure{position:absolute;width:100%;height:0;overflow:hidden;visibility:hidden}.CodeMirror-measure pre{position:static}.CodeMirror div.CodeMirror-cursor{position:absolute;border-right:none;width:0}div.CodeMirror-cursors{visibility:hidden;position:relative;z-index:1}.CodeMirror-focused div.CodeMirror-cursors{visibility:visible}.CodeMirror-selected{background:#d9d9d9}.CodeMirror-focused .CodeMirror-selected{background:#d7d4f0}.CodeMirror-crosshair{cursor:crosshair}.cm-searching{background:#ffa;background:rgba(255,255,0,.4)}.cm-force-border{padding-right:.1px}@media print{.CodeMirror div.CodeMirror-cursors{visibility:hidden}}.CodeMirror-hints{position:absolute;z-index:10;overflow:hidden;list-style:none;margin:0;padding:2px;-webkit-box-shadow:2px 3px 5px rgba(0,0,0,.2);-moz-box-shadow:2px 3px 5px rgba(0,0,0,.2);box-shadow:2px 3px 5px rgba(0,0,0,.2);border-radius:3px;border:1px solid silver;background:#fff;font-size:90%;font-family:monospace;max-height:20em;overflow-y:auto}.CodeMirror-hint{margin:0;padding:0 4px;border-radius:2px;overflow:hidden;white-space:pre;color:#000;cursor:pointer}.CodeMirror-hint-active{background:#08f;color:#fff}.CodeMirror{line-height:1.5em;border:1px solid #d1d1d1}.CodeMirror pre{font-size:13px}.CodeMirror-focused .cm-matchhighlight{background-color:#d9d9d9}.CodeMirror-hint{max-width:30em}.gutterError{color:red;display:inline-block;font-size:large;margin-left:3px;margin-top:-1px}span.cm-error{border-bottom:2px dotted red}.yasqe_buttons{position:absolute;top:5px;right:5px;z-index:5}.yasqe_buttons div{vertical-align:middle}.yasqe_queryButton{display:inline-block;cursor:pointer}.yasqe_share{cursor:pointer;margin-right:5px}.yasqe_sharePopup{position:absolute;z-index:7;padding:6px;background-color:#f5f5f5;border:1px solid #e3e3e3;border-radius:4px;-webkit-box-shadow:inset 0 1px 1px rgba(0,0,0,.05);box-shadow:inset 0 1px 1px rgba(0,0,0,.05);width:400px;height:auto}.yasqe_sharePopup textarea{width:100%}.completionNotification{color:#999;background-color:#f7f7f7;position:absolute;padding:0 5px;right:0;bottom:0;z-index:6;font-size:90%}.svgContainer{display:inline-block}
 table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;border-spacing:0}table.dataTable tfoot th,table.dataTable thead th{font-weight:700}table.dataTable thead td,table.dataTable thead th{padding:10px 18px;border-bottom:1px solid #111}table.dataTable thead td:active,table.dataTable thead th:active{outline:0}table.dataTable tfoot td,table.dataTable tfoot th{padding:10px 18px 6px;border-top:1px solid #111}table.dataTable thead .sorting,table.dataTable thead .sorting_asc,table.dataTable thead .sorting_desc{cursor:pointer}table.dataTable thead .sorting{background:url(../images/sort_both.png) center right no-repeat}table.dataTable thead .sorting_asc{background:url(../images/sort_asc.png) center right no-repeat}table.dataTable thead .sorting_desc{background:url(../images/sort_desc.png) center right no-repeat}table.dataTable thead .sorting_asc_disabled{background:url(../images/sort_asc_disabled.png) center right no-repeat}table.dataTable thead .sorting_desc_disabled{background:url(../images/sort_desc_disabled.png) center right no-repeat}table.dataTable tbody tr{background-color:#fff}table.dataTable tbody tr.selected{background-color:#b0bed9}table.dataTable tbody td,table.dataTable tbody th{padding:8px 10px}table.dataTable.display tbody td,table.dataTable.display tbody th,table.dataTable.row-border tbody td,table.dataTable.row-border tbody th{border-top:1px solid #ddd}table.dataTable.display tbody tr:first-child td,table.dataTable.display tbody tr:first-child th,table.dataTable.row-border tbody tr:first-child td,table.dataTable.row-border tbody tr:first-child th{border-top:none}table.dataTable.cell-border tbody td,table.dataTable.cell-border tbody th{border-top:1px solid #ddd;border-right:1px solid #ddd}table.dataTable.cell-border tbody tr td:first-child,table.dataTable.cell-border tbody tr th:first-child{border-left:1px solid #ddd}table.dataTable.cell-border tbody tr:first-child td,table.dataTable.cell-border tbody tr:first-child th{border-top:none}table.dataTable.display tbody tr.odd,table.dataTable.stripe tbody tr.odd{background-color:#f9f9f9}table.dataTable.display tbody tr.odd.selected,table.dataTable.stripe tbody tr.odd.selected{background-color:#abb9d3}table.dataTable.display tbody tr.even:hover,table.dataTable.display tbody tr.odd:hover,table.dataTable.display tbody tr:hover,table.dataTable.hover tbody tr.even:hover,table.dataTable.hover tbody tr.odd:hover,table.dataTable.hover tbody tr:hover{background-color:#f5f5f5}table.dataTable.display tbody tr.even:hover.selected,table.dataTable.display tbody tr.odd:hover.selected,table.dataTable.display tbody tr:hover.selected,table.dataTable.hover tbody tr.even:hover.selected,table.dataTable.hover tbody tr.odd:hover.selected,table.dataTable.hover tbody tr:hover.selected{background-color:#a9b7d1}table.dataTable.display tbody tr>.sorting_1,table.dataTable.display tbody tr>.sorting_2,table.dataTable.display tbody tr>.sorting_3,table.dataTable.order-column tbody tr>.sorting_1,table.dataTable.order-column tbody tr>.sorting_2,table.dataTable.order-column tbody tr>.sorting_3{background-color:#f9f9f9}table.dataTable.display tbody tr.selected>.sorting_1,table.dataTable.display tbody tr.selected>.sorting_2,table.dataTable.display tbody tr.selected>.sorting_3,table.dataTable.order-column tbody tr.selected>.sorting_1,table.dataTable.order-column tbody tr.selected>.sorting_2,table.dataTable.order-column tbody tr.selected>.sorting_3{background-color:#acbad4}table.dataTable.display tbody tr.odd>.sorting_1,table.dataTable.order-column.stripe tbody tr.odd>.sorting_1{background-color:#f1f1f1}table.dataTable.display tbody tr.odd>.sorting_2,table.dataTable.order-column.stripe tbody tr.odd>.sorting_2{background-color:#f3f3f3}table.dataTable.display tbody tr.odd>.sorting_3,table.dataTable.order-column.stripe tbody tr.odd>.sorting_3{background-color:#f5f5f5}table.dataTable.display tbody tr.odd.selected>.sorting_1,table.dataTable.order-column.stripe tbody tr.odd.selected>.sorting_1{background-color:#a6b3cd}table.dataTable.display tbody tr.odd.selected>.sorting_2,table.dataTable.order-column.stripe tbody tr.odd.selected>.sorting_2{background-color:#a7b5ce}table.dataTable.display tbody tr.odd.selected>.sorting_3,table.dataTable.order-column.stripe tbody tr.odd.selected>.sorting_3{background-color:#a9b6d0}table.dataTable.display tbody tr.even>.sorting_1,table.dataTable.order-column.stripe tbody tr.even>.sorting_1{background-color:#f9f9f9}table.dataTable.display tbody tr.even>.sorting_2,table.dataTable.order-column.stripe tbody tr.even>.sorting_2{background-color:#fbfbfb}table.dataTable.display tbody tr.even>.sorting_3,table.dataTable.order-column.stripe tbody tr.even>.sorting_3{background-color:#fdfdfd}table.dataTable.display tbody tr.even.selected>.sorting_1,table.dataTable.order-column.stripe tbody tr.even.selected>.sorting_1{background-color:#acbad4}table.dataTable.display tbody tr.even.selected>.sorting_2,table.dataTable.order-column.stripe tbody tr.even.selected>.sorting_2{background-color:#adbbd6}table.dataTable.display tbody tr.even.selected>.sorting_3,table.dataTable.order-column.stripe tbody tr.even.selected>.sorting_3{background-color:#afbdd8}table.dataTable.display tbody tr.even:hover>.sorting_1,table.dataTable.display tbody tr.odd:hover>.sorting_1,table.dataTable.display tbody tr:hover>.sorting_1,table.dataTable.order-column.hover tbody tr.even:hover>.sorting_1,table.dataTable.order-column.hover tbody tr.odd:hover>.sorting_1,table.dataTable.order-column.hover tbody tr:hover>.sorting_1{background-color:#eaeaea}table.dataTable.display tbody tr.even:hover>.sorting_2,table.dataTable.display tbody tr.odd:hover>.sorting_2,table.dataTable.display tbody tr:hover>.sorting_2,table.dataTable.order-column.hover tbody tr.even:hover>.sorting_2,table.dataTable.order-column.hover tbody tr.odd:hover>.sorting_2,table.dataTable.order-column.hover tbody tr:hover>.sorting_2{background-color:#ebebeb}table.dataTable.display tbody tr.even:hover>.sorting_3,table.dataTable.display tbody tr.odd:hover>.sorting_3,table.dataTable.display tbody tr:hover>.sorting_3,table.dataTable.order-column.hover tbody tr.even:hover>.sorting_3,table.dataTable.order-column.hover tbody tr.odd:hover>.sorting_3,table.dataTable.order-column.hover tbody tr:hover>.sorting_3{background-color:#eee}table.dataTable.display tbody tr.even:hover.selected>.sorting_1,table.dataTable.display tbody tr.odd:hover.selected>.sorting_1,table.dataTable.display tbody tr:hover.selected>.sorting_1,table.dataTable.order-column.hover tbody tr.even:hover.selected>.sorting_1,table.dataTable.order-column.hover tbody tr.odd:hover.selected>.sorting_1,table.dataTable.order-column.hover tbody tr:hover.selected>.sorting_1{background-color:#a1aec7}table.dataTable.display tbody tr.even:hover.selected>.sorting_2,table.dataTable.display tbody tr.odd:hover.selected>.sorting_2,table.dataTable.display tbody tr:hover.selected>.sorting_2,table.dataTable.order-column.hover tbody tr.even:hover.selected>.sorting_2,table.dataTable.order-column.hover tbody tr.odd:hover.selected>.sorting_2,table.dataTable.order-column.hover tbody tr:hover.selected>.sorting_2{background-color:#a2afc8}table.dataTable.display tbody tr.even:hover.selected>.sorting_3,table.dataTable.display tbody tr.odd:hover.selected>.sorting_3,table.dataTable.display tbody tr:hover.selected>.sorting_3,table.dataTable.order-column.hover tbody tr.even:hover.selected>.sorting_3,table.dataTable.order-column.hover tbody tr.odd:hover.selected>.sorting_3,table.dataTable.order-column.hover tbody tr:hover.selected>.sorting_3{background-color:#a4b2cb}table.dataTable.no-footer{border-bottom:1px solid #111}table.dataTable.nowrap td,table.dataTable.nowrap th{white-space:nowrap}table.dataTable.compact thead td,table.dataTable.compact thead th{padding:5px 9px}table.dataTable.compact tfoot td,table.dataTable.compact tfoot th{padding:5px 9px 3px}table.dataTable.compact tbody td,table.dataTable.compact tbody th{padding:4px 5px}table.dataTable td.dt-left,table.dataTable th.dt-left{text-align:left}table.dataTable td.dataTables_empty,table.dataTable td.dt-center,table.dataTable th.dt-center{text-align:center}table.dataTable td.dt-right,table.dataTable th.dt-right{text-align:right}table.dataTable td.dt-justify,table.dataTable th.dt-justify{text-align:justify}table.dataTable td.dt-nowrap,table.dataTable th.dt-nowrap{white-space:nowrap}table.dataTable tfoot td.dt-head-left,table.dataTable tfoot th.dt-head-left,table.dataTable thead td.dt-head-left,table.dataTable thead th.dt-head-left{text-align:left}table.dataTable tfoot td.dt-head-center,table.dataTable tfoot th.dt-head-center,table.dataTable thead td.dt-head-center,table.dataTable thead th.dt-head-center{text-align:center}table.dataTable tfoot td.dt-head-right,table.dataTable tfoot th.dt-head-right,table.dataTable thead td.dt-head-right,table.dataTable thead th.dt-head-right{text-align:right}table.dataTable tfoot td.dt-head-justify,table.dataTable tfoot th.dt-head-justify,table.dataTable thead td.dt-head-justify,table.dataTable thead th.dt-head-justify{text-align:justify}table.dataTable tfoot td.dt-head-nowrap,table.dataTable tfoot th.dt-head-nowrap,table.dataTable thead td.dt-head-nowrap,table.dataTable thead th.dt-head-nowrap{white-space:nowrap}table.dataTable tbody td.dt-body-left,table.dataTable tbody th.dt-body-left{text-align:left}table.dataTable tbody td.dt-body-center,table.dataTable tbody th.dt-body-center{text-align:center}table.dataTable tbody td.dt-body-right,table.dataTable tbody th.dt-body-right{text-align:right}table.dataTable tbody td.dt-body-justify,table.dataTable tbody th.dt-body-justify{text-align:justify}table.dataTable tbody td.dt-body-nowrap,table.dataTable tbody th.dt-body-nowrap{white-space:nowrap}table.dataTable,table.dataTable td,table.dataTable th{-webkit-box-sizing:content-box;-moz-box-sizing:content-box;box-sizing:content-box}.dataTables_wrapper{position:relative;clear:both;zoom:1}.dataTables_wrapper .dataTables_filter{float:right;text-align:right}.dataTables_wrapper .dataTables_filter input{margin-left:.5em}.dataTables_wrapper .dataTables_info{clear:both;float:left;padding-top:.755em}.dataTables_wrapper .dataTables_paginate{float:right;text-align:right;padding-top:.25em}.dataTables_wrapper .dataTables_paginate .paginate_button{box-sizing:border-box;display:inline-block;min-width:1.5em;padding:.5em 1em;margin-left:2px;text-align:center;text-decoration:none!important;cursor:pointer;color:#333!important;border:1px solid transparent}.dataTables_wrapper .dataTables_paginate .paginate_button.current,.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover{color:#333!important;border:1px solid #cacaca;background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#fff),color-stop(100%,#dcdcdc));background:-webkit-linear-gradient(top,#fff 0,#dcdcdc 100%);background:-moz-linear-gradient(top,#fff 0,#dcdcdc 100%);background:-ms-linear-gradient(top,#fff 0,#dcdcdc 100%);background:-o-linear-gradient(top,#fff 0,#dcdcdc 100%);background:linear-gradient(to bottom,#fff 0,#dcdcdc 100%)}.dataTables_wrapper .dataTables_paginate .paginate_button.disabled,.dataTables_wrapper .dataTables_paginate .paginate_button.disabled:active,.dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover{cursor:default;color:#666!important;border:1px solid transparent;background:0 0;box-shadow:none}.dataTables_wrapper .dataTables_paginate .paginate_button:hover{color:#fff!important;border:1px solid #111;background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#585858),color-stop(100%,#111));background:-webkit-linear-gradient(top,#585858 0,#111 100%);background:-moz-linear-gradient(top,#585858 0,#111 100%);background:-ms-linear-gradient(top,#585858 0,#111 100%);background:-o-linear-gradient(top,#585858 0,#111 100%);background:linear-gradient(to bottom,#585858 0,#111 100%)}.dataTables_wrapper .dataTables_paginate .paginate_button:active{outline:0;background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#2b2b2b),color-stop(100%,#0c0c0c));background:-webkit-linear-gradient(top,#2b2b2b 0,#0c0c0c 100%);background:-moz-linear-gradient(top,#2b2b2b 0,#0c0c0c 100%);background:-ms-linear-gradient(top,#2b2b2b 0,#0c0c0c 100%);background:-o-linear-gradient(top,#2b2b2b 0,#0c0c0c 100%);background:linear-gradient(to bottom,#2b2b2b 0,#0c0c0c 100%);box-shadow:inset 0 0 3px #111}.dataTables_wrapper .dataTables_processing{position:absolute;top:50%;left:50%;width:100%;height:40px;margin-left:-50%;margin-top:-25px;padding-top:20px;text-align:center;font-size:1.2em;background:-webkit-gradient(linear,left top,right top,color-stop(0%,rgba(255,255,255,0)),color-stop(25%,rgba(255,255,255,.9)),color-stop(75%,rgba(255,255,255,.9)),color-stop(100%,rgba(255,255,255,0)));background:-webkit-linear-gradient(left,rgba(255,255,255,0) 0,rgba(255,255,255,.9) 25%,rgba(255,255,255,.9) 75%,rgba(255,255,255,0) 100%);background:-moz-linear-gradient(left,rgba(255,255,255,0) 0,rgba(255,255,255,.9) 25%,rgba(255,255,255,.9) 75%,rgba(255,255,255,0) 100%);background:-ms-linear-gradient(left,rgba(255,255,255,0) 0,rgba(255,255,255,.9) 25%,rgba(255,255,255,.9) 75%,rgba(255,255,255,0) 100%);background:-o-linear-gradient(left,rgba(255,255,255,0) 0,rgba(255,255,255,.9) 25%,rgba(255,255,255,.9) 75%,rgba(255,255,255,0) 100%);background:linear-gradient(to right,rgba(255,255,255,0) 0,rgba(255,255,255,.9) 25%,rgba(255,255,255,.9) 75%,rgba(255,255,255,0) 100%)}.dataTables_wrapper .dataTables_filter,.dataTables_wrapper .dataTables_info,.dataTables_wrapper .dataTables_length,.dataTables_wrapper .dataTables_paginate,.dataTables_wrapper .dataTables_processing{color:#333}.dataTables_wrapper .dataTables_scroll{clear:both}.dataTables_wrapper .dataTables_scroll div.dataTables_scrollBody{-webkit-overflow-scrolling:touch}.dataTables_wrapper .dataTables_scroll div.dataTables_scrollBody td>div.dataTables_sizing,.dataTables_wrapper .dataTables_scroll div.dataTables_scrollBody th>div.dataTables_sizing{height:0;overflow:hidden;margin:0!important;padding:0!important}.dataTables_wrapper.no-footer .dataTables_scrollBody{border-bottom:1px solid #111}.dataTables_wrapper.no-footer div.dataTables_scrollBody table,.dataTables_wrapper.no-footer div.dataTables_scrollHead table{border-bottom:none}.dataTables_wrapper:after{visibility:hidden;display:block;content:"";clear:both;height:0}@media screen and (max-width:767px){.dataTables_wrapper .dataTables_info,.dataTables_wrapper .dataTables_paginate{float:none;text-align:center}.dataTables_wrapper .dataTables_paginate{margin-top:.5em}}@media screen and (max-width:640px){.dataTables_wrapper .dataTables_filter,.dataTables_wrapper .dataTables_length{float:none;text-align:center}.dataTables_wrapper .dataTables_filter{margin-top:.5em}}.booleanResult{width:70px;margin:0 auto;vertical-align:middle}.booleanResult svg{margin-bottom:-10px;margin-right:7px}.errorResult span.exception{display:inline;padding:.2em .6em .3em;font-size:75%;font-weight:700;line-height:1;color:#fff;text-align:center;white-space:nowrap;vertical-align:baseline;border-radius:.25em;background-color:#d9534f}.errorResult{padding:10px}.yasr{margin-top:5px}.yasr a{color:#428bca;text-decoration:none}.yasr a:focus,.yasr a:hover{color:#2a6496;text-decoration:underline}.yasr a:active,.yasr a:hover{outline:0}.yasr th{text-align:left}.yasr{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:14px;line-height:1.428571429;color:#333}.yasr_header *{z-index:8;position:relative}.yasr .yasr_btn{color:#333;border:1px solid transparent;background-color:#fff;border-color:#ccc;border-width:1px;display:inline-block;text-align:center;vertical-align:middle;cursor:pointer;white-space:nowrap;padding:6px 12px;border-radius:4px;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-appearance:button;overflow:visible;box-sizing:border-box}.yasr .yasr_btn[disabled]{cursor:default;opacity:.5;filter:alpha(opacity=50);-webkit-box-shadow:none;box-shadow:none}.yasr .yasr_btn.selected,.yasr .yasr_btn:focus,.yasr .yasr_btn:hover{color:#333;outline:0;background-color:#ebebeb;border-color:#adadad}.yasr_btnGroup{display:inline-block;vertical-align:middle}.yasr_btnGroup>button:first-child:not(:last-child){border-bottom-right-radius:0;border-top-right-radius:0}.yasr_btnGroup>button:last-child:not(:first-child){border-bottom-left-radius:0;border-top-left-radius:0}.yasr_btnGroup>button:not(:first-child):not(:last-child){border-radius:0}.yasr_btnGroup button+button{margin-left:-1px}.yasr_downloadIcon{margin-left:5px}.yasr_results .CodeMirror{margin-top:5px;height:100%}.dataTables_wrapper .dataTables_length{float:right;margin-left:10px}.dataTables_length label,.dataTables_length select{vertical-align:middle}table.dataTable thead th{background:none!important}
 .tags {
@@ -9000,7 +8186,7 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 }
 
 .layer-img {
-	height: 50px;
+	height: 60px;
 	background-color: #eee;
 	background-size: cover;
 	background-position: center;
@@ -9024,13 +8210,19 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	display:box;
 	box-pack:center;
 	box-align:center;
+	border-radius: 2px;
 
 	cursor: pointer;
 	opacity: .8;
+
+
 }
 
 .layer-img:hover {
 	opacity: 1;
+	-webkit-transition: opacity ease-out .15s;
+	-o-transition: opacity ease-out .15s;
+	transition: opacity ease-out .15s;
 }
 
 .layer-img.active {
@@ -11057,7 +10249,7 @@ strong {
 
 .btn-group > .btn {
   font-size: 12px;
-  padding: 5px 10px;
+  padding: 4px 10px;
 }
 
 .btn-group > .btn.active {
@@ -11673,15 +10865,23 @@ input[type="radio"], input[type="checkbox"] {
   margin-right: 5px;
   vertical-align: top;
   margin-top: 8px;
+  cursor: pointer;
+}
+
+input[type="radio"], input[type="checkbox"]:hover {
+
+  border-color: #ddd;
+  background-color: #fafafa;
+
 }
 
 input[type="checkbox"]:checked:before {
-  content: "\2713";
+  content: "\2715";
   position: absolute;
   font-size: 0.85em;
-  left: 1px;
+  top: 1px;
   text-align: center;
-  width: 1.25em;
+  width: 1.30em;
 }
 
 [type="text"]:focus, [type="password"]:focus, [type="search"]:focus, [type="email"]:focus, [type="url"]:focus, [type="tel"]:focus, textarea:focus, select:focus, input[type="radio"]:focus, input[type="checkbox"]:focus {
@@ -11701,4 +10901,515 @@ input[type="checkbox"]:checked:before {
 .values-editor {
   max-height: 400px;
   overflow-x: hidden;
+}
+
+
+/**
+ * selectize.default.css (v0.8.5) - Default Theme
+ * Copyright (c) 2013 Brian Reavis & contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the License at:
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under
+ * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+ * ANY KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ *
+ * @author Brian Reavis <brian@thirdroute.com>
+ */
+
+.selectize-control.plugin-drag_drop.multi > .selectize-input > div.ui-sortable-placeholder {
+  background: #f2f2f2 !important;
+  background: rgba(0, 0, 0, 0.06) !important;
+  border: 0 none !important;
+  visibility: visible !important;
+  -webkit-box-shadow: inset 0 0 12px 4px #ffffff;
+          box-shadow: inset 0 0 12px 4px #ffffff;
+}
+
+.selectize-control.plugin-drag_drop .ui-sortable-placeholder::after {
+  content: '!';
+  visibility: hidden;
+}
+
+.selectize-control.plugin-drag_drop .ui-sortable-helper {
+  -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.selectize-dropdown-header {
+  position: relative;
+  padding: 5px 8px;
+  background: #f8f8f8;
+  border-bottom: 1px solid #d0d0d0;
+  -webkit-border-radius: 3px 3px 0 0;
+     -moz-border-radius: 3px 3px 0 0;
+          border-radius: 3px 3px 0 0;
+}
+
+.selectize-dropdown-header-close {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  margin-top: -12px;
+  font-size: 20px !important;
+  line-height: 20px;
+  color: #303030;
+  opacity: 0.4;
+}
+
+.selectize-dropdown-header-close:hover {
+  color: #000000;
+}
+
+.selectize-dropdown.plugin-optgroup_columns .optgroup {
+  float: left;
+  border-top: 0 none;
+  border-right: 1px solid #f2f2f2;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+}
+
+.selectize-dropdown.plugin-optgroup_columns .optgroup:last-child {
+  border-right: 0 none;
+}
+
+.selectize-dropdown.plugin-optgroup_columns .optgroup:before {
+  display: none;
+}
+
+.selectize-dropdown.plugin-optgroup_columns .optgroup-header {
+  border-top: 0 none;
+}
+
+.selectize-control.plugin-remove_button [data-value] {
+  position: relative;
+  padding-right: 24px !important;
+}
+
+.selectize-control.plugin-remove_button [data-value] .remove {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: inline-block;
+  width: 17px;
+  padding: 2px 0 0 0;
+  font-size: 12px;
+  font-weight: bold;
+  color: inherit;
+  text-align: center;
+  text-decoration: none;
+  vertical-align: middle;
+  border-left: 1px solid #0073bb;
+  -webkit-border-radius: 0 2px 2px 0;
+     -moz-border-radius: 0 2px 2px 0;
+          border-radius: 0 2px 2px 0;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+}
+
+.selectize-control.plugin-remove_button [data-value] .remove:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.selectize-control.plugin-remove_button [data-value].active .remove {
+  border-left-color: #00578d;
+}
+
+.selectize-control.plugin-remove_button .disabled [data-value] .remove:hover {
+  background: none;
+}
+
+.selectize-control.plugin-remove_button .disabled [data-value] .remove {
+  border-left-color: #aaaaaa;
+}
+
+.selectize-control {
+  position: relative;
+}
+
+.selectize-dropdown,
+.selectize-input,
+.selectize-input input {
+  font-family: inherit;
+  font-size: 13px;
+  -webkit-font-smoothing: inherit;
+  line-height: 18px;
+  color: #303030;
+}
+
+.selectize-input,
+.selectize-control.single .selectize-input.input-active {
+  display: inline-block;
+  cursor: text;
+  background: #ffffff;
+}
+
+.selectize-input {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  width: 100%;
+  padding: 8px 8px;
+  overflow: hidden;
+  border: 1px solid #d0d0d0;
+  -webkit-border-radius: 3px;
+     -moz-border-radius: 3px;
+          border-radius: 3px;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.1);
+          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.1);
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+}
+
+.selectize-control.multi .selectize-input.has-items {
+  padding: 5px 8px 2px;
+}
+
+.selectize-input.full {
+  background-color: #ffffff;
+}
+
+.selectize-input.disabled,
+.selectize-input.disabled * {
+  cursor: default !important;
+}
+
+.selectize-input.focus {
+  -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+          box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.selectize-input.dropdown-active {
+  -webkit-border-radius: 3px 3px 0 0;
+     -moz-border-radius: 3px 3px 0 0;
+          border-radius: 3px 3px 0 0;
+}
+
+.selectize-input > * {
+  display: -moz-inline-stack;
+  display: inline-block;
+  *display: inline;
+  vertical-align: baseline;
+  zoom: 1;
+}
+
+.selectize-control.multi .selectize-input > div {
+  padding: 2px 6px;
+  margin: 0 3px 3px 0;
+  color: #ffffff;
+  cursor: pointer;
+  background: #1da7ee;
+  border: 1px solid #0073bb;
+}
+
+.selectize-control.multi .selectize-input > div.active {
+  color: #ffffff;
+  background: #92c836;
+  border: 1px solid #00578d;
+}
+
+.selectize-control.multi .selectize-input.disabled > div,
+.selectize-control.multi .selectize-input.disabled > div.active {
+  color: #ffffff;
+  background: #d2d2d2;
+  border: 1px solid #aaaaaa;
+}
+
+.selectize-input > input {
+  max-width: 100% !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 1px !important;
+  line-height: inherit !important;
+  text-indent: 0 !important;
+  background: none !important;
+  border: 0 none !important;
+  -webkit-box-shadow: none !important;
+          box-shadow: none !important;
+  -webkit-user-select: auto !important;
+}
+
+.selectize-input > input:focus {
+  outline: none !important;
+}
+
+.selectize-input::after {
+  display: block;
+  clear: left;
+  content: ' ';
+}
+
+.selectize-input.dropdown-active::before {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: block;
+  height: 1px;
+  background: #f0f0f0;
+  content: ' ';
+}
+
+.selectize-dropdown {
+  position: absolute;
+  z-index: 10;
+  margin: -1px 0 0 0;
+  background: #ffffff;
+  border: 1px solid #d0d0d0;
+  border-top: 0 none;
+  -webkit-border-radius: 0 0 3px 3px;
+     -moz-border-radius: 0 0 3px 3px;
+          border-radius: 0 0 3px 3px;
+  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+}
+
+.selectize-dropdown [data-selectable] {
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.selectize-dropdown [data-selectable] .highlight {
+  background: rgba(125, 168, 208, 0.2);
+  -webkit-border-radius: 1px;
+     -moz-border-radius: 1px;
+          border-radius: 1px;
+}
+
+.selectize-dropdown [data-selectable],
+.selectize-dropdown .optgroup-header {
+  padding: 5px 8px;
+}
+
+.selectize-dropdown .optgroup:first-child .optgroup-header {
+  border-top: 0 none;
+}
+
+.selectize-dropdown .optgroup-header {
+  color: #303030;
+  cursor: default;
+  background: #ffffff;
+}
+
+.selectize-dropdown .active {
+  color: #495c68;
+  background-color: #f5fafd;
+}
+
+.selectize-dropdown .active.create {
+  color: #495c68;
+}
+
+.selectize-dropdown .create {
+  color: rgba(48, 48, 48, 0.5);
+}
+
+.selectize-dropdown-content {
+  max-height: 200px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.selectize-control.single .selectize-input,
+.selectize-control.single .selectize-input input {
+  cursor: pointer;
+}
+
+.selectize-control.single .selectize-input.input-active,
+.selectize-control.single .selectize-input.input-active input {
+  cursor: text;
+}
+
+
+
+.selectize-control.single .selectize-input.dropdown-active:after {
+  margin-top: -4px;
+  border-color: transparent transparent #808080 transparent;
+  border-width: 0 5px 5px 5px;
+}
+
+.selectize-control.rtl.single .selectize-input:after {
+  right: auto;
+  left: 15px;
+}
+
+.selectize-control.rtl .selectize-input > input {
+  margin: 0 4px 0 -2px !important;
+}
+
+.selectize-control .selectize-input.disabled {
+  background-color: #fafafa;
+  opacity: 0.5;
+}
+
+.selectize-control.multi .selectize-input.has-items {
+  padding-right: 5px;
+  padding-left: 5px;
+}
+
+.selectize-control.multi .selectize-input.disabled [data-value] {
+  color: #999;
+  text-shadow: none;
+  background: none;
+  -webkit-box-shadow: none;
+          box-shadow: none;
+}
+
+.selectize-control.multi .selectize-input.disabled [data-value],
+.selectize-control.multi .selectize-input.disabled [data-value] .remove {
+  border-color: #e6e6e6;
+}
+
+.selectize-control.multi .selectize-input.disabled [data-value] .remove {
+  background: none;
+}
+
+.selectize-control.multi .selectize-input [data-value] {
+  text-shadow: 0 1px 0 rgba(0, 51, 83, 0.3);
+  background-color: #1b9dec;
+  background-image: -moz-linear-gradient(top, #1da7ee, #178ee9);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#1da7ee), to(#178ee9));
+  background-image: -webkit-linear-gradient(top, #1da7ee, #178ee9);
+  background-image: -o-linear-gradient(top, #1da7ee, #178ee9);
+  background-image: linear-gradient(to bottom, #1da7ee, #178ee9);
+  background-repeat: repeat-x;
+  -webkit-border-radius: 3px;
+     -moz-border-radius: 3px;
+          border-radius: 3px;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff1da7ee', endColorstr='#ff178ee9', GradientType=0);
+  -webkit-box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), inset 0 1px rgba(255, 255, 255, 0.03);
+          box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), inset 0 1px rgba(255, 255, 255, 0.03);
+}
+
+.selectize-control.multi .selectize-input [data-value].active {
+  background-color: #0085d4;
+  background-image: -moz-linear-gradient(top, #008fd8, #0075cf);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#008fd8), to(#0075cf));
+  background-image: -webkit-linear-gradient(top, #008fd8, #0075cf);
+  background-image: -o-linear-gradient(top, #008fd8, #0075cf);
+  background-image: linear-gradient(to bottom, #008fd8, #0075cf);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff008fd8', endColorstr='#ff0075cf', GradientType=0);
+}
+
+.selectize-control.single .selectize-input {
+  background-color: #f9f9f9;
+  background-image: -moz-linear-gradient(top, #fefefe, #f2f2f2);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#fefefe), to(#f2f2f2));
+  background-image: -webkit-linear-gradient(top, #fefefe, #f2f2f2);
+  background-image: -o-linear-gradient(top, #fefefe, #f2f2f2);
+  background-image: linear-gradient(to bottom, #fefefe, #f2f2f2);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fffefefe', endColorstr='#fff2f2f2', GradientType=0);
+  -webkit-box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+          box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.selectize-control.single .selectize-input,
+.selectize-dropdown.single {
+  border-color: #b8b8b8;
+}
+
+.selectize-dropdown .optgroup-header {
+  padding-top: 7px;
+  font-size: 0.85em;
+  font-weight: bold;
+}
+
+.selectize-dropdown .optgroup {
+  border-top: 1px solid #f0f0f0;
+}
+
+.selectize-dropdown .optgroup:first-child {
+  border-top: 0 none;
+}
+
+/* changes */
+
+.selectize-dropdown {
+  position: absolute;
+  z-index: 10;
+  margin: -1px 0 0 0;
+
+  border-color: #ddd;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  -webkit-box-shadow: 00px 1px 2px -1px rgba(0,0,0,.1);
+  box-shadow: 0px 1px 2px -1px rgba(0,0,0,.1)
+}
+
+.selectize-control.single .selectize-input {
+  background-color: #fff;
+  background-image: none;
+  background-repeat: none;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  border-color: #c4c4c4;
+}
+
+.selectize-control.single .selectize-input:hover {
+  border-color: #ddd;
+  background-color: #fafafa;
+}
+
+.selectize-dropdown, .selectize-input, .selectize-input input {
+  font-family: inherit;
+  font-size: 13px;
+  -webkit-font-smoothing: inherit;
+  line-height: 18px;
+  color: inherit;
+}
+
+.selectize-input {
+  width: auto;
+  padding: 7px 20px;
+  border: 1px solid #ddd;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+.selectize-input:focus {
+  outline: 0px !important;
+}
+
+.selectize-input.selectize-focus {
+  border-color: #c4c4c4 !important;
+}
+
+.selectize-input .caret {
+  margin-left: 5px;
+  color: #888;
+}
+
+.selectize-dropdown.single {
+  border-color: #ddd;
+}
+
+.selectize-dropdown .optgroup:first-child,
+.selectize-dropdown .optgroup {
+  border-top: 1px solid #ddd;
+}
+
+.selectize-dropdown .active {
+  color: inherit;
+  background-color: #fafafa;
+}
+
+.selectize-dropdown [data-selectable], .selectize-dropdown .optgroup-header {
+  padding: 8px 8px;
 }
