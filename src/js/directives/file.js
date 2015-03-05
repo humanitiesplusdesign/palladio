@@ -15,7 +15,7 @@ angular.module('palladio.directives.file', [])
         var current = element.find('.' + previous);
 
         var animationIn = 'pt-page-moveFromRight',
-            animationOut = 'pt-page-moveToRight';
+            animationOut = 'pt-page-moveToLeft';
 
         element
           .find('.field-view')

@@ -8604,19 +8604,6 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 [data-palladio-histogram-filter] .axis text {
 	font: 10px Helvetica, Arial, sans-serif;
 }
-[data-palladio-parduration-filter] path {
-	fill: #dddddd;
-}
-
-[data-palladio-parduration-filter] .axis path, [data-palladio-partime-filter] .axis line {
-	fill: none;
-	stroke: #000;
-	shape-rendering: crispEdges;
-}
-
-[data-palladio-parduration-filter] .axis text {
-	font: 10px Helvetica, Arial, sans-serif;
-}
 [data-palladio-timespan-filter] path {
 	fill: #dddddd;
 }
@@ -8628,6 +8615,19 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 }
 
 [data-palladio-timespan-filter] .axis text {
+	font: 10px Helvetica, Arial, sans-serif;
+}
+[data-palladio-parduration-filter] path {
+	fill: #dddddd;
+}
+
+[data-palladio-parduration-filter] .axis path, [data-palladio-partime-filter] .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-parduration-filter] .axis text {
 	font: 10px Helvetica, Arial, sans-serif;
 }
 .pt-perspective {
@@ -10438,6 +10438,13 @@ label.inline {
   border-radius: 2px 2px 0 0;
   line-height: 1;
   color: #888;
+}
+
+.nav-tabs > li > a:hover {
+  border-color: #f5f5f5 #f5f5f5 #ddd;
+}
+.nav > li > a:hover, .nav > li > a:focus {
+  background-color: #f5f5f5;
 }
 
 /* Modals */

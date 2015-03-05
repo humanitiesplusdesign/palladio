@@ -460,6 +460,13 @@ label.inline {
   color: #888;
 }
 
+.nav-tabs > li > a:hover {
+  border-color: #f5f5f5 #f5f5f5 #ddd;
+}
+.nav > li > a:hover, .nav > li > a:focus {
+  background-color: #f5f5f5;
+}
+
 /* Modals */
 .modal-backdrop {
   background-color: #eee;

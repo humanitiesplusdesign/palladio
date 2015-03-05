@@ -50,7 +50,7 @@
 
 								<ul data-ng-show="!layers.length" class="list-unstyled">
 									<li class="layer-item">
-										<span>No data layers</span>
+										<span class="text-muted">No data layers</span>
 									</li>
 								</ul>
 						</div>
@@ -78,7 +78,7 @@
 								</ul>
 								<ul data-ng-show="!tileSets.length" class="list-unstyled">
 									<li class="layer-item">
-										<span>No tilesets</span>
+										<span class="text-muted">No tilesets</span>
 									</li>
 								</ul>
 								<p class="help-block">Sort layers by dragging them</p>
@@ -248,7 +248,7 @@
 							      <span ng-bind-html="field.description | highlight: $select.search"></span>
 							    </ui-select-choices>
 							  </ui-select>
-								
+
 							</div>
 
 						</div>
