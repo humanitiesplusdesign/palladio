@@ -7714,26 +7714,6 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
   stroke-width: 1.5px;
 }
 
-[data-palladio-duration-view] path {
-	fill: #dddddd;
-}
-
-[data-palladio-duration-view] .axis path, [data-palladio-duration-view] .axis line {
-	fill: none;
-	stroke: #000;
-	shape-rendering: crispEdges;
-}
-
-[data-palladio-duration-view] .x-grid line {
-	fill: none;
-	stroke: #DDD;
-	shape-rendering: crispEdges;
-}
-
-[data-palladio-duration-view] .axis text {
-	font: 10px Merriweather, Helvetica, Arial, sans-serif;
-}
-
 [data-palladio-facet-filter] .selection-title {
 	text-transform: uppercase;
 	margin-top: 7px;
@@ -7984,6 +7964,26 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 [data-palladio-graph-view] .link.hidden {
     display: none;
 }
+[data-palladio-duration-view] path {
+	fill: #dddddd;
+}
+
+[data-palladio-duration-view] .axis path, [data-palladio-duration-view] .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-duration-view] .x-grid line {
+	fill: none;
+	stroke: #DDD;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-duration-view] .axis text {
+	font: 10px Merriweather, Helvetica, Arial, sans-serif;
+}
+
 [data-palladio-list-view] {
 	margin-bottom: 20px;
 	margin-top: 20px;
@@ -8350,6 +8350,7 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 [data-palladio-table-view] {
 	width: 100%;
 	margin-bottom: 90px;
+	padding-top: 5px;
 }
 
 [data-palladio-table-view] table {
@@ -8604,19 +8605,6 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 [data-palladio-histogram-filter] .axis text {
 	font: 10px Helvetica, Arial, sans-serif;
 }
-[data-palladio-timespan-filter] path {
-	fill: #dddddd;
-}
-
-[data-palladio-timespan-filter] .axis path, [data-palladio-timespan-filter] .axis line {
-	fill: none;
-	stroke: #000;
-	shape-rendering: crispEdges;
-}
-
-[data-palladio-timespan-filter] .axis text {
-	font: 10px Helvetica, Arial, sans-serif;
-}
 [data-palladio-parduration-filter] path {
 	fill: #dddddd;
 }
@@ -8628,6 +8616,19 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 }
 
 [data-palladio-parduration-filter] .axis text {
+	font: 10px Helvetica, Arial, sans-serif;
+}
+[data-palladio-timespan-filter] path {
+	fill: #dddddd;
+}
+
+[data-palladio-timespan-filter] .axis path, [data-palladio-timespan-filter] .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-timespan-filter] .axis text {
 	font: 10px Helvetica, Arial, sans-serif;
 }
 .pt-perspective {
@@ -10060,8 +10061,25 @@ h4 {
   font-family: roboto slab, serif;
 }
 
+.text-uppercase {
+  letter-spacing: .05em;
+  font-size: 11px;
+}
+
 .bg-dark {
   background: #444;
+}
+
+.control-hover .show-hover{
+  display: none;
+}
+
+.control-hover:hover .hide-hover{
+  display: none;
+}
+
+.control-hover:hover .show-hover{
+  display: inline-block;
 }
 
 .strong,
@@ -10140,6 +10158,10 @@ strong {
 .file .panel-heading {
   background: #fff;
   border-color: #ddd;
+}
+
+.file .panel-body {
+  padding: 10px;
 }
 
 .primary .panel-body,
@@ -10248,12 +10270,22 @@ strong {
 }
 
 .btn-group > .btn {
-  font-size: 12px;
-  padding: 4px 10px;
+  font-size: 11px;
+  padding: 3px 10px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
 }
 
 .btn-group > .btn.active {
   background-color: #eee;
+}
+
+.btn-xs {
+  display: inline-block;
+  padding: 3px 8px;
+  font-size: 11px;
+  margin-top: 0px;
+  margin-right: -5px;
 }
 
 .dropdown-menu {
@@ -10485,12 +10517,17 @@ label.inline {
 /* Files */
 .field {
   border-color: #f5f5f5;
-  -webkit-transition: padding .2s ease-in-out, height .2s ease-in-out;
-  -o-transition: padding .2s ease-in-out, height .2s ease-in-out;
-  transition: padding .2s ease-in-out, height .2s ease-in-out;
+  -webkit-transition: padding .2s ease-in-out, height .2s ease-in-out, background .1s ease-out;
+  -o-transition: padding .2s ease-in-out, height .2s ease-in-out, background .1s ease-out;
+  transition: padding .2s ease-in-out, height .2s ease-in-out, background .1s ease-out;
   border: none;
-  border-bottom: 1px solid #eee;
+  border-top: 1px solid #eee;
   margin-bottom: 0px;
+  padding: 10px 15px;
+}
+
+.field:hover {
+  background: #fafafa;
 }
 
 .fieldview-container {
@@ -10534,6 +10571,10 @@ label.inline {
   cursor: pointer;
   text-align: center;
   font-size: 12px;
+}
+
+.field-description {
+  vertical-align: middle;
 }
 
 .field-description a {

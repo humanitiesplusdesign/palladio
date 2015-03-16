@@ -80,8 +80,25 @@ h4 {
   font-family: roboto slab, serif;
 }
 
+.text-uppercase {
+  letter-spacing: .05em;
+  font-size: 11px;
+}
+
 .bg-dark {
   background: #444;
+}
+
+.control-hover .show-hover{
+  display: none;
+}
+
+.control-hover:hover .hide-hover{
+  display: none;
+}
+
+.control-hover:hover .show-hover{
+  display: inline-block;
 }
 
 .strong,
@@ -160,6 +177,10 @@ strong {
 .file .panel-heading {
   background: #fff;
   border-color: #ddd;
+}
+
+.file .panel-body {
+  padding: 10px;
 }
 
 .primary .panel-body,
@@ -268,12 +289,22 @@ strong {
 }
 
 .btn-group > .btn {
-  font-size: 12px;
-  padding: 4px 10px;
+  font-size: 11px;
+  padding: 3px 10px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
 }
 
 .btn-group > .btn.active {
   background-color: #eee;
+}
+
+.btn-xs {
+  display: inline-block;
+  padding: 3px 8px;
+  font-size: 11px;
+  margin-top: 0px;
+  margin-right: -5px;
 }
 
 .dropdown-menu {
@@ -505,12 +536,17 @@ label.inline {
 /* Files */
 .field {
   border-color: #f5f5f5;
-  -webkit-transition: padding .2s ease-in-out, height .2s ease-in-out;
-  -o-transition: padding .2s ease-in-out, height .2s ease-in-out;
-  transition: padding .2s ease-in-out, height .2s ease-in-out;
+  -webkit-transition: padding .2s ease-in-out, height .2s ease-in-out, background .1s ease-out;
+  -o-transition: padding .2s ease-in-out, height .2s ease-in-out, background .1s ease-out;
+  transition: padding .2s ease-in-out, height .2s ease-in-out, background .1s ease-out;
   border: none;
-  border-bottom: 1px solid #eee;
+  border-top: 1px solid #eee;
   margin-bottom: 0px;
+  padding: 10px 15px;
+}
+
+.field:hover {
+  background: #fafafa;
 }
 
 .fieldview-container {
@@ -554,6 +590,10 @@ label.inline {
   cursor: pointer;
   text-align: center;
   font-size: 12px;
+}
+
+.field-description {
+  vertical-align: middle;
 }
 
 .field-description a {
