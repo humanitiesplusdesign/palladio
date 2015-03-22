@@ -61093,36 +61093,6 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		}, 1000);
 	});
 
-angular.module('palladio.filters', [])
-  .filter('titleCase', function () {
-		return function (str) {
-			return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
-		};
-	})
-
-  .filter('confirmed', function () {
-    return function (fields) {
-      return fields.filter(function(d){ return d.confirmed; }).length;
-    };
-  })
-
-  .filter('special', function () {
-    return function (fields) {
-      return fields.filter(function(d){ return d.special.length; }).length;
-    };
-  })
-
-  .filter('unique', function () {
-    return function (fields) {
-        return fields.filter(function(d){ return d.uniqueKey; }).length;
-    };
-  })
-
-  .filter('notSameFile', function () {
-    return function (files, fileId) {
-        return files.filter(function (d){ return d.id !== fileId; });
-    };
-  });
 angular.module('palladio.directives.dimension', ['palladio'])
 	.directive('palladioDimension', ['palladioService', function(ps) {
 		return {
@@ -61970,6 +61940,36 @@ angular.module('palladio.directives.yasgui', [
 			}
 		};
 	});
+angular.module('palladio.filters', [])
+  .filter('titleCase', function () {
+		return function (str) {
+			return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+		};
+	})
+
+  .filter('confirmed', function () {
+    return function (fields) {
+      return fields.filter(function(d){ return d.confirmed; }).length;
+    };
+  })
+
+  .filter('special', function () {
+    return function (fields) {
+      return fields.filter(function(d){ return d.special.length; }).length;
+    };
+  })
+
+  .filter('unique', function () {
+    return function (fields) {
+        return fields.filter(function(d){ return d.uniqueKey; }).length;
+    };
+  })
+
+  .filter('notSameFile', function () {
+    return function (files, fileId) {
+        return files.filter(function (d){ return d.id !== fileId; });
+    };
+  });
 var crossfilterHelpers = {
 
 	///////////////////////////////////////////////////////////////////////
@@ -67664,7 +67664,9 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						if(!scope.countBy) {
 							sourceGroups = scope.sourceDimension.group().reduce(
 								function (p, v) {
-									p.data.description = sourceAccessor(v);
+									if(p.data.description.indexOf(sourceAccessor(v)) === -1) {
+										p.data.description.push(sourceAccessor(v));
+									}
 									p.data.agg++;
 									if(p.data.agg > p.data.initialAgg) p.data.initialAgg = p.data.agg;
 									return p;
@@ -67674,7 +67676,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 									return p;
 								},
 								function () {
-									return { data: { agg: 0, initialAgg: 0 }, initialCount: 0 };
+									return { data: { agg: 0, initialAgg: 0, description: [] }, initialCount: 0 };
 								}
 							).order(function (p) { return p.data.agg; });
 						} else {
@@ -67682,7 +67684,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 								function(v) { return v[scope.countBy]; },
 								function (d, p, t) {
 									if(p === undefined) {
-										p = { agg: 0, initialAgg: 0, description: sourceAccessor(d) };
+										p = { agg: 0, initialAgg: 0, description: [] };
 									}
 									if(t === 'add') {
 										// Adding a new record.
@@ -67692,6 +67694,9 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 											p.agg = p.agg + (+d[scope.aggregateKey] ? +d[scope.aggregateKey] : 0); // Make sure to cast or you end up with a String!!!
 										}
 										if(p.agg > p.initialAgg) p.initialAgg = p.agg;
+										if(p.description.indexOf(sourceAccessor(d)) === -1) {
+											p.description.push(sourceAccessor(d));
+										}
 									} else {
 										// Removing a record.
 										if(scope.aggregationType === 'COUNT') {
@@ -67717,7 +67722,9 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						if(!scope.countBy) {
 							destGroups = scope.destinationDimension.group().reduce(
 								function (p, v) {
-									p.data.description = destinationAccessor(v);
+									if(p.data.description.indexOf(destinationAccessor(v)) === -1) {
+										p.data.description.push(destinationAccessor(v));
+									}
 									p.data.agg++;
 									if(p.data.agg > p.data.initialAgg) p.data.initialAgg = p.data.agg;
 									return p;
@@ -67727,7 +67734,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 									return p;
 								},
 								function () {
-									return { data: { agg: 0, initialAgg: 0 }, initialCount: 0 };
+									return { data: { agg: 0, initialAgg: 0, description: [] }, initialCount: 0 };
 								}
 							).order(function (p) { return p.data.agg; });
 						} else {
@@ -67735,7 +67742,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 								function(v) { return v[scope.countBy]; },
 								function (d, p, t) {
 									if(p === undefined) {
-										p = { agg: 0, initialAgg: 0, description: destinationAccessor(d) };
+										p = { agg: 0, initialAgg: 0, description: [] };
 									}
 									if(t === 'add') {
 										// Adding a new record.
@@ -67745,6 +67752,9 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 											p.agg = p.agg + (+d[scope.aggregateKey] ? +d[scope.aggregateKey] : 0); // Make sure to cast or you end up with a String!!!
 										}
 										if(p.agg > p.initialAgg) p.initialAgg = p.agg;
+										if(p.description.indexOf(destinationAccessor(d)) === -1) {
+											p.description.push(destinationAccessor(d));
+										}
 									} else {
 										// Removing a record.
 										if(scope.aggregationType === 'COUNT') {
@@ -67782,6 +67792,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							.forEach( function (d) {
 								if(groupPoints.has(d.key)) {
 									groupPoints.get(d.key).data.agg += +d.value.data.agg;
+									groupPoints.get(d.key).data.description = d3.set(groupPoints.get(d.key).data.description.concat(d.value.data.description)).values();
 								} else {
 									// Must copy the group value because these values will be updated.
 									groupPoints.set(d.key, { data: angular.copy(d.value.data), count: d.value.count, initialCount: d.value.initialCount });
@@ -68027,7 +68038,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 										c[1] === d.properties.key;
 								});
 						    	// scope.sourceDimension.filter(d.properties.key);
-						    	deregister.push(palladioService.setFilter(identifier, scope.title, d.properties.value.data.description, resetNode));
+						    	deregister.push(palladioService.setFilter(identifier, scope.title, d.properties.value.data.description.join(', '), resetNode));
 								palladioService.update();
 						    })
 						    .on("mouseover", nodeTip.show)
@@ -68046,7 +68057,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 										c[1] === d.properties.key;
 								});
 						    	// scope.sourceDimension.filter(d.properties.key);
-						    	deregister.push(palladioService.setFilter(identifier, scope.title, d.properties.value.data.description, resetNode));
+						    	deregister.push(palladioService.setFilter(identifier, scope.title, d.properties.value.data.description.join(', '), resetNode));
 								palladioService.update();
 						    })
 						    .on("mouseover", nodeTip.show)
@@ -68106,11 +68117,11 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 					    return {
 						    type: "tooltip",
-						    text: d.properties.value.data.description + " (" + d.properties.value.data.agg + ")",//source + " → " + destination + " (" + d.properties.value + ")",
+						    text: d.properties.value.data.description.join(', ') + " (" + d.properties.value.data.agg + ")",//source + " → " + destination + " (" + d.properties.value + ")",
 						    detection: "shape",
 						    placement: "mouse",
 						    gravity: "top",
-						    displacement: [-(d.properties.value.data.description).length*7/2, 0],
+						    displacement: [-(d.properties.value.data.description.join(', ')).length*7/2, 0],
 						    mousemove: true
 					    };
 					}
@@ -68171,7 +68182,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 		        	// some highlight
 		        	node.classed("hidden-node", function(d){
-		        		var found = d.properties.value.data.description.toLowerCase().indexOf(search.toLowerCase()) !== -1;
+		        		var found = d.properties.value.data.description.join(', ').toLowerCase().indexOf(search.toLowerCase()) !== -1;
 		        		return found ? false : true;
 		        	})
 
@@ -68209,7 +68220,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				var nodeTip = d3.tip()
 				  	.offset([-10, 0])
 				  	.attr("class","d3-tip")
-				  	.html(function(d){ return d.properties.value.data.description + " (" + d.properties.value.data.agg + ")"; });
+				  	.html(function(d){ return d.properties.value.data.description.join(', ') + " (" + d.properties.value.data.agg + ")"; });
 
 				var linkTip = d3.tip()
 				  	//.offset([0, 0])
