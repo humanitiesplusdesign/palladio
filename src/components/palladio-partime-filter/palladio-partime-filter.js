@@ -54,6 +54,12 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 					if(scope.view === 'true') scope.stepModes.push('Grouped Bars');
 					scope.stepMode = scope.stepModes[0];
 
+					// Handle collapsing
+					scope.collapse = false;
+					scope.toggleCollapse = function() {
+						scope.collapse = !scope.collapse;
+					};
+
 					scope.showDateStartModal = function () {
 						$('#' + scope.uniqueModalId).find('#date-start-modal').modal('show');
 					};

@@ -1,14 +1,14 @@
 <div class="row-fluid">
 	<div data-ng-class="{span3: view !== 'true', settings: view === 'true', open: view === 'true'}">
 		<div ng-if="showAccordion !== 'false'" class="accordion-heading row-fluid">
-			<a class="span1 text-center angle" data-toggle="collapse" data-ng-click="collapse=!collapse" data-ng-init="collapse=false" data-parent="#filters" href="{{uniqueToggleHref}}" target="_self">
+			<a class="span1 text-center angle" data-toggle="collapse" data-ng-click="toggleCollapse()" data-parent="#filters" href="{{uniqueToggleHref}}" target="_self">
 				<span data-ng-show="!collapse"><i class="fa fa-angle-down"></i></span>
 				<span data-ng-show="collapse"><i class="fa fa-angle-right"></i></span>
 			</a>
 			<input type="text" class="editable span11" data-ng-model="title"></input>
 		</div>
 
-		<div class="settings-panel accordion-body" ng-show="!collapse">
+		<div class="settings-panel accordion-body" data-ng-show="!collapse">
 
 			<div class="setting row-fluid">
 				<label class="span4 inline">Layout</label>
