@@ -1,8 +1,6 @@
-<div class="view">
-	<a class="toggle" data-toggle="tooltip" data-original-title="Settings" data-placement="bottom">
-		<i class="fa fa-cog"></i>
-	</a>
-	<div data-palladio-graph-view 
+<div class="container-fluid">
+
+	<div data-palladio-graph-view
 		style="margin-bottom: -55px"
 		link-dimension="linkDimension"
 		show-links="showLinks"
@@ -18,7 +16,6 @@
 		count-by="{{countBy}}"
 		count-description="{{aggDescription}}">
 
-<!-- Zoom -->
 		<div class="leaflet-top leaflet-left">
 			<div class="leaflet-control-zoom leaflet-bar leaflet-control">
 				<a class="leaflet-control-zoom-in" ng-click="zoomIn()" title="Zoom in">+</a>
@@ -26,102 +23,87 @@
 			</div>
 		</div>
 
-	</div>
-</div> 
-
-<!-- Message -->
-<div class="message" data-ng-show="!linkDimension">
-	Please select a Source and a Target dimension</br>from the Settings panel
 </div>
 
 <!-- Settings -->
-<div class="span4 settings open">
-	<div class="row-fluid">
-		<div class="span6">
-			<div class="setting span12">
-				<label>Source</label>
-				<span class="field" ng-click="showSourceModal()">
-					{{mapping.sourceDimension.description || "Choose..."}}
-					<i class="fa fa-bars pull-right"></i>
-				</span>
-				<label class="checkbox" ng-class="{muted:!mapping.sourceDimension}">
-					<input type="checkbox" name="color-node" value="source" 
-							ng-model="highlightSource"
-							data-ng-disabled="!mapping.sourceDimension">Highlight</input>
-				</label>
-			</div>
-		</div>
+<div class="row">
 
-		<div class="span6">
-			<div class="setting span12">
-				<label>Target</label>
-				<span class="field" ng-click="showTargetModal()">
-					{{mapping.targetDimension.description || "Choose..."}}
-					<i class="fa fa-bars pull-right"></i>
-				</span>
-				<label class="checkbox" ng-class="{muted:!mapping.targetDimension}">
-					<input type="checkbox" name="color-node" value="target" 
-						ng-model="highlightTarget" 
-						data-ng-disabled="!mapping.targetDimension">Highlight</input>
-				</label>
-			</div>
-		</div>
-	</div>
+    <div class="settings col-lg-4 col-lg-offset-8 col-md-6 col-md-offset-6">
+      <div class="panel panel-default">
 
-	<div class="space"></div>
+        <a class="settings-toggle" data-toggle="tooltip" data-original-title="Settings" data-placement="bottom">
+          <i class="fa fa-bars"></i>
+        </a>
 
-	<div class="row-fluid">
-		<div class="span6">
-			<div class="setting">
-				<label class="checkbox">
-					<input type="checkbox" ng-model="nodeSize"> Size nodes
-				</label>
-			</div>
+        <div class="panel-body">
 
-			<div class="setting" data-ng-show="nodeSize">
-				<label class="">Node size corresponds to</label>
-				<span class="field" ng-click="showAggModal()">
-						{{getAggDescription(aggDim) || "Choose..."}}
-					<i class="fa fa-bars pull-right"></i>
-				</span>
-			</div>
-		</div>
-	</div>
+          <div class="row">
+            <div class="col-lg-12">
+              <label class="strong">Settings</label>
+            </div>
+          </div>
 
-	<div class="row-fluid">
-		<div class="space"></div>
-		<div class="setting">
-			<label class="checkbox">
-				<input type="checkbox" ng-model="showLinks"> Show links
-			</label>
-		</div>
+          <div class="row margin-top">
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+              <label class="inline">Source</label>
+            </div>
+            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
+              <span class="btn btn-default" ng-click="showSourceModal()">
+                  {{mapping.sourceDimension.description || "Choose"}}
+                  <span class="caret"></span>
+              </span>
+            </div>
+          </div>
 
-		<div class="setting">
-			<label class="checkbox">
-				<input type="checkbox" ng-model="showLabels"> Show labels
-			</label>
-		</div>
+					<div class="row margin-top">
+						<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+							<label class="inline">Highlight</label>
+						</div>
+						<div class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">
+								<input type="checkbox" ng-model="highlightSource">
+						</div>
+					</div>
 
-		<div class="space"></div>
+					<div class="row margin-top">
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+              <label class="inline">Target</label>
+            </div>
+            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
+              <span class="btn btn-default" ng-click="showTargetModal()">
+                  {{mapping.targetDimension.description || "Choose"}}
+                  <span class="caret"></span>
+              </span>
+            </div>
+          </div>
 
-		<div class="setting">
-			<a ng-click="resetNodes()">
-				<i class="fa fa-arrows-alt margin-right"></i> Reset node position
-			</a>
-		</div>
-		<br />
+					<div class="row margin-top">
+						<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+							<label class="inline">Highlight</label>
+						</div>
+						<div class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">
+								<input type="checkbox" ng-model="highlightTarget">
+						</div>
+					</div>
+					
 
-		<div class="setting">
-			<a ng-click="exportSvg(this, 'Palladio Graph.svg')">
-				<i class="fa fa-arrow-circle-down margin-right"></i> Export graph as .svg
-			</a>
-		</div>
-	</div>
+					<div class="row margin-top">
+						<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+							<label class="inline">Show links</label>
+						</div>
+						<div class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">
+								<input type="checkbox" ng-model="showLinks">
+						</div>
+					</div>
+
+        </div>
+
+      </div>
+    </div>
+
 </div>
-<!--Modal-->
+
 <div id="{{uniqueModalId}}">
 	<div id="source-modal" data-modal dimensions="fields" model="mapping.sourceDimension"></div>
 	<div id="target-modal" data-modal dimensions="fields" model="mapping.targetDimension"></div>
-	<div id="agg-modal" data-modal dimensions="aggDims" model="aggDim" 
-		description-accessor="getAggDescription"></div>
+	<div id="agg-modal" data-modal dimensions="aggDims" model="aggDim" description-accessor="getAggDescription"></div>
 </div>

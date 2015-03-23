@@ -31,14 +31,27 @@
 										<label class="inline">Nodes</label>
 									</div>
 									<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
-										<button type="button" class="btn btn-default"
+										{{nodeDim}}
+
+									<!--	<button type="button" class="btn btn-default"
 										    ng-model="nodeDim"
 										    data-html="1"
 											placeholder="Choose"
 										    ng-options="type.label for type in nodeDims"
 										    bs-select>
 										  Choose <span class="caret"></span>
-										</button>
+										</button>-->
+
+										<ui-select ng-model="nodeDim" theme="selectize" ng-disabled="disabled">
+									    <ui-select-match placeholder="Select or search">
+												{{$select.selected.label}}
+												<span class="caret"></span>
+											</ui-select-match>
+									    <ui-select-choices repeat="type in nodeDims | filter: {label:$select.search}">
+									      <span ng-bind-html="type.label | highlight: $select.search"></span>
+									    </ui-select-choices>
+									  </ui-select>
+
 										<p class="help-block">Select a table for the nodes. Each row in the table will correspond to a node in the graph.</p>
 									</div>
 								</div>
@@ -49,7 +62,7 @@
 										<label class="inline">Links</label>
 									</div>
 									<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
-										<button type="button" class="btn btn-default"
+										<!--<button type="button" class="btn btn-default"
 										    ng-model="linkDim"
 										    data-html="1"
 											placeholder="Choose"
@@ -57,7 +70,18 @@
 										    ng-options="type.label for type in linkDims"
 										    bs-select>
 										  Choose <span class="caret"></span>
-										</button>
+										</button>-->
+
+										<ui-select ng-model="linkDim" theme="selectize" ng-disabled="disabled">
+									    <ui-select-match placeholder="Select or search">
+												{{$select.selected.label}}
+												<span class="caret"></span>
+											</ui-select-match>
+									    <ui-select-choices repeat="type in linkDims | filter: {label:$select.search}">
+									      <span ng-bind-html="type.label | highlight: $select.search"></span>
+									    </ui-select-choices>
+									  </ui-select>
+
 									</div>
 								</div>
 
@@ -66,7 +90,7 @@
 										<label class="inline">Size nodes</label>
 									</div>
 									<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
-										<button type="button" class="btn btn-default"
+									<!--	<button type="button" class="btn btn-default"
 										    ng-model="linkDim"
 										    data-html="1"
 												placeholder="Choose"
@@ -74,7 +98,7 @@
 										    ng-options="type.label for type in nodeDims"
 										    bs-select>
 										  Choose <span class="caret"></span>
-										</button>
+										</button>-->
 									</div>
 								</div>
 

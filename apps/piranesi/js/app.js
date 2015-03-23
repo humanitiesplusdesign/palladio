@@ -7,7 +7,9 @@ var app = angular.module('palladioApp', [
 	'ui.codemirror',
 	'ui.router',
 	'ui.sortable',
-	'mgcrea.ngStrap',
+	'ui.select',
+
+//	'mgcrea.ngStrap',
 
 	'palladioDataUpload',
 	'palladioDataDownload',
@@ -21,12 +23,12 @@ var app = angular.module('palladioApp', [
 	'palladioTimespanFilter',
 	'palladioPartimeFilter',
 	// Views
-	'palladioListView',
+/*	'palladioListView',
 	'palladioMapView',
 	'palladioTableView',
 	'palladioSelectionView',
 	'palladioGraphView',
-	'palladioDurationView',
+	'palladioDurationView',*/
 	'palladioIdiographView']
 	)
 	.config(function($stateProvider, $urlRouterProvider) {
