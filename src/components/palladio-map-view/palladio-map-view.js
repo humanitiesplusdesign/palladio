@@ -14,6 +14,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				var deregister = [];
 				var search = '';
 				var l; // User-defined map layer
+				var line = d3.svg.line().interpolate('bundle');
 
 				deregister.push(palladioService.onUpdate(uniqueId, function() {
 					// Only update if the table is visible.
@@ -22,17 +23,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 				// Update when it becomes visible (updating when not visibile errors out)
 				scope.$watch(function() { return element.is(':visible'); }, update);
-
-				scope.$watchGroup(['countBy', 'aggregationType', 'pointSize',
-					'aggregationKey', 'type', 'descriptionField', 'maxPointSize'], function (nv, ov) {
-
-					if(nv[0] !== ov[0] || nv[1] !== ov[1] || nv[2] !== ov[2] || nv[3] !== ov[3] ||
-						nv[4] !== ov[4] || nv[5] !== ov[5]) {
-
-						clearAllGroups();
-						update();
-					}
-				});
 
 				function clearAllGroups() {
 					scope.layers.forEach(clearGroups);
@@ -46,12 +36,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					if(layer.nestedGroups) layer.nestedGroups.remove();
 					layer.nestedGroups = null;
 				}
-
-				scope.$watch('filterDimension', function () {
-					palladioService.removeFilter(identifier);
-					palladioService.update();
-					update(); // Necessary?
-				});
 
 				deregister.push(palladioService.onSearch(uniqueId, function(text) {
 					search = text;
@@ -213,8 +197,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 
 				function generateLinks(layer) {
-					if (layer.type == "points") return [];
-					return layer.type == "point-to-point" ? pointToPoint(layer) : sequence(layer);
+					if (layer.type == "point-to-point") return pointToPoint(layer);
+					return [];
 				}
 
 				/* Generates links by connecting two points (i.e. source/destination) */
@@ -232,14 +216,14 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							reducer.exceptionCount(true);
 							reducer.aliasProp({
 								agg: function(g) { return g.exceptionCount; },
-								description: function(g, v) { return layer.sourceAccessor(v) + " - " + layer.destinationAccessor(v); },
+								description: function(g, v) { return layer.sourceAccessor(v) + " → " + layer.destinationAccessor(v); },
 								record: function(g,v) { return v; }
 							});
 						} else {
 							reducer.exceptionSum(function(d) { return +d[layer.aggregateKey]; });
 							reducer.aliasProp({
 								agg: function(g) { return g.exceptionSum; },
-								description: function(g, v) { return layer.sourceAccessor(v) + " - " + layer.destinationAccessor(v); },
+								description: function(g, v) { return layer.sourceAccessor(v) + " → " + layer.destinationAccessor(v); },
 								record: function(g,v) { return v; }
 							});
 						}
@@ -250,18 +234,16 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					var tempLinks = [];
 
 					layer.nestedGroups.all().forEach( function (d) {
-						// s.value.nest.entries().forEach( function (d) {
-							// Don't use blank latlongs.
-							if(d.key[0] && d.key[1] && d.value.agg > 0) tempLinks.push(
-								{
-									source: d.key[0],
-									destination: d.key[1],
-									value: d.value.agg,
-									description: d.value.description,
-									data: d.value.record
-								}
-							);
-						// });
+						// Don't use blank latlongs.
+						if(d.key[0] && d.key[1] && d.value.agg > 0) tempLinks.push(
+							{
+								source: d.key[0],
+								destination: d.key[1],
+								value: d.value.agg,
+								description: d.value.description,
+								data: d.value.record
+							}
+						);
 					});
 
 					var lines = createLines(tempLinks, function(d) { return [
@@ -275,33 +257,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					return lines;
 				}
 
-				/* Generates links by creating a sequence */
-
-				function sequence(layer) {
-					// aggregating links with same source and dest
-		        	if (!layer.sequenceAccessor) return [];
-
-		        	var nodes = layer.source.top(Infinity).filter( function (d) { return layer.source.accessor(d); });
-
-		        	nodes = nodes.sort( function(a,b){ return layer.sequenceAccessor(a) - layer.sequenceAccessor(b); });
-
-		        	var links = []
-
-		        	for (var l=0; l<nodes.length-2; l++){
-		        		links.push({ source: layer.sourceCoordinatesAccessor(nodes[l]), destination: layer.sourceCoordinatesAccessor(nodes[l+1]) });
-		        	}
-
-		        	links = createLines(links, function(d) { return [
-		        		// source
-			        		[ +d.source.split(',')[0], +d.source.split(',')[1] ],
-			        		//destination
-			        		[ +d.destination.split(',')[0], +d.destination.split(',')[1] ]
-		        		];
-		        	})
-
-		        	return links;
-				}
-
 				function update() {
 
 					// scope.layers.forEach(function(layer) {
@@ -309,7 +264,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					// 	if (!layer.source) return;
 
 						var svgs = d3.select(m.getPanes().overlayPane).selectAll("svg")
-			          		.data(scope.layers)
+			          		.data(scope.layers.filter(function(d) { return d.enabled; }))
 			          	svgs.enter().append("svg");
 			          	svgs.exit().remove();
 
@@ -332,7 +287,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				        	// creation of nodes and links
 							var nodes = generatePoints(layer),
 								edges = generateLinks(layer),
-								line = d3.svg.line().interpolate('bundle'),
 								maxPointSize = layer.maxPointSize ? +layer.maxPointSize : d3.max(nodes.features, function(d){ return d.properties.value.initialAgg; });
 								pointSize = layer.pointSize ?
 									d3.scale.sqrt().domain(
@@ -362,8 +316,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 
 						    // links, if any...
-
-						    var links = layer.showLinks ? edges().features || [] : [];
+						    var links = layer.showLinks ? edges.features || [] : [];
 
 						    link = g.selectAll(".link")
 								.data(links, function(d) { return d.properties.source + "-" + d.properties.destination; })
@@ -613,11 +566,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				var linkTip = d3.tip()
 				  	//.offset([0, 0])
 				  	.attr("class","d3-tip")
-				  	.html(function(d){
-				  		var source = layer.sourceAccessor ? layer.sourceAccessor(d.properties.data) : layer.sourceCoordinatesAccessor(d.properties.data),
-						destination = layer.destinationAccessor ? layer.destinationAccessor(d.properties.data) : layer.destinationCoordinatesAccessor(d.properties.data);
-						return source + " → " + destination + " (" + d.properties.value + ")"
-				  	});
+				  	.html(function(d){ return d.properties.description + " (" + d.properties.value + ")"; });
 
 		 		scope.title = "Map View"
 		       	var identifier = "" + scope.title + Math.floor(Math.random() * 10000);
@@ -625,6 +574,15 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 		       	var filterDimension = null;
 
 		       	scope.$watchCollection('layers', function () {
+		       		scope.layers.forEach(function(layer, i) {
+		       			if(!layer.toggle) {
+		       				layer.toggle = function() {
+		       					layer.enabled = !layer.enabled;
+		       					update();
+		       				}
+		       			}
+		       		});
+
 		       		clearAllGroups();
 		       		update();
 		       	});
@@ -813,7 +771,10 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				function buildLayerAttributes(layer) {
 					// Transfer mapping and attributes
 					layer.mapping = scope.mapping;
+					layer.type = scope.mapType.value;
 					layer.descriptiveDim = scope.descriptiveDim;
+					layer.pointSize = scope.pointSize;
+					layer.showLinks = layer.mapping.destinationCoordinates ? scope.showLinks : false;
 
 					// If we are dealing with a type-based field, build a lookup mapping.
 					var typeMap = d3.map();
