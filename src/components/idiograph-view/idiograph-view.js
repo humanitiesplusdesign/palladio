@@ -78,7 +78,7 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 					function setup() {
 						// Called when the entire visualization should be rebuilt.
 						//d3.select(element[0]).selectAll('*').remove();
-						if (!graph) graph = d3.graph();
+						if (!graph) graph = d3.idiograph();
 
 						// If a dimension already exists, explicitly destroy it so that it is dropped from
 						// the Crossfilter.

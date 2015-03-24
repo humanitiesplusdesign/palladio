@@ -1480,3 +1480,12 @@ input[type="checkbox"]:checked:before {
 .selectize-dropdown [data-selectable], .selectize-dropdown .optgroup-header {
   padding: 8px 8px;
 }
+
+
+#footer {
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  background: rgba(255,255,255,.9);
+}
