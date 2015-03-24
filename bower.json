@@ -39,7 +39,7 @@
     "YASQE": "https://github.com/YASGUI/YASQE.git#~1.4.0",
     "YASR": "https://github.com/YASGUI/YASR.git#~1.2.0",
     "angular-ui-select": "~0.10.0",
-    "mapbox.js": "~2.1.5"
+    "mapbox.js": "2.1.5"
   },
   "overrides": {
     "FileSaver": {
