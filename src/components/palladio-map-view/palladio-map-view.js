@@ -181,6 +181,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							.forEach( function (d) {
 								if(groupPoints.has(d.key)) {
 									groupPoints.get(d.key).agg += +d.value.agg;
+									groupPoints.get(d.key).initialAgg += d.value.initialAgg;
 								} else {
 									// Must copy the group value because these values will be updated.
 									groupPoints.set(d.key, angular.copy(d.value));
@@ -257,254 +258,266 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					return lines;
 				}
 
+				var maxPointSize;
+
 				function update() {
 
-					// scope.layers.forEach(function(layer) {
+					var svg = d3.select(m.getPanes().overlayPane).select("svg");
 
-					// 	if (!layer.source) return;
+					if(svg.empty()) {
+						svg = d3.select(m.getPanes().overlayPane).append("svg");
+					}
 
-						var svgs = d3.select(m.getPanes().overlayPane).selectAll("svg")
-			          		.data(scope.layers.filter(function(d) { return d.enabled; }))
-			          	svgs.enter().append("svg");
-			          	svgs.exit().remove();
+					var gs = svg.selectAll("g.leaflet-zoom-hide")
+		          		.data(scope.layers.filter(function(d) { return d.enabled; }),
+		          				function(l) {return l.index; });
 
-				        m.on("viewreset", function() { svgs.each(draw); });
-				        m.on("moveend", function() { svgs.each(draw); });
+		            svg.call(nodeTip);
+					svg.call(linkTip);
 
-				        svgs.each(draw);
+		          	gs.enter().append("g").attr("class", "leaflet-zoom-hide");
+		          	gs.exit().remove();
 
-				        function draw(layer) {
+		          	gs.order();
 
-				        	var svg = d3.select(this);
-				        	var g = svg.selectAll("g.leaflet-zoom-hide")
-				          		.data(function(d){ return [d]; })
-				          	g.enter().append("g").attr("class", "leaflet-zoom-hide");
-							g.exit().remove();
+			        m.on("viewreset", function() { gs.each(draw); });
+			        m.on("moveend", function() { gs.each(draw); });
 
-				        	svg.call(nodeTip);
-							svg.call(linkTip);
+			        // Calculate maximum point size across layers
+			        maxPointSize = scope.layers.reduce(function(a,b) {
+			        	var t = d3.max(generatePoints(b).features, function(d){ return d.properties.value.initialAgg; });
+			        	return a > t ? a : t;
+			        }, 0);
 
-				        	// creation of nodes and links
-							var nodes = generatePoints(layer),
-								edges = generateLinks(layer),
-								maxPointSize = layer.maxPointSize ? +layer.maxPointSize : d3.max(nodes.features, function(d){ return d.properties.value.initialAgg; });
-								pointSize = layer.pointSize ?
-									d3.scale.sqrt().domain(
-							       		[ 1, maxPointSize ]
-							       	).range([3,26]) :
-							       	function(){ return 3; },
-								path = d3.geo.path()
-									.pointRadius(function(d){ return pointSize(d.properties.value.agg);})
-									.projection(project),
-		   						value = edges.feature ? d3.scale.linear().domain([ d3.min(edges.features, function(d){ return d.properties.value; }), d3.max(edges.features, function(d){ return d.properties.value; }) ]).range([2,20]) : function(d){ return 2; };
+			        gs.each(draw);
 
-		   					if(!layer.maxPointSize) layer.maxPointSize = maxPointSize;
+			        function draw(layer) {
 
-				        	var w = d3.select(element[0]).style("width"),
-				        		h = d3.select(element[0]).style("height")
+			        	var container = d3.select(this);
+			        	var g = container.selectAll('g.layer')
+			          		.data(function(d){ return [d]; })
+			          	g.enter().append('g').attr("class", "layer");
+						g.exit().remove();
 
-				        	var bounds = m.getBounds(),
-				        		topRight = project(bounds._northEast),
-				              	bottomLeft = project(bounds._southWest);
+			        	// creation of nodes and links
+						var nodes = generatePoints(layer),
+							edges = generateLinks(layer),
+							pointSize = layer.pointSize ?
+								d3.scale.sqrt().domain(
+						       		[ 1, maxPointSize ]
+						       	).range([3,26]) :
+						       	function(){ return 3; },
+							path = d3.geo.path()
+								.pointRadius(function(d){ return pointSize(d.properties.value.agg);})
+								.projection(project),
+	   						value = edges.feature ? d3.scale.linear().domain([ d3.min(edges.features, function(d){ return d.properties.value; }), d3.max(edges.features, function(d){ return d.properties.value; }) ]).range([2,20]) : function(d){ return 2; };
 
-				          	svg .attr("width", w)//topRight[0] - bottomLeft[0])
-				              	.attr("height", h)//bottomLeft[1] - topRight[1])
-				              	.style("margin-left", bottomLeft[0] + "px")
-				              	.style("margin-top", topRight[1] + "px");
+	   					if(!layer.maxPointSize) layer.maxPointSize = maxPointSize;
 
-						    g 	.attr("transform", "translate(" + -bottomLeft[0] + "," + -topRight[1] + ")");
+			        	var w = d3.select(element[0]).style("width"),
+			        		h = d3.select(element[0]).style("height")
 
+			        	var bounds = m.getBounds(),
+			        		topRight = project(bounds._northEast),
+			              	bottomLeft = project(bounds._southWest);
 
-						    // links, if any...
-						    var links = layer.showLinks ? edges.features || [] : [];
+			          	svg .attr("width", w)//topRight[0] - bottomLeft[0])
+			              	.attr("height", h)//bottomLeft[1] - topRight[1])
+			              	.style("margin-left", bottomLeft[0] + "px")
+			              	.style("margin-top", topRight[1] + "px");
 
-						    link = g.selectAll(".link")
-								.data(links, function(d) { return d.properties.source + "-" + d.properties.destination; })
-
-							link.exit().remove();
-
-							link
-								.attr("stroke-width", function(d){ return value(d.properties.value); })
-								.attr("d", curve)
-								//.tooltip(tooltipLink)
-								.on("click", function(d){
-									layer.filterDimension.filter(function (c) {
-										return c[0] === d.properties.source &&
-											c[1] === d.properties.destination;
-									});
-							    	deregister.push(palladioService.setFilter(identifier, layer.title, layer.sourceAccessor(d.properties.data) + "/" + layer.destinationAccessor(d.properties.data), resetLink));
-									palladioService.update();
-							    })
-							    .on("mouseover", linkTip.show)
-								.on("mouseout", linkTip.hide)
-
-							link.enter().append("path")
-								.classed("link",true)
-								.attr("stroke-width", function(d){ return value(d.properties.value); })
-								.attr("stroke-linecap", "round")
-								.style("fill","none")
-								.style("stroke","#000")
-								.style("opacity",".2")
-								.attr("d", curve)
-								//.tooltip(tooltipLink)
-								.on("click", function(d){
-									layer.filterDimension.filter(function (c) {
-										return c[0] === d.properties.source &&
-											c[1] === d.properties.destination;
-									});
-							    	deregister.push(palladioService.setFilter(identifier, layer.title, layer.sourceAccessor(d.properties.data) + "/" + layer.destinationAccessor(d.properties.data), resetLink));
-									palladioService.update();
-							    })
-							    .on("mouseover", linkTip.show)
-								.on("mouseout", linkTip.hide)
-
-							// This function should do what needs to be done to remove the filter.
-					    	var resetLink = function () {
-					    		layer.filterDimension.filterAll();
-					    		palladioService.removeFilter(identifier);
-					    		palladioService.update();
-					    	}
+					    g 	.attr("transform", "translate(" + -bottomLeft[0] + "," + -topRight[1] + ")");
 
 
-				        	// nodes
+					    // links, if any...
+					    var links = layer.showLinks ? edges.features || [] : [];
 
-				        	node = g.selectAll(".node")
-				            	.data(nodes.features, function (d) { return d.properties.key; });
+					    link = g.selectAll(".link")
+							.data(links, function(d) { return d.properties.source + "-" + d.properties.destination; })
 
-				            node.exit().remove();
+						link.exit().remove();
 
-				          	node
-					          	.attr("d", path)
-					          	//.tooltip(tooltipNode)
-					          	.on("click", function(d){
-							    	layer.filterDimension.filter(function (c) {
-										return c[0] === d.properties.key ||
-											c[1] === d.properties.key;
-									});
-							    	deregister.push(palladioService.setFilter(identifier, layer.title, d.properties.value.description, resetNode));
-									palladioService.update();
-							    })
-							    .on("mouseover", nodeTip.show)
-								.on("mouseout", nodeTip.hide)
+						link
+							.attr("stroke-width", function(d){ return value(d.properties.value); })
+							.attr("d", curve)
+							//.tooltip(tooltipLink)
+							.on("click", function(d){
+								layer.filterDimension.filter(function (c) {
+									return c[0] === d.properties.source &&
+										c[1] === d.properties.destination;
+								});
+						    	deregister.push(palladioService.setFilter(identifier, layer.title, layer.sourceAccessor(d.properties.data) + "/" + layer.destinationAccessor(d.properties.data), resetLink));
+								palladioService.update();
+						    })
+						    .on("mouseover", linkTip.show)
+							.on("mouseout", linkTip.hide)
 
-					        node.enter().append('path')
-					          	.classed("node",true)
-							    .attr("d", path)
-							    .style("fill", "#444")
-							    .style("stroke", "#fff")
-							    //.tooltip(tooltipNode)
-							    .on("click", function(d){
-							    	nodeTip.hide();
-							    	layer.filterDimension.filter(function (c) {
-										return c[0] === d.properties.key ||
-											c[1] === d.properties.key;
-									});
-							    	deregister.push(palladioService.setFilter(identifier, layer.title, d.properties.value.description, resetNode));
-									palladioService.update();
-							    })
-							    .on("mouseover", nodeTip.show)
-								.on("mouseout", nodeTip.hide)
+						link.enter().append("path")
+							.classed("link",true)
+							.attr("stroke-width", function(d){ return value(d.properties.value); })
+							.attr("stroke-linecap", "round")
+							.style("fill","none")
+							.style("stroke",layer.color)
+							.style("opacity",".2")
+							.attr("d", curve)
+							//.tooltip(tooltipLink)
+							.on("click", function(d){
+								layer.filterDimension.filter(function (c) {
+									return c[0] === d.properties.source &&
+										c[1] === d.properties.destination;
+								});
+						    	deregister.push(palladioService.setFilter(identifier, layer.title, layer.sourceAccessor(d.properties.data) + "/" + layer.destinationAccessor(d.properties.data), resetLink));
+								palladioService.update();
+						    })
+						    .on("mouseover", linkTip.show)
+							.on("mouseout", linkTip.hide)
 
-							// This function should do what needs to be done to remove the filter.
-					    	var resetNode = function () {
-					    		layer.filterDimension.filterAll();
-					    		palladioService.removeFilter(identifier);
-					    		palladioService.update();
-					    	}
+						// This function should do what needs to be done to remove the filter.
+				    	var resetLink = function () {
+				    		layer.filterDimension.filterAll();
+				    		palladioService.removeFilter(identifier);
+				    		palladioService.update();
+				    	}
 
-					    	highlight(layer);
 
-					    	// legend
+			        	// nodes
 
-					    	if(layer.pointSize) {
+			        	node = g.selectAll(".node")
+			            	.data(nodes.features, function (d) { return d.properties.key; });
 
-						    	d3.select(element[0]).selectAll("div.legend").remove();
+			            node.exit().remove();
 
-						    	if (!layer.pointSize) return;
+			          	node
+				          	.attr("d", path)
+				          	//.tooltip(tooltipNode)
+				          	.on("click", function(d){
+						    	layer.filterDimension.filter(function (c) {
+									return c[0] === d.properties.key ||
+										c[1] === d.properties.key;
+								});
+						    	deregister.push(palladioService.setFilter(identifier, layer.title, d.properties.value.description, resetNode));
+								palladioService.update();
+						    })
+						    .on("mouseover", nodeTip.show)
+							.on("mouseout", nodeTip.hide)
 
-						    	var circles,legend,labels;
+				        node.enter().append('path')
+				          	.classed("node",true)
+						    .attr("d", path)
+						    .style("fill", layer.color)
+						    .style("stroke", layer.color)
+						    //.tooltip(tooltipNode)
+						    .on("click", function(d){
+						    	nodeTip.hide();
+						    	layer.filterDimension.filter(function (c) {
+									return c[0] === d.properties.key ||
+										c[1] === d.properties.key;
+								});
+						    	deregister.push(palladioService.setFilter(identifier, layer.title, d.properties.value.description, resetNode));
+								palladioService.update();
+						    })
+						    .on("mouseover", nodeTip.show)
+							.on("mouseout", nodeTip.hide)
 
-						    	legend = d3.select(element[0]).selectAll("div.legend")
-				          			.data(function(d){ return [d]; })
-				          			.enter()
-				          			.append("div")
-				          			.attr("class", "legend")
-				          			//.style("min-width", function(){ return pointSize(maxPointSize) * 2 + "px"; })
-				          			//.style("min-height", function(){ return pointSize(maxPointSize) * 2 + "px"; })
-				          			.append("div")
-				          				.style("position","relative");
+						// This function should do what needs to be done to remove the filter.
+				    	var resetNode = function () {
+				    		layer.filterDimension.filterAll();
+				    		palladioService.removeFilter(identifier);
+				    		palladioService.update();
+				    	}
 
-								legend.append("div")
-									.attr("class","legend-title")
-									.html(layer.countDescription);
+				    	highlight(layer);
 
-								legend.selectAll("div.circle")
-									.data([ maxPointSize, 1 ])
-									.enter().append("div")
-										.attr("class", "circle")
-										.style("width", function (d,i){ return (pointSize(d) * 2) + "px"; })
-										.style("height", function (d,i){ return (pointSize(d) * 2) + "px"; })
-										.style("border-radius", "50%")
-										.style("margin-top", function(d,i){ return d < maxPointSize ? -(pointSize(d)*2) + "px" : 0; })
-										.style("margin-left", function(d,i){ return d < maxPointSize ? (pointSize(maxPointSize)-pointSize(d)) + "px" : 0; })
-										.append("span")
-											.attr("class","legend-title")
-											.style("margin-left", function(d){ return (-(pointSize(maxPointSize)-pointSize(d))+pointSize(maxPointSize)*2 + 10) + "px"; })
-											.html(String)
+				    	// legend
 
-							}
-				        }
+				    	if(layer.pointSize) {
 
-				        function tooltipNode(d,i){
+					    	d3.select(element[0]).selectAll("div.legend").remove();
 
-						    return {
-							    type: "tooltip",
-							    text: d.properties.value.description + " (" + d.properties.value.agg + ")",//source + " → " + destination + " (" + d.properties.value + ")",
-							    detection: "shape",
-							    placement: "mouse",
-							    gravity: "top",
-							    displacement: [-(d.properties.value.description).length*7/2, 0],
-							    mousemove: true
-						    };
+					    	if (!layer.pointSize) return;
+
+					    	var circles,legend,labels;
+
+					    	legend = d3.select(element[0]).selectAll("div.legend")
+			          			.data(function(d){ return [d]; })
+			          			.enter()
+			          			.append("div")
+			          			.attr("class", "legend")
+			          			//.style("min-width", function(){ return pointSize(maxPointSize) * 2 + "px"; })
+			          			//.style("min-height", function(){ return pointSize(maxPointSize) * 2 + "px"; })
+			          			.append("div")
+			          				.style("position","relative");
+
+							legend.append("div")
+								.attr("class","legend-title")
+								.html(layer.countDescription);
+
+							legend.selectAll("div.circle")
+								.data([ maxPointSize, 1 ])
+								.enter().append("div")
+									.attr("class", "circle")
+									.style("width", function (d,i){ return (pointSize(d) * 2) + "px"; })
+									.style("height", function (d,i){ return (pointSize(d) * 2) + "px"; })
+									.style("border-radius", "50%")
+									.style("margin-top", function(d,i){ return d < maxPointSize ? -(pointSize(d)*2) + "px" : 0; })
+									.style("margin-left", function(d,i){ return d < maxPointSize ? (pointSize(maxPointSize)-pointSize(d)) + "px" : 0; })
+									.append("span")
+										.attr("class","legend-title")
+										.style("margin-left", function(d){ return (-(pointSize(maxPointSize)-pointSize(d))+pointSize(maxPointSize)*2 + 10) + "px"; })
+										.html(String)
+
 						}
+			        }
 
-						function tooltipLink(d,i){
+			        function tooltipNode(d,i){
 
-							var source = layer.sourceAccessor ? layer.sourceAccessor(d.properties.data) : layer.sourceCoordinatesAccessor(d.properties.data),
-								destination = layer.destinationAccessor ? layer.destinationAccessor(d.properties.data) : layer.destinationCoordinatesAccessor(d.properties.data);
+					    return {
+						    type: "tooltip",
+						    text: d.properties.value.description + " (" + d.properties.value.agg + ")",//source + " → " + destination + " (" + d.properties.value + ")",
+						    detection: "shape",
+						    placement: "mouse",
+						    gravity: "top",
+						    displacement: [-(d.properties.value.description).length*7/2, 0],
+						    mousemove: true
+					    };
+					}
 
-							return {
-							    type: "tooltip",
-							    text: source + " → " + destination + " (" + d.properties.value + ")",
-							    detection: "shape",
-							    placement: "mouse",
-							    gravity: "top",
-							    displacement: [-(source + " → " + destination + " (" + d.properties.value + ")").length*5/2, 0],
-							    mousemove: true
-						    };
-						}
+					function tooltipLink(d,i){
 
-				        function project(x) {
-				        	var point = m.latLngToLayerPoint(x);
-				        	return [point.x, point.y];
-				        }
+						var source = layer.sourceAccessor ? layer.sourceAccessor(d.properties.data) : layer.sourceCoordinatesAccessor(d.properties.data),
+							destination = layer.destinationAccessor ? layer.destinationAccessor(d.properties.data) : layer.destinationCoordinatesAccessor(d.properties.data);
 
-				        function curve(d) {
+						return {
+						    type: "tooltip",
+						    text: source + " → " + destination + " (" + d.properties.value + ")",
+						    detection: "shape",
+						    placement: "mouse",
+						    gravity: "top",
+						    displacement: [-(source + " → " + destination + " (" + d.properties.value + ")").length*5/2, 0],
+						    mousemove: true
+					    };
+					}
 
-				        	var source = project(d.geometry.coordinates[0]),
-								target = project(d.geometry.coordinates[1]),
-				        		rad = Math.sqrt( Math.pow(target[0]-source[0],2) + Math.pow(target[1]-source[1], 2) )/4,
-								sourceP = Math.atan2((target[1]-source[1]),(target[0]-source[0])) - Math.PI/10,
-								targetP = Math.atan2((source[1]-target[1]),(source[0]-target[0])) + Math.PI/10
+			        function project(x) {
+			        	var point = m.latLngToLayerPoint(x);
+			        	return [point.x, point.y];
+			        }
 
-							return line([
-								[source[0], source[1]],
-								[source[0]+rad*Math.cos(sourceP),source[1]+rad*Math.sin(sourceP)],
-								[target[0]+rad*Math.cos(targetP),target[1]+rad*Math.sin(targetP)],
-								[target[0],target[1]]
-							]);
-				        }
-					// });
+			        function curve(d) {
+
+			        	var source = project(d.geometry.coordinates[0]),
+							target = project(d.geometry.coordinates[1]),
+			        		rad = Math.sqrt( Math.pow(target[0]-source[0],2) + Math.pow(target[1]-source[1], 2) )/4,
+							sourceP = Math.atan2((target[1]-source[1]),(target[0]-source[0])) - Math.PI/10,
+							targetP = Math.atan2((source[1]-target[1]),(source[0]-target[0])) + Math.PI/10
+
+						return line([
+							[source[0], source[1]],
+							[source[0]+rad*Math.cos(sourceP),source[1]+rad*Math.sin(sourceP)],
+							[target[0]+rad*Math.cos(targetP),target[1]+rad*Math.sin(targetP)],
+							[target[0],target[1]]
+						]);
+			        }
 				}
 
 				function highlight(layer){
@@ -775,6 +788,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					layer.descriptiveDim = scope.descriptiveDim;
 					layer.pointSize = scope.pointSize;
 					layer.showLinks = layer.mapping.destinationCoordinates ? scope.showLinks : false;
+					layer.color = scope.color;
 
 					// If we are dealing with a type-based field, build a lookup mapping.
 					var typeMap = d3.map();
@@ -1059,6 +1073,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					scope.mapping = {};
 				}
 
+				var dataLayerIndex = 0;
 				function buildDataLayer() {
 					var layer = {};
 
@@ -1073,7 +1088,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						}
 					}
 
-					layer.index = scope.layers.length;
+					layer.index = dataLayerIndex;
+					dataLayerIndex++;
 					layer.enabled = true;
 					layer.layer = null;
 
