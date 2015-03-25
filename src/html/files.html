@@ -109,6 +109,8 @@
 					<div class="panel-heading">
 
 						<input
+							tooltip-animation="false"
+							tooltip-append-to-body="true"
 							tooltip="Rename"
 							data-container="body"
 							data-placement="top"
@@ -119,41 +121,25 @@
 						</input>
 
 						<div class="margin-top">
-							<span ng-show="$index==0" class="small text-muted">Primary table</span>
-							<span class="text-muted pull-right">{{file.data.length}} rows</span>
+							<span ng-show="$index==0" class="pull-left text-muted text-uppercase">Primary table</span>
+							<span class="text-muted pull-right text-uppercase">{{file.data.length}} rows</span>
 							<span class="clearfix"></span>
 						</div>
 
-						<div class="margin-top">
 
-							<div class="text-right">
-								<div class="btn-group">
-					        <label class="btn btn-default" ng-model="fieldView" btn-radio="'field-view-list'">List</label>
-					        <label class="btn btn-default" ng-model="fieldView" btn-radio="'field-view-fingerprint'">Fingerprint</label>
-									<label class="btn btn-default" ng-model="fieldView" btn-radio="'field-view-overview'">Overview</label>
-					    	</div>
-							</div>
-
-								<!--<i
-									class="pull-right fa fa-th-list"
-									bs-tooltip
-									data-title="List"
-									data-container="body"
-									ng-click="setView('field-view-list')"
-								></i>
-
-								<i
-									class="pull-right fa fa-th-large margin-right"
-									bs-tooltip
-									data-title="List"
-									data-container="body"
-									ng-click="setView('field-view-fingerprint')"
-								></i>-->
-
-							<span class="clearfix">
-						</div>
 
 					</div>
+
+					<div class="panel-body">
+						<div class="text-center">
+							<div class="btn-group">
+								<label class="btn btn-default" ng-model="fieldView" btn-radio="'field-view-list'">List</label>
+								<label class="btn btn-default" ng-model="fieldView" btn-radio="'field-view-fingerprint'">Fingerprint</label>
+								<label class="btn btn-default" ng-model="fieldView" btn-radio="'field-view-overview'">Overview</label>
+							</div>
+						</div>
+					</div>
+
 					<!-- File Body -->
 					<!--<div class="panel-body">
 
@@ -167,7 +153,7 @@
 					</div>-->
 
 					<!-- SOOOOO BAD -->
-					<div class="fieldview-container" ng-style="myStyle={'height':file.fields.length*41}">
+					<div class="fieldview-container" ng-style="myStyle={'height':file.fields.length*42}">
 
 						<!-- Deafult view list -->
 						<div class="field-view field-view-list pt-page pt-page-current">
@@ -175,7 +161,7 @@
 							<ul class="list-group">
 
 								<li
-									class="field list-group-item bg-danger"
+									class="field list-group-item bg-danger control-hover"
 									ng-class="{muted:field.delete}"
 									ng-repeat="field in file.fields"
 									>
@@ -220,16 +206,36 @@
 
 									<span class="pull-right">
 
-										<span ng-hide="hasLinks(field).lookup.file" class="text-capitalize" ng-class="{'text-muted':!field.errors.length, 'text-danger':field.errors.length}">{{field.type}}</span>
-
 										<span
-											bs-tooltip
-											data-html="true"
-											data-container="body"
-											data-title="<b>{{hasLinks(field).metadata.matches}}</b> in <b>{{hasLinks(field).lookup.file.label}}</b> (via {{hasLinks(field).lookup.field.description}})"
-											ng-show="hasLinks(field).lookup.file"
-											class="pointer text-capitalize text-success">{{hasLinks(field).metadata.matches}} {{hasLinks(field).lookup.file.label}}
+											ng-hide="hasLinks(field).lookup.file"
+											class="text-uppercase hide-hover"
+											ng-class="{'text-muted':!field.errors.length, 'text-danger':field.errors.length}">{{field.type}}
 										</span>
+
+										<button
+											data-ng-show="!hasLinks(field).lookup.file && !field.errors.length"
+											class="btn btn-xs btn-default show-hover">Extend
+										</button>
+
+										<button
+											data-ng-show="!hasLinks(field).lookup.file && field.errors.length"
+											data-toggle="modal"
+											data-target="#myModal"
+											data-ng-click="setSelected(field,file)"
+											class="btn btn-xs btn-default show-hover">Review
+										</button>
+
+										<button
+											tooltip-animation="false"
+											tooltip-append-to-body="true"
+											tooltip-html-unsafe="<b>{{hasLinks(field).metadata.matches}}</b> in <b>{{hasLinks(field).lookup.file.label}}</b> (via {{hasLinks(field).lookup.field.description}})"
+											data-ng-show="hasLinks(field).lookup.file"
+											data-toggle="modal"
+											data-target="#myModal"
+											data-ng-click="setSelected(field,file)"
+											class="btn btn-xs btn-default">{{hasLinks(field).metadata.matches}} {{hasLinks(field).lookup.file.label}}
+										</button>
+
 									</span>
 									<span class="clearfix"></span>
 
@@ -269,7 +275,14 @@
 
 
 						<div class="field-view field-view-overview pt-page">
-							overview
+							<span>
+								<a ng-class="{strong:field.uniqueKey}"
+									data-toggle="modal"
+									data-target="#myModal"
+									data-ng-show="!field.delete"
+									data-ng-click="setSelected(field,file)">{{field.description}}</a>
+									<i class="fa fa-pencil field-edit"></i>
+							</span>
 						</div>
 
 
@@ -282,6 +295,8 @@
 
 						<span
 							class="pointer"
+							tooltip-animation="false"
+							tooltip-append-to-body="true"
 							tooltip="Download data"
 							data-placement="top"
 							data-ng-click="downloadFile(file)">
@@ -290,6 +305,8 @@
 
 						<span
 							class="pointer pull-right text-danger"
+							tooltip-animation="false"
+							tooltip-append-to-body="true"
 							tooltip="Delete table"
 							data-container="body"
 							data-ng-click="deleteFile(file.uniqueId)">

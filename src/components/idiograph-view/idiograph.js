@@ -1,7 +1,7 @@
 // Fibra graph view
 !function(){
 
-  d3.graph = function(){
+  d3.idiograph = function(){
 
     var svg         // main svg - for nodes
     , canvas      // main canvas - for links

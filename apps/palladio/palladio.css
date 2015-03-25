@@ -9119,8 +9119,25 @@ h4 {
   font-family: roboto slab, serif;
 }
 
+.text-uppercase {
+  letter-spacing: .05em;
+  font-size: 11px;
+}
+
 .bg-dark {
   background: #444;
+}
+
+.control-hover .show-hover{
+  display: none;
+}
+
+.control-hover:hover .hide-hover{
+  display: none;
+}
+
+.control-hover:hover .show-hover{
+  display: inline-block;
 }
 
 .strong,
@@ -9199,6 +9216,10 @@ strong {
 .file .panel-heading {
   background: #fff;
   border-color: #ddd;
+}
+
+.file .panel-body {
+  padding: 10px;
 }
 
 .primary .panel-body,
@@ -9307,12 +9328,22 @@ strong {
 }
 
 .btn-group > .btn {
-  font-size: 12px;
-  padding: 4px 10px;
+  font-size: 11px;
+  padding: 3px 10px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
 }
 
 .btn-group > .btn.active {
   background-color: #eee;
+}
+
+.btn-xs {
+  display: inline-block;
+  padding: 3px 8px;
+  font-size: 11px;
+  margin-top: 0px;
+  margin-right: -5px;
 }
 
 .dropdown-menu {
@@ -9544,12 +9575,17 @@ label.inline {
 /* Files */
 .field {
   border-color: #f5f5f5;
-  -webkit-transition: padding .2s ease-in-out, height .2s ease-in-out;
-  -o-transition: padding .2s ease-in-out, height .2s ease-in-out;
-  transition: padding .2s ease-in-out, height .2s ease-in-out;
+  -webkit-transition: padding .2s ease-in-out, height .2s ease-in-out, background .1s ease-out;
+  -o-transition: padding .2s ease-in-out, height .2s ease-in-out, background .1s ease-out;
+  transition: padding .2s ease-in-out, height .2s ease-in-out, background .1s ease-out;
   border: none;
-  border-bottom: 1px solid #eee;
+  border-top: 1px solid #eee;
   margin-bottom: 0px;
+  padding: 10px 15px;
+}
+
+.field:hover {
+  background: #fafafa;
 }
 
 .fieldview-container {
@@ -9593,6 +9629,10 @@ label.inline {
   cursor: pointer;
   text-align: center;
   font-size: 12px;
+}
+
+.field-description {
+  vertical-align: middle;
 }
 
 .field-description a {
@@ -10480,6 +10520,15 @@ input[type="checkbox"]:checked:before {
   padding: 8px 8px;
 }
 
+
+#footer {
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  background: rgba(255,255,255,.9);
+}
+
 [data-palladio-idiograph-view] {
 
 }
@@ -11160,6 +11209,7 @@ input[type="checkbox"]:checked:before {
 [data-palladio-table-view] {
 	width: 100%;
 	margin-bottom: 90px;
+	padding-top: 5px;
 }
 
 [data-palladio-table-view] table {
@@ -11200,45 +11250,6 @@ input[type="checkbox"]:checked:before {
   stroke: #666;
 }
 
-[data-palladio-histogram-filter] path {
-	fill: #dddddd;
-}
-
-[data-palladio-histogram-filter] .axis path, [data-palladio-histogram-filter] .axis line {
-	fill: none;
-	stroke: #000;
-	shape-rendering: crispEdges;
-}
-
-[data-palladio-histogram-filter] .axis text {
-	font: 10px Helvetica, Arial, sans-serif;
-}
-[data-palladio-parduration-filter] path {
-	fill: #dddddd;
-}
-
-[data-palladio-parduration-filter] .axis path, [data-palladio-partime-filter] .axis line {
-	fill: none;
-	stroke: #000;
-	shape-rendering: crispEdges;
-}
-
-[data-palladio-parduration-filter] .axis text {
-	font: 10px Helvetica, Arial, sans-serif;
-}
-[data-palladio-timespan-filter] path {
-	fill: #dddddd;
-}
-
-[data-palladio-timespan-filter] .axis path, [data-palladio-timespan-filter] .axis line {
-	fill: none;
-	stroke: #000;
-	shape-rendering: crispEdges;
-}
-
-[data-palladio-timespan-filter] .axis text {
-	font: 10px Helvetica, Arial, sans-serif;
-}
 [data-palladio-arctime-filter] .list-title {
 	height: 1.4em;
 	font-weight: bold;
@@ -11438,5 +11449,44 @@ input[type="checkbox"]:checked:before {
 }
 
 [data-palladio-timestep-filter] .axis text {
+	font: 10px Helvetica, Arial, sans-serif;
+}
+[data-palladio-histogram-filter] path {
+	fill: #dddddd;
+}
+
+[data-palladio-histogram-filter] .axis path, [data-palladio-histogram-filter] .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-histogram-filter] .axis text {
+	font: 10px Helvetica, Arial, sans-serif;
+}
+[data-palladio-parduration-filter] path {
+	fill: #dddddd;
+}
+
+[data-palladio-parduration-filter] .axis path, [data-palladio-partime-filter] .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-parduration-filter] .axis text {
+	font: 10px Helvetica, Arial, sans-serif;
+}
+[data-palladio-timespan-filter] path {
+	fill: #dddddd;
+}
+
+[data-palladio-timespan-filter] .axis path, [data-palladio-timespan-filter] .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-timespan-filter] .axis text {
 	font: 10px Helvetica, Arial, sans-serif;
 }

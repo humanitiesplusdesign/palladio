@@ -415,8 +415,8 @@ angular.module('palladioGraphView', ['palladio.services', 'palladio'])
 				},
 
 				post: function(scope, element, attrs) {
-					$(element).find('.toggle').on("click", function() {
-						element.find('.settings').toggleClass('open close');
+					element.find('.settings-toggle').click(function() {
+					  element.find('.settings').toggleClass('closed');
 					});
 				}
 			}

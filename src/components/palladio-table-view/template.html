@@ -1,59 +1,72 @@
-<!-- View -->
-<div class="view">
-	<a class="toggle" data-toggle="tooltip" data-original-title="Settings" data-placement="bottom">
-		<i class="fa fa-cog"></i>
-	</a>
-	<div data-ng-show="countDim"
-		data-palladio-table-view 
-		style="margin-bottom: -55px"
-		dimension="countDim"
-		height="{{height}}"
-		dimensions="tableDimensions"
-		xfilter="xfilter"
-		export-func="exportCsv">
-	</div>
+<div class="">
 
-	<!-- Message -->
-	<div class="message" data-ng-show="!countDim">
-		Please select a Row dimension and any display dimensions</br>you would like to see from the Settings panel
-	</div>
-</div> 
+		<div data-ng-show="countDim"
+			data-palladio-table-view
+			style="margin-bottom: -55px"
+			dimension="countDim"
+			height="{{height}}"
+			dimensions="tableDimensions"
+			xfilter="xfilter"
+			export-func="exportCsv">
+		</div>
+
+</div>
 
 <!-- Settings -->
-<div class="span4 settings"> 
-	<div class="row-fluid">
-		<div class="setting">
-			<label class="">Row dimension</label>
-			<span class="field" ng-click="showCountModal()">
-				{{countDim.description || "Choose..."}}
-				<i class="fa fa-bars pull-right"></i>
-			</span>
-			<span class="muted" style="font-size: 11px; font-weight: 300">
-				At least one row per value in this dimension. Multiple values will be displayed as lists in each cell.
-			</span>
-		</div>
+<div class="row">
 
-		<br />
+    <div class="settings col-lg-4 col-lg-offset-8 col-md-6 col-md-offset-6">
+      <div class="panel panel-default">
 
-		<div class="setting"> 
-			<label>Dimensions</label> 
-			<span class="field" ng-click="showModal()">
-				{{fieldDescriptions() || "Choose..."}}
-				<i class="fa fa-bars pull-right"></i>
-			</span>
-		</div>
+        <a class="settings-toggle" data-toggle="tooltip" data-original-title="Settings" data-placement="bottom">
+          <i class="fa fa-bars"></i>
+        </a>
 
-		<br />
+        <div class="panel-body">
 
-		<div class="setting">
-			<a ng-click="exportCsv()">
-				<i class="fa fa-arrow-circle-down margin-right"></i> Export table as .csv
-			</a>
-		</div>
+          <div class="row">
+            <div class="col-lg-12">
+              <label class="strong">Settings</label>
+            </div>
+          </div>
 
-	</div>
+          <div class="row margin-top">
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+              <label class="inline">Row dimension</label>
+            </div>
+            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
+              <span class="btn btn-default" ng-click="showCountModal()">
+                  {{countDim.description || "Choose"}}
+                  <span class="caret"></span>
+              </span>
+            </div>
+          </div>
+
+          <div class="row margin-top">
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+              <label class="inline">Dimensions</label>
+            </div>
+            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-condensed">
+							<span class="btn btn-default" ng-click="showModal()">
+                  {{fieldDescriptions() || "Choose"}}
+                  <span class="caret"></span>
+              </span>
+            </div>
+          </div>
+
+
+
+
+
+
+
+        </div>
+
+      </div>
+    </div>
+
 </div>
-<!--Modal-->
+
 <div id="{{uniqueModalId}}">
 	<div id="table-modal" data-modal dimensions="fields" model="tableDimensions" sortable="true"></div>
 	<div id="count-modal" data-modal dimensions="countDims" model="countDim" description-accessor="getCountDescription"></div>

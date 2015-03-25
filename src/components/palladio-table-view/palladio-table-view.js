@@ -89,7 +89,7 @@ angular.module('palladioTableView', ['palladio', 'palladio.services'])
 					headers = table.select("tr")
 						.selectAll("th")
 						.data(dims, function (d) { return d.key; });
-		
+
 					headers.exit().remove();
 					headers.enter().append("th")
 						.text(function(d){ return d.key + " "; })
@@ -150,7 +150,7 @@ angular.module('palladioTableView', ['palladio', 'palladio.services'])
 										return d[m.key];
 									}).join() + uniqueDimension.accessor(d);
 							});
-						
+
 					rows.exit().remove();
 					rows.enter().append("tr");
 
@@ -205,7 +205,7 @@ angular.module('palladioTableView', ['palladio', 'palladio.services'])
 					}
 				}
 
-				
+
 				scope.$on('$destroy', function () {
 					if(uniqueDimension) uniqueDimension.remove();
 					deregister.forEach(function(f) { f(); });
@@ -285,7 +285,7 @@ angular.module('palladioTableView', ['palladio', 'palladio.services'])
 						scope.$apply(function () {
 							scope.tableDimensions = state.tableDimensions;
 							scope.countDim = state.countDim;
-							
+
 							scope.setInternalState(state);
 						});
 					}
@@ -307,11 +307,12 @@ angular.module('palladioTableView', ['palladio', 'palladio.services'])
 
 				post: function(scope, element, attrs) {
 
-					$(element).find('.toggle').on("click", function() {
-						element.find('.settings').toggleClass('open close');
-					});
 
-					
+						element.find('.settings-toggle').click(function() {
+						  element.find('.settings').toggleClass('closed');
+						});
+
+
 				}
 			}
 		};
