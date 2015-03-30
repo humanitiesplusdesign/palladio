@@ -27,9 +27,8 @@
 						</div>
 						<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
 								<ul class="layer-list list-unstyled" ui-sortable="{axis:y, containment: 'parent'}" data-ng-model="layers" data-ng-show="layers.length">
-									<li class="layer-item" data-ng-repeat="layer in layers | orderBy:index">
+									<li class="layer-item" data-ng-repeat="layer in layers | orderBy:index" ng-style="{'border-right':'5px solid ' + layer.color}">
 										<i class="fa text-muted" data-ng-class="layer.enabled ? 'fa-eye' : 'fa-eye-slash'" data-ng-click="layer.toggle()" data-title="{{layer.enabled ? 'Hide' : 'Show'}}" bs-tooltip></i>
-
 										<span style="margin-left: 10px">{{layer.description}}</span>
 										<i class="fa fa-trash-o pull-right text-danger" data-container="body" data-title="Delete" bs-tooltip data-ng-click="layer.remove();" style="line-height: 1.6"></i>
 										<i class="fa fa-pencil pull-right margin-right text-primary" data-container="body" data-title="Edit" bs-tooltip data-ng-click="" style="line-height: 1.6"></i>
@@ -239,7 +238,13 @@
 									<label class="inline">Color</label>
 								</div>
 								<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
-									<input class="form-control" type="text" ng-model="color">
+
+									<div class="input-group" ng-init="color='#666'">
+									  <span class="input-group-addon" colorpicker id="sizing-addon1" ng-model="color" ng-style="{'background-color':color}"></span>
+									  <input type="text" colorpicker class="form-control" aria-describedby="sizing-addon1" ng-model="color">
+									</div>
+
+									<!--<input colorpicker class="form-control" type="text" ng-model="color" ng-init="color='#666'"/>-->
 							</div>
 						</div>
 
@@ -299,7 +304,7 @@
 							</div>
 							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
 								<div class="pull-right">
-									<a class="btn btn-default" data-ng-disabled="!layerType" data-ng-click="addLayer();addNewLayer=false;">Add layer</a>
+									<a class="btn btn-default" data-ng-disabled="!layerType || !mapping.sourceCoordinates || mapType.value=='point-to-point' && !mapping.destinationCoordinates" data-ng-click="addLayer();addNewLayer=false;">Add layer</a>
 									<a class="btn btn-default btn-cancel" data-ng-click="addNewLayer=false">Cancel</a>
 								</div>
 						</div>

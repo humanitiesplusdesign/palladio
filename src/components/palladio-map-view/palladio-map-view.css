@@ -166,6 +166,10 @@
 	opacity: 1;
 }
 
+[data-palladio-map-view-with-settings] .layer-color {
+	padding: 0px 7px;
+}
+
 [data-palladio-map-view-with-settings] .layer-item {
 	padding: 8px 10px;
 	font-size: 13px;

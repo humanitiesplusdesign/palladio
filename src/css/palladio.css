@@ -206,6 +206,12 @@ strong {
   transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
 }
 
+.input-group-addon {
+  padding: 0px 15px;
+  border: none;
+  border-radius: 2px;
+}
+
 .dropdown-menu,
 .btn {
 }
