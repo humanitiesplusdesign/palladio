@@ -234,6 +234,18 @@ strong {
   font-size: 13px;
 }
 
+.btn-info {
+  color: #fff;
+  background-color: #20D39D;
+  border: none;
+}
+
+.btn-info:hover, .btn-info:focus, .btn-info.focus, .btn-info:active, .btn-info.active, .open > .dropdown-toggle.btn-info {
+  color: #fff;
+  background-color: #19B687;
+  border: none;
+}
+
 .btn-cancel {
   color: #FF0057;
 }
