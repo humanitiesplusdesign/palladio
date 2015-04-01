@@ -31,7 +31,7 @@
 										<i class="fa text-muted" data-ng-class="layer.enabled ? 'fa-eye' : 'fa-eye-slash'" data-ng-click="layer.toggle()" data-title="{{layer.enabled ? 'Hide' : 'Show'}}" bs-tooltip></i>
 										<span style="margin-left: 10px">{{layer.description}}</span>
 										<i class="fa fa-trash-o pull-right text-danger" data-container="body" data-title="Delete" bs-tooltip data-ng-click="layer.remove();" style="line-height: 1.6"></i>
-										<i class="fa fa-pencil pull-right margin-right text-primary" data-container="body" data-title="Edit" bs-tooltip data-ng-click="" style="line-height: 1.6"></i>
+										<i class="fa fa-pencil pull-right margin-right text-primary" data-container="body" data-title="Edit" bs-tooltip data-ng-click="layer.edit();" style="line-height: 1.6"></i>
 									</li>
 								</ul>
 
@@ -278,7 +278,7 @@
 							</div>
 						</div>
 
-						<div class="row margin-top" data-ng-show="pointSize">
+						<!-- <div class="row margin-top" data-ng-show="pointSize">
 							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
 								<label class="inline">Adjust scale</label>
 							</div>
@@ -295,7 +295,7 @@
 									<input class="form-control" type="number" ng-model="maxPointSize">
 									<p class="help-block">Maximum value</p>
 							</div>
-						</div>
+						</div> -->
 
 					</div>
 
@@ -304,7 +304,9 @@
 							</div>
 							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
 								<div class="pull-right">
-									<a class="btn btn-default" data-ng-disabled="!layerType || !mapping.sourceCoordinates || mapType.value=='point-to-point' && !mapping.destinationCoordinates" data-ng-click="addLayer();addNewLayer=false;">Add layer</a>
+									<a class="btn btn-default" data-ng-disabled="!layerType || !mapping.sourceCoordinates || mapType.value=='point-to-point' && !mapping.destinationCoordinates" data-ng-click="addLayer();addNewLayer=false;">
+										{{ editingLayer ? 'Save layer' : 'Add layer' }}
+									</a>
 									<a class="btn btn-default btn-cancel" data-ng-click="addNewLayer=false">Cancel</a>
 								</div>
 						</div>

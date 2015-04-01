@@ -340,7 +340,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						link
 							.attr("stroke-width", function(d){ return value(d.properties.value); })
 							.attr("d", curve)
-							//.tooltip(tooltipLink)
+							.style("stroke",layer.color)
 							.on("click", function(d){
 								layer.filterDimension.filter(function (c) {
 									return c[0] === d.properties.source &&
@@ -360,7 +360,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							.style("stroke",layer.color)
 							.style("opacity",".2")
 							.attr("d", curve)
-							//.tooltip(tooltipLink)
 							.on("click", function(d){
 								layer.filterDimension.filter(function (c) {
 									return c[0] === d.properties.source &&
@@ -389,7 +388,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 			          	node
 				          	.attr("d", path)
-				          	//.tooltip(tooltipNode)
+				          	.style("fill", layer.color)
+						    .style("stroke", layer.color)
 				          	.on("click", function(d){
 						    	layer.filterDimension.filter(function (c) {
 									return c[0] === d.properties.key ||
@@ -406,7 +406,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						    .attr("d", path)
 						    .style("fill", layer.color)
 						    .style("stroke", layer.color)
-						    //.tooltip(tooltipNode)
 						    .on("click", function(d){
 						    	nodeTip.hide();
 						    	layer.filterDimension.filter(function (c) {
@@ -586,7 +585,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 		       	var filterDimension = null;
 
-		       	scope.$watchCollection('layers', function () {
+		       	function onLayerChange() {
 		       		scope.layers.forEach(function(layer, i) {
 		       			if(!layer.toggle) {
 		       				layer.toggle = function() {
@@ -598,7 +597,17 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 		       		clearAllGroups();
 		       		update();
+		       	}
+
+		       	// Shallow watch
+		       	scope.$watchCollection('layers', function () {
+		       		onLayerChange();
 		       	});
+
+		       	// Reference watch
+		       	scope.$watch('layers', function () {
+		       		onLayerChange();
+		       	})
 
 		       	scope.$watchCollection('tileSets', function () {
 					scope.tileSets.forEach(function(ts, i) {
@@ -876,7 +885,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 					if (layer.destination) layer.destination.remove();
 					layer.destination = !layer.mapping.destinationCoordinates ? null : scope.xfilter.dimension(layer.destinationCoordinatesAccessor);
-					
 
 					buildFilterDimension(layer);
 
@@ -1064,7 +1072,13 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						});
 					}
 					else if (scope.layerType.value === 'data') {
-						scope.layers.push(buildDataLayer());
+						if(scope.editingLayer) {
+							// If we are just editing the layer, we don't want to add it again.
+							buildDataLayer();
+							scope.layers = scope.layers.slice(); // Trigger watch
+						} else {
+							scope.layers.push(buildDataLayer());
+						}
 					}
 
 					scope.url = null;
@@ -1076,6 +1090,12 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				var dataLayerIndex = 0;
 				function buildDataLayer() {
 					var layer = {};
+
+					if(scope.editingLayer) {
+						// Updating an existing layer.
+						layer = scope.editingLayer;
+						scope.editingLayer = undefined;
+					}
 
 					layer.description = scope.description;
 
@@ -1100,6 +1120,18 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						if(this.destination) this.destination.remove();
 						if(this.filterDimension) this.filterDimension.remove();
 						scope.layers.splice(scope.layers.indexOf(this),1);
+					}
+
+					layer.edit = function() {
+						scope.description = layer.description;
+						scope.editingLayer = layer;
+						scope.mapping = layer.mapping;
+						scope.mapType.value = layer.type;
+						scope.descriptiveDim = layer.descriptiveDim;
+						scope.pointSize = layer.pointSize;
+						scope.showLinks = layer.mapping.destinationCoordinates ? layer.showLinks : scope.showLinks;
+						scope.color = layer.color;
+						scope.addNewLayer = true;
 					}
 
 					return layer;
