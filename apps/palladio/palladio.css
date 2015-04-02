@@ -7957,7 +7957,7 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	font-size: 12px;
 	display: inline-block;
 	width: 200px;
-	margin-left: 5px;
+	margin-right: 10px;
 	overflow-y: scroll;
 }
 
@@ -7992,6 +7992,7 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 [data-palladio-facet-filter] .facet-header {
 	font-size: 12px;
 	width: 200px;
+	padding: 8px 0px;
 }
 
 [data-palladio-facet-filter] .cell {
@@ -8001,6 +8002,7 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	background-color: #dddddd;
 	font-size: 11px;
 	padding: 1px 0px;
+	cursor: pointer;
 }
 
 [data-palladio-facet-filter] .cell:hover {
@@ -8023,6 +8025,7 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	overflow-x: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
+	line-height: 1.7;
 }
 
 [data-palladio-facet-filter] .cell-value {
@@ -8038,6 +8041,7 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	color: #666;
 	font-size: 12px;
 }
+
 [data-palladio-graph-view] {
 	width: 100%;
 	height: 100%;
@@ -8236,6 +8240,7 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 [data-palladio-map-view] {
 	width: 100%;
 	height: 100%;
+	background: #ddd;
 }
 
 .leaflet-container {
@@ -8457,7 +8462,7 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 }
 
 [data-palladio-partime-filter] .axis text {
-	font: 10px Merriweather, Helvetica, Arial, sans-serif;
+	font-size: 10px;
 }
 
 [data-palladio-selection-view] {
@@ -8558,7 +8563,7 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 }
 
 [data-palladio-timeline-filter] .axis text {
-	font: 10px Merriweather, Helvetica, Arial, sans-serif;
+	font-size: 10px;
 }
 
 [data-palladio-timeline-filter] .resize path {
@@ -8641,59 +8646,6 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	min-height: 200px;
 }
 
-[data-palladio-timechart-view] svg {
-  shape-rendering: crispEdges;
-}
-
-[data-palladio-timechart-view] .context rect {
-    shape-rendering: crispEdges;
-
-}
-[data-palladio-timechart-view] svg text {
-  alignment-baseline: middle;
-  font: 10px "Lato", sans-serif; 
-}
- 
-[data-palladio-timechart-view] .groupText {
-  alignment-baseline: middle;
-  font: 11px "Lato", sans-serif;  
-}
- 
-[data-palladio-timechart-view] .month text {
-  text-anchor: start;
-}
- 
-[data-palladio-timechart-view] .todayLine {
-  stroke: blue;
-  stroke-width: 1.5;
-}
- 
-[data-palladio-timechart-view] .axis line, .axis path {
-  stroke: black;
-}
- 
-[data-palladio-timechart-view] .contextItem {
-  stroke: #ffffff;
-  fill: #cccccc;
-  stroke-width: 1;
-}
- 
-[data-palladio-timechart-view] .future {
-  stroke: gray;
-  fill: #ddd;
-}
- 
-[data-palladio-timechart-view] .focusItem {
-  stroke: #aaaaaa;
-  fill: #dddddd;
-}
- 
-[data-palladio-timechart-view] .brush .extent {
-  stroke: gray;
-  fill: #888;
-  fill-opacity: .165;
-  shape-rendering: crispEdges;
-}
 [data-palladio-lifetime-filter] .list-title {
 	height: 1.4em;
 	font-weight: bold;
@@ -8754,6 +8706,59 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	shape-rendering: crispEdges;
 }
 
+[data-palladio-timechart-view] svg {
+  shape-rendering: crispEdges;
+}
+
+[data-palladio-timechart-view] .context rect {
+    shape-rendering: crispEdges;
+
+}
+[data-palladio-timechart-view] svg text {
+  alignment-baseline: middle;
+  font: 10px "Lato", sans-serif; 
+}
+ 
+[data-palladio-timechart-view] .groupText {
+  alignment-baseline: middle;
+  font: 11px "Lato", sans-serif;  
+}
+ 
+[data-palladio-timechart-view] .month text {
+  text-anchor: start;
+}
+ 
+[data-palladio-timechart-view] .todayLine {
+  stroke: blue;
+  stroke-width: 1.5;
+}
+ 
+[data-palladio-timechart-view] .axis line, .axis path {
+  stroke: black;
+}
+ 
+[data-palladio-timechart-view] .contextItem {
+  stroke: #ffffff;
+  fill: #cccccc;
+  stroke-width: 1;
+}
+ 
+[data-palladio-timechart-view] .future {
+  stroke: gray;
+  fill: #ddd;
+}
+ 
+[data-palladio-timechart-view] .focusItem {
+  stroke: #aaaaaa;
+  fill: #dddddd;
+}
+ 
+[data-palladio-timechart-view] .brush .extent {
+  stroke: gray;
+  fill: #888;
+  fill-opacity: .165;
+  shape-rendering: crispEdges;
+}
 [data-palladio-timestep-filter] path {
 	fill: #dddddd;
 }
@@ -10377,6 +10382,10 @@ strong {
   -o-transition: all ease-in-out .15s;
   transition: all ease-in-out .15s;*/
   padding: 7px 20px;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .btn:hover, .btn:focus, .btn:active, .btn.active, .btn.disabled, .btn[disabled] {
@@ -10393,7 +10402,6 @@ strong {
   color: #565a5c;
   background-color: #fff;
   border-color: #c4c4c4;
-  font-size: 13px;
 }
 
 .btn-cancel {
@@ -10495,6 +10503,12 @@ strong {
   line-height: 1.8;
   cursor: pointer;
   font-size: 13px;
+}
+
+.btn-modal {
+  text-overflow: ellipsis;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .form-control:focus {
@@ -10771,6 +10785,10 @@ label.inline {
   opacity: .3;
 }
 
+
+a.fa:hover {
+  text-decoration: none;
+}
 
 /* Refine */
 
@@ -11077,6 +11095,37 @@ pre.CodeMirror-placeholder {
   border-radius: 0px;
   -webkit-box-shadow: none;
   box-shadow: none;
+}
+
+.well-expand {
+  margin-bottom: 0px;
+
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 15px;
+  right: 15px;
+
+  /* Internet Explorer 10 */
+  display:-ms-flexbox;
+  -ms-flex-pack:center;
+  -ms-flex-align:center;
+
+  /* Firefox */
+  display:-moz-box;
+  -moz-box-pack:center;
+  -moz-box-align:center;
+
+  /* Safari, Opera, and Chrome */
+  display:-webkit-box;
+  -webkit-box-pack:center;
+  -webkit-box-align:center;
+
+  /* W3C */
+  display:box;
+  box-pack:center;
+  box-align:center;
+
 }
 
 input[type="radio"], input[type="checkbox"] {
@@ -11650,4 +11699,15 @@ input[type="checkbox"]:checked:before {
   left: 0px;
   right: 0px;
   background: rgba(255,255,255,.9);
+  z-index: 100;
+}
+
+#filters {
+  margin-bottom: 0px;
+}
+
+#filters li {
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }

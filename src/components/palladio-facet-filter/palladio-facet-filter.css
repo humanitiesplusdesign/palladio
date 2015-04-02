@@ -50,7 +50,7 @@
 	font-size: 12px;
 	display: inline-block;
 	width: 200px;
-	margin-left: 5px;
+	margin-right: 10px;
 	overflow-y: scroll;
 }
 
@@ -85,6 +85,7 @@
 [data-palladio-facet-filter] .facet-header {
 	font-size: 12px;
 	width: 200px;
+	padding: 8px 0px;
 }
 
 [data-palladio-facet-filter] .cell {
@@ -94,6 +95,7 @@
 	background-color: #dddddd;
 	font-size: 11px;
 	padding: 1px 0px;
+	cursor: pointer;
 }
 
 [data-palladio-facet-filter] .cell:hover {
@@ -116,6 +118,7 @@
 	overflow-x: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
+	line-height: 1.7;
 }
 
 [data-palladio-facet-filter] .cell-value {

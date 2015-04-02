@@ -470,7 +470,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			// '$destroy' event isn't getting fired properly with just .remove(), so we do it
 			// ourselves.
 			angular.element(event.currentTarget.parentElement).scope().$broadcast('$destroy');
-			angular.element(event.currentTarget.parentElement.parentElement.parentElement).remove();
+			angular.element(event.currentTarget.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement).remove();
 			palladioService.update();
 			$('.tooltip').remove();
 		};
