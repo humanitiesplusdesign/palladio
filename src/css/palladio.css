@@ -1537,7 +1537,7 @@ input[type="checkbox"]:checked:before {
   bottom: 0px;
   left: 0px;
   right: 0px;
-  background: rgba(255,255,255,.9);
+  background: rgba(255,255,255,.97);
   z-index: 100;
 }
 

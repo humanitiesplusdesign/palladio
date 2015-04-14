@@ -31,7 +31,6 @@
 										<label class="inline">Nodes</label>
 									</div>
 									<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
-										{{nodeDim}}
 
 									<!--	<button type="button" class="btn btn-default"
 										    ng-model="nodeDim"
@@ -42,7 +41,7 @@
 										  Choose <span class="caret"></span>
 										</button>-->
 
-										<ui-select ng-model="nodeDim" theme="selectize" ng-disabled="disabled">
+										<ui-select ng-model="dims.nodes" theme="selectize" ng-disabled="disabled">
 									    <ui-select-match placeholder="Select or search">
 												{{$select.selected.label}}
 												<span class="caret"></span>
@@ -62,17 +61,8 @@
 										<label class="inline">Links</label>
 									</div>
 									<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
-										<!--<button type="button" class="btn btn-default"
-										    ng-model="linkDim"
-										    data-html="1"
-											placeholder="Choose"
-											ng-disabled="!linkDims.length"
-										    ng-options="type.label for type in linkDims"
-										    bs-select>
-										  Choose <span class="caret"></span>
-										</button>-->
 
-										<ui-select ng-model="linkDim" theme="selectize" ng-disabled="disabled">
+										<ui-select ng-model="dims.links" theme="selectize" ng-disabled="disabled">
 									    <ui-select-match placeholder="Select or search">
 												{{$select.selected.label}}
 												<span class="caret"></span>
@@ -82,6 +72,17 @@
 									    </ui-select-choices>
 									  </ui-select>
 
+										<p class="help-block" ng-show="dims.nodes">Select a table for the links. {{dims.nodes.label}} will be connected accordingly.</p>
+
+									</div>
+								</div>
+
+								<div class="row margin-top">
+									<div class="col-lg-3 col-md-4 col-sm-4 col-xs-4 text-right">
+										<label class="inline">Show links</label>
+									</div>
+									<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
+											<input type="checkbox" ng-model="showLinks">
 									</div>
 								</div>
 
@@ -90,15 +91,7 @@
 										<label class="inline">Size nodes</label>
 									</div>
 									<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
-									<!--	<button type="button" class="btn btn-default"
-										    ng-model="linkDim"
-										    data-html="1"
-												placeholder="Choose"
-												ng-disabled="!nodeDim"
-										    ng-options="type.label for type in nodeDims"
-										    bs-select>
-										  Choose <span class="caret"></span>
-										</button>-->
+											<input type="checkbox" ng-model="nodeSize">
 									</div>
 								</div>
 
@@ -110,8 +103,8 @@
 
 								<!-- no nodes -->
 
-								<div data-ng-show="!nodeDim">
-									<p class="help-block">You must select nodes...</p>
+								<div data-ng-show="!selectedNodes.length && !selectedNode">
+									<p class="help-block">You must select nodes.</p>
 								</div>
 
 								<!-- single selection -->
@@ -123,6 +116,7 @@
 											<label class="inline strong">Dimensions</label>
 										</div>
 										<div class="col-lg-8 col-md-8 col-sm-7 col-xs-7 col-condensed">
+
 										</div>
 									</div>
 
@@ -145,7 +139,7 @@
 								</div>
 
 								<!-- Multiple selection -->
-								<div data-ng-show="selectedNodes.length > 1 && nodeDim">
+								<div data-ng-show="selectedNodes.length > 1 && dims.nodes">
 
 									<p class="help-block">Edit, add and remove nodes and their properties.</p>
 
@@ -241,7 +235,7 @@
 </div>
 
 
-<div id="node-modal" data-modal dimensions="[]" model="nodeDim"></div>
+<div id="node-modal" data-modal dimensions="[]" model="dims.nodes"></div>
 
 
 

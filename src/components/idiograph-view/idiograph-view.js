@@ -31,6 +31,11 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 					scope.xfilter = dataService.getDataSync().xfilter;
 					scope.data = dataService.getDataSync().data;
 
+					scope.dims = {
+						nodes: null,
+						links: null
+					}
+
 					scope.nodeDims = dataService.getFiles();
 
 					scope.layouts = [
@@ -79,7 +84,6 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 						// Called when the entire visualization should be rebuilt.
 						//d3.select(element[0]).selectAll('*').remove();
 						if (!graph) graph = d3.idiograph();
-
 						// If a dimension already exists, explicitly destroy it so that it is dropped from
 						// the Crossfilter.
 						if(dimension) {
@@ -95,11 +99,11 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 							linkGroup = undefined;
 						}
 
-						if(scope.nodeDim) {
+						if(scope.dims.nodes) {
 
 							// nodeDim is a table, not a field. Find a field that is a unique key.
 							// TODO: we need to always add a unique key to a table...
-							nodeKeyField = scope.nodeDim.fields.filter(function(d) { return d.uniqueKey; })[0];
+							nodeKeyField = scope.dims.nodes.fields.filter(function(d) { return d.uniqueKey; })[0];
 
 							// Create a dimension based on the key field.
 							dimension = scope.xfilter.dimension(function(d) {
@@ -111,10 +115,10 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 
 							updateLinks();
 
-							if(scope.linkDim) {
+							if(scope.dims.links) {
 								linkKeyFields = dataService.getLinks().filter(function(l) {
-									return l.source.file.id === scope.linkDim.id &&
-											l.lookup.file.id === scope.nodeDim.id;
+									return l.source.file.id === scope.dims.links.id &&
+											l.lookup.file.id === scope.dims.nodes.id;
 								}).map(function(l) { return l.source.field; });
 
 								linkDimension = scope.xfilter.dimension(function(d) {
@@ -140,7 +144,7 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 						.key(key)
 						.on('selected', selected)*/
 
-						if(scope.nodeDim) {
+						if(scope.dims.nodes) {
 
 							// Build nodes.
 							var nodes = group.top(Infinity).map(function(d) {
@@ -154,7 +158,8 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 							var linkMap = d3.map();
 							var links = [];
 
-							if(scope.linkDim) {
+							if(scope.dims.links) {
+
 								var i, j;
 								linkGroup.top(Infinity).forEach(function(g) {
 									for(i = 0; i<g.key.length; i++) {
@@ -191,9 +196,11 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 
 							// fake data
 							data = {
-								nodes: nodes,
-								links: links
+								nodes: nodes.filter(function(d){return d.value > 0; }),
+								links: links.filter(function(d){return d.value > 0; })
 							};
+
+							console.log('sasa',data)
 
 							d3.select(element[0])
 								.select('.view')
@@ -211,7 +218,7 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 							// only one selected
 							if (d.length == 1) {
 								scope.$apply(function(scope){
-									scope.selectedNode = scope.nodeDim.data.filter(function(f){ return f[nodeKeyField.key] === d[0].data.name; })[0] || {};
+									scope.selectedNode = scope.dims.nodes.data.filter(function(f){ return f[nodeKeyField.key] === d[0].data.name; })[0] || {};
 									scope.selectedNode = d3.entries(scope.selectedNode).filter(function(a){ return a.key.indexOf('$$') !== 0; });
 								});
 								return;
@@ -220,26 +227,26 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 							// more than one selected
 							scope.$apply(function(scope){
 								var lu = d.map(function(a){ return a.data.name; });
-								scope.selectedNodes = scope.nodeDim.data.filter(function(f){ return lu.indexOf(f[nodeKeyField.key]) !== -1; }) || [];
+								scope.selectedNodes = scope.dims.nodes.data.filter(function(f){ return lu.indexOf(f[nodeKeyField.key]) !== -1; }) || [];
 							});
 						}
 
 						scope.getFieldType = function(field){
-							return scope.nodeDim.fields.filter(function(d){ return d.key == field; })[0].type;
+							return scope.dims.nodes.fields.filter(function(d){ return d.key == field; })[0].type;
 						}
 
 						scope.getUniques = function(field){
-							return scope.nodeDim.fields.filter(function(d){ return d.key == field; })[0].uniques.map(function(d){ return d.key; });
+							return scope.dims.nodes.fields.filter(function(d){ return d.key == field; })[0].uniques.map(function(d){ return d.key; });
 						}
 
 					}
 
 					function updateLinks() {
-						if(scope.nodeDim) {
+						if(scope.dims.nodes) {
 
 							// Links through tables.
 							var linkSources = dataService.getLinks().filter(function(d) {
-								return d.lookup.file.id === scope.nodeDim.id;
+								return d.lookup.file.id === scope.dims.nodes.id;
 							}).map(function(d) {
 								return d.source.file.id;
 							});
@@ -256,7 +263,7 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 					}
 
 					// Watch scope elements that should trigger a full rebuild.
-					scope.$watchGroup(['nodeDim', 'linkDim'], function () {
+					scope.$watchGroup(['dims.nodes', 'dims.links'], function () {
 						reset();
 						setup();
 						update();

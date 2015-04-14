@@ -41,3 +41,9 @@
 [data-palladio-idiograph-view] .point {
   stroke-width: 1.5px;
 }
+
+[data-palladio-idiograph-view] .brush .extent {
+  fill-opacity: .1;
+  stroke: #fff;
+  shape-rendering: crispEdges;
+}

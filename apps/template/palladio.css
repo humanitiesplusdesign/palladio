@@ -7885,6 +7885,12 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
   stroke-width: 1.5px;
 }
 
+[data-palladio-idiograph-view] .brush .extent {
+  fill-opacity: .1;
+  stroke: #fff;
+  shape-rendering: crispEdges;
+}
+
 [data-palladio-duration-view] path {
 	fill: #dddddd;
 }
@@ -7980,7 +7986,7 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 }
 
 [data-palladio-facet-filter] div.over-drop {
-	background-color: #9DBCE4;
+	background-color: #7DC8E4;
 }
 
 [data-palladio-facet-filter] .facet-drop-area-text {
@@ -7992,7 +7998,7 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 [data-palladio-facet-filter] .facet-header {
 	font-size: 12px;
 	width: 200px;
-	padding: 8px 0px;
+	padding: 6px 0px;
 }
 
 [data-palladio-facet-filter] .cell {
@@ -8010,7 +8016,7 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 }
 
 [data-palladio-facet-filter] .filter-value {
-	background-color: #9DBCE4;
+	background-color: #7DC8E4;
 }
 
 [data-palladio-facet-filter] .cell:last-of-type {
@@ -8045,6 +8051,7 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 [data-palladio-graph-view] {
 	width: 100%;
 	height: 100%;
+	position: relative;
 }
 /*
 [data-palladio-graph-view] path.link {
@@ -8159,6 +8166,7 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 [data-palladio-graph-view] .link.hidden {
     display: none;
 }
+
 [data-palladio-list-view] {
 	margin-bottom: 20px;
 	margin-top: 20px;
@@ -11698,7 +11706,7 @@ input[type="checkbox"]:checked:before {
   bottom: 0px;
   left: 0px;
   right: 0px;
-  background: rgba(255,255,255,.9);
+  background: rgba(255,255,255,.97);
   z-index: 100;
 }
 

@@ -73,7 +73,7 @@
 }
 
 [data-palladio-facet-filter] div.over-drop {
-	background-color: #9DBCE4;
+	background-color: #7DC8E4;
 }
 
 [data-palladio-facet-filter] .facet-drop-area-text {
@@ -85,7 +85,7 @@
 [data-palladio-facet-filter] .facet-header {
 	font-size: 12px;
 	width: 200px;
-	padding: 8px 0px;
+	padding: 6px 0px;
 }
 
 [data-palladio-facet-filter] .cell {
@@ -103,7 +103,7 @@
 }
 
 [data-palladio-facet-filter] .filter-value {
-	background-color: #9DBCE4;
+	background-color: #7DC8E4;
 }
 
 [data-palladio-facet-filter] .cell:last-of-type {
