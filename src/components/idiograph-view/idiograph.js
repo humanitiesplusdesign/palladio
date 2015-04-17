@@ -11,6 +11,7 @@
     , data        // data {nodes,links}
     , node        // node elements selector
     , zoom        // zoom behaviour
+    , brush       // brush
     , zooming
     , shiftKey
     , drag        // dragging
@@ -175,11 +176,48 @@
       .on("mousedown.zoom");
 
       svg
+      .on("mouseup.selection", selected)
       .on("dblclick.zoom", null)
       .on("mousedown.zoom", null)
       .on("touchstart.zoom", null)
       .on("touchmove.zoom", null)
       .on("touchend.zoom", null)
+
+      brush = svg
+      .append("g")
+      .datum(function() { return { selected: false, previouslySelected: false }; })
+      .attr("class", "brush")
+      .call(d3.svg.brush()
+        .x(d3.scale.identity().domain([0, width]))
+        .y(d3.scale.identity().domain([0, height]))
+        .on("brushstart", function(d) {
+          node.each(function(d) { d.previouslySelected = shiftKey && d.selected; });
+        })
+        .on("brush", function() {
+
+        	/*if (editing) {
+        		d3.select(this).select(".extent").remove();
+        		return;
+        	}*/
+
+          var extent = d3.event.target.extent();
+          node.classed("selected", function(d) {
+            return d.selected = d.previouslySelected ^
+                (extent[0][0] <= x(d.x) && x(d.x) < extent[1][0]
+                && extent[0][1] <= y(d.y) && y(d.y) < extent[1][1]);
+
+            return d.selected = d.previouslySelected ^
+                (extent[0][0] <= (d.x * zoom.scale() + zoom.translate()[0]) && (d.x * zoom.scale() + zoom.translate()[0]) < extent[1][0]
+                && extent[0][1] <= (d.y * zoom.scale() + zoom.translate()[1]) && (d.y * zoom.scale() + zoom.translate()[1]) < extent[1][1]);
+          });
+
+          selected();
+
+        })
+        .on("brushend", function() {
+          d3.event.target.clear();
+          d3.select(this).call(d3.event.target);
+        }));
 
       // nodes
       node = svg
@@ -215,7 +253,6 @@
 
         tick();
       })
-
 
 
 

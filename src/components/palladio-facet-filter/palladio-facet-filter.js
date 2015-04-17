@@ -84,7 +84,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 						.filter(function(d) { return countDims.get(d.fileId) ? true : false; })
 						.sort(function (a, b) { return scope.getAggDescription(a) < scope.getAggDescription(b) ? -1 : 1; });
 
-							
+
 					scope.aggDim = scope.configAggregation ? scope.configAggregation : scope.aggDims[0];
 					scope.$watch('aggDim', function () {
 						if(scope.aggDim.key) {
@@ -105,7 +105,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 					scope.showAggModal = function () { $('#' + scope.uniqueModalId).find('#facet-agg-modal').modal('show'); };
 
 					scope.showModal = function () { $('#' + scope.uniqueModalId).find('#facet-modal').modal('show'); };
-					
+
 					scope.fieldDescriptions = function () {
 						return scope.dims.map( function (d) { return d.description; }).join(", ");
 					};
@@ -321,7 +321,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 						var topRange = topValue / total * numericHeight > minCellHeight*2 ? topValue / total * numericHeight : minCellHeight*2;
 
 						topRange = Math.floor(topRange) - 2;
-						
+
 						data.scale = d3.scale.linear()
 							.domain([1, topValue])
 							.range([minCellHeight, topRange]);
@@ -498,7 +498,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 							} else {
 								simpleArrayOfKeys = f.map(function(d) { return d.key; });
 							}
-							
+
 							// Filter the celsl to the ones in the saved filter.
 							var cells = d3.select(facetSelection[i]).selectAll('.cell')
 								.filter(function(d) {

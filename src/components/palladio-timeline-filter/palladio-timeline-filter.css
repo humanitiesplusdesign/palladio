@@ -17,7 +17,7 @@
 }
 
 [data-palladio-timeline-filter] .axis text {
-	font: 10px Merriweather, Helvetica, Arial, sans-serif;
+	font-size: 10px;
 }
 
 [data-palladio-timeline-filter] .resize path {
