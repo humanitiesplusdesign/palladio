@@ -285,15 +285,25 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 			        // Calculate maximum point size across layers
 			        maxPointSize = scope.layers.reduce(function(a,b) {
-			        	var t = d3.max(generatePoints(b).features, function(d){ return d.properties.value.initialAgg; });
+			        	var t = 0;
+			        	if(!b.geoJson) {
+			        		t = d3.max(generatePoints(b).features, function(d){ return d.properties.value.initialAgg; });
+			        	}
 			        	return a > t ? a : t;
 			        }, 0);
 
 			        gs.each(draw);
 
 			        function draw(layer) {
+			        	if(!layer.geoJson) {
+			        		drawData(layer, this);
+			        	} else {
+			        		drawGeoJson(layer, this);
+			        	}
+			        }
 
-			        	var container = d3.select(this);
+			        function drawData(layer, elem) {
+			        	var container = d3.select(elem);
 			        	var g = container.selectAll('g.layer')
 			          		.data(function(d){ return [d]; })
 			          	g.enter().append('g').attr("class", "layer");
@@ -468,6 +478,44 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						}
 			        }
 
+			        function drawGeoJson(layer, elem) {
+
+			        	var path = d3.geo.path().projection(projectLatLong);
+
+			        	var container = d3.select(elem);
+			        	var g = container.selectAll('g.layer')
+			          		.data(function(d){ return [d]; })
+			          	g.enter().append('g').attr("class", "layer");
+						g.exit().remove();
+
+			        	var w = d3.select(element[0]).style("width"),
+			        		h = d3.select(element[0]).style("height")
+
+			        	var bounds = m.getBounds(),
+			        		topRight = project(bounds._northEast),
+			              	bottomLeft = project(bounds._southWest);
+
+			          	svg .attr("width", w)//topRight[0] - bottomLeft[0])
+			              	.attr("height", h)//bottomLeft[1] - topRight[1])
+			              	.style("margin-left", bottomLeft[0] + "px")
+			              	.style("margin-top", topRight[1] + "px");
+
+					    g 	.attr("transform", "translate(" + -bottomLeft[0] + "," + -topRight[1] + ")");
+
+					   	var paths = g.selectAll('path')
+					   			.data(layer.geoJson.features);
+
+					   	paths.exit().remove();
+
+					   	paths.enter()
+					   		.append("path")
+					   			.attr("d", path)
+					   			.attr("stroke", "#777")
+					   			.attr("fill", "none");
+
+					   	paths.attr("d", path);
+			        }
+
 			        function tooltipNode(d,i){
 
 					    return {
@@ -499,6 +547,11 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 			        function project(x) {
 			        	var point = m.latLngToLayerPoint(x);
+			        	return [point.x, point.y];
+			        }
+
+			        function projectLatLong(x) {
+			        	var point = m.latLngToLayerPoint([x[1], x[0]]);
 			        	return [point.x, point.y];
 			        }
 
@@ -1000,7 +1053,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					{
 						"description": "geoJSON",
 						"value": "geoJSON",
-						"info": "TBD"
+						"info": "Upload a geoJSON file including polygon features to overlay on the map."
 					}
 				];
 
@@ -1079,6 +1132,12 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						} else {
 							scope.layers.push(buildDataLayer());
 						}
+					} else if (scope.layerType.value === 'geoJSON') {
+						if(scope.editingLayer) {
+
+						} else {
+							scope.layers.push(buildGeoJsonLayer());
+						}
 					}
 
 					scope.url = null;
@@ -1131,6 +1190,38 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						scope.pointSize = layer.pointSize;
 						scope.showLinks = layer.mapping.destinationCoordinates ? layer.showLinks : scope.showLinks;
 						scope.color = layer.color;
+						scope.addNewLayer = true;
+					}
+
+					return layer;
+				}
+
+				function buildGeoJsonLayer() {
+					var layer = {};
+
+					if(scope.editingLayer) {
+						// Updating an existing layer.
+						layer = scope.editingLayer;
+						scope.editingLayer = undefined;
+					}
+
+					layer.description = scope.description;
+
+					layer.index = dataLayerIndex;
+					dataLayerIndex++;
+					layer.enabled = true;
+					layer.layer = null;
+					layer.geoJson = JSON.parse(scope.geoJson);
+					scope.geoJson = null;
+
+					layer.remove = function() {
+						scope.layers.splice(scope.layers.indexOf(this),1);
+					}
+
+					layer.edit = function() {
+						scope.description = layer.description;
+						scope.editingLayer = layer;
+						scope.geoJson = layer.geoJson;
 						scope.addNewLayer = true;
 					}
 

@@ -94,7 +94,8 @@
 						</div>
 
 
-					<!-- tiles -->
+					<!-- Tiles -->
+
 					<div class="" data-ng-show="layerType.value=='tiles'">
 
 						<div class="row margin-top">
@@ -145,7 +146,7 @@
 					</div>
 
 
-					<!-- Map -->
+					<!-- Data -->
 
 					<div class="" data-ng-show="layerType.value=='data'">
 
@@ -297,6 +298,20 @@
 							</div>
 						</div> -->
 
+					</div>
+
+					<!-- Data -->
+
+					<div class="" data-ng-show="layerType.value=='geoJSON'">
+
+						<div class="row margin-top">
+							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
+								<label class="inline">Drop geoJSON file or paste geoJSON here</label>
+							</div>
+							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
+								<textarea class="col-md-8 col-xs-8" id="layerGeoJSON" ng-model="geoJson" ui-codemirror="{ mode : 'javascript', lineNumbers : true, lineWrapping: true }" placeholder="Paste your geoJSON data or drop a file here"></textarea>
+							</div>
+						</div>
 					</div>
 
 					<div class="row margin-top">
