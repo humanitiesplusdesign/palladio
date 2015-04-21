@@ -507,11 +507,27 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 					   	paths.exit().remove();
 
+					   	paths.attr("d", path)
+					   			.attr("stroke", layer.color)
+					   			.attr("fill", function(d) { 
+					   				if (layer.fillShapes && d.geometry && (d.geometry.type === "Point" || d.geometry.type === "Polygon" || d.geometry.type === "GeometryCollection")) {
+					   					return layer.color;
+					   				} else {
+					   					return "none"; 
+					   				}
+					   			});
+
 					   	paths.enter()
 					   		.append("path")
 					   			.attr("d", path)
-					   			.attr("stroke", "#777")
-					   			.attr("fill", "none");
+					   			.attr("stroke", layer.color)
+					   			.attr("fill", function(d) { 
+					   				if (layer.fillShapes && d.geometry && (d.geometry.type === "Point" || d.geometry.type === "Polygon" || d.geometry.type === "GeometryCollection")) {
+					   					return layer.color;
+					   				} else {
+					   					return "none"; 
+					   				}
+					   			});
 
 					   	paths.attr("d", path);
 			        }
@@ -1134,7 +1150,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						}
 					} else if (scope.layerType.value === 'geoJSON') {
 						if(scope.editingLayer) {
-
+							buildGeoJsonLayer();
+							scope.layers = scope.layers.slice();
 						} else {
 							scope.layers.push(buildGeoJsonLayer());
 						}
@@ -1167,8 +1184,10 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						}
 					}
 
-					layer.index = dataLayerIndex;
-					dataLayerIndex++;
+					if(layer.index === undefined) {
+						layer.index = dataLayerIndex;
+						dataLayerIndex++;
+					}
 					layer.enabled = true;
 					layer.layer = null;
 
@@ -1182,6 +1201,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					}
 
 					layer.edit = function() {
+						scope.layerType = scope.layerTypes[0];
 						scope.description = layer.description;
 						scope.editingLayer = layer;
 						scope.mapping = layer.mapping;
@@ -1207,10 +1227,15 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 					layer.description = scope.description;
 
-					layer.index = dataLayerIndex;
-					dataLayerIndex++;
+					if(layer.index === undefined) {
+						layer.index = dataLayerIndex;
+						dataLayerIndex++;
+					}
+
 					layer.enabled = true;
 					layer.layer = null;
+					layer.fillShapes = scope.fillShapes;
+					layer.color = scope.color;
 					layer.geoJson = JSON.parse(scope.geoJson);
 					scope.geoJson = null;
 
@@ -1219,14 +1244,25 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					}
 
 					layer.edit = function() {
+						scope.layerType = scope.layerTypes[2];
+						scope.addNewLayer = true;
 						scope.description = layer.description;
 						scope.editingLayer = layer;
-						scope.geoJson = layer.geoJson;
-						scope.addNewLayer = true;
+						scope.geoJson = JSON.stringify(layer.geoJson);
+						scope.color = layer.color;
+						scope.fillShapes = layer.fillShapes;
 					}
 
 					return layer;
 				}
+
+				// Forces refresh of the codemirror when we update the model. Needed because CM
+				// doesn't properly update when it is hidden so if we update the model and unhide
+				// in the same update cycle it needs to be refreshed.
+				scope.cmRefresh = true;
+				scope.$watch('geoJson', function() { 
+					scope.cmRefresh = !scope.cmRefresh;
+				});
 
 				scope.tilesType = scope.tilesTypes[0];
 
