@@ -101,24 +101,9 @@
 							<!-- edit -->
 							<div class="tab-pane" data-ng-class="{'active' : panelView =='edit'}" id="edit">
 
-								<!-- no nodes -->
-
-								<div data-ng-show="!selectedNodes.length && !selectedNode">
-									<p class="help-block">You must select nodes.</p>
-								</div>
-
 								<!-- single selection -->
 
 								<div data-ng-show="selectedNode">
-
-									<div class="row margin-top margin-bottom">
-										<div class="col-lg-4 col-md-4 col-sm-5 col-xs-5 text-right">
-											<label class="inline strong">Dimensions</label>
-										</div>
-										<div class="col-lg-8 col-md-8 col-sm-7 col-xs-7 col-condensed">
-
-										</div>
-									</div>
 
 									<div class="values-editor">
 
@@ -139,9 +124,22 @@
 								</div>
 
 								<!-- Multiple selection -->
-								<div data-ng-show="selectedNodes.length > 1 && dims.nodes">
+								<div data-ng-show="(!selectedNode || selectedNodes.length > 1) && dims.nodes">
+									<div class="row margin-top">
+										<div class="col-lg-3 col-md-4 col-sm-4 col-xs-4 text-right">
+											<label class="inline"></label>
+										</div>
+										<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
+											<form class="form-inline">
+												<div class="form-group">
+													<input type="text" class="form-control" ng-model="searchNode" typeahead="node as node.name for node in nodes | filter:{name:$viewValue}"  placeholder="Search"></input>
+												</div>
+												<button class="btn btn-default" ng-click="" ng-disabled="!searchNode">Add to selection</button>
+											</form>
+										</div>
+									</div>
 
-									<p class="help-block">Edit, add and remove nodes and their properties.</p>
+									<!--<p class="help-block">Edit, add and remove nodes and their properties.</p>-->
 
 									<div class="row margin-top">
 										<div class="col-lg-3 col-md-4 col-sm-4 col-xs-4 text-right">
@@ -157,12 +155,12 @@
 												<table class="table table-striped">
 													<tbody>
 														<tr data-ng-repeat="node in selectedNodes">
-															<td class="small">{{node.data.name}}</td>
+															<td class="small">{{node[nodeKeyField.key]}}</td>
 														</tr>
 													</tbody>
 												</table>
 											</div>
-											<p class="help-block" data-ng-show="selectedNodes.length">{{nodeSelection.length}} nodes selected.</p>
+											<p class="help-block" data-ng-show="selectedNodes.length">{{selectedNodes.length}} nodes selected</p>
 										</div>
 									</div>
 
@@ -171,8 +169,20 @@
 											<label class="inline"></label>
 										</div>
 										<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
-											<button type="button" class="btn btn-default" bs-dropdown="layouts">Arrange selection by <span class="caret"></span></button>
+
+											<div class="btn-group">
+											  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+											    Arrange selected nodes <span class="caret"></span>
+											  </button>
+											  <ul class="dropdown-menu" role="menu">
+											    <li><a href="#">None</a></li>
+											    <li><a href="#">By links</a></li>
+											    <li><a href="#">By groups</a></li>
+											  </ul>
+											</div>
+
 											<button class="btn btn-default pull-right" ng-click=""><i class="fa fa-trash-o margin-right text-danger"></i>Delete</button>
+
 										</div>
 									</div>
 
@@ -185,20 +195,8 @@
 										</div>
 									</div>
 
-									<div class="row margin-top">
-										<div class="col-lg-3 col-md-4 col-sm-4 col-xs-4 text-right">
-											<label class="inline"></label>
-										</div>
-										<div class="col-lg-9 col-md-8 col-sm-8 col-xs-8 col-condensed">
-											<form class="form-inline">
-												<div class="form-group">
-													<input type="text" class="form-control" ng-model="searchNode" placeholder="Search"></input>
-												</div>
-												<button class="btn btn-default" ng-click="" ng-disabled="!searchNode.length">Add to selection</button>
-											</form>
-										</div>
-									</div>
 
+									<!--
 									<div class="row margin-top">
 										<div class="col-lg-3 col-md-4 col-sm-4 col-xs-4 text-right">
 											<label class="inline">Add</label>
@@ -207,6 +205,7 @@
 											<button class="btn btn-default" ng-click="showNodeModal()"><i class="fa fa-file-text-o margin-right text-primary"></i>New node</button>
 										</div>
 									</div>
+								-->
 
 								</div><!-- end multiple -->
 

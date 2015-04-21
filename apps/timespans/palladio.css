@@ -10466,14 +10466,20 @@ strong {
   background-color: #fafafa;
 }
 
-.btn-group > .btn {
+.btn-group.open .dropdown-toggle {
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  border-color: #ddd;
+}
+
+.btn-group-small > .btn {
   font-size: 11px;
   padding: 3px 10px;
   text-transform: uppercase;
   letter-spacing: .05em;
 }
 
-.btn-group > .btn.active {
+.btn-group-small > .btn.active {
   background-color: #eee;
 }
 
