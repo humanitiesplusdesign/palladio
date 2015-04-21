@@ -1,14 +1,114 @@
+<div class="row">
+
+	<div class="col-lg-9">
+
+		<div class="main-viz">
+			<div id="{{uniqueToggleId}}"></div>
+		</div>
+
+		<div class="well well-expand" ng-show="!dateEndDim || !dateStartDim || !groupDim">Select an Upper date, a Lower date and a Group dimension on the right</div>
+
+	</div>
+
+	<div class="col-lg-3">
+
+		<div class="row">
+			<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right ">
+				<label class="inline">Description</label>
+			</div>
+			<div class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">
+				<input type="text" class="form-control" data-ng-model="title" placeholder="Untitled"></input>
+			</div>
+		</div>
+
+		<div class="row margin-top">
+			<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right ">
+				<label class="inline">Upper date</label>
+			</div>
+			<div class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">
+				<span class="btn btn-default btn-modal" ng-click="showDateEndModal()">
+					{{dateEndDim.description || "Choose"}}
+					<span class="caret"></span>
+				</span>
+			</div>
+		</div>
+
+		<div class="row margin-top">
+			<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right ">
+				<label class="inline">Lower date</label>
+			</div>
+			<div class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">
+				<span class="btn btn-default btn-modal" ng-click="showDateStartModal()">
+					{{dateStartDim.description || "Choose"}}
+					<span class="caret"></span>
+				</span>
+			</div>
+		</div>
+
+		<div class="row margin-top">
+			<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right ">
+				<label class="inline">Tooltip</label>
+			</div>
+			<div class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">
+				<span class="btn btn-default btn-modal" ng-click="showTooltipLabelModal()">
+					{{tooltipLabelDim.description || "Choose"}}
+					<span class="caret"></span>
+				</span>
+			</div>
+		</div>
+
+		<div class="row margin-top">
+			<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right ">
+				<label class="inline">Group</label>
+			</div>
+			<div class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">
+				<span class="btn btn-default btn-modal" ng-click="showGroupModal()">
+					{{groupDim.description || "Choose"}}
+					<span class="caret"></span>
+				</span>
+			</div>
+		</div>
+
+		<div class="row margin-top">
+			<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right ">
+			</div>
+			<div class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">
+				<a class="btn btn-danger" data-ng-click="$parent.removeFilter($event)">Remove</a>
+			</div>
+		</div>
+
+	</div>
+
+</div>
+
+<div id="{{uniqueModalId}}">
+	<div id="date-start-modal" data-modal dimensions="dateDims" model="dateStartDim"></div>
+	<div id="date-end-modal" data-modal dimensions="dateDims" model="dateEndDim"></div>
+	<div id="tooltip-label-modal" data-modal dimensions="labelDims" model="tooltipLabelDim"></div>
+	<div id="group-modal" data-modal dimensions="labelDims" model="groupDim"></div>
+</div>
+
+
+
+<!--
+
+
+
+
+
+
+
 <div class="row-fluid">
 	<div data-ng-class="{span3: view !== 'true', settings: view === 'true', open: view === 'true'}">
 		<div ng-if="showAccordion !== 'false'" class="accordion-heading row-fluid">
-			<a class="span1 text-center angle" data-toggle="collapse" data-ng-click="collapse=!collapse" data-ng-init="collapse=false" data-parent="#filters" href="{{uniqueToggleHref}}" target="_self">
+			<a class="span1 text-center angle" data-toggle="collapse" data-ng-click="toggleCollapse()" data-parent="#filters" href="{{uniqueToggleHref}}" target="_self">
 				<span data-ng-show="!collapse"><i class="fa fa-angle-down"></i></span>
 				<span data-ng-show="collapse"><i class="fa fa-angle-right"></i></span>
 			</a>
 			<input type="text" class="editable span11" data-ng-model="title"></input>
 		</div>
 
-		<div class="settings-panel accordion-body" ng-show="!collapse">
+		<div class="settings-panel accordion-body" data-ng-show="!collapse">
 
 			<div class="setting row-fluid">
 				<label class="span4 inline">Layout</label>
@@ -48,7 +148,6 @@
 
 	<div class="main-viz" data-ng-class = "{ view: view === 'true', span9: view !== 'true', span12: view === 'true' }">
 		<div id="{{uniqueToggleId}}" class="row-fluid accordion-body collapse in component">
-			<!-- SVG inserted here -->
 		</div>
 		<div id="{{uniqueModalId}}">
 			<div id="date-start-modal" data-modal dimensions="dateDims" model="dateStartDim"></div>
@@ -65,3 +164,4 @@
 	<a data-ng-show="view === 'true'" class="toggle" data-toggle="tooltip" data-original-title="Settings"
 		data-placement="bottom"><i class="fa fa-cog"></i></a>
 </div>
+-->

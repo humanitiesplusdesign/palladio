@@ -21,30 +21,17 @@
 				<!-- Body -->
 				<div class="panel-body">
 
-
-
-
-
-					<!--<div class="row margin-top" data-ng-show="!addNewLayer">
-							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
-							</div>
-							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
-								<span class="">Data layers</span>
-						</div>
-					</div>-->
-
 					<div class="row margin-top" data-ng-show="!addNewLayer">
 						<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
 							<label class="inline">Data</label>
 						</div>
 						<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
 								<ul class="layer-list list-unstyled" ui-sortable="{axis:y, containment: 'parent'}" data-ng-model="layers" data-ng-show="layers.length">
-									<li class="layer-item" data-ng-repeat="layer in layers | orderBy:index">
+									<li class="layer-item" data-ng-repeat="layer in layers | orderBy:index" ng-style="{'border-right':'5px solid ' + layer.color}">
 										<i class="fa text-muted" data-ng-class="layer.enabled ? 'fa-eye' : 'fa-eye-slash'" data-ng-click="layer.toggle()" data-title="{{layer.enabled ? 'Hide' : 'Show'}}" bs-tooltip></i>
-
 										<span style="margin-left: 10px">{{layer.description}}</span>
 										<i class="fa fa-trash-o pull-right text-danger" data-container="body" data-title="Delete" bs-tooltip data-ng-click="layer.remove();" style="line-height: 1.6"></i>
-										<i class="fa fa-pencil pull-right margin-right text-primary" data-container="body" data-title="Edit" bs-tooltip data-ng-click="" style="line-height: 1.6"></i>
+										<i class="fa fa-pencil pull-right margin-right text-primary" data-container="body" data-title="Edit" bs-tooltip data-ng-click="layer.edit();" style="line-height: 1.6"></i>
 									</li>
 								</ul>
 
@@ -55,14 +42,6 @@
 								</ul>
 						</div>
 					</div>
-
-					<!--<div class="row margin-top" data-ng-show="!addNewLayer">
-							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
-							</div>
-							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
-								<span class="">Tile layers</span>
-						</div>
-					</div>-->
 
 					<div class="row" data-ng-show="!addNewLayer">
 						<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
@@ -91,17 +70,6 @@
 					<!-- Choosing layer -->
 
 					<div class="" data-ng-show="addNewLayer">
-
-						<!--<div class="row margin-top">
-								<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
-								</div>
-								<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
-									<span class="">New Layer</span>
-							</div>
-						</div>-->
-
-
-
 						<div class="row margin-top">
 							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
 								<label class="inline">Type</label>
@@ -126,7 +94,8 @@
 						</div>
 
 
-					<!-- tiles -->
+					<!-- Tiles -->
+
 					<div class="" data-ng-show="layerType.value=='tiles'">
 
 						<div class="row margin-top">
@@ -177,7 +146,7 @@
 					</div>
 
 
-					<!-- Map -->
+					<!-- Data -->
 
 					<div class="" data-ng-show="layerType.value=='data'">
 
@@ -265,6 +234,19 @@
 							</div>
 						</div>
 
+						<div class="row margin-top">
+								<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
+									<label class="inline">Color</label>
+								</div>
+								<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
+
+									<div class="input-group" ng-init="color='#666'">
+									  <span class="input-group-addon" colorpicker id="sizing-addon1" ng-model="color" ng-style="{'background-color':color}"></span>
+									  <input type="text" colorpicker class="form-control" aria-describedby="sizing-addon1" ng-model="color">
+									</div>
+							</div>
+						</div>
+
 						<div class="row margin-top" ng-show="mapType.value=='point-to-point' || mapType.value=='sequence'">
 							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
 								<label class="inline">Show links</label>
@@ -295,25 +277,42 @@
 							</div>
 						</div>
 
-						<div class="row margin-top" data-ng-show="pointSize">
+					</div>
+
+					<!-- GeoJSON -->
+
+					<div class="" data-ng-show="layerType.value=='geoJSON'">
+
+						<div class="row margin-top">
 							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
-								<label class="inline">Adjust scale</label>
+								<label class="inline">Drop geoJSON file or paste geoJSON here</label>
 							</div>
 							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
-								<input type="checkbox" ng-model="fixScale">
+								<textarea class="col-md-8 col-xs-8" id="layerGeoJSON" ng-model="geoJson" ui-codemirror="{ mode : 'javascript', lineNumbers : true, lineWrapping: true }" placeholder="Paste your geoJSON data or drop a file here" ui-refresh="cmRefresh"></textarea>
 							</div>
 						</div>
 
-						<div class="row margin-top" data-ng-show="fixScale && pointSize">
-								<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
-									<label class="inline">Maxim</label>
+						<div class="row margin-top">
+							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
+								<label class="inline">Color</label>
+							</div>
+							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
+
+								<div class="input-group" ng-init="color='#666'">
+								  <span class="input-group-addon" colorpicker id="sizing-addon1" ng-model="color" ng-style="{'background-color':color}"></span>
+								  <input type="text" colorpicker class="form-control" aria-describedby="sizing-addon1" ng-model="color">
 								</div>
-								<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
-									<input class="form-control" type="number" ng-model="maxPointSize">
-									<p class="help-block">Maximum value</p>
 							</div>
 						</div>
 
+						<div class="row margin-top">
+							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
+								<label class="inline">Fill shapes</label>
+							</div>
+							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
+									<input type="checkbox" ng-model="fillShapes">
+							</div>
+						</div>
 					</div>
 
 					<div class="row margin-top">
@@ -321,13 +320,13 @@
 							</div>
 							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
 								<div class="pull-right">
-									<a class="btn btn-default" data-ng-disabled="!layerType" data-ng-click="addLayer();addNewLayer=false;">Add layer</a>
+									<a class="btn btn-default" data-ng-disabled="layerType.value === 'data' && ((!mapping.sourceCoordinates || (mapType.value=='point-to-point' && !mapping.destinationCoordinates)))" data-ng-click="addLayer();addNewLayer=false;">
+										{{ editingLayer ? 'Save layer' : 'Add layer' }}
+									</a>
 									<a class="btn btn-default btn-cancel" data-ng-click="addNewLayer=false">Cancel</a>
 								</div>
 						</div>
 					</div>
-
-
 
 				</div>
 			</div>

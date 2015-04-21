@@ -84,7 +84,7 @@
 								<input type="checkbox" ng-model="highlightTarget">
 						</div>
 					</div>
-					
+
 
 					<div class="row margin-top">
 						<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
@@ -94,6 +94,29 @@
 								<input type="checkbox" ng-model="showLinks">
 						</div>
 					</div>
+
+					<div class="row margin-top">
+						<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right">
+							<label class="inline">Size nodes</label>
+						</div>
+						<div class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">
+								<input type="checkbox" ng-model="nodeSize">
+						</div>
+					</div>
+
+					<div class="row margin-top" data-ng-show="nodeSize">
+						<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right ">
+							<label class="inline">According to</label>
+						</div>
+						<div class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">
+							<span class="btn btn-default" ng-click="showAggModal()">
+								{{getAggDescription(aggDim) || "Choose"}}
+								<span class="caret"></span>
+							</span>
+						</div>
+					</div>
+
+
 
         </div>
 

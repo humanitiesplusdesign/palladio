@@ -11,6 +11,7 @@
     , data        // data {nodes,links}
     , node        // node elements selector
     , zoom        // zoom behaviour
+    , brush       // brush
     , zooming
     , shiftKey
     , drag        // dragging
@@ -34,6 +35,24 @@
         // init (just first time)
         if (!canvas) init(selection);
         // force layout
+
+        var currentNodes = d3.map(force.nodes(), function(d) { return d.id; });
+
+        // Merge the new data with the standard properties of current nodes.
+        var currentNode;
+        data.nodes.forEach(function(d) {
+          currentNode = currentNodes.get(d.id);
+          if(currentNode) {
+            d.index = currentNode.index;
+            d.x = currentNode.x;
+            d.y = currentNode.y;
+            d.px = currentNode.px;
+            d.py = currentNode.py;
+            d.fixed = currentNode.fixed;
+            d.weight = currentNode.weight;
+          }
+        });
+
         force
         .size([width, height])
         .nodes(data.nodes)
@@ -77,7 +96,7 @@
     // default accessors
 
     function key(d,i){
-      return i;
+      return d.name;
     }
 
     function charge(d){
@@ -175,11 +194,48 @@
       .on("mousedown.zoom");
 
       svg
+      .on("mouseup.selection", selected)
       .on("dblclick.zoom", null)
       .on("mousedown.zoom", null)
       .on("touchstart.zoom", null)
       .on("touchmove.zoom", null)
       .on("touchend.zoom", null)
+
+      brush = svg
+      .append("g")
+      .datum(function() { return { selected: false, previouslySelected: false }; })
+      .attr("class", "brush")
+      .call(d3.svg.brush()
+        .x(d3.scale.identity().domain([0, width]))
+        .y(d3.scale.identity().domain([0, height]))
+        .on("brushstart", function(d) {
+          node.each(function(d) { d.previouslySelected = shiftKey && d.selected; });
+        })
+        .on("brush", function() {
+
+        	/*if (editing) {
+        		d3.select(this).select(".extent").remove();
+        		return;
+        	}*/
+
+          var extent = d3.event.target.extent();
+          node.classed("selected", function(d) {
+            return d.selected = d.previouslySelected ^
+                (extent[0][0] <= x(d.x) && x(d.x) < extent[1][0]
+                && extent[0][1] <= y(d.y) && y(d.y) < extent[1][1]);
+
+            return d.selected = d.previouslySelected ^
+                (extent[0][0] <= (d.x * zoom.scale() + zoom.translate()[0]) && (d.x * zoom.scale() + zoom.translate()[0]) < extent[1][0]
+                && extent[0][1] <= (d.y * zoom.scale() + zoom.translate()[1]) && (d.y * zoom.scale() + zoom.translate()[1]) < extent[1][1]);
+          });
+
+          selected();
+
+        })
+        .on("brushend", function() {
+          d3.event.target.clear();
+          d3.select(this).call(d3.event.target);
+        }));
 
       // nodes
       node = svg
@@ -203,6 +259,8 @@
       // drag function
       drag = force.drag()
       .on("drag.force", function (a) {
+        force.stop();
+
         node
         .filter(function(d){ return d.selected; })
         .each(function(d){
@@ -211,11 +269,10 @@
           d.y -= d3.event.dy / zoom.scale();
           d.px = d.x;
           d.py = d.y;
-        })
+        });
 
-        tick();
-      })
-
+        repositionNodes();
+      });
 
 
 
@@ -337,9 +394,13 @@
       context.stroke();
 
       //nodes
+      repositionNodes();
+    }
+
+    function repositionNodes() {
       node.attr("transform", function(d) {
         return 'translate(' + x(d.x) + ',' + y(d.y) + ')';
-      })
+      });
     }
 
     function select(accessor){
@@ -361,18 +422,29 @@
       shiftKey = d3.event.shiftKey// || d3.event.metaKey;
     }
 
+    var runForce = true;
 
     function update(){
+
+      // If force update is running, stop it.
+      force.stop();
 
       // update area scale
       area.domain([0,d3.max(data.nodes, function(d){ return d.size; })]);
 
       // nodes
-      node = node.data(data.nodes, function(d){ return d.id; })
-      .call(drag)
+      node = svg
+        .select("g.nodes")
+        .selectAll(".node")
+        .data(data.nodes, function(d){ return d.id; });
+      
+      node
+        .call(drag)
+
       // update nodes
-      node.selectAll(".point")
+      node.select(".point")  // .selectAll doesn't automatically assign datum, .select does.
       .each(updateNodes)
+
       // add new nodes
       node.enter()
       .append('g')
@@ -384,16 +456,21 @@
       .append("circle")
       .attr("class","point")
       .each(updateNodes)
+
       // remove old nodes
       node.exit().remove();
 
-      force.start();
+      // if(runForce) { 
+        force.start();
+        // runForce = false;
+      // }
 
     }
 
     function updateNodes(d){
       d3.select(this)
-      .style('fill', '#999')//function(d){ return color(d.community); })
+      // .style('fill', '#999')//function(d){ return color(d.community); })
+      .style('fill', function (d) { return d.data.value > 0 ? '#999' : '#ddd'; })
       .attr("r", radius)
     }
 

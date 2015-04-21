@@ -10,7 +10,7 @@ var app = angular.module('palladioApp', [
 	'ui.router',
 	'ui.sortable',
 	'ui.select',
-//	'mgcrea.ngStrap',
+	'colorpicker.module',
 
 	'palladioDataUpload',
 	'palladioDataDownload',

@@ -206,6 +206,12 @@ strong {
   transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
 }
 
+.input-group-addon {
+  padding: 0px 15px;
+  border: none;
+  border-radius: 2px;
+}
+
 .dropdown-menu,
 .btn {
 }
@@ -215,6 +221,10 @@ strong {
   -o-transition: all ease-in-out .15s;
   transition: all ease-in-out .15s;*/
   padding: 7px 20px;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .btn:hover, .btn:focus, .btn:active, .btn.active, .btn.disabled, .btn[disabled] {
@@ -231,7 +241,6 @@ strong {
   color: #565a5c;
   background-color: #fff;
   border-color: #c4c4c4;
-  font-size: 13px;
 }
 
 .btn-info {
@@ -345,6 +354,12 @@ strong {
   line-height: 1.8;
   cursor: pointer;
   font-size: 13px;
+}
+
+.btn-modal {
+  text-overflow: ellipsis;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .form-control:focus {
@@ -621,6 +636,10 @@ label.inline {
   opacity: .3;
 }
 
+
+a.fa:hover {
+  text-decoration: none;
+}
 
 /* Refine */
 
@@ -927,6 +946,37 @@ pre.CodeMirror-placeholder {
   border-radius: 0px;
   -webkit-box-shadow: none;
   box-shadow: none;
+}
+
+.well-expand {
+  margin-bottom: 0px;
+
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 15px;
+  right: 15px;
+
+  /* Internet Explorer 10 */
+  display:-ms-flexbox;
+  -ms-flex-pack:center;
+  -ms-flex-align:center;
+
+  /* Firefox */
+  display:-moz-box;
+  -moz-box-pack:center;
+  -moz-box-align:center;
+
+  /* Safari, Opera, and Chrome */
+  display:-webkit-box;
+  -webkit-box-pack:center;
+  -webkit-box-align:center;
+
+  /* W3C */
+  display:box;
+  box-pack:center;
+  box-align:center;
+
 }
 
 input[type="radio"], input[type="checkbox"] {
@@ -1499,5 +1549,16 @@ input[type="checkbox"]:checked:before {
   bottom: 0px;
   left: 0px;
   right: 0px;
-  background: rgba(255,255,255,.9);
+  background: rgba(255,255,255,.97);
+  z-index: 100;
+}
+
+#filters {
+  margin-bottom: 0px;
+}
+
+#filters li {
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }

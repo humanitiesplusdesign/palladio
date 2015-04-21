@@ -34,7 +34,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 				//
 				///////////////////////////////////////////////////////////////////////
 
-				var width = scope.width ? +scope.width : $(window).width()*0.7;
+				var width = scope.width ? +scope.width : element.width();
 				var height = scope.height ? +scope.height : 100;
 				var mode = scope.mode ? scope.mode : 'stack';
 				var type = scope.type ? scope.type : 'numeric';
@@ -149,7 +149,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 							scope.extentOverride.start = null;
 							scope.extentOverride.end = null;
 
-							// If title has already changed, then we have a problem. Need to use a 
+							// If title has already changed, then we have a problem. Need to use a
 							// unique and static identifier...
 							palladioService.removeFilter(identifier);
 							palladioService.update();
@@ -175,7 +175,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 						brush.clear();
 
 						setup();
-						
+
 						brush.extent(tempExtent);
 
 						sel.call(initializeTimeline);
@@ -273,7 +273,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 						}
 
 						// updateHighlights(gr);
-						
+
 						palladioService.update();
 					});
 
@@ -284,7 +284,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					brush.resizeAdaption(function (selection) {
 						selection.append("path")
 							.attr("transform", "translate(0, " + -(mainHeight * (1/4)) + ")");
-							
+
 						selection.select("rect").attr("height", mainHeight);
 
 						function resizePath(d) {
@@ -673,7 +673,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 
 					// Set up values.
 					brush = d3.svg.multibrush();
-					
+
 					hMargin = vMargin = mMargin = 10;
 					xAxisHeight = 20;
 					yAxisWidth = 30;
@@ -768,10 +768,10 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 
 					///////////////////////////////////////////////////////////////////////
 					//
-					// Reduce functions that don't double-count by using add/reduce based 
+					// Reduce functions that don't double-count by using add/reduce based
 					// on unique dimension if defined.
 					//
-					// countByGroup property aggregates counts broken out by the grouping 
+					// countByGroup property aggregates counts broken out by the grouping
 					// defined by the group-accessor attribute.
 					//
 					///////////////////////////////////////////////////////////////////////
@@ -983,7 +983,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 
 					brush.extent(ex.map(function(e) { return [new Date(e[0]), new Date(e[1])]; }));
 					extent = brush.extent();
-					
+
 					gBrush.call(brush);
 					// sel.select("svg").select('.brush').call(brush);
 					sel.call(updateTimeline);
@@ -1102,7 +1102,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 							.filter(function(d) { return countDims.get(d.fileId) ? true : false; })
 							.sort(function (a, b) { return scope.getAggDescription(a) < scope.getAggDescription(b) ? -1 : 1; });
 					// Take the first aggDim from the first file.
-					scope.aggDim = scope.aggDims.filter(function(d) { return d.fileId === 0; })[0] ? 
+					scope.aggDim = scope.aggDims.filter(function(d) { return d.fileId === 0; })[0] ?
 									scope.aggDims.filter(function(d) { return d.fileId === 0; })[0] :
 									scope.aggDims[0];
 					scope.$watch('aggDim', function () {
@@ -1225,7 +1225,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 						// Now aggDim, but we let it remain countDim in the save file for backward compatible.
 						if(state.countDim) scope.countDim = scope.aggDims.filter(function(d) { return d.key === state.countDim; })[0];
 						if(state.aggDimKey) scope.aggDim = scope.aggDims.filter(function(f) { return f.key === state.aggDimKey; })[0];
-						
+
 						scope.$digest();
 						scope.groupProp = scope.groupDims.filter(function(d) { return d.key === state.groupProp; })[0];
 						scope.$digest();

@@ -54,6 +54,12 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 					if(scope.view === 'true') scope.stepModes.push('Grouped Bars');
 					scope.stepMode = scope.stepModes[0];
 
+					// Handle collapsing
+					scope.collapse = false;
+					scope.toggleCollapse = function() {
+						scope.collapse = !scope.collapse;
+					};
+
 					scope.showDateStartModal = function () {
 						$('#' + scope.uniqueModalId).find('#date-start-modal').modal('show');
 					};
@@ -84,7 +90,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 
 					// Constants...
 					var margin = 25;
-					var width = scope.fullWidth === 'true' ? $(window).width() - margin*2 : $(window).width()*0.7;
+					var width = scope.fullWidth === 'true' ? element.find('.main-viz').width() - margin*2 : element.find('.main-viz').width();
 					var height = scope.height ? +scope.height : 200;
 					height = scope.fullHeight === 'true' ? $(window).height()-200 : height;
 					var filterColor = '#9DBCE4';
@@ -186,7 +192,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 
 							emitFilterText = function() {
 								var texts = [];
-								
+
 								if(bottomExtent.length) {
 									texts.push(scope.dateStartDim.description + " from " + format(bottomExtent[0]) + " to " + format(bottomExtent[1]));
 								}

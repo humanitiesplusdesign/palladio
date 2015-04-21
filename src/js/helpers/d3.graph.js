@@ -174,7 +174,7 @@
 					.classed("fixed", function (d) { return d.fixed; })
 					.attr("r", function (d) { return nodeSize ? sizeScale(d.agg) : 5; })
 					.style('fill','#bbbbbb')
-					.style('stroke', function (d) { return d.fixed ? "#222" : "#eee"; } )
+					.style('stroke', '#eee')//function (d) { return d.fixed ? "#222" : "#eee"; } )
 					.style('stroke-width','2px')
 					.style('fill-opacity','.95')
 					.on("mouseover", mouseover)
@@ -197,7 +197,7 @@
 					.attr("class", "anchor-node")
 					.append("svg:text")
 						.style("fill", "#555")
-						.style("font-family", "merriweather, Arial, Helvetica")
+						.style("font-family", "karla, Arial, Helvetica")
 						.style("font-size", 11)
 						.text(function(d, i) {
 							return d.fake ? "" : d.node.name;
@@ -263,7 +263,7 @@
 					.on("dragstart", function (d) {
 						d3.event.sourceEvent.stopPropagation();
 						d.fixed = true;
-						d3.select(this).classed("fixed", true).style('stroke', "#222");
+					//	d3.select(this).classed("fixed", true).style('stroke', "#222");
 					})
 					.on("drag.force", function (d) {
 						d.px = d.x + d3.event.dx / zoom.scale();
@@ -491,7 +491,7 @@
 				n.fixed = false;
 			});
 			node.classed("fixed", function (d) { return d.fixed; })
-				.style('stroke', function (d) { return d.fixed ? "#222" : "#eee"; } );
+				.style('stroke', '#eee')//function (d) { return d.fixed ? "#222" : "#eee"; } );
 			force.resume();
 			forceLabel.resume();
 			redraw();
