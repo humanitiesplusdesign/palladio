@@ -95,8 +95,13 @@
 
 <div class="container-fluid" data-ng-show="files.length">
 
-	<div class="row padding-top files">
+	<div class="row padding-top">
+		<div class="col-lg-12">
+			<input class="form-control editable" type="text" placeholder="Untitled project" ng-model="project.title"></input>
+		</div>
+	</div>
 
+	<div class="row padding-top files">
 			<!-- Each file -->
 			<div
 				file
@@ -153,7 +158,7 @@
 					</div>-->
 
 					<!-- SOOOOO BAD -->
-					<div class="fieldview-container" ng-style="myStyle={'height':file.fields.length*42}">
+					<div class="fieldview-container" ng-style="myStyle={'height':file.fields.length*38}">
 
 						<!-- Deafult view list -->
 						<div class="field-view field-view-list pt-page pt-page-current">
@@ -167,6 +172,9 @@
 									>
 
 									<span class="control">
+
+										<!--
+
 										<i
 											class="text-muted fa"
 											data-toggle="tooltip"
@@ -191,20 +199,21 @@
 											ng-show="hasLinks(field).lookup.file"
 											ng-class="{'fa-arrow-right':file.id==0, 'fa-arrow-left':file.id!=0}"></i>
 
+										-->
 									</span>
 
 									<span class="field-description">
-									<a class="margin-left" ng-class="{strong:field.uniqueKey}"
-										data-toggle="modal"
-										data-target="#myModal"
-										data-ng-show="!field.delete"
-										data-ng-click="setSelected(field,file)">{{field.description}}</a>
+										<a class="margin-left" ng-class="{strong:field.uniqueKey}"
+											data-toggle="modal"
+											data-target="#myModal"
+											data-ng-show="!field.delete"
+											data-ng-click="setSelected(field,file)">{{field.description}}</a>
 										<i class="fa fa-pencil field-edit"></i>
 									</span>
 
 									<span data-ng-show="field.delete" class="margin-left" ng-class="{strong:field.uniqueKey}">{{field.description}}</span>
 
-									<span class="pull-right">
+									<!--<span class="pull-right">
 
 										<span
 											ng-hide="hasLinks(field).lookup.file"
@@ -236,7 +245,8 @@
 											class="btn btn-xs btn-default">{{hasLinks(field).metadata.matches}} {{hasLinks(field).lookup.file.label}}
 										</button>
 
-									</span>
+									</span>-->
+
 									<span class="clearfix"></span>
 
 

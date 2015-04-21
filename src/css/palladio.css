@@ -387,7 +387,7 @@ strong {
 .editable:focus {
   background: rgba(0,0,0,.05);
   padding: 20px 10px;
-  border-color: transparent;
+  border-color: #ddd;
 }
 
 .primary .editable {
@@ -563,7 +563,7 @@ label.inline {
   border: none;
   border-top: 1px solid #eee;
   margin-bottom: 0px;
-  padding: 10px 15px;
+  padding: 8px 15px;
 }
 
 .field:hover {

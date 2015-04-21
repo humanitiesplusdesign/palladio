@@ -22,6 +22,11 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 
 		$scope.searchText = "";
 
+		$scope.project = {
+			title : null,
+			author : 'Untitled'
+		}
+
 		$scope.$watch('searchText', function (nv, ov) {
 			if(nv !== ov) {
 				palladioService.search(nv);

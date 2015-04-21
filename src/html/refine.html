@@ -7,8 +7,8 @@
 			<div class="modal-body">
 
 				<div class="row margin-bottom">
-					<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
-						<label class="inline strong">Description</label>
+					<div class="col-lg-2 col-md-3 col-sm-4 col-xs-4 text-right">
+						<label class="inline">Description</label>
 					</div>
 					<div class="col-lg-4 col-md-9 col-sm-8 col-xs-8 col-condensed">
 						<input
@@ -17,7 +17,7 @@
 							data-ng-change="setDirty()"
 							type="text"
 							required
-							class="form-control text-big"
+							class="form-control"
 							data-ng-model="selectedFieldMetadata.description" placeholder="Untitled"></input>
 					</div>
 				</div>
@@ -32,32 +32,37 @@
 					<!-- Left column -->
 					<div class="col-lg-12">
 
-						<!-- Data type -->
+						<!--
+
 						<div class="row margin-top">
 							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
 								<label class="inline">Data type</label>
 							</div>
 							<div class="col-lg-9 col-md-9 col-sm-8 col-xs-8 col-condensed">
-								<select
-									bs-select
-									placeholder="Choose"
-									class="form-control"
-									data-ng-model="selectedFieldMetadata.type"
-									data-ng-options="t.id as t.name for t in allowedTypes" id="type"
-									data-ng-change="updateMetadata()">
-								</select>
+
+								<ui-select ng-model="selectedFieldMetadata.type" theme="selectize" ng-disabled="disabled" on-select="updateMetadata()">
+									<ui-select-match placeholder="Select or search">
+										{{$select.selected.name}}
+										<span class="caret"></span>
+									</ui-select-match>
+									<ui-select-choices repeat="type.id as type in allowedTypes | filter: {name:$select.search}">
+										<span ng-bind-html="type.name | highlight: $select.search"></span>
+									</ui-select-choices>
+								</ui-select>
+
+
 								<p class="help-block" data-ng-show="selectedFieldMetadata.errors.length">{{selectedFieldMetadata.errors.length}} unique values do not match this data type! <a data-ng-click="downloadErrors()">Download the list of errors.</a></p>
 								<p class="help-block" data-ng-hide="selectedFieldMetadata.errors.length">All the values match this type.</p>
 							</div>
 						</div>
 
-						<!-- Unique values -->
 						<div class="row">
+
 							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
 								<label class="inline">Unique values</label>
 							</div>
 							<div class="col-lg-9 col-md-9 col-sm-8 col-xs-8 col-condensed">
-								<!-- Search -->
+
 								<div class="row">
 									<div class="col-lg-8 col-md-6 col-sm-6">
 										<div class="">
@@ -103,6 +108,8 @@
 								<a ng-click="showNewTable()">Add a new table</a>
 							</div>
 						</div>
+
+					-->
 
 					</div>
 
