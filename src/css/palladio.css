@@ -560,6 +560,14 @@ label.inline {
   padding: 10px 15px;
 }
 
+svg.fingerprint {
+  position: absolute;
+  margin-top: -10px;
+  margin-left: -15px;
+  height: 100%;
+  width: 100%;
+}
+
 .field:hover {
   background: #fafafa;
 }

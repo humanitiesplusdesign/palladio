@@ -1,6 +1,6 @@
 angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.services.validation',
-		'palladio.services.spinner'])
-	.factory("dataService", function (parseService, validationService, spinnerService, $q) {
+		'palladio.services.spinner', 'palladio.services.exception'])
+	.factory("dataService", function (parseService, validationService, spinnerService, exceptionService, $q) {
 
 		// Set this to "true" if data or links have been added/removed/changed
 
@@ -76,11 +76,18 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 			file.uniqueId = uniqueCounter;
 			uniqueCounter++;
 
+			processFile(file);
+
 			files.push(file);
 			setDirty();
 		};
 
+		function processFile(file) {
+			exceptionService(file);
+		}
+
 		var addFileRaw = function(file) {
+			processFile(file);
 			files.push(file);
 			uniqueCounter++;
 

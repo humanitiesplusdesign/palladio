@@ -24,7 +24,7 @@ angular.module('palladio.services.validation', ['palladio.services.date'])
 							break;
 						}
 						if(!dateTest.test(d)) {
-							errors.push({ value: d, message: '"' + d + '" has our of range values'});
+							errors.push({ value: d, message: '"' + d + '" has out of range values'});
 						}
 						break;
 					case 'latlong':

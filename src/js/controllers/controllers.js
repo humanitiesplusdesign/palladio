@@ -187,6 +187,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		};
 
 		$scope.setSelected = function(field, file) {
+			console.log(field);
 			$scope.showSpecialCharDetail = false;
 
 			// This is screwy: Don't update links if this is true, which we

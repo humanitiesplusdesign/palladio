@@ -248,28 +248,36 @@
 
 						<div class="field-view field-view-fingerprint pt-page">
 
-						<ul class="list-group">
+							<ul class="list-group">
+								<li
+									class="field list-group-item bg-danger"
+									ng-class="{muted:field.delete}"
+									ng-repeat="field in file.fields"
+									>
 
-							<li
-								class="field list-group-item bg-danger"
-								ng-class="{muted:field.delete}"
-								ng-repeat="field in file.fields"
-								>
+									<svg class="fingerprint">
+										<g>
+											<rect height="100%"
+												ng-repeat="exception in field.exceptions"
+												width="{{'' + (1.1 / file.data.length * 100) + '%'}}"
+												x="{{'' + (exception.index / file.data.length * 100) + '%'}}"
+												fill="{{ exception.exception === 'b' ? '#070' : exception.exception === 't' ? '#007' : '#700' }}"></rect>
+										</g>
+									</svg>
 
-								<span class="field-description">
-									<a ng-class="{strong:field.uniqueKey}"
-										data-toggle="modal"
-										data-target="#myModal"
-										data-ng-show="!field.delete"
-										data-ng-click="setSelected(field,file)">{{field.description}}</a>
-										<i class="fa fa-pencil field-edit"></i>
-								</span>
+									<span class="field-description">
+										<a ng-class="{strong:field.uniqueKey}"
+											data-toggle="modal"
+											data-target="#myModal"
+											data-ng-show="!field.delete"
+											data-ng-click="setSelected(field,file)">{{field.description}}</a>
+											<i class="fa fa-pencil field-edit"></i>
+									</span>
 
-								<span data-ng-show="field.delete" class="margin-left" ng-class="{strong:field.uniqueKey}">{{field.description}}</span>
+									<span data-ng-show="field.delete" class="margin-left" ng-class="{strong:field.uniqueKey}">{{field.description}}</span>
 
-							</li>
-							<!-- Button trigger modal -->
-						</ul>
+								</li>
+							</ul>
 
 						</div>
 
