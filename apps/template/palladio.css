@@ -7911,125 +7911,6 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	font: 10px Merriweather, Helvetica, Arial, sans-serif;
 }
 
-[data-palladio-graph-view] {
-	width: 100%;
-	height: 100%;
-	position: relative;
-}
-/*
-[data-palladio-graph-view] path.link {
-    fill: none;
-    stroke-opacity: .5;
-    stroke: #666;
-    stroke-width: 1px;
-}
-
-[data-palladio-graph-view] .node {
-    fill: #BBBBBB;
-    stroke: #eee;
-    stroke-width: 1px;
-    fill-opacity: .95;
-}
-
-
-[data-palladio-graph-view] .highlighted {
-    fill: #666666;
-}
-
-[data-palladio-graph-view] .node.fixed.target {
-    stroke: #222222;
-}
-
-[data-palladio-graph-view] .node.fixed.source {
-    stroke: #222222;
-}
-
-
-[data-palladio-graph-view] text.label,
-[data-palladio-graph-view] text.shadow {
-    font-family: Helvetica, Arial;
-    font-size: 11px;
-    font-weight: 300;
-}
-
-[data-palladio-graph-view] text {
-    pointer-events: none;
-}
-
-[data-palladio-graph-view] text.shadow {
-    stroke: #fff;
-    stroke-width: 2px;
-    stroke-opacity: .7;
-    stroke-linejoin: round;
-}
-
-*/
-
- .leaflet-bar a {
-    background-color: #fff;
-    border-bottom: 1px solid #ccc;
-    width: 26px;
-    height: 26px;
-    line-height: 26px;
-    display: block;
-    text-align: center;
-    text-decoration: none;
-    color: black;
-}
-
-[data-palladio-graph-view]  .leaflet-bar {
-    box-shadow: none;
-    -webkit-border-radius: 2px;
-    border-radius: 2px;
-}
-
-[data-palladio-graph-view]  .leaflet-control-zoom, .leaflet-control-layers {
-    border: none;
-}
-
-[data-palladio-graph-view]  .leaflet-bar a:first-child {
-    -webkit-border-top-left-radius: 2px;
-    border-top-left-radius: 2px;
-    -webkit-border-top-right-radius: 2px;
-    border-top-right-radius: 2px;
-}
-
-[data-palladio-graph-view]  .leaflet-bar a:last-child {
-    -webkit-border-bottom-left-radius: 2px;
-    border-bottom-left-radius: 2px;
-    -webkit-border-bottom-right-radius: 2px;
-    border-bottom-right-radius: 2px;
-    border-bottom: none;
-}
-
-[data-palladio-graph-view] .node {
-    cursor: pointer;
-}
-
-[data-palladio-graph-view] .node:hover {
-    fill: #DDD;
-    fill-opacity: 1;
-}
-
-[data-palladio-graph-view] .anchor-node.strong {
-    font-weight: 600;
-}
-
-[data-palladio-graph-view] rect.overlay {
-  cursor:hand;
-  cursor:grab;
-  cursor:-moz-grab;
-  cursor:-webkit-grab;
-}
-
-[data-palladio-graph-view] .hidden {
-    opacity: .1;
-}
-
-[data-palladio-graph-view] .link.hidden {
-    display: none;
-}
-
 [data-palladio-facet-filter] .selection-title {
 	text-transform: uppercase;
 	margin-top: 7px;
@@ -8165,6 +8046,125 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 [data-palladio-facet-filter] .btn-mini {
 	color: #666;
 	font-size: 12px;
+}
+
+[data-palladio-graph-view] {
+	width: 100%;
+	height: 100%;
+	position: relative;
+}
+/*
+[data-palladio-graph-view] path.link {
+    fill: none;
+    stroke-opacity: .5;
+    stroke: #666;
+    stroke-width: 1px;
+}
+
+[data-palladio-graph-view] .node {
+    fill: #BBBBBB;
+    stroke: #eee;
+    stroke-width: 1px;
+    fill-opacity: .95;
+}
+
+
+[data-palladio-graph-view] .highlighted {
+    fill: #666666;
+}
+
+[data-palladio-graph-view] .node.fixed.target {
+    stroke: #222222;
+}
+
+[data-palladio-graph-view] .node.fixed.source {
+    stroke: #222222;
+}
+
+
+[data-palladio-graph-view] text.label,
+[data-palladio-graph-view] text.shadow {
+    font-family: Helvetica, Arial;
+    font-size: 11px;
+    font-weight: 300;
+}
+
+[data-palladio-graph-view] text {
+    pointer-events: none;
+}
+
+[data-palladio-graph-view] text.shadow {
+    stroke: #fff;
+    stroke-width: 2px;
+    stroke-opacity: .7;
+    stroke-linejoin: round;
+}
+
+*/
+
+ .leaflet-bar a {
+    background-color: #fff;
+    border-bottom: 1px solid #ccc;
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    color: black;
+}
+
+[data-palladio-graph-view]  .leaflet-bar {
+    box-shadow: none;
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+}
+
+[data-palladio-graph-view]  .leaflet-control-zoom, .leaflet-control-layers {
+    border: none;
+}
+
+[data-palladio-graph-view]  .leaflet-bar a:first-child {
+    -webkit-border-top-left-radius: 2px;
+    border-top-left-radius: 2px;
+    -webkit-border-top-right-radius: 2px;
+    border-top-right-radius: 2px;
+}
+
+[data-palladio-graph-view]  .leaflet-bar a:last-child {
+    -webkit-border-bottom-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+    -webkit-border-bottom-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+    border-bottom: none;
+}
+
+[data-palladio-graph-view] .node {
+    cursor: pointer;
+}
+
+[data-palladio-graph-view] .node:hover {
+    fill: #DDD;
+    fill-opacity: 1;
+}
+
+[data-palladio-graph-view] .anchor-node.strong {
+    font-weight: 600;
+}
+
+[data-palladio-graph-view] rect.overlay {
+  cursor:hand;
+  cursor:grab;
+  cursor:-moz-grab;
+  cursor:-webkit-grab;
+}
+
+[data-palladio-graph-view] .hidden {
+    opacity: .1;
+}
+
+[data-palladio-graph-view] .link.hidden {
+    display: none;
 }
 
 [data-palladio-list-view] {
@@ -10389,7 +10389,7 @@ strong {
   /*-webkit-transition: all ease-in-out .15s;
   -o-transition: all ease-in-out .15s;
   transition: all ease-in-out .15s;*/
-  padding: 7px 20px;
+  padding: 7px 12px;
   font-size: 13px;
   text-overflow: ellipsis;
   max-width: 100%;
@@ -10410,6 +10410,18 @@ strong {
   color: #565a5c;
   background-color: #fff;
   border-color: #c4c4c4;
+}
+
+.btn-info {
+  color: #fff;
+  background-color: #20D39D;
+  border: none;
+}
+
+.btn-info:hover, .btn-info:focus, .btn-info.focus, .btn-info:active, .btn-info.active, .open > .dropdown-toggle.btn-info {
+  color: #fff;
+  background-color: #19B687;
+  border: none;
 }
 
 .btn-cancel {
@@ -11343,7 +11355,6 @@ input[type="checkbox"]:checked:before {
 }
 
 .selectize-input {
-  position: relative;
   z-index: 1;
   display: inline-block;
   width: 100%;
@@ -11508,7 +11519,7 @@ input[type="checkbox"]:checked:before {
 }
 
 .selectize-dropdown-content {
-  max-height: 200px;
+  max-height: 280px;
   overflow-x: hidden;
   overflow-y: auto;
 }
@@ -11666,7 +11677,7 @@ input[type="checkbox"]:checked:before {
 
 .selectize-input {
   width: auto;
-  padding: 7px 20px;
+  padding: 7px 12px;
   border: 1px solid #ddd;
   -webkit-border-radius: 2px;
   -moz-border-radius: 2px;

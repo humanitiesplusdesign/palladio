@@ -27,7 +27,7 @@
     "d3": "~3.5.3",
     "angular-bootstrap": "~0.12.1",
     "angular-ui-sortable": "~0.13.3",
-    "angular-ui-codemirror": "~0.2.2",
+    "angular-ui-codemirror": "~0.2.3",
     "spin.js": "~2.0.2",
     "crossfilter": "1.3.9",
     "d3-tip": "~0.6.6",

@@ -205,10 +205,9 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 								});
 							}
 
-							// fake data
 							data = {
-								nodes: nodes.filter(function(d){return d.value > 0; }),
-								links: links.filter(function(d){return d.value > 0; })
+								nodes: nodes,
+								links: links
 							};
 
 							// improve for search...

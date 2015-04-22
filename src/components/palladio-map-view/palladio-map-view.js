@@ -285,15 +285,25 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 			        // Calculate maximum point size across layers
 			        maxPointSize = scope.layers.reduce(function(a,b) {
-			        	var t = d3.max(generatePoints(b).features, function(d){ return d.properties.value.initialAgg; });
+			        	var t = 0;
+			        	if(!b.geoJson) {
+			        		t = d3.max(generatePoints(b).features, function(d){ return d.properties.value.initialAgg; });
+			        	}
 			        	return a > t ? a : t;
 			        }, 0);
 
 			        gs.each(draw);
 
 			        function draw(layer) {
+			        	if(!layer.geoJson) {
+			        		drawData(layer, this);
+			        	} else {
+			        		drawGeoJson(layer, this);
+			        	}
+			        }
 
-			        	var container = d3.select(this);
+			        function drawData(layer, elem) {
+			        	var container = d3.select(elem);
 			        	var g = container.selectAll('g.layer')
 			          		.data(function(d){ return [d]; })
 			          	g.enter().append('g').attr("class", "layer");
@@ -340,7 +350,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						link
 							.attr("stroke-width", function(d){ return value(d.properties.value); })
 							.attr("d", curve)
-							//.tooltip(tooltipLink)
+							.style("stroke",layer.color)
 							.on("click", function(d){
 								layer.filterDimension.filter(function (c) {
 									return c[0] === d.properties.source &&
@@ -360,7 +370,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							.style("stroke",layer.color)
 							.style("opacity",".2")
 							.attr("d", curve)
-							//.tooltip(tooltipLink)
 							.on("click", function(d){
 								layer.filterDimension.filter(function (c) {
 									return c[0] === d.properties.source &&
@@ -389,7 +398,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 			          	node
 				          	.attr("d", path)
-				          	//.tooltip(tooltipNode)
+				          	.style("fill", layer.color)
+						    .style("stroke", layer.color)
 				          	.on("click", function(d){
 						    	layer.filterDimension.filter(function (c) {
 									return c[0] === d.properties.key ||
@@ -406,7 +416,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						    .attr("d", path)
 						    .style("fill", layer.color)
 						    .style("stroke", layer.color)
-						    //.tooltip(tooltipNode)
 						    .on("click", function(d){
 						    	nodeTip.hide();
 						    	layer.filterDimension.filter(function (c) {
@@ -469,6 +478,60 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						}
 			        }
 
+			        function drawGeoJson(layer, elem) {
+
+			        	var path = d3.geo.path().projection(projectLatLong);
+
+			        	var container = d3.select(elem);
+			        	var g = container.selectAll('g.layer')
+			          		.data(function(d){ return [d]; })
+			          	g.enter().append('g').attr("class", "layer");
+						g.exit().remove();
+
+			        	var w = d3.select(element[0]).style("width"),
+			        		h = d3.select(element[0]).style("height")
+
+			        	var bounds = m.getBounds(),
+			        		topRight = project(bounds._northEast),
+			              	bottomLeft = project(bounds._southWest);
+
+			          	svg .attr("width", w)//topRight[0] - bottomLeft[0])
+			              	.attr("height", h)//bottomLeft[1] - topRight[1])
+			              	.style("margin-left", bottomLeft[0] + "px")
+			              	.style("margin-top", topRight[1] + "px");
+
+					    g 	.attr("transform", "translate(" + -bottomLeft[0] + "," + -topRight[1] + ")");
+
+					   	var paths = g.selectAll('path')
+					   			.data(layer.geoJson.features);
+
+					   	paths.exit().remove();
+
+					   	paths.attr("d", path)
+					   			.attr("stroke", layer.color)
+					   			.attr("fill", function(d) { 
+					   				if (layer.fillShapes && d.geometry && (d.geometry.type === "Point" || d.geometry.type === "Polygon" || d.geometry.type === "GeometryCollection")) {
+					   					return layer.color;
+					   				} else {
+					   					return "none"; 
+					   				}
+					   			});
+
+					   	paths.enter()
+					   		.append("path")
+					   			.attr("d", path)
+					   			.attr("stroke", layer.color)
+					   			.attr("fill", function(d) { 
+					   				if (layer.fillShapes && d.geometry && (d.geometry.type === "Point" || d.geometry.type === "Polygon" || d.geometry.type === "GeometryCollection")) {
+					   					return layer.color;
+					   				} else {
+					   					return "none"; 
+					   				}
+					   			});
+
+					   	paths.attr("d", path);
+			        }
+
 			        function tooltipNode(d,i){
 
 					    return {
@@ -500,6 +563,11 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 			        function project(x) {
 			        	var point = m.latLngToLayerPoint(x);
+			        	return [point.x, point.y];
+			        }
+
+			        function projectLatLong(x) {
+			        	var point = m.latLngToLayerPoint([x[1], x[0]]);
 			        	return [point.x, point.y];
 			        }
 
@@ -586,7 +654,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 		       	var filterDimension = null;
 
-		       	scope.$watchCollection('layers', function () {
+		       	function onLayerChange() {
 		       		scope.layers.forEach(function(layer, i) {
 		       			if(!layer.toggle) {
 		       				layer.toggle = function() {
@@ -598,7 +666,17 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 		       		clearAllGroups();
 		       		update();
+		       	}
+
+		       	// Shallow watch
+		       	scope.$watchCollection('layers', function () {
+		       		onLayerChange();
 		       	});
+
+		       	// Reference watch
+		       	scope.$watch('layers', function () {
+		       		onLayerChange();
+		       	})
 
 		       	scope.$watchCollection('tileSets', function () {
 					scope.tileSets.forEach(function(ts, i) {
@@ -876,7 +954,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 					if (layer.destination) layer.destination.remove();
 					layer.destination = !layer.mapping.destinationCoordinates ? null : scope.xfilter.dimension(layer.destinationCoordinatesAccessor);
-					
 
 					buildFilterDimension(layer);
 
@@ -992,7 +1069,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					{
 						"description": "geoJSON",
 						"value": "geoJSON",
-						"info": "TBD"
+						"info": "Upload a geoJSON file including polygon features to overlay on the map."
 					}
 				];
 
@@ -1064,7 +1141,20 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						});
 					}
 					else if (scope.layerType.value === 'data') {
-						scope.layers.push(buildDataLayer());
+						if(scope.editingLayer) {
+							// If we are just editing the layer, we don't want to add it again.
+							buildDataLayer();
+							scope.layers = scope.layers.slice(); // Trigger watch
+						} else {
+							scope.layers.push(buildDataLayer());
+						}
+					} else if (scope.layerType.value === 'geoJSON') {
+						if(scope.editingLayer) {
+							buildGeoJsonLayer();
+							scope.layers = scope.layers.slice();
+						} else {
+							scope.layers.push(buildGeoJsonLayer());
+						}
 					}
 
 					scope.url = null;
@@ -1077,6 +1167,12 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				function buildDataLayer() {
 					var layer = {};
 
+					if(scope.editingLayer) {
+						// Updating an existing layer.
+						layer = scope.editingLayer;
+						scope.editingLayer = undefined;
+					}
+
 					layer.description = scope.description;
 
 					if(!layer.description) {
@@ -1088,8 +1184,10 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						}
 					}
 
-					layer.index = dataLayerIndex;
-					dataLayerIndex++;
+					if(layer.index === undefined) {
+						layer.index = dataLayerIndex;
+						dataLayerIndex++;
+					}
 					layer.enabled = true;
 					layer.layer = null;
 
@@ -1102,8 +1200,69 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						scope.layers.splice(scope.layers.indexOf(this),1);
 					}
 
+					layer.edit = function() {
+						scope.layerType = scope.layerTypes[0];
+						scope.description = layer.description;
+						scope.editingLayer = layer;
+						scope.mapping = layer.mapping;
+						scope.mapType.value = layer.type;
+						scope.descriptiveDim = layer.descriptiveDim;
+						scope.pointSize = layer.pointSize;
+						scope.showLinks = layer.mapping.destinationCoordinates ? layer.showLinks : scope.showLinks;
+						scope.color = layer.color;
+						scope.addNewLayer = true;
+					}
+
 					return layer;
 				}
+
+				function buildGeoJsonLayer() {
+					var layer = {};
+
+					if(scope.editingLayer) {
+						// Updating an existing layer.
+						layer = scope.editingLayer;
+						scope.editingLayer = undefined;
+					}
+
+					layer.description = scope.description;
+
+					if(layer.index === undefined) {
+						layer.index = dataLayerIndex;
+						dataLayerIndex++;
+					}
+
+					layer.enabled = true;
+					layer.layer = null;
+					layer.fillShapes = scope.fillShapes;
+					layer.color = scope.color;
+					layer.geoJson = JSON.parse(scope.geoJson);
+					scope.geoJson = null;
+
+					layer.remove = function() {
+						scope.layers.splice(scope.layers.indexOf(this),1);
+					}
+
+					layer.edit = function() {
+						scope.layerType = scope.layerTypes[2];
+						scope.addNewLayer = true;
+						scope.description = layer.description;
+						scope.editingLayer = layer;
+						scope.geoJson = JSON.stringify(layer.geoJson);
+						scope.color = layer.color;
+						scope.fillShapes = layer.fillShapes;
+					}
+
+					return layer;
+				}
+
+				// Forces refresh of the codemirror when we update the model. Needed because CM
+				// doesn't properly update when it is hidden so if we update the model and unhide
+				// in the same update cycle it needs to be refreshed.
+				scope.cmRefresh = true;
+				scope.$watch('geoJson', function() { 
+					scope.cmRefresh = !scope.cmRefresh;
+				});
 
 				scope.tilesType = scope.tilesTypes[0];
 

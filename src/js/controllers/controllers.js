@@ -168,7 +168,9 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			{ label:'Sort by Frequency', value:'value'}
 		];
 
-		$scope.sortBy = $scope.sortOptions[0];
+		$scope.displayOptions = {
+			sortBy : $scope.sortOptions[0]
+		}
 
 		$scope.onDrop = function(obj, e){
 			$scope.lastFileName = e.dataTransfer.files[0].name.replace(/\.[^/.]+$/, "") || null;
@@ -267,7 +269,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 				// Display only uniques with the selected special character (if selected).
 				return $scope.selectedSpecialChar === null || d.key.indexOf($scope.selectedSpecialChar) !== -1;
 			}).sort(function (a, b) {
-				var sortBy = $scope.sortBy.value;
+				var sortBy = $scope.displayOptions.sortBy.value;
 				if($scope.findError(a.key) && $scope.findError(b.key)) return a[sortBy] > b[sortBy] ? 1 : -1;
 				if($scope.findError(a.key)) return -1;
 				if($scope.findError(b.key)) return 1;
@@ -339,11 +341,11 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		};
 
 		$scope.allowedTypes = [
-			{id: 'text', name: 'Text'},
-			{id: 'number', name: 'Number'},
-			{id: 'date', name: 'Year or Date (YYYY-MM-DD)'},
-			{id: 'latlong', name: 'Coordinates'},
-			{id: 'url', name: 'URL'}
+			{id: 'text', name: 'Text', description: 'This is a description'},
+			{id: 'number', name: 'Number', description: 'This is description'},
+			{id: 'date', name: 'Date', description: 'Dates can be YYYY or YYYY-MM-DD'},
+			{id: 'latlong', name: 'Coordinates', description: 'This is description'},
+			{id: 'url', name: 'URL', description: 'This is description'}
 		];
 
 		$scope.hasLinks = function (field) {
