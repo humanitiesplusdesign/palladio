@@ -1010,36 +1010,56 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 				function importState(state) {
 					scope.$apply(function (s) {
-						s.countDim = state.countDim;
-						s.descriptiveDim = state.descriptiveDim;
-						s.showLinks = state.showLinks;
-						if(state.tileSets) s.tileSets = state.tileSets;
-						s.pointSize = state.pointSize;
-						s.mapType = s.mapTypes.filter(function (d) { return d.value === state.mapType.value; })[0];
-						if(state.mapping.sourceCoordinates) {
-							s.mapping.sourceCoordinates =
-								s.latlonFields
-									.filter(function (d) {
-										return d.description === state.mapping.sourceCoordinates.description; })[0];
-						}
-
-						if(state.mapping.destinationCoordinates) {
-							s.mapping.destinationCoordinates =
-								s.latlonFields
-									.filter(function (d) {
-										return d.description === state.mapping.destinationCoordinates.description; })[0];
-						}
-						if(state.aggDimKey) {
-							s.aggDim = s.aggDims.filter(function(f) { return f.key === state.aggDimKey; })[0];
+						if(state.tileSets.length) s.tileSets = state.tileSets;
+						if(state.layers) {
+							state.layers.forEach(function(d) {
+								// Set the layer type
+								scope.layerType = scope.layerTypes.filter(function(l) { return l.value === d.layerType; })[0];
+								scope.description = d.description;
+								scope.mapping = {
+									sourceCoordinates: scope.latlonFields.filter(function(f) { return f.key === d.mapping.sourceCoordinatesKey; })[0],
+									destinationCoordinates: scope.latlonFields.filter(function(f) { return f.key === d.mapping.destinationCoordinatesKey; })[0],
+								};
+								scope.fillShapes = d.fillShapes;
+								scope.color = d.color;
+								scope.geoJson = JSON.stringify(d.geoJson);
+								scope.mapType = scope.mapTypes.filter(function (m) { return m.value === d.type; })[0];
+								// TODO: populate descriptive dim.
+								scope.pointSize = d.pointSize;
+								scope.showLinks = d.showLinks;
+								// TODO: aggregation stuff
+								scope.addLayer();
+							});
+						} else {
+							// Handle the old version
+							s.countDim = state.countDim;
+							s.descriptiveDim = state.descriptiveDim;
+							s.showLinks = state.showLinks;
+							s.pointSize = state.pointSize;
+							s.mapType = s.mapTypes.filter(function (d) { return d.value === state.mapType.value; })[0];
+							s.mapping = {};
+							if(state.mapping.sourceCoordinates) {
+								s.mapping.sourceCoordinates =
+									s.latlonFields
+										.filter(function (d) {
+											return d.description === state.mapping.sourceCoordinates.description; })[0];
+							}
+							if(state.mapping.destinationCoordinates) {
+								s.mapping.destinationCoordinates =
+									s.latlonFields
+										.filter(function (d) {
+											return d.description === state.mapping.destinationCoordinates.description; })[0];
+							}
+							if(state.aggDimKey) {
+								s.aggDim = s.aggDims.filter(function(f) { return f.key === state.aggDimKey; })[0];
+							}
+							s.addLayer();
 						}
 					});
 				}
 
 				function exportState() {
 					return {
-						countDim: scope.countDim,
-						descriptiveDim: scope.descriptiveDim,
-						showLinks: scope.showLinks,
 						tileSets: scope.tileSets.map(function (t) {
 							return {
 								"url": t.url,
@@ -1048,10 +1068,27 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 								"description": t.description,
 							};
 						}),
-						pointSize: scope.pointSize,
-						mapType: scope.mapType,
-						mapping: scope.mapping,
-						aggDimKey: scope.aggDim.key
+						layers: scope.layers.map(function (l) {
+							return {
+								aggDescription: l.aggDescription,
+								fillShapes: l.fillShapes,
+								geoJson: l.geoJson,
+								aggregateKey: l.aggregateKey,
+								aggregationType: l.aggregationType,
+								color: l.color,
+								countBy: l.countBy,
+								description: l.description,
+								enabled: l.enabled,
+								layerType: l.layerType,
+								mapping: {
+									sourceCoordinatesKey: l.mapping && l.mapping.sourceCoordinates && l.mapping.sourceCoordinates ? l.mapping.sourceCoordinates.key : null,
+									destinationCoordinatesKey: l.mapping && l.mapping.destinationCoordinates && l.mapping.destinationCoordinates.key ? l.mapping.destinationCoordinates.key : null
+								},
+								pointSize: l.pointSize,
+								showLinks: l.showLinks,
+								type: l.type
+							};
+						})
 					};
 				}
 
@@ -1190,6 +1227,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					}
 					layer.enabled = true;
 					layer.layer = null;
+					layer.layerType = scope.layerType.value;
 
 					buildLayerAttributes(layer);
 
@@ -1205,7 +1243,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						scope.description = layer.description;
 						scope.editingLayer = layer;
 						scope.mapping = layer.mapping;
-						scope.mapType.value = layer.type;
+						scope.mapType = scope.mapTypes.filter(function(m) { return m.value === layer.type; })[0];
 						scope.descriptiveDim = layer.descriptiveDim;
 						scope.pointSize = layer.pointSize;
 						scope.showLinks = layer.mapping.destinationCoordinates ? layer.showLinks : scope.showLinks;
@@ -1234,6 +1272,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 					layer.enabled = true;
 					layer.layer = null;
+					layer.layerType = scope.layerType.value;
 					layer.fillShapes = scope.fillShapes;
 					layer.color = scope.color;
 					layer.geoJson = JSON.parse(scope.geoJson);
