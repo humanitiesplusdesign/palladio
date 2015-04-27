@@ -10407,7 +10407,7 @@ strong {
   /*-webkit-transition: all ease-in-out .15s;
   -o-transition: all ease-in-out .15s;
   transition: all ease-in-out .15s;*/
-  padding: 7px 20px;
+  padding: 7px 12px;
   font-size: 13px;
   text-overflow: ellipsis;
   max-width: 100%;
@@ -10428,6 +10428,18 @@ strong {
   color: #565a5c;
   background-color: #fff;
   border-color: #c4c4c4;
+}
+
+.btn-info {
+  color: #fff;
+  background-color: #20D39D;
+  border: none;
+}
+
+.btn-info:hover, .btn-info:focus, .btn-info.focus, .btn-info:active, .btn-info.active, .open > .dropdown-toggle.btn-info {
+  color: #fff;
+  background-color: #19B687;
+  border: none;
 }
 
 .btn-cancel {
@@ -10484,14 +10496,20 @@ strong {
   background-color: #fafafa;
 }
 
-.btn-group > .btn {
+.btn-group.open .dropdown-toggle {
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  border-color: #ddd;
+}
+
+.btn-group-small > .btn {
   font-size: 11px;
   padding: 3px 10px;
   text-transform: uppercase;
   letter-spacing: .05em;
 }
 
-.btn-group > .btn.active {
+.btn-group-small > .btn.active {
   background-color: #eee;
 }
 
@@ -10568,7 +10586,7 @@ strong {
 .editable:focus {
   background: rgba(0,0,0,.05);
   padding: 20px 10px;
-  border-color: transparent;
+  border-color: #ddd;
 }
 
 .primary .editable {
@@ -10744,7 +10762,7 @@ label.inline {
   border: none;
   border-top: 1px solid #eee;
   margin-bottom: 0px;
-  padding: 10px 15px;
+  padding: 8px 15px;
 }
 
 .field:hover {
@@ -11355,7 +11373,6 @@ input[type="checkbox"]:checked:before {
 }
 
 .selectize-input {
-  position: relative;
   z-index: 1;
   display: inline-block;
   width: 100%;
@@ -11520,7 +11537,7 @@ input[type="checkbox"]:checked:before {
 }
 
 .selectize-dropdown-content {
-  max-height: 200px;
+  max-height: 280px;
   overflow-x: hidden;
   overflow-y: auto;
 }
@@ -11678,7 +11695,7 @@ input[type="checkbox"]:checked:before {
 
 .selectize-input {
   width: auto;
-  padding: 7px 20px;
+  padding: 7px 12px;
   border: 1px solid #ddd;
   -webkit-border-radius: 2px;
   -moz-border-radius: 2px;

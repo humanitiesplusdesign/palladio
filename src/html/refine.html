@@ -3,117 +3,181 @@
 	<div class="modal-dialog modal-lg">
 		<div class="modal-content">
 			<!-- Modal Header -->
+			<div class="modal-header">
+				Refine
+			</div>
+
 			<!-- Modal Body -->
 			<div class="modal-body">
 
-				<div class="row margin-bottom">
-					<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
-						<label class="inline strong">Description</label>
+
+				<div class="row" data-ng-show="addingTable">
+
+					<div class="col-lg-12">
+						<p>Copy and paste out of your spreadsheets, drag-and-drop to upload tabular data (e.g. .csv, .tab, .tsv), or link to a file in a public Dropbox folder to add a new table to your Palladio project. <a target="_blank" href="http://hdlab.stanford.edu/lab-notebook/palladio/2014/11/18/palladio-faqs-0-8-0/#2">Not sure how to structure your data?</a></p>
+						<textarea ui-refresh="selectedFieldMetadata" ui-codemirror="{ mode : 'text',  lineNumbers : true, lineWrapping: true, onDrop : onDrop }" placeholder="Paste your data or drop a file here" ng-model="text"></textarea>
+						<div class="alert alert-warning" ng-show="parseError">{{parseError}}</div>
+
+						<div class="pull-right">
+							<a class="btn btn-default" ng-click="parseExtendTable()" ng-disabled="!text">Load</a>
+							<a class="btn btn-default btn-cancel" ng-click="hideNewTable()">Cancel</a>
+						</div>
+
 					</div>
-					<div class="col-lg-4 col-md-9 col-sm-8 col-xs-8 col-condensed">
+
+					<div class="col-lg-12 margin-top">
+
+						<p class="small" data-ng-show="!showSPARQL"><a data-ng-click="showSPARQL=true">Load data from a SPARQL endpoint (beta)</a></p>
+
+						<div data-ng-show="showSPARQL" class="margin-top padding-top">
+							<p><strong>SPARQL endpoint (beta)</strong></p>
+							<p>You can load data from a SPARQL endpoint by providing both the endpoint URL and a valid SPARQL query. After you run the SPARQL query you will have the opportunity to validate your data and re-run the query if necessary before loading the data into Palladio.</p>
+							<yasgui data="text" endpoint="sparqlEndpoint"></yasgui>
+							<div class="">
+								<button class="btn btn-primary" ng-click="parseExtendTable()" ng-show="text">Load data</button>
+							</div>
+							<div class="alert alert-warning" ng-show="parseError">{{parseError}}</div>
+						</div>
+
+					</div>
+
+				</div>
+
+
+
+			<div data-ng-hide="addingTable">
+
+				<div class="row margin-bottom">
+					<div class="col-lg-2 col-md-2 col-sm-4 col-xs-4 text-right">
+						<label class="inline">Description</label>
+					</div>
+					<div class="col-lg-4 col-md-6 col-sm-8 col-xs-8 col-condensed">
 						<input
 							data-toggle="tooltip"
 							data-original-title="Rename"
 							data-ng-change="setDirty()"
 							type="text"
 							required
-							class="form-control text-big"
+							class="form-control"
 							data-ng-model="selectedFieldMetadata.description" placeholder="Untitled"></input>
 					</div>
 				</div>
 
+
+				<div class="row margin-top">
+					<div class="col-lg-2 col-md-2 col-sm-4 col-xs-4 text-right">
+						<label class="inline">Data type</label>
+					</div>
+					<div class="col-lg-9 col-md-9 col-sm-8 col-xs-8 col-condensed">
+
+						<ui-select ng-model="selectedFieldMetadata.type" theme="selectize" ng-disabled="disabled" on-select="updateMetadata()">
+							<ui-select-match placeholder="Select or search">
+								{{$select.selected.name}}
+								<span class="caret"></span>
+							</ui-select-match>
+							<ui-select-choices repeat="type.id as type in allowedTypes | filter: {name:$select.search}">
+								<span ng-bind-html="type.name | highlight: $select.search"></span><br/>
+								<span class="text-muted small" ng-bind-html="type.description"></span>
+							</ui-select-choices>
+						</ui-select>
+
+						<p class="help-block" data-ng-show="selectedFieldMetadata.errors.length">{{selectedFieldMetadata.errors.length}} unique values do not match this data type! <a data-ng-click="downloadErrors()">Download the list of errors.</a></p>
+						<p class="help-block" data-ng-hide="selectedFieldMetadata.errors.length">All the values match this type.</p>
+					</div>
+				</div>
+
+
 				<div class="row">
 
-					<!-- Right column -->
-					<!--<div class="col-lg-4">
-						<label>Special characters</label>
-					</div>-->
+					<div class="col-lg-2 col-md-2 col-sm-4 col-xs-4 text-right">
+						<label class="inline">Unique values</label>
+					</div>
 
-					<!-- Left column -->
-					<div class="col-lg-12">
-
-						<!-- Data type -->
-						<div class="row margin-top">
-							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
-								<label class="inline">Data type</label>
-							</div>
-							<div class="col-lg-9 col-md-9 col-sm-8 col-xs-8 col-condensed">
-								<select
-									bs-select
-									placeholder="Choose"
-									class="form-control"
-									data-ng-model="selectedFieldMetadata.type"
-									data-ng-options="t.id as t.name for t in allowedTypes" id="type"
-									data-ng-change="updateMetadata()">
-								</select>
-								<p class="help-block" data-ng-show="selectedFieldMetadata.errors.length">{{selectedFieldMetadata.errors.length}} unique values do not match this data type! <a data-ng-click="downloadErrors()">Download the list of errors.</a></p>
-								<p class="help-block" data-ng-hide="selectedFieldMetadata.errors.length">All the values match this type.</p>
-							</div>
-						</div>
-
-						<!-- Unique values -->
-						<div class="row">
-							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
-								<label class="inline">Unique values</label>
-							</div>
-							<div class="col-lg-9 col-md-9 col-sm-8 col-xs-8 col-condensed">
-								<!-- Search -->
-								<div class="row">
-									<div class="col-lg-8 col-md-6 col-sm-6">
-										<div class="">
-											<select
-												class="form-control"
-												bs-select
-												data-ng-model="sortBy"
-												data-ng-options="t as t.label for t in sortOptions" id="sortBy"
-												data-ng-change="updateMetadata()">
-											</select>
-										</div>
-									</div>
-									<div class="col-lg-4 col-md-6 col-sm-6">
-										<input type="text" class="form-control" ng-model="searchUnique.key" placeholder="Search"></input>
-									</div>
-
-								</div>
-								<div class="unique-values margin-bottom margin-top">
-									<table
-										class="table table-striped"
-										data-ng-show="!filtered || (filtered && filtered.length > 0)">
-										<tr data-ng-repeat="val in filtered = (selectedFieldMetadata.uniques | filter:searchUnique) | limitTo:1000">
-												<td
-													data-ng-class="{ 'text-danger': findError(val.key) }"
-													title="{{findError(val.key).message}}"
-													data-ng-bind-html="displayVal(val)">
-											</td>
-										</tr>
-									</table>
-									<div class="padding-all text-danger small" data-ng-show="filtered && filtered.length == 0">No values found</div>
-								</div>
-								<p class="help-block pull-right"><strong>{{filtered.length}}</strong> values displayed. <a data-ng-click="downloadUniques(searchUnique)" class="" data-ng-hide="filtered && filtered.length == 0">Download</a></p>
-
-							</div>
-						</div>
+					<div class="col-lg-10 col-md-10 col-sm-8 col-xs-8 col-condensed">
 
 						<div class="row">
-							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
-								<label class="inline">Extention</label>
-							</div>
-							<div class="col-lg-9 col-md-9 col-sm-8 col-xs-8 col-condensed">
 
-								<a ng-click="showNewTable()">Add a new table</a>
+							<div class="col-lg-5 col-md-6 col-sm-6 margin-bottom">
+								<input type="text" class="form-control" ng-model="searchUnique.key" placeholder="Search"></input>
 							</div>
+
+							<div class="col-lg-5 col-lg-offset-2 col-md-6 col-sm-6">
+
+								<ui-select class="pull-right" ng-model="displayOptions.sortBy" theme="selectize" ng-disabled="disabled" on-select="updateMetadata()">
+									<ui-select-match placeholder="Select or search">
+										{{$select.selected.label}}
+										<span class="caret"></span>
+									</ui-select-match>
+									<ui-select-choices repeat="type in sortOptions | filter: {label:$select.search}">
+										<span ng-bind-html="type.label | highlight: $select.search"></span><br/>
+									</ui-select-choices>
+								</ui-select>
+
+								<div class="clearfix"></div>
+
+							</div>
+
 						</div>
+
+						<div class="unique-values margin-bottom">
+							<table
+								class="table table-striped"
+								data-ng-show="!filtered || (filtered && filtered.length > 0)">
+								<tr data-ng-repeat="val in filtered = (selectedFieldMetadata.uniques | filter:searchUnique) | limitTo:1000">
+										<td
+											data-ng-class="{ 'text-danger': findError(val.key) }"
+											title="{{findError(val.key).message}}"
+											data-ng-bind-html="displayVal(val)">
+									</td>
+								</tr>
+							</table>
+							<div class="padding-all text-danger small" data-ng-show="filtered && filtered.length == 0">No values found</div>
+						</div>
+
+						<p class="help-block pull-right"><strong>{{filtered.length}}</strong> values displayed. <a data-ng-click="downloadUniques(searchUnique)" class="" data-ng-hide="filtered && filtered.length == 0">Download</a></p>
 
 					</div>
 
-
-
-
 				</div>
+
+				<div class="row">
+					<div class="col-lg-2 col-md-2 col-sm-4 col-xs-4 text-right">
+						<label class="inline">Extention</label>
+					</div>
+					<div class="col-lg-9 col-md-9 col-sm-8 col-xs-8 col-condensed">
+
+						<ui-select ng-model="selectedFieldMetadata.augmentId" theme="selectize" ng-disabled="disabled" on-select="updateMetadata()">
+							<ui-select-match placeholder="Choose a table...">
+								{{$select.selected.label}}
+								<span class="caret"></span>
+							</ui-select-match>
+							<ui-select-choices repeat="file.uniqueId as file in filteredFiles() | filter: {label:$select.search}">
+								<span ng-bind-html="file.label | highlight: $select.search"></span><br/>
+							</ui-select-choices>
+						</ui-select>
+
+						<span class=""
+							style="margin-bottom:0px"
+							data-ng-show="hasLinks(selectedFieldMetadata).lookup"
+							ng-class="hasLinks(selectedFieldMetadata).metadata.claz">
+
+							<span class="">{{hasLinks(selectedFieldMetadata).metadata.matches}}</span> out of {{hasLinks(selectedFieldMetadata).metadata.total}} matches for {{selectedFieldMetadata.description}} in {{hasLinks(selectedFieldMetadata).lookup.file.label}}
+						</span>
+
+
+						<span class="help-block" data-ng-show="!hasLinks(selectedFieldMetadata).lookup">You can provide additional information about this dimension with data from another table.</span>
+
+
+					<a class="btn btn-default" ng-click="showNewTable()">Add a new table</a>
+					</div>
+				</div>
+
+			</div>
 
 
 
 			</div>
+
 			<!-- Modal Footer -->
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">Done</button>

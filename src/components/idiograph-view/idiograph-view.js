@@ -40,18 +40,29 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 
 					scope.layouts = [
 					  {
-					    "text": "None",
-					    "click": "$alert()"
+					    "label": "None"
 					  },
 					  {
-					    "text": "Links",
-					    "click": "$alert()"
+					    "label": "Links"
 					  },
 					  {
-					    "text": "Groups",
-					    "href": "#"
+					    "label": "Groups"
 					  }
 					];
+
+					scope.status = {
+				    isopen: false
+				  };
+
+				  scope.toggled = function(open) {
+
+				  };
+
+				  scope.toggleDropdown = function($event) {
+				    $event.preventDefault();
+				    $event.stopPropagation();
+				    scope.status.isopen = !scope.status.isopen;
+				  };
 
 					// selection
 					scope.selectedNode = null;
@@ -103,7 +114,7 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 
 							// nodeDim is a table, not a field. Find a field that is a unique key.
 							// TODO: we need to always add a unique key to a table...
-							nodeKeyField = scope.dims.nodes.fields.filter(function(d) { return d.uniqueKey; })[0];
+							scope.nodeKeyField = nodeKeyField = scope.dims.nodes.fields.filter(function(d) { return d.uniqueKey; })[0];
 
 							// Create a dimension based on the key field.
 							dimension = scope.xfilter.dimension(function(d) {
@@ -194,13 +205,13 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 								});
 							}
 
-							// fake data
 							data = {
-								nodes: nodes.filter(function(d){return d.value > 0; }),
-								links: links.filter(function(d){return d.value > 0; })
+								nodes: nodes,
+								links: links
 							};
 
-							console.log('sasa',data)
+							// improve for search...
+							scope.nodes = data.nodes;
 
 							d3.select(element[0])
 								.select('.view')
