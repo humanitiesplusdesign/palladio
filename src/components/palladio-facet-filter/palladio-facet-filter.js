@@ -202,6 +202,37 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 											}); },
 										function (d) { return d.key; });
 
+						// Highlight/filter option
+						buttonGroup.append("a").attr("class", "btn-mini")
+								.classed('active', function(d) { return !d.highlight; })
+								.on("click", function(d, i) {
+									if(!d.highlight) {
+										d.highlight = true;
+										
+										// Switch icon
+										d3.select(this).select('i').classed('fa-square', false);
+										d3.select(this).select('i').classed('fa-square-o', true);
+
+										// Remove filter and update
+										d.dimension.filterAll();
+										palladioService.removeFilter(scope.uniqueToggleId + d.facetKey);
+										applyFilterOrHighlight(d);
+										palladioService.update();
+									} else {
+										d.highlight = false;
+										// Switch icon
+										d3.select(this).select('i').classed('fa-square', true);
+										d3.select(this).select('i').classed('fa-square-o', false);
+
+										// Remove highlight and update
+										palladioService.removeHighlight();
+										applyFilterOrHighlight(d);
+										palladioService.update();
+									}
+									d3.select(this).classed('active', !d.highlight);
+								})
+								.append("i").attr("class", "fa fa-square");
+
 						// Sort options twiddle the cells.
 						buttonGroup.append("a").attr("class", "btn-mini")
 								.on("click", function(d) {
@@ -328,6 +359,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 
 						data.domKey = calculateDomKey(data.key);
 						data.filters = [];
+						data.highlight = false;
 					}
 
 					function removeFacetData(data) {
@@ -362,6 +394,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 						cellData.facetDescription = facetData.description;
 						cellData.dimension = facetData.dimension;
 						cellData.filters = facetData.filters;
+						cellData.highlight = function () { return facetData.highlight; };
 						cellData.inFilter = cellData.filters.indexOf(cellData.key) !== -1;
 						if(scope.aggDim.type === "count") {
 							cellData.displayValue = cellData.value.exceptionCount;
@@ -380,31 +413,43 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 							d.filters.push(d.key);
 						}
 
-						d.dimension.filterFunction(filterFunction.bind(null, d));
-
-						if(d.filters.length > 0) {
-							deregister.push(
-								palladioService.setFilter(
-									scope.uniqueToggleId + d.facetKey,
-									d.facetDescription,
-									d.filters.join(', '),
-									function() {
-										d.filters.splice(0, d.filters.length); // Maintain the reference
-										d.dimension.filterAll();
-										palladioService.removeFilter(scope.uniqueToggleId + d.facetKey);
-										palladioService.update();
-									}
-								)
-							);
-						} else {
-							palladioService.removeFilter(scope.uniqueToggleId + d.facetKey);
-						}
+						applyFilterOrHighlight(d);
 
 						palladioService.update();
 					}
 
+					function applyFilterOrHighlight(d) {
+						if(typeof d.highlight === 'function' ? !d.highlight() : !d.highlight) {
+							d.dimension.filterFunction(filterFunction.bind(null, d));
+
+							if(d.filters.length > 0) {
+								deregister.push(
+									palladioService.setFilter(
+										scope.uniqueToggleId + d.facetKey,
+										d.facetDescription,
+										d.filters.join(', '),
+										function() {
+											d.filters.splice(0, d.filters.length); // Maintain the reference
+											d.dimension.filterAll();
+											palladioService.removeFilter(scope.uniqueToggleId + d.facetKey);
+											palladioService.update();
+										}
+									)
+								);
+							} else {
+								palladioService.removeFilter(scope.uniqueToggleId + d.facetKey);
+							}
+						} else {
+							palladioService.setHighlight(highlightFunction.bind(null, d.dimension.accessor, d));
+						}
+					}
+
 					function filterFunction(d, v) {
 						return d.filters.indexOf(v) !== -1 || d.filters.length === 0;
+					}
+
+					function highlightFunction(accessor, facet, v) {
+						return facet.filters.indexOf(accessor(v)) !== -1 || facet.filters.length === 0;
 					}
 
 					function calculateDomKey(key) {
