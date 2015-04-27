@@ -8447,6 +8447,20 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 		margin-bottom: 0px
 }
 
+[data-palladio-partime-filter] path {
+	fill: #dddddd;
+}
+
+[data-palladio-partime-filter] .axis path, [data-palladio-partime-filter] .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-partime-filter] .axis text {
+	font-size: 10px;
+}
+
 [data-palladio-palette] .palette-new-dimension-button {
 	width: 100%;
 	margin-top: 10px;
@@ -8477,20 +8491,6 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
   margin-left: 5px;
   border-radius: 2px;
 }
-[data-palladio-partime-filter] path {
-	fill: #dddddd;
-}
-
-[data-palladio-partime-filter] .axis path, [data-palladio-partime-filter] .axis line {
-	fill: none;
-	stroke: #000;
-	shape-rendering: crispEdges;
-}
-
-[data-palladio-partime-filter] .axis text {
-	font-size: 10px;
-}
-
 [data-palladio-selection-view] {
 	display: inline-block;
 }
