@@ -42,6 +42,13 @@
         <a class="btn btn-default" data-ng-click="addFilter('facet')">Facet</a>
         <a class="btn btn-default" data-ng-click="addFilter('timeline')">Timeline</a>
         <a class="btn btn-default" data-ng-click="addFilter('partime')">Timespan</a>
+        <div class="" data-palladio-selection-view></div>
+        <div class="pull-right">
+          <a class="btn btn-default" data-ng-click="expandedFilters = !expandedFilters" data-ng-init="expandedFilters = true">
+  					<i data-ng-show="expandedFilters" class="fa fa-chevron-down"></i>
+            <i data-ng-show="!expandedFilters" class="fa fa-chevron-up"></i>
+  				</a>
+        </div>
       </div>
     </div>
 

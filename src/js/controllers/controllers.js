@@ -68,6 +68,8 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		});
 
 
+
+
 		// TODO: Remove - this is no longer required as we don't run off of data on $scope.
 		$scope.refreshData = function (data) {
 			// Data setup.
@@ -164,8 +166,8 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		$scope.sparqlEndpoint = "";
 
 		$scope.sortOptions = [
-			{ label:'Sort by Value', value:'key' },
-			{ label:'Sort by Frequency', value:'value'}
+			{ label:'Sort by Value', value:'key', icon: 'fa-sort-alpha-asc' },
+			{ label:'Sort by Frequency', value:'value', icon: 'fa-sort-numeric-asc'}
 		];
 
 		$scope.displayOptions = {
@@ -270,10 +272,13 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 				return $scope.selectedSpecialChar === null || d.key.indexOf($scope.selectedSpecialChar) !== -1;
 			}).sort(function (a, b) {
 				var sortBy = $scope.displayOptions.sortBy.value;
-				if($scope.findError(a.key) && $scope.findError(b.key)) return a[sortBy] > b[sortBy] ? 1 : -1;
-				if($scope.findError(a.key)) return -1;
-				if($scope.findError(b.key)) return 1;
-				return a[sortBy] > b[sortBy] ? 1 : -1;
+				var s = 1;
+				if($scope.findError(a.key) && $scope.findError(b.key)) s = a[sortBy] > b[sortBy] ? 1 : -1;
+				if($scope.findError(a.key)) s = -1;
+				if($scope.findError(b.key)) s = 1;
+				s = a[sortBy] > b[sortBy] ? 1 : -1;
+				if ($scope.displayOptions.sortBy.value == 'value') s = s *-1;
+				return s;
 			});
 
 			// Animate unique values table on change here.

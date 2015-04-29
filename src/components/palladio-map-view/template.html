@@ -21,6 +21,8 @@
 				<!-- Body -->
 				<div class="panel-body">
 
+					<p>Map layers</p>
+
 					<div class="row margin-top" data-ng-show="!addNewLayer">
 						<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
 							<label class="inline">Data</label>
@@ -285,11 +287,14 @@
 
 						<div class="row margin-top">
 							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
-								<label class="inline">Drop geoJSON file or paste geoJSON here</label>
+								<label class="inline">geoJSON</label>
 							</div>
 							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
 								<textarea class="col-md-8 col-xs-8" id="layerGeoJSON" ng-model="geoJson" ui-codemirror="{ mode : 'javascript', lineNumbers : true, lineWrapping: true }" placeholder="Paste your geoJSON data or drop a file here" ui-refresh="cmRefresh"></textarea>
-							</div>
+
+								<span class="help-block">Drop geoJSON file or paste geoJSON in the area above</span>
+
+								</div>
 						</div>
 
 						<div class="row margin-top">
@@ -321,7 +326,7 @@
 							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
 								<div class="pull-right">
 									<a class="btn btn-default" data-ng-disabled="layerType.value === 'data' && ((!mapping.sourceCoordinates || (mapType.value=='point-to-point' && !mapping.destinationCoordinates)))" data-ng-click="addLayer();addNewLayer=false;">
-										{{ editingLayer ? 'Save layer' : 'Add layer' }}
+										{{ editingLayer ? 'Apply' : 'Add layer' }}
 									</a>
 									<a class="btn btn-default btn-cancel" data-ng-click="addNewLayer=false">Cancel</a>
 								</div>

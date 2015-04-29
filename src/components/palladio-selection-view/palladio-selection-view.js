@@ -35,14 +35,21 @@ angular.module('palladioSelectionView', ['palladio'])
 						ul.append("span").attr("class", "selection-title").text("Filters");
 					}*/
 
-					sel.selectAll("span.muted").remove();
+					sel.selectAll(".no-filter").remove();
 
 					if (palladioService.getFilters().entries().length === 0) {
 						sel.append("span")
-							.attr("class","muted small")
+							.attr("class","no-filter text-muted small")
 							.style("margin-left", "5px")
-							.text("No active filters");
+							.text("You have no active filters");
 					}
+
+					/*sel.append("span")
+						.attr("class","no-filter text-muted small")
+						.style("margin-left", "5px")
+						.text(function(){
+							return palladioService.getFilters().entries().length === 0 ? "You have no active filters" : "Active filters"
+						});*/
 
 					var pills = ul.selectAll("li")
 						.data(palladioService.getFilters().entries(), function (d) { return d.key; });
@@ -54,10 +61,13 @@ angular.module('palladioSelectionView', ['palladio'])
 									.attr("class", "selection-label");
 							li.append("span")
 									.attr("class", "selection-text");
-							li.append("a")
-									.attr("class","remove")
+							li.append("span")
+									.attr("class","pointer text-danger")
+									.attr("tooltip","Remove")
+									.attr("tooltip-animation","false")
 									.html('&times;')
 									.on("click", function (d) { d.value[2](); });
+
 						});
 
 					pills.exit().remove();

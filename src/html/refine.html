@@ -4,18 +4,17 @@
 		<div class="modal-content">
 			<!-- Modal Header -->
 			<div class="modal-header">
-				Refine
+				Edit
 			</div>
 
 			<!-- Modal Body -->
 			<div class="modal-body">
 
-
 				<div class="row" data-ng-show="addingTable">
 
 					<div class="col-lg-12">
-						<p>Copy and paste out of your spreadsheets, drag-and-drop to upload tabular data (e.g. .csv, .tab, .tsv), or link to a file in a public Dropbox folder to add a new table to your Palladio project. <a target="_blank" href="http://hdlab.stanford.edu/lab-notebook/palladio/2014/11/18/palladio-faqs-0-8-0/#2">Not sure how to structure your data?</a></p>
 						<textarea ui-refresh="selectedFieldMetadata" ui-codemirror="{ mode : 'text',  lineNumbers : true, lineWrapping: true, onDrop : onDrop }" placeholder="Paste your data or drop a file here" ng-model="text"></textarea>
+						<p class="help-block">Copy and paste out of your spreadsheets, drag-and-drop to upload tabular data (e.g. .csv, .tab, .tsv), or link to a file in a public Dropbox folder to add a new table to your Palladio project. <a target="_blank" href="http://hdlab.stanford.edu/lab-notebook/palladio/2014/11/18/palladio-faqs-0-8-0/#2">Not sure how to structure your data?</a></p>
 						<div class="alert alert-warning" ng-show="parseError">{{parseError}}</div>
 
 						<div class="pull-right">
@@ -49,7 +48,7 @@
 
 				<div class="row margin-bottom">
 					<div class="col-lg-2 col-md-2 col-sm-4 col-xs-4 text-right">
-						<label class="inline">Description</label>
+						<label class="inline">Title</label>
 					</div>
 					<div class="col-lg-4 col-md-6 col-sm-8 col-xs-8 col-condensed">
 						<input
@@ -97,44 +96,69 @@
 
 						<div class="row">
 
-							<div class="col-lg-5 col-md-6 col-sm-6 margin-bottom">
-								<input type="text" class="form-control" ng-model="searchUnique.key" placeholder="Search"></input>
+							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+
+								<div class="row">
+
+									<div class="col-lg-5 col-md-6 col-sm-6 margin-bottom">
+										<input type="text" class="form-control" ng-model="searchUnique.key" placeholder="Search"></input>
+									</div>
+
+									<div class="col-lg-5 col-lg-offset-2 col-md-6 col-sm-6">
+
+										<ui-select class="pull-right" ng-model="displayOptions.sortBy" theme="selectize" ng-disabled="disabled" on-select="updateMetadata()">
+											<ui-select-match placeholder="Select or search">
+												<!--<i class="fa margin-right" ng-class="$select.selected.icon"></i>-->
+												{{$select.selected.label}}
+												<span class="caret"></span>
+											</ui-select-match>
+											<ui-select-choices repeat="type in sortOptions | filter: {label:$select.search}">
+												<span ng-bind-html="type.label | highlight: $select.search"></span><br/>
+											</ui-select-choices>
+										</ui-select>
+
+										<div class="clearfix"></div>
+
+									</div>
+
+								</div>
+
+								<div class="unique-values margin-bottom">
+									<table
+										class="table table-striped"
+										data-ng-show="!filtered || (filtered && filtered.length > 0)">
+										<tr data-ng-repeat="val in filtered = (selectedFieldMetadata.uniques | filter:searchUnique) | limitTo:1000">
+												<td
+													data-ng-class="{ 'text-danger': findError(val.key) }"
+													title="{{findError(val.key).message}}"
+													data-ng-bind-html="displayVal(val)">
+											</td>
+										</tr>
+									</table>
+									<div class="padding-all text-danger small" data-ng-show="filtered && filtered.length == 0">No values found</div>
+								</div>
+
+								<p class="help-block pull-right"><strong>{{filtered.length}}</strong> values displayed. <a data-ng-click="downloadUniques(searchUnique)" class="" data-ng-hide="filtered && filtered.length == 0">Download</a></p>
+
 							</div>
 
-							<div class="col-lg-5 col-lg-offset-2 col-md-6 col-sm-6">
+							<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
 
-								<ui-select class="pull-right" ng-model="displayOptions.sortBy" theme="selectize" ng-disabled="disabled" on-select="updateMetadata()">
-									<ui-select-match placeholder="Select or search">
-										{{$select.selected.label}}
-										<span class="caret"></span>
-									</ui-select-match>
-									<ui-select-choices repeat="type in sortOptions | filter: {label:$select.search}">
-										<span ng-bind-html="type.label | highlight: $select.search"></span><br/>
-									</ui-select-choices>
-								</ui-select>
+								<!--<div ng-show="selectedFieldMetadata.unassignedSpecialChars.length">
+									<span class="help-block">Some of the values in this dimension contain the following special characters. If you want to use them as delimiter, type them into the forms below.</span>
+									<div specials></div>
+								</div>-->
 
-								<div class="clearfix"></div>
-
+								<label class="">Multiple values <i class="fa fa-question-circle hint" popover-trigger="mouseenter" popover="Multiple values are Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse "></i></label>
+								<input type="text" id="val-delimiter" class="form-control"
+									data-ng-model="selectedFieldMetadata.mvDelimiter"
+									data-ng-change="updateMetadata()"/>
+								<span class="help-block">If the dimension contains multiple values, insert the delimiter string above</span>
 							</div>
 
 						</div>
 
-						<div class="unique-values margin-bottom">
-							<table
-								class="table table-striped"
-								data-ng-show="!filtered || (filtered && filtered.length > 0)">
-								<tr data-ng-repeat="val in filtered = (selectedFieldMetadata.uniques | filter:searchUnique) | limitTo:1000">
-										<td
-											data-ng-class="{ 'text-danger': findError(val.key) }"
-											title="{{findError(val.key).message}}"
-											data-ng-bind-html="displayVal(val)">
-									</td>
-								</tr>
-							</table>
-							<div class="padding-all text-danger small" data-ng-show="filtered && filtered.length == 0">No values found</div>
-						</div>
 
-						<p class="help-block pull-right"><strong>{{filtered.length}}</strong> values displayed. <a data-ng-click="downloadUniques(searchUnique)" class="" data-ng-hide="filtered && filtered.length == 0">Download</a></p>
 
 					</div>
 

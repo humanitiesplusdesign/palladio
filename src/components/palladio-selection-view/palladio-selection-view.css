@@ -15,15 +15,15 @@
 	display: inline-block;
 	margin-left: 0px;
 	margin: 0px;
+	padding: 0px;
 }
 
 [data-palladio-selection-view] .selection-pill {
 	display: inline-block;
-	margin-right: 5px;
 	background-color: #eeeeee;
 	border-radius: 2px;
 	padding-right: 10px;
-	margin-bottom: 2px;
+	margin: 2px 5px 2px 0px;
 	line-height: 1.6;
 }
 
