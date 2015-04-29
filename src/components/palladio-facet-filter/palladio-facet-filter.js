@@ -174,7 +174,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 
 								if(count > 0) {
 									// Extend the width of the inner- and mid-facet-container
-									selection.style('width', (+selection.style('width').substring(0, selection.style('width').length - 2) + (205 * count)) + 'px');
+									selection.style('width', (+selection.style('width').substring(0, selection.style('width').length - 2) + (210 * count)) + 'px');
 									d3.select(element[0]).select('.mid-facet-container').transition()
 										.style('width', (+d3.select(element[0]).select('.mid-facet-container')
 											.style('width').substring(0, d3.select(element[0]).select('.mid-facet-container')
@@ -287,6 +287,10 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 
 						buttonGroup.append("a").attr("class", "btn-mini")
 								.on("click", function (d) {
+									if(d.highlight) {
+										// If highlighting is in place, remove it.
+										palladioService.removeHighlight();
+									}
 									scope.$apply(function(s) {
 										s.dims = s.dims.filter(function (g) {
 											return g.key !== d.key;
@@ -440,7 +444,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 								palladioService.removeFilter(scope.uniqueToggleId + d.facetKey);
 							}
 						} else {
-							palladioService.setHighlight(highlightFunction.bind(null, d.dimension.accessor, d));
+							deregister.push(palladioService.setHighlight(highlightFunction.bind(null, d.dimension.accessor, d)));
 						}
 					}
 

@@ -22,10 +22,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				}));
 
 				deregister.push(palladioService.watchHighlight(uniqueId, function () {
-					scope.layers.forEach(function(d) {
-						d.sourceGroups = null;
-						d.destGroups = null;
-					});
+					clearAllGroups();
 				}));
 
 				// Update when it becomes visible (updating when not visibile errors out)
