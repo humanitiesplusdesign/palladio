@@ -55,6 +55,44 @@ angular.module('palladio', [])
 			update();
 		};
 
+		//	Experimental: setHighlight takes 1 argument: A function taking a record and
+		//  returning true/false. Indicates whether a record is within the highlight or
+		//  or not.
+
+		var highlight;
+		var highlightWatches = d3.map();
+
+		var setHighlight = function (test) {
+			if(typeof test === 'function') {
+				highlight = test;
+				highlightWatches.values().forEach(function(c) { c(); });
+			} else {
+				console.error("setHighlight only takes a function as its argument.");
+			}
+			return removeHighlight;
+		};
+
+		var getHighlight = function () {
+			return highlight;
+		};
+
+		var watchHighlight = function (id, callback) {
+			highlightWatches.set(id, callback);
+			return unwatchHighlight.bind(this, id);
+		};
+
+		var unwatchHighlight = function (id) {
+			highlightWatches.remove(id);
+		};
+
+		var removeHighlight = function () {
+			highlight = function () { return true; };
+			highlightWatches.values().forEach(function(c) { c(); });
+			update();
+		};
+
+		removeHighlight();
+
 
 
 		var resetCallbacks = d3.map();
@@ -167,6 +205,11 @@ angular.module('palladio', [])
 			setFilter: setFilter,
 			getFilters: getFilters,
 			removeFilter: removeFilter,
+			setHighlight: setHighlight,
+			getHighlight: getHighlight,
+			watchHighlight: watchHighlight,
+			unwatchHighlight: unwatchHighlight,
+			removeHighlight: removeHighlight,
 			onReset: registerResetCallback,
 			reset: reset,
 			onSearch: registerSearchCallback,

@@ -35,8 +35,6 @@
 
 
 [data-palladio-map-view] .node {
-	opacity: 0.7;
-	stroke-opacity: 0.6;
 	cursor: pointer;
 }
 
@@ -45,6 +43,15 @@
 	transition-property: fill;
     transition-duration: .5s;
 	fill: #1B2D36;
+}
+
+[data-palladio-map-view] .shape {
+	cursor: pointer;
+}
+
+[data-palladio-map-view] .shape:hover {
+	opacity: 0.9;
+	stroke-opacity: 0.9;
 }
 
 [data-palladio-map-view] .link{

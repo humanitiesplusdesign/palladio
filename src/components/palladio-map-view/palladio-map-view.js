@@ -21,6 +21,10 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					if(element.is(':visible')) { m.invalidateSize(false); update(); }
 				}));
 
+				deregister.push(palladioService.watchHighlight(uniqueId, function () {
+					clearAllGroups();
+				}));
+
 				// Update when it becomes visible (updating when not visibile errors out)
 				scope.$watch(function() { return element.is(':visible'); }, update);
 
@@ -110,19 +114,31 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							var reducer = reductio()
 								.exception(function(v) { return v[layer.countBy]; });
 
+							var highlight = reducer.value('hl')
+								.filter(palladioService.getHighlight())
+								.exception(function(v) { return v[layer.countBy]; });
+
 							if(layer.aggregationType === 'COUNT') {
 								reducer.exceptionCount(true);
+								highlight.exceptionCount(true);
 								reducer.aliasProp({
 									description: function(g, v) { return sourceAccessor(v); },
 									agg: function(g) { return g.exceptionCount; },
 									initialAgg: function(g) { return isNaN(g.initialAgg) || g.exceptionCount > +g.initialAgg ? g.exceptionCount : g.initialAgg; }
 								});
+								highlight.aliasProp({
+									agg: function(g) { return g.exceptionCount; }
+								});
 							} else {
 								reducer.exceptionSum(function(d) { return +d[layer.aggregateKey]; });
+								highlight.exceptionSum(function(d) { return +d[layer.aggregateKey]; });
 								reducer.aliasProp({
 									description: function(g, v) { return sourceAccessor(v); },
 									agg: function(g) { return g.exceptionSum; },
 									initialAgg: function(g) { return isNaN(g.initialAgg) || g.exceptionSum > +g.initialAgg ? g.exceptionSum : g.initialAgg; }
+								});
+								highlight.aliasProp({
+									agg: function(g) { return g.exceptionSum; }
 								});
 							}
 							layer.sourceGroups = reducer(layer.source.group())
@@ -143,19 +159,31 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							var reducer = reductio()
 								.exception(function(v) { return v[layer.countBy]; });
 
+							var highlight = reducer.value('hl')
+								.filter(palladioService.getHighlight())
+								.exception(function(v) { return v[layer.countBy]; });
+
 							if(layer.aggregationType === 'COUNT') {
 								reducer.exceptionCount(true);
+								highlight.exceptionCount(true);
 								reducer.aliasProp({
 									description: function(g, v) { return destinationAccessor(v); },
 									agg: function(g) { return g.exceptionCount; },
 									initialAgg: function(g) { return isNaN(g.initialAgg) || g.exceptionCount > +g.initialAgg ? g.exceptionCount : g.initialAgg; }
 								});
+								highlight.aliasProp({
+									agg: function(g) { return g.exceptionCount; }
+								});
 							} else {
 								reducer.exceptionSum(function(d) { return +d[layer.aggregateKey]; });
+								highlight.exceptionSum(function(d) { return +d[layer.aggregateKey]; });
 								reducer.aliasProp({
 									description: function(g, v) { return destinationAccessor(v); },
 									agg: function(g) { return g.exceptionSum; },
 									initialAgg: function(g) { return isNaN(g.initialAgg) || g.exceptionSum > +g.initialAgg ? g.exceptionSum : g.initialAgg; }
+								});
+								highlight.aliasProp({
+									agg: function(g) { return g.exceptionSum; }
 								});
 							}
 							layer.destGroups = reducer(layer.destination.group())
@@ -181,6 +209,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							.forEach( function (d) {
 								if(groupPoints.has(d.key)) {
 									groupPoints.get(d.key).agg += +d.value.agg;
+									groupPoints.get(d.key).hl.agg += +d.value.hl.agg;
 									groupPoints.get(d.key).initialAgg += d.value.initialAgg;
 								} else {
 									// Must copy the group value because these values will be updated.
@@ -213,20 +242,32 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						var reducer = reductio()
 							.exception(function(v) { return v[layer.countBy]; });
 
+						var highlight = reducer.value('hl')
+							.filter(palladioService.getHighlight())
+							.exception(function(v) { return v[layer.countBy]; });
+
 						if(layer.aggregationType === 'COUNT') {
 							reducer.exceptionCount(true);
+							highlight.exceptionCount(true);
 							reducer.aliasProp({
 								agg: function(g) { return g.exceptionCount; },
 								description: function(g, v) { return layer.sourceAccessor(v) + " → " + layer.destinationAccessor(v); },
 								record: function(g,v) { return v; }
 							});
+							highlight.aliasProp({
+								agg: function(g) { return g.exceptionCount; }
+							});
 						} else {
 							reducer.exceptionSum(function(d) { return +d[layer.aggregateKey]; });
+							highlight.exceptionSum(function(d) { return +d[layer.aggregateKey]; });
 							reducer.aliasProp({
 								agg: function(g) { return g.exceptionSum; },
 								description: function(g, v) { return layer.sourceAccessor(v) + " → " + layer.destinationAccessor(v); },
 								record: function(g,v) { return v; }
 							});
+							highlight.aliasProp({
+								agg: function(g) { return g.exceptionSum; }
+							})
 						}
 
 						layer.nestedGroups = reducer(layer.filterDimension.group());
@@ -320,6 +361,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							path = d3.geo.path()
 								.pointRadius(function(d){ return pointSize(d.properties.value.agg);})
 								.projection(project),
+							opacity = function(d) { return 0.2 + (0.6 * ((d.properties.value.hl.agg ? d.properties.value.hl.agg : 0) / d.properties.value.agg)); },
 	   						value = edges.feature ? d3.scale.linear().domain([ d3.min(edges.features, function(d){ return d.properties.value; }), d3.max(edges.features, function(d){ return d.properties.value; }) ]).range([2,20]) : function(d){ return 2; };
 
 	   					if(!layer.maxPointSize) layer.maxPointSize = maxPointSize;
@@ -400,6 +442,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				          	.attr("d", path)
 				          	.style("fill", layer.color)
 						    .style("stroke", layer.color)
+						    .style("opacity", opacity)
 				          	.on("click", function(d){
 						    	layer.filterDimension.filter(function (c) {
 									return c[0] === d.properties.key ||
@@ -416,6 +459,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						    .attr("d", path)
 						    .style("fill", layer.color)
 						    .style("stroke", layer.color)
+						    .style("opacity", opacity)
 						    .on("click", function(d){
 						    	nodeTip.hide();
 						    	layer.filterDimension.filter(function (c) {
@@ -520,6 +564,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					   	paths.enter()
 					   		.append("path")
 					   			.attr("d", path)
+					   			.attr("class", "shape")
 					   			.attr("stroke", layer.color)
 					   			.attr("fill", function(d) { 
 					   				if (layer.fillShapes && d.geometry && (d.geometry.type === "Point" || d.geometry.type === "Polygon" || d.geometry.type === "GeometryCollection")) {
