@@ -361,7 +361,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							path = d3.geo.path()
 								.pointRadius(function(d){ return pointSize(d.properties.value.agg);})
 								.projection(project),
-							opacity = function(d) { return 0.2 + (0.6 * ((d.properties.value.hl.agg ? d.properties.value.hl.agg : 0) / d.properties.value.agg)); },
+							opacity = function(d) { return ((d.properties.value.hl.agg ? d.properties.value.hl.agg : 0) > 0) ? 0.8 : 0.2; },
 	   						value = edges.feature ? d3.scale.linear().domain([ d3.min(edges.features, function(d){ return d.properties.value; }), d3.max(edges.features, function(d){ return d.properties.value; }) ]).range([2,20]) : function(d){ return 2; };
 
 	   					if(!layer.maxPointSize) layer.maxPointSize = maxPointSize;
