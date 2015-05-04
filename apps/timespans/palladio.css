@@ -8167,6 +8167,84 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
     display: none;
 }
 
+[data-palladio-list-view] {
+	margin-bottom: 20px;
+	margin-top: 20px;
+}
+
+[data-palladio-list-view] .list-title {
+	font-size: 14px;
+	line-height: normal;
+}
+
+[data-palladio-list-view] .list-image {
+	height: 130px;
+	width: 100px;
+	float: left;
+	background-size: cover;
+	background-position: top center;
+	border: none;
+	margin-right: 10px;
+	background-repeat: no-repeat;
+	background-color: #ddd;
+	color: #bbb;
+	font-size: 12px;
+
+	padding: 20px;
+	text-align: center;
+
+	/* Internet Explorer 10 */
+	display:-ms-flexbox;
+	-ms-flex-pack:center;
+	-ms-flex-align:center;
+
+	/* Firefox */
+	display:-moz-box;
+	-moz-box-pack:center;
+	-moz-box-align:center;
+
+	/* Safari, Opera, and Chrome */
+	display:-webkit-box;
+	-webkit-box-pack:center;
+	-webkit-box-align:center;
+
+	/* W3C */
+	display:box;
+	box-pack:center;
+	box-align:center;
+
+}
+
+
+[data-palladio-list-view] .list-subtitle {
+	color: #888;
+	font-size: 13px;
+	margin-top: 5px;
+}
+
+[data-palladio-list-view] .list-text {
+	font-size: 12px;
+	margin-top: 5px;
+}
+
+[data-palladio-list-view] .list-link {
+	text-decoration: none;
+	color: black;
+}
+
+
+[data-palladio-list-view] .list-box {
+	height: 150px;
+	padding: 10px;
+	background: #e5e5e5;
+	margin-bottom: 15px;
+
+}
+
+[data-palladio-list-view] .list-box:hover {
+	background-color: #ccc;
+}
+
 [data-palladio-map-view] {
 	width: 100%;
 	height: 100%;
@@ -8356,84 +8434,6 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 
 [data-palladio-map-view-with-settings] .layer-item:last-child {
 		margin-bottom: 0px
-}
-
-[data-palladio-list-view] {
-	margin-bottom: 20px;
-	margin-top: 20px;
-}
-
-[data-palladio-list-view] .list-title {
-	font-size: 14px;
-	line-height: normal;
-}
-
-[data-palladio-list-view] .list-image {
-	height: 130px;
-	width: 100px;
-	float: left;
-	background-size: cover;
-	background-position: top center;
-	border: none;
-	margin-right: 10px;
-	background-repeat: no-repeat;
-	background-color: #ddd;
-	color: #bbb;
-	font-size: 12px;
-
-	padding: 20px;
-	text-align: center;
-
-	/* Internet Explorer 10 */
-	display:-ms-flexbox;
-	-ms-flex-pack:center;
-	-ms-flex-align:center;
-
-	/* Firefox */
-	display:-moz-box;
-	-moz-box-pack:center;
-	-moz-box-align:center;
-
-	/* Safari, Opera, and Chrome */
-	display:-webkit-box;
-	-webkit-box-pack:center;
-	-webkit-box-align:center;
-
-	/* W3C */
-	display:box;
-	box-pack:center;
-	box-align:center;
-
-}
-
-
-[data-palladio-list-view] .list-subtitle {
-	color: #888;
-	font-size: 13px;
-	margin-top: 5px;
-}
-
-[data-palladio-list-view] .list-text {
-	font-size: 12px;
-	margin-top: 5px;
-}
-
-[data-palladio-list-view] .list-link {
-	text-decoration: none;
-	color: black;
-}
-
-
-[data-palladio-list-view] .list-box {
-	height: 150px;
-	padding: 10px;
-	background: #e5e5e5;
-	margin-bottom: 15px;
-
-}
-
-[data-palladio-list-view] .list-box:hover {
-	background-color: #ccc;
 }
 
 [data-palladio-palette] .palette-new-dimension-button {
@@ -10749,6 +10749,47 @@ label.inline {
   -o-transform: translate(0, 0);
   transform: translate(0, 0);
 }
+
+/* Pills */
+
+.modal .pill {
+  display: inline-block;
+  padding: 2px 10px;
+  margin: 2px;
+  border-radius: 2px;
+  background-color: #eee;
+  cursor: pointer;
+}
+
+.modal .pill:hover {
+  background-color: #ddd;
+}
+
+.modal .pill.checked {
+  background-color: #444;
+}
+
+.modal .pill label {
+  display: inline-block;
+  margin: 0px;
+  line-height: 1;
+  font-weight: 300;
+  cursor: pointer;
+}
+
+.modal .pill.checked label {
+  color: #eee;
+}
+
+.modal .pill i {
+  margin-right: 10px;
+}
+
+.modal .pill input {
+  display: none;
+}
+
+
 
 .fa {
   -webkit-user-select: none;

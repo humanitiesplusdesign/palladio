@@ -226,7 +226,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 									// Must copy the group value because these values will be updated.
 									groupPoints.set(d.key, angular.copy(d.value));
 								}
-							});	
+							});
 					}
 
 					// remove entries for undefined coordinates
@@ -567,11 +567,11 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 					   	paths.attr("d", path)
 					   			.attr("stroke", layer.color)
-					   			.attr("fill", function(d) { 
+					   			.attr("fill", function(d) {
 					   				if (layer.fillShapes && d.geometry && (d.geometry.type === "Point" || d.geometry.type === "Polygon" || d.geometry.type === "GeometryCollection")) {
 					   					return layer.color;
 					   				} else {
-					   					return "none"; 
+					   					return "none";
 					   				}
 					   			});
 
@@ -580,11 +580,11 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					   			.attr("d", path)
 					   			.attr("class", "shape")
 					   			.attr("stroke", layer.color)
-					   			.attr("fill", function(d) { 
+					   			.attr("fill", function(d) {
 					   				if (layer.fillShapes && d.geometry && (d.geometry.type === "Point" || d.geometry.type === "Polygon" || d.geometry.type === "GeometryCollection")) {
 					   					return layer.color;
 					   				} else {
-					   					return "none"; 
+					   					return "none";
 					   				}
 					   			});
 
@@ -997,7 +997,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 					if (layer.source) layer.source.remove();
 					layer.source = !layer.mapping.sourceCoordinates ? null : scope.xfilter.dimension(layer.sourceCoordinatesAccessor);
-					
+
 					// If we are dealing with a type-based field, build a lookup mapping.
 					var destTypeMap = d3.map();
 					if(layer.mapping.destinationCoordinates && layer.mapping.destinationCoordinates.typeField !== undefined) {
@@ -1230,8 +1230,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					},
 					{
 						"custom" : true,
-						"description": "Custom...",
-						"info" : "Choose one of the following methods to add custom tiles."
+						"description": "Custom tiles",
+						"info" : "Choose one of the following methods to add custom tiles"
 					}
 				]
 
@@ -1385,7 +1385,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				// doesn't properly update when it is hidden so if we update the model and unhide
 				// in the same update cycle it needs to be refreshed.
 				scope.cmRefresh = true;
-				scope.$watch('geoJson', function() { 
+				scope.$watch('geoJson', function() {
 					scope.cmRefresh = !scope.cmRefresh;
 				});
 
