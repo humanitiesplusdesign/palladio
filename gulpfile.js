@@ -73,6 +73,16 @@ gulp.task('css', function () {
         .pipe(gulp.dest('./apps/template/'));
 });
 
+gulp.task('images', function () {
+	gulp.src('./bower_components/mapbox.js/images/*')
+		.pipe(gulp.dest('./images/'))
+        .pipe(gulp.dest('./apps/palladio/images/'))
+        .pipe(gulp.dest('./apps/piranesi/images/'))
+        .pipe(gulp.dest('./apps/standalone/images/'))
+        .pipe(gulp.dest('./apps/timespans/images/'))
+        .pipe(gulp.dest('./apps/template/images/'));
+})
+
 // Watch Files For Changes
 gulp.task('watch', function() {
 	gulp.watch(["bower.json"], ['scripts', 'css']);
@@ -97,6 +107,6 @@ gulp.task('webserver', function() {
 		}));
 });
 
-gulp.task('default', ['scripts', 'css', 'webserver', 'watch']);
-gulp.task('all', ['scripts', 'css']);
+gulp.task('default', ['scripts', 'css', 'images', 'webserver', 'watch']);
+gulp.task('all', ['scripts', 'css', 'images']);
 gulp.task('serve', ['webserver'])

@@ -4,7 +4,7 @@
 		<div class="modal-content">
 			<!-- Modal Header -->
 			<div class="modal-header">
-				Edit
+				Edit dimension
 			</div>
 
 			<!-- Modal Body -->
@@ -94,9 +94,9 @@
 
 					<div class="col-lg-10 col-md-10 col-sm-8 col-xs-8 col-condensed">
 
-						<div class="row">
+						<div class="row margin-bottom">
 
-							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+							<div class="col-lg-8 col-md-8 col-sm-12 col-xs-12">
 
 								<div class="row">
 
@@ -138,11 +138,11 @@
 									<div class="padding-all text-danger small" data-ng-show="filtered && filtered.length == 0">No values found</div>
 								</div>
 
-								<p class="help-block pull-right"><strong>{{filtered.length}}</strong> values displayed. <a data-ng-click="downloadUniques(searchUnique)" class="" data-ng-hide="filtered && filtered.length == 0">Download</a></p>
+								<p class="help-block"><strong>{{filtered.length}}</strong> values displayed. <a data-ng-click="downloadUniques(searchUnique)" class="" data-ng-hide="filtered && filtered.length == 0">Download</a></p>
 
 							</div>
 
-							<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+							<div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
 
 								<!--<div ng-show="selectedFieldMetadata.unassignedSpecialChars.length">
 									<span class="help-block">Some of the values in this dimension contain the following special characters. If you want to use them as delimiter, type them into the forms below.</span>
@@ -168,31 +168,50 @@
 					<div class="col-lg-2 col-md-2 col-sm-4 col-xs-4 text-right">
 						<label class="inline">Extention</label>
 					</div>
-					<div class="col-lg-9 col-md-9 col-sm-8 col-xs-8 col-condensed">
 
-						<ui-select ng-model="selectedFieldMetadata.augmentId" theme="selectize" ng-disabled="disabled" on-select="updateMetadata()">
-							<ui-select-match placeholder="Choose a table...">
-								{{$select.selected.label}}
-								<span class="caret"></span>
-							</ui-select-match>
-							<ui-select-choices repeat="file.uniqueId as file in filteredFiles() | filter: {label:$select.search}">
-								<span ng-bind-html="file.label | highlight: $select.search"></span><br/>
-							</ui-select-choices>
-						</ui-select>
+					<div class="col-lg-10 col-md-10 col-sm-8 col-xs-8 col-condensed">
 
-						<span class=""
-							style="margin-bottom:0px"
-							data-ng-show="hasLinks(selectedFieldMetadata).lookup"
-							ng-class="hasLinks(selectedFieldMetadata).metadata.claz">
+						<div class="row">
 
-							<span class="">{{hasLinks(selectedFieldMetadata).metadata.matches}}</span> out of {{hasLinks(selectedFieldMetadata).metadata.total}} matches for {{selectedFieldMetadata.description}} in {{hasLinks(selectedFieldMetadata).lookup.file.label}}
-						</span>
+							<div class="col-lg-8 col-md-8 col-sm-12 col-xs-12">
 
 
-						<span class="help-block" data-ng-show="!hasLinks(selectedFieldMetadata).lookup">You can provide additional information about this dimension with data from another table.</span>
+										<div class="row">
+											<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+												<ui-select ng-model="selectedFieldMetadata.augmentId" theme="selectize" ng-disabled="disabled" on-select="updateMetadata()">
+													<ui-select-match placeholder="Choose a table">
+														{{$select.selected.label}}
+														<span class="caret"></span>
+													</ui-select-match>
+													<ui-select-choices repeat="file.uniqueId as file in filteredFiles() | filter: {label:$select.search}">
+														<span ng-bind-html="file.label | highlight: $select.search"></span><br/>
+													</ui-select-choices>
+												</ui-select>
 
 
-					<a class="btn btn-default" ng-click="showNewTable()">Add a new table</a>
+											</div>
+											<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+												<a class="btn btn-default pull-right" ng-click="showNewTable()">Add a new table</a>
+											</div>
+										</div>
+
+
+										<span
+											class="help-block"
+											style="margin-bottom:0px"
+											data-ng-show="hasLinks(selectedFieldMetadata).lookup">
+
+											<span ng-class="hasLinks(selectedFieldMetadata).metadata.claz">
+												<span>{{hasLinks(selectedFieldMetadata).metadata.matches}}</span> out of {{hasLinks(selectedFieldMetadata).metadata.total}} matches for {{selectedFieldMetadata.description}} in {{hasLinks(selectedFieldMetadata).lookup.file.label}}
+											</span>
+
+										</span>
+
+										<span class="help-block" data-ng-show="!hasLinks(selectedFieldMetadata).lookup">You can provide additional information about this dimension with data from another table.</span>
+
+							</div>
+						</div>
+
 					</div>
 				</div>
 
@@ -204,7 +223,7 @@
 
 			<!-- Modal Footer -->
 			<div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal">Done</button>
+				<button type="button" class="btn btn-default" data-dismiss="modal" ng-click="hideNewTable()">Done</button>
 			</div>
 		</div>
 	</div>

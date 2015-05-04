@@ -98,12 +98,40 @@
 <div class="container-fluid" data-ng-show="files.length">
 
 	<div class="row padding-top">
+
 		<div class="col-lg-12">
 			<input class="form-control editable" type="text" placeholder="Untitled project" ng-model="project.title"></input>
+			<p class="" ng-show="!showDetails"><a class="small text-muted" ng-click="showDetails=true" ng-init="showDetails=false">Show project details</a></p>
+			<p class="" ng-show="showDetails"><a class="small text-muted" ng-click="showDetails=false">Hide details</a></p>
 		</div>
+
+		<div class="col-lg-12" ng-show="shwDetails">
+			<div class="row">
+				<div class="col-lg-3 col-md-3">
+					<label>Author</label>
+					<input class="form-control" type="text"></input>
+				</div>
+			</div>
+		</div>
+
 	</div>
 
 	<div class="row padding-top files">
+
+		<div class="col-lg-3 col-md-4" ng-show="showDetails">
+
+			<div>
+				<label>Author(s)</label>
+				<input class="form-control" type="text" placeholder="" ng-model="project.author"></input>
+			</div>
+
+			<div class="margin-top">
+				<label>Description</label>
+				<textarea class="resize-vertical form-control" rows="10" placeholder="Provide a description for this project (e.g. description of the data, ...)" ng-model="project.description"></textarea>
+			</div>
+
+		</div>
+
 			<!-- Each file -->
 			<div
 				file
@@ -137,7 +165,8 @@
 
 					</div>
 
-					<div class="panel-body">
+					<!--<div class="panel-body">
+
 						<div class="text-center">
 							<div class="btn-group btn-group-small">
 								<label class="btn btn-default" ng-model="fieldView" btn-radio="'field-view-list'">List</label>
@@ -145,7 +174,7 @@
 								<label class="btn btn-default" ng-model="fieldView" btn-radio="'field-view-overview'">Overview</label>
 							</div>
 						</div>
-					</div>
+					</div>-->
 
 					<!-- File Body -->
 					<!--<div class="panel-body">

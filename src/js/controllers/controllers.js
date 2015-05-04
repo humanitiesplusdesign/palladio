@@ -24,7 +24,8 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 
 		$scope.project = {
 			title : null,
-			author : 'Untitled'
+			author : null,
+			description : null
 		}
 
 		$scope.$watch('searchText', function (nv, ov) {
@@ -112,6 +113,8 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 				dataService.deleteFile(dataService.getFiles()[0], 0);
 			}
 		};
+
+
 
 		$scope.onLoad = function() {
 			// Only move on to the visualization if the save file has a visualization part, in
@@ -486,6 +489,10 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			palladioService.update();
 			$('.tooltip').remove();
 		};
+
+		$scope.hasFilters = function() {
+			return $('#filters').children().length;
+		}
 
 		// Compile new filters, add them to the WorkflowCtrl scope (parent)
 		// and then append them to the DOM.

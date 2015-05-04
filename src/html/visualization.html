@@ -44,7 +44,7 @@
         <a class="btn btn-default" data-ng-click="addFilter('partime')">Timespan</a>
         <div class="" data-palladio-selection-view></div>
         <div class="pull-right">
-          <a class="btn btn-default" data-ng-click="expandedFilters = !expandedFilters" data-ng-init="expandedFilters = true">
+          <a class="btn btn-default" ng-class="{disabled:!hasFilters()}" data-ng-click="expandedFilters = !expandedFilters" data-ng-init="expandedFilters = true">
   					<i data-ng-show="expandedFilters" class="fa fa-chevron-down"></i>
             <i data-ng-show="!expandedFilters" class="fa fa-chevron-up"></i>
   				</a>

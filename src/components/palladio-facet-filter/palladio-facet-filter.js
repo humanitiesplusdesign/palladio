@@ -203,35 +203,35 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 										function (d) { return d.key; });
 
 						// Highlight/filter option
-						buttonGroup.append("a").attr("class", "btn-mini")
-								.classed('active', function(d) { return !d.highlight; })
-								.on("click", function(d, i) {
-									if(!d.highlight) {
-										d.highlight = true;
+						// buttonGroup.append("a").attr("class", "btn-mini")
+						// 		.classed('active', function(d) { return !d.highlight; })
+						// 		.on("click", function(d, i) {
+						// 			if(!d.highlight) {
+						// 				d.highlight = true;
 										
-										// Switch icon
-										d3.select(this).select('i').classed('fa-square', false);
-										d3.select(this).select('i').classed('fa-square-o', true);
+						// 				// Switch icon
+						// 				d3.select(this).select('i').classed('fa-square', false);
+						// 				d3.select(this).select('i').classed('fa-square-o', true);
 
-										// Remove filter and update
-										d.dimension.filterAll();
-										palladioService.removeFilter(scope.uniqueToggleId + d.facetKey);
-										applyFilterOrHighlight(d);
-										palladioService.update();
-									} else {
-										d.highlight = false;
-										// Switch icon
-										d3.select(this).select('i').classed('fa-square', true);
-										d3.select(this).select('i').classed('fa-square-o', false);
+						// 				// Remove filter and update
+						// 				d.dimension.filterAll();
+						// 				palladioService.removeFilter(scope.uniqueToggleId + d.facetKey);
+						// 				applyFilterOrHighlight(d);
+						// 				palladioService.update();
+						// 			} else {
+						// 				d.highlight = false;
+						// 				// Switch icon
+						// 				d3.select(this).select('i').classed('fa-square', true);
+						// 				d3.select(this).select('i').classed('fa-square-o', false);
 
-										// Remove highlight and update
-										palladioService.removeHighlight();
-										applyFilterOrHighlight(d);
-										palladioService.update();
-									}
-									d3.select(this).classed('active', !d.highlight);
-								})
-								.append("i").attr("class", "fa fa-square");
+						// 				// Remove highlight and update
+						// 				palladioService.removeHighlight();
+						// 				applyFilterOrHighlight(d);
+						// 				palladioService.update();
+						// 			}
+						// 			d3.select(this).classed('active', !d.highlight);
+						// 		})
+						// 		.append("i").attr("class", "fa fa-square");
 
 						// Sort options twiddle the cells.
 						buttonGroup.append("a").attr("class", "btn-mini")

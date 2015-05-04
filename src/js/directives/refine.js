@@ -110,7 +110,7 @@ angular.module('palladio.directives.refine', [
 							});
 						} else {
 							// Was defined, but changed - need to remove old link and create a new one.
-							if(( ov || ov === 0) && ov !== nv) {
+							if(( ov || ov === 0) && ov !== nv && scope.hasLinks(scope.selectedFieldMetadata).length) {
 								dataService.deleteLink(scope.hasLinks(scope.selectedFieldMetadata));
 
 								// If it's still defined, create the new link.
