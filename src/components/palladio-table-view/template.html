@@ -53,21 +53,13 @@
               </span>
             </div>
           </div>
-
-
-
-
-
-
-
         </div>
-
       </div>
     </div>
 
 </div>
 
 <div id="{{uniqueModalId}}">
-	<div id="table-modal" data-modal dimensions="fields" model="tableDimensions" sortable="true"></div>
-	<div id="count-modal" data-modal dimensions="countDims" model="countDim" description-accessor="getCountDescription"></div>
+	<div id="table-modal" data-modal description="Choose data dimensions" dimensions="fields" model="tableDimensions" sortable="true"></div>
+	<div id="count-modal" data-modal description="Choose key dimension (one row for each value of this dimension)" dimensions="countDims" model="countDim" description-accessor="getCountDescription"></div>
 </div>
