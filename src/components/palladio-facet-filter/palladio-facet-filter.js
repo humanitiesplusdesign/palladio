@@ -164,24 +164,6 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 							.selectAll('.facet')
 								.data(scope.dims, function(d) { return calculateDomKey(d.key); });
 
-						// Build dimensions, groups
-						facets.enter()
-							.call(function(sel) {
-								var count = 0;
-								sel[0].forEach(function(d) {
-									count++; // Count added elements (sel[0].length is not reliable)
-								});
-
-								if(count > 0) {
-									// Extend the width of the inner- and mid-facet-container
-									selection.style('width', (+selection.style('width').substring(0, selection.style('width').length - 2) + (210 * count)) + 'px');
-									d3.select(element[0]).select('.mid-facet-container').transition()
-										.style('width', (+d3.select(element[0]).select('.mid-facet-container')
-											.style('width').substring(0, d3.select(element[0]).select('.mid-facet-container')
-												.style('width').length - 2) + (205 * count)) + 'px');
-								}
-							});
-
 						// Build facets and button group
 						var buttonGroup = facets.enter()
 							.append('div')
@@ -194,6 +176,17 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 							.append("span")
 								.attr("class", "mode-buttons")
 							.append("div").attr("class", "btn-group");
+
+						facets
+							.call(function(sel) {
+								var count = scope.dims.length;
+
+								// Extend the width of the inner- and mid-facet-container
+								d3.select(element[0]).select('.inner-facet-container')
+									.style('width', (210 * count) + 'px');
+								d3.select(element[0]).select('.mid-facet-container')
+									.style('width', (210 * count) + 'px');
+							});
 
 						var cells = facets.selectAll('.cell')
 								.data(function (d) { return d.group.top(Infinity)
@@ -314,12 +307,6 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 
 						// Remove facets.
 						facets.exit().each(function(d) {
-							// Collapse the width of the inner-facet-container
-							selection.transition().style('width', (+selection.style('width').substring(0, selection.style('width').length - 2) - 205) + 'px');
-							d3.select(element[0]).select('.mid-facet-container').transition()
-								.style('width', (+d3.select(element[0]).select('.mid-facet-container')
-									.style('width').substring(0, d3.select(element[0]).select('.mid-facet-container')
-										.style('width').length - 2) - 205) + 'px');
 							palladioService.removeFilter(scope.uniqueToggleId + d.key);
 							removeFacetData(d);
 							palladioService.update();
