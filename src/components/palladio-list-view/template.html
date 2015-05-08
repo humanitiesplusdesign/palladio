@@ -143,68 +143,9 @@
 
 </div>
 
-<div id="title-modal" data-modal dimensions="fields" model="titleDim"></div>
-<div id="subtitle-modal" data-modal dimensions="fields" model="subtitleDim"></div>
-<div id="text-modal" data-modal dimensions="fields" model="textDim"></div>
-<div id="link-modal" data-modal dimensions="urlDims" model="linkDim"></div>
-<div id="imgurl-modal" data-modal dimensions="urlDims" model="imgurlDim"></div>
-<div id="sort-modal" data-modal dimensions="fields" model="sortDim"></div>
-
-
-  <!--
-      '<div class="view">' +
-        '<a class="toggle" data-toggle="tooltip" data-original-title="Settings" data-placement="bottom"><i class="fa fa-cog"></i></a>' +
-          '<div data-palladio-list-view ' +
-            'list-dimension="id"' +
-            'max-to-display="1000"' +
-            'img-url-accessor="imgurlAccessor"' +
-            'title-accessor="titleAccessor"' +
-            'subtitle-accessor="subtitleAccessor"' +
-            'text-accessor="textAccessor"' +
-            'link-accessor="linkAccessor"' +
-            'sort-options="sortOptions"></div>' +
-      '</div> ' +
-
-      '<div class="span4 settings open"> ' +
-        '<div class="row-fluid">' +
-
-          '<div class="setting">' +
-            '<label>Title</label>' +
-            '<span class="field" ng-click="showTitleModal()">{{titleDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
-          '</div>' +
-
-          '<div class="setting">' +
-            '<label>Subtitle</label>' +
-            '<span class="field" ng-click="showSubtitleModal()">{{subtitleDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
-          '</div>' +
-
-          '<div class="setting">' +
-            '<label>Text</label>' +
-            '<span class="field" ng-click="showTextModal()">{{textDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
-          '</div>' +
-
-          '<div class="setting">' +
-            '<label>Link URL</label>' +
-            '<span class="field" ng-click="showLinkModal()">{{linkDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
-          '</div>' +
-
-          '<div class="setting">' +
-            '<label>Image URL</label>' +
-            '<span class="field" ng-click="showImgURLModal()">{{imgurlDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
-          '</div>' +
-
-          '<div class="setting">' +
-            '<label>Sort by</label>' +
-            '<span class="field" ng-click="showSortModal()">{{sortDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>' +
-          '</div>' +
-
-        '</div>' +
-      '</div>' +
-      '<div id="title-modal" data-modal dimensions="fields" model="titleDim"></div>' +
-      '<div id="subtitle-modal" data-modal dimensions="fields" model="subtitleDim"></div>' +
-      '<div id="text-modal" data-modal dimensions="fields" model="textDim"></div>' +
-      '<div id="link-modal" data-modal dimensions="urlDims" model="linkDim"></div>' +
-      '<div id="imgurl-modal" data-modal dimensions="urlDims" model="imgurlDim"></div>' +
-      '<div id="sort-modal" data-modal dimensions="fields" model="sortDim"></div>',
-
--->
+<div id="title-modal" data-modal description="Choose title" dimensions="fields" model="titleDim"></div>
+<div id="subtitle-modal" data-modal description="Choose sub-title" dimensions="fields" model="subtitleDim"></div>
+<div id="text-modal" data-modal description="Choose text" dimensions="fields" model="textDim"></div>
+<div id="link-modal" data-modal description="Choose link (URL to launch on click)" dimensions="urlDims" model="linkDim"></div>
+<div id="imgurl-modal" data-modal description="Choose image (URL of image)" dimensions="urlDims" model="imgurlDim"></div>
+<div id="sort-modal" data-modal description="Choose sort order dimension" dimensions="fields" model="sortDim"></div>
