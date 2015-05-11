@@ -57,7 +57,7 @@ angular.module('palladioTableView', ['palladio', 'palladio.services'])
 						return window.Blob || window.WebKitBlob || window.MozBlob;
 					}
 
-					var BB = getBlob();;
+					var BB = getBlob();
 
 					var isSafari = (navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1);
 
@@ -66,13 +66,13 @@ angular.module('palladioTableView', ['palladio', 'palladio.services'])
 						var newWindow = window.open(csv, 'download');
 					} else {
 						var blob = new BB([text], { type: "data:text/csv" });
-						saveAs(blob, title)
+						saveAs(blob, title);
 					}
 
 				};
 
 				function update() {
-					if (!uniqueDimension || dims.length === 0) return;
+					if (!scope.dimension || !uniqueDimension || dims.length === 0) return;
 
 					if (!sorting) sorting = dims[0].key;
 
