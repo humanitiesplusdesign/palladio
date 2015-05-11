@@ -75,6 +75,9 @@ angular.module('palladioListView', ['palladio', 'palladio.services'])
 
 				function buildList() {
 
+					if(!scope.titleFunc || !scope.imageURLFunc || !scope.subtitleFunc || !scope.textFunc
+						|| !scope.linkFunc || !scope.sortOptions.length ) { return; }
+
 					// Groups
 					listGroups = scope.listDimension.group();
 
@@ -204,46 +207,54 @@ angular.module('palladioListView', ['palladio', 'palladio.services'])
 					}
 
 					scope.id = scope.xfilter.dimension(function (d) { return "" + d[scope.listDim.key]; });
-					scope.titleAccessor = function (d) { return "" + d[scope.titleDim.key]; };
-					scope.subtitleAccessor = function (d) { return "Select a subtitle dimension"; };
-					scope.textAccessor = function (d) { return "Select a text dimension"; };
-					scope.linkAccessor = function (d) { return ""; };
-					scope.imgurlAccessor = function (d) { return ""; };
-					scope.sortOptions = [{ attribute: scope.listDim.key }];
-
+					
 					scope.$watch('titleDim', function (nv, ov) {
-						scope.titleAccessor = function (d) { return "" + d[nv.key]; };
+						if(nv !== ov && nv) {
+							scope.titleAccessor = function (d) { return "" + d[nv.key]; };
+						} else {
+							scope.titleAccessor = function (d) { return "" + d[scope.titleDim.key]; };
+						}
 					});
 
 					scope.$watch('subtitleDim', function (nv, ov) {
-						if(nv !== ov) {
+						if(nv !== ov && nv) {
 							scope.subtitleAccessor = function (d) { return "" + d[nv.key]; };
+						} else {
+							scope.subtitleAccessor = function (d) { return "Select a subtitle dimension"; };
 						}
 					});
 
 					scope.$watch('textDim', function (nv, ov) {
-						if(nv !== ov) {
+						if(nv !== ov && nv) {
 							scope.textAccessor = function (d) { return "" + d[nv.key]; };
+						} else {
+							scope.textAccessor = function (d) { return "Select a text dimension"; };
 						}
 					});
 
 					scope.$watch('linkDim', function (nv, ov) {
-						if(nv !== ov) {
+						if(nv !== ov && nv) {
 							scope.linkAccessor = function (d) { return "" + d[nv.key]; };
+						} else {
+							scope.linkAccessor = function (d) { return ""; };
 						}
 					});
 
 					scope.$watch('imgurlDim', function (nv, ov) {
-						if(nv !== ov) {
+						if(nv !== ov && nv) {
 							scope.imgurlAccessor = function (d) { return "" + d[nv.key]; };
+						} else {
+							scope.imgurlAccessor = function (d) { return ""; };
 						}
 					});
 
 					scope.$watch('sortDim', function (nv, ov) {
-						if(nv !== ov) {
+						if(nv !== ov && nv) {
 							scope.sortOptions = [{
 								attribute: nv.key
 							}];
+						} else {
+							scope.sortOptions = [{ attribute: scope.listDim.key }];
 						}
 					});
 
