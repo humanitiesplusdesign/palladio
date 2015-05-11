@@ -10820,9 +10820,11 @@ label.inline {
 /* Files */
 .field {
   border-color: #f5f5f5;
-  -webkit-transition: padding .2s ease-in-out, height .2s ease-in-out, background .1s ease-out;
-  -o-transition: padding .2s ease-in-out, height .2s ease-in-out, background .1s ease-out;
-  transition: padding .2s ease-in-out, height .2s ease-in-out, background .1s ease-out;
+
+  -webkit-transition: padding .2s ease-in-out, height .2s ease-in-out, opacity .1s ease-out;
+  -o-transition: padding .2s ease-in-out, height .2s ease-in-out, opacity .1s ease-out;
+  transition: padding .2s ease-in-out, height .2s ease-in-out, opacity .1s ease-out;
+
   border: none;
   border-top: 1px solid #eee;
   margin-bottom: 0px;
@@ -10854,7 +10856,6 @@ label.inline {
 }
 
 .field:hover {
-
 }
 
 .field.error {
@@ -10862,37 +10863,42 @@ label.inline {
 }
 
 .field.muted * {
-    opacity: .3;
+    opacity: .5;
+}
+
+.field.muted * .fa {
+    opacity: 1;
 }
 
 .field.muted .control {
     opacity: 1;
 }
 
-/*.field.muted {
-  padding: 0px 15px;
-  height: 7px;
+.field.muted {
+  padding: 5px 15px;
+  height: 8px;
   overflow: hidden;
   background: #fafafa;
 }
 
 .field.muted:hover {
-  padding: 10px 15px;
+  padding: 8px 15px;
   height: auto;
   cursor: pointer;
-}*/
+
+}
 
 
 .field .control {
   width: 20px;
-  font-size: 12px;
+  font-size: 13px;
   display: inline-block;
 }
 
 .field .fa {
   cursor: pointer;
   text-align: center;
-  opacity: .5;
+  opacity: .7;
 }
 
 .field .fa:hover {

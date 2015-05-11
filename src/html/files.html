@@ -202,30 +202,12 @@
 									ng-repeat="field in file.fields"
 									>
 
-									<span class="control">
-										<i
-											class="fa fa-eye"
-											tooltip-animation="false"
-											tooltip-append-to-body="true"
-											tooltip="Disable"
-											data-container="body"
-											data-ng-click="toggleDelete(field)"
-											ng-hide="field.delete || hasLinks(field).lookup.file || isLinked(field)"></i>
-<!--											ng-hide="field.delete || hasLinks(field).lookup.file || !field.confirmed && field.unassignedSpecialChars.length > 0 && !hasLinks(field).lookup.file"></i> -->
-
-										<i
-											class="fa fa-eye-slash"
-											tooltip-animation="false"
-											tooltip-append-to-body="true"
-											tooltip="Enable"
-											data-container="body"
-											data-ng-click="toggleDelete(field)" ng-show="field.delete && !hasLinks(field).lookup.file"></i>
-									</span>
 
 
 
 									<span class="field-description">
-										<a class="" ng-class="{strong:field.uniqueKey}"
+										<a class=""
+											data-ng-class="{strong:field.uniqueKey}"
 											data-toggle="modal"
 											data-target="#myModal"
 											data-ng-show="!field.delete"
@@ -268,8 +250,11 @@
 											data-toggle="modal"
 											data-target="#myModal"
 											data-ng-click="setSelected(field,file)"
-											class="small">{{hasLinks(field).metadata.matches}} {{hasLinks(field).lookup.file.label}}
+											class="text-muted small">{{hasLinks(field).metadata.matches}} {{hasLinks(field).lookup.file.label}}
 										</span>
+
+
+
 
 										<span class="control text-right">
 
@@ -284,18 +269,58 @@
 	<!--											ng-hide="field.delete || hasLinks(field).lookup.file || !field.confirmed && field.unassignedSpecialChars.length > 0 && !hasLinks(field).lookup.file"></i> -->
 
 											<i
-												class="text-small fa fa-bell-o"
+												class="text-small text-danger fa fa-ban"
 												tooltip-animation="false"
 												tooltip-append-to-body="true"
-												tooltip="This dimensions has issues!"
+												tooltip="Please review"
 												data-container="body"
-												ng-show="!field.delete && !hasLinks(field).lookup.file && !field.confirmed && field.unassignedSpecialChars.length > 0 && !hasLinks(field).lookup.file && !field.errors.length"></i>
+												data-toggle="modal"
+												data-target="#myModal"
+												data-ng-click="setSelected(field,file)"
+												ng-show="!field.delete && !hasLinks(field).lookup.file && field.unassignedSpecialChars.length > 0 && !hasLinks(field).lookup.file && !field.errors.length"></i>
+
+										<!--	<i
+												class="fa fa-arrow-right"
+												ng-show="hasLinks(field).lookup.file"
+												tooltip-animation="false"
+												tooltip-append-to-body="true"
+												data-toggle="modal"
+												data-target="#myModal"
+												data-ng-click="setSelected(field,file)"
+												tooltip-html-unsafe="<b>{{hasLinks(field).metadata.matches}}</b> in <b>{{hasLinks(field).lookup.file.label}}</b> (via {{hasLinks(field).lookup.field.description}})"></i>
+
 
 											<i
-												class="fa"
-												ng-show="hasLinks(field).lookup.file || isLinked(field)"
-												ng-class="{'fa-sign-out':file.id==0, 'fa-sign-in':file.id!=0}"></i>
+												class="fa fa-arrow-left"
+												ng-show="isLinked(field) && file.id != 0"
+												tooltip-animation="false"
+												tooltip-append-to-body="true"
+												data-toggle="modal"
+												data-target="#myModal"
+												data-ng-click="setSelected(field,file)"
+												tooltip-html-unsafe="This dimension has some links"></i>-->
 
+										</span>
+
+										<span class="control text-right">
+
+											<i
+												class="fa fa-eye"
+												tooltip-animation="false"
+												tooltip-append-to-body="true"
+												tooltip="Disable"
+												data-container="body"
+												data-ng-click="toggleDelete(field)"
+												ng-hide="field.delete || hasLinks(field).lookup.file || isLinked(field)"></i>
+	<!--											ng-hide="field.delete || hasLinks(field).lookup.file || !field.confirmed && field.unassignedSpecialChars.length > 0 && !hasLinks(field).lookup.file"></i> -->
+
+											<i
+												class="fa fa-eye-slash"
+												tooltip-animation="false"
+												tooltip-append-to-body="true"
+												tooltip="Enable"
+												data-container="body"
+												data-ng-click="toggleDelete(field)" ng-show="field.delete && !hasLinks(field).lookup.file"></i>
 										</span>
 
 									</span>
@@ -360,8 +385,8 @@
 							class="pointer"
 							tooltip-animation="false"
 							tooltip-append-to-body="true"
-							tooltip="Download data"
-							data-placement="top"
+							tooltip="Download as .csv"
+							tooltip-placement="right"
 							data-ng-click="downloadFile(file)">
 								<i class="fa fa-download"></i>
 						</span>
@@ -371,7 +396,7 @@
 							tooltip-animation="false"
 							tooltip-append-to-body="true"
 							tooltip="Delete table"
-							data-container="body"
+							tooltip-placement="left"
 							data-ng-click="deleteFile(file.uniqueId)">
 								<i class="fa fa-trash-o"></i>
 						</span>
