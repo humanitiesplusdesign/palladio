@@ -673,7 +673,7 @@ label.inline {
 }
 
 .field.muted * .fa {
-    opacity: 1;
+    opacity: .7;
 }
 
 .field.muted .control {
@@ -697,7 +697,7 @@ label.inline {
 
 .field .control {
   width: 20px;
-  font-size: 13px;
+  font-size: 12px;
   display: inline-block;
 }
 

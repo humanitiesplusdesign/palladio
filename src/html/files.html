@@ -118,7 +118,7 @@
 
 	<div class="row files">
 
-		<div class="col-lg-3 col-md-4 margin-bottom" ng-show="showDetails">
+		<div class="col-lg-3 col-md-4 margin-bottom" ng-show="showDetails" style="border-right: 1px solid #ddd">
 
 			<div>
 				<label>Author(s)</label>
@@ -202,6 +202,27 @@
 									ng-repeat="field in file.fields"
 									>
 
+									<span class="control">
+
+										<i
+											class="fa fa-eye"
+											tooltip-animation="false"
+											tooltip-append-to-body="true"
+											tooltip="Disable"
+											data-container="body"
+											data-ng-click="toggleDelete(field)"
+											ng-hide="field.delete || hasLinks(field).lookup.file || isLinked(field)"></i>
+									<!--											ng-hide="field.delete || hasLinks(field).lookup.file || !field.confirmed && field.unassignedSpecialChars.length > 0 && !hasLinks(field).lookup.file"></i> -->
+
+										<i
+											class="fa fa-eye-slash"
+											tooltip-animation="false"
+											tooltip-append-to-body="true"
+											tooltip="Enable"
+											data-container="body"
+											data-ng-click="toggleDelete(field)" ng-show="field.delete && !hasLinks(field).lookup.file"></i>
+									</span>
+
 
 
 
@@ -256,6 +277,8 @@
 
 
 
+
+
 										<span class="control text-right">
 
 									<!--		<i
@@ -269,7 +292,7 @@
 	<!--											ng-hide="field.delete || hasLinks(field).lookup.file || !field.confirmed && field.unassignedSpecialChars.length > 0 && !hasLinks(field).lookup.file"></i> -->
 
 											<i
-												class="text-small text-danger fa fa-ban"
+												class="text-small text-danger fa fa-circle"
 												tooltip-animation="false"
 												tooltip-append-to-body="true"
 												tooltip="Please review"
@@ -279,8 +302,8 @@
 												data-ng-click="setSelected(field,file)"
 												ng-show="!field.delete && !hasLinks(field).lookup.file && field.unassignedSpecialChars.length > 0 && !hasLinks(field).lookup.file && !field.errors.length"></i>
 
-										<!--	<i
-												class="fa fa-arrow-right"
+											<i
+												class="fa fa-arrow-circle-right"
 												ng-show="hasLinks(field).lookup.file"
 												tooltip-animation="false"
 												tooltip-append-to-body="true"
@@ -291,37 +314,18 @@
 
 
 											<i
-												class="fa fa-arrow-left"
+												class="fa fa-arrow-circle-left"
 												ng-show="isLinked(field) && file.id != 0"
 												tooltip-animation="false"
 												tooltip-append-to-body="true"
 												data-toggle="modal"
 												data-target="#myModal"
 												data-ng-click="setSelected(field,file)"
-												tooltip-html-unsafe="This dimension has some links"></i>-->
+												tooltip-html-unsafe="This dimension has some links"></i>
 
 										</span>
 
-										<span class="control text-right">
 
-											<i
-												class="fa fa-eye"
-												tooltip-animation="false"
-												tooltip-append-to-body="true"
-												tooltip="Disable"
-												data-container="body"
-												data-ng-click="toggleDelete(field)"
-												ng-hide="field.delete || hasLinks(field).lookup.file || isLinked(field)"></i>
-	<!--											ng-hide="field.delete || hasLinks(field).lookup.file || !field.confirmed && field.unassignedSpecialChars.length > 0 && !hasLinks(field).lookup.file"></i> -->
-
-											<i
-												class="fa fa-eye-slash"
-												tooltip-animation="false"
-												tooltip-append-to-body="true"
-												tooltip="Enable"
-												data-container="body"
-												data-ng-click="toggleDelete(field)" ng-show="field.delete && !hasLinks(field).lookup.file"></i>
-										</span>
 
 									</span>
 
