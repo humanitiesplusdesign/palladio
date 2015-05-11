@@ -1103,8 +1103,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 								scope.layerType = scope.layerTypes.filter(function(l) { return l.value === d.layerType; })[0];
 								scope.description = d.description;
 								scope.mapping = {
-									sourceCoordinates: scope.latlonFields.filter(function(f) { return f.key === d.mapping.sourceCoordinatesKey; })[0],
-									destinationCoordinates: scope.latlonFields.filter(function(f) { return f.key === d.mapping.destinationCoordinatesKey; })[0],
+									sourceCoordinates: scope.latlonFields.filter(function(f) { return f.key === d.mapping.sourceCoordinatesKey && f.description === d.mapping.sourceCoordinatesDescription; })[0],
+									destinationCoordinates: scope.latlonFields.filter(function(f) { return f.key === d.mapping.destinationCoordinatesKey && f.description === d.mapping.destinationCoordinatesDescription; })[0],
 								};
 								scope.fillShapes = d.fillShapes;
 								scope.color = d.color;
@@ -1167,8 +1167,12 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 								enabled: l.enabled,
 								layerType: l.layerType,
 								mapping: {
-									sourceCoordinatesKey: l.mapping && l.mapping.sourceCoordinates && l.mapping.sourceCoordinates ? l.mapping.sourceCoordinates.key : null,
-									destinationCoordinatesKey: l.mapping && l.mapping.destinationCoordinates && l.mapping.destinationCoordinates.key ? l.mapping.destinationCoordinates.key : null
+									sourceCoordinatesKey: l.mapping && l.mapping.sourceCoordinates && l.mapping.sourceCoordinates.key ? l.mapping.sourceCoordinates.key : null,
+									sourceCoordinatesType: l.mapping && l.mapping.sourceCoordinates && l.mapping.sourceCoordinates.typeField ? l.mapping.sourceCoordinates.typeField : null,
+									sourceCoordinatesDescription: l.mapping && l.mapping.sourceCoordinates && l.mapping.sourceCoordinates.description ? l.mapping.sourceCoordinates.description : null,
+									destinationCoordinatesKey: l.mapping && l.mapping.destinationCoordinates && l.mapping.destinationCoordinates.key ? l.mapping.destinationCoordinates.key : null,
+									destinationCoordinatesType: l.mapping && l.mapping.destinationCoordinates && l.mapping.destinationCoordinates.typeField ? l.mapping.destinationCoordinates.typeField : null,
+									destinationCoordinatesDescription: l.mapping && l.mapping.destinationCoordinates && l.mapping.destinationCoordinates.description ? l.mapping.destinationCoordinates.description : null
 								},
 								pointSize: l.pointSize,
 								showLinks: l.showLinks,
