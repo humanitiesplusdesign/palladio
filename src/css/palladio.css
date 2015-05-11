@@ -655,6 +655,10 @@ label.inline {
   border-bottom-right-radius: 0px;
 }
 
+.list-group {
+  margin-bottom: 0px;
+}
+
 .field:hover {
 
 }
@@ -663,7 +667,15 @@ label.inline {
   background-color: #FCF9E9;
 }
 
-.field.muted {
+.field.muted * {
+    opacity: .3;
+}
+
+.field.muted .control {
+    opacity: 1;
+}
+
+/*.field.muted {
   padding: 0px 15px;
   height: 7px;
   overflow: hidden;
@@ -674,14 +686,31 @@ label.inline {
   padding: 10px 15px;
   height: auto;
   cursor: pointer;
+}*/
+
+
+.field .control {
+  width: 20px;
+  font-size: 12px;
+  display: inline-block;
 }
 
 .field .fa {
+  cursor: pointer;
+  text-align: center;
+  opacity: .5;
+}
+
+.field .fa:hover {
+  opacity: 1;
+}
+
+/*.field .fa {
   width:10px;
   cursor: pointer;
   text-align: center;
   font-size: 12px;
-}
+}*/
 
 .field-description {
   vertical-align: middle;
