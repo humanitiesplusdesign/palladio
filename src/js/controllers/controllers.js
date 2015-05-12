@@ -116,7 +116,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 
 
 
-		$scope.onLoad = function() {
+		$scope.onLoad = function(json) {
 			// Only move on to the visualization if the save file has a visualization part, in
 			// which case it would have a layout specified.
 			if(!loadService.layout()) {
@@ -126,6 +126,13 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			// if(loadService.layout()) setTimeout(function() { $location.path('/visualization'); }, 1000);
 			if(loadService.layout()) {
 				$location.path('/visualization');
+			}
+
+			var metadata = dataService.getMetadata();
+			if(metadata) {
+				$scope.project.title = metadata.title;
+				$scope.project.author = metadata.author;
+				$scope.project.description = metadata.description;
 			}
 		};
 

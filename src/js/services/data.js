@@ -793,6 +793,15 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 			});
 		}
 
+		var metadata = {};
+		function setMetadata(obj) {
+			metadata = obj;
+		}
+
+		function getMetadata() {
+			return metadata;
+		}
+
 		function getDataSync() {
 			if(dirty) {
 				process();
@@ -828,7 +837,9 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 			isDirty: isDirty,
 			setDirty: setDirty,
 			calcLinkMetadata: calcLinkMetadata,
-			setCountBy: setCountBy
+			setCountBy: setCountBy,
+			setMetadata: setMetadata,
+			getMetadata: getMetadata
 		};
 
 		// Helper function for munging data with multiple values in a field.
