@@ -229,7 +229,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 						// Sort options twiddle the cells.
 						buttonGroup.append("a").attr("class", "btn-mini")
 								.on("click", function(d) {
-									$(this).button('toggle');
+									$(this).toggleClass('active');
 									// Remove all current filter values.
 									d.filters.splice(0, d.filters.length);
 									if(d3.select(this).classed("active")) {
@@ -258,7 +258,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 
 						buttonGroup.append("a").attr("class", "btn-mini")
 								.on("click", function(d, i) {
-									$(this).button('toggle');
+									$(this).toggleClass('active');
 									// Note that we have to reselect just the cells in this facet.
 									if(d3.select(this).classed("active")) {
 										d3.selectAll(cells[i]).sort(function(a,b) {

@@ -701,6 +701,11 @@ label.inline {
   display: inline-block;
 }
 
+.field .control .fa {
+  padding-right: 1px;
+  padding-left: 1px;
+}
+
 .field .fa {
   cursor: pointer;
   text-align: center;
