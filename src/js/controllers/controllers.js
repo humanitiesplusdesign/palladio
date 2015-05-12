@@ -216,6 +216,8 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			$scope.selectedFile = file;
 			$scope.selectedSpecialChar = null;
 
+			$scope.addingTable = false;
+
 			var autoFields = file.autoFields.filter(function (d) { return d.key === field.key; })[0];
 
 			// If 'type' isn't set, grab the auto-recognized type.
