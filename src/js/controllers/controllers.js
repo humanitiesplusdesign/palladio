@@ -385,6 +385,10 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			return found;
 		}
 
+		$scope.deleteLink = function (link, index) {
+			dataService.deleteLink(link, index);
+		};
+
 		$scope.highlightLink = function (link, source) {
 
 			if (!link) {
