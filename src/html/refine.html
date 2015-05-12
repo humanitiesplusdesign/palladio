@@ -4,7 +4,8 @@
 		<div class="modal-content">
 			<!-- Modal Header -->
 			<div class="modal-header">
-				Edit dimension
+				<a data-ng-show="addingTable" ng-click="hideNewTable()">< Back</a>
+				<span data-ng-hide="addingTable">Edit dimension</span>
 			</div>
 
 			<!-- Modal Body -->
@@ -19,7 +20,7 @@
 
 						<div class="pull-right">
 							<a class="btn btn-default" ng-click="parseExtendTable()" ng-disabled="!text">Load</a>
-							<a class="btn btn-default btn-cancel" ng-click="hideNewTable()">Cancel</a>
+
 						</div>
 
 					</div>
