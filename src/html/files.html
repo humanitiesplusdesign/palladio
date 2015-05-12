@@ -242,10 +242,23 @@
 
 
 										<span
-											ng-hide="hasLinks(field).lookup.file"
-											class="text-capitalize small"
-											ng-class="{'text-muted':!field.errors.length, 'text-danger':field.errors.length}">{{field.type}}
+											ng-show="!hasLinks(field).lookup.file && !field.errors.length"
+											class="text-capitalize small text-muted"
+											tooltip-animation="false"
+											tooltip-append-to-body="true"
+											tooltip="All the values match this type">{{field.type}}
 										</span>
+
+										<span
+											ng-show="!hasLinks(field).lookup.file && field.errors.length"
+											class="text-capitalize small text-danger"
+											tooltip-animation="false"
+											tooltip-append-to-body="true"
+											tooltip="{{field.errors.length}} values do not match this type">{{field.type}}
+										</span>
+
+
+
 
 										<!--
 
@@ -268,9 +281,7 @@
 											tooltip-append-to-body="true"
 											tooltip-html-unsafe="<b>{{hasLinks(field).metadata.matches}}</b> in <b>{{hasLinks(field).lookup.file.label}}</b> (via {{hasLinks(field).lookup.field.description}})"
 											data-ng-show="hasLinks(field).lookup.file"
-											data-toggle="modal"
-											data-target="#myModal"
-											data-ng-click="setSelected(field,file)"
+											ng-class="hasLinks(field).metadata.claz"
 											class="text-muted small">{{hasLinks(field).metadata.matches}} {{hasLinks(field).lookup.file.label}}
 										</span>
 
@@ -310,6 +321,7 @@
 												data-toggle="modal"
 												data-target="#myModal"
 												data-ng-click="setSelected(field,file)"
+												ng-class="hasLinks(field).metadata.claz"
 												tooltip-html-unsafe="<b>{{hasLinks(field).metadata.matches}}</b> in <b>{{hasLinks(field).lookup.file.label}}</b> (via {{hasLinks(field).lookup.field.description}})"></i>
 
 
