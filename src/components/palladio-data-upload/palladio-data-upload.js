@@ -4,7 +4,7 @@ angular.module('palladioDataUpload', ['palladio.services'])
 	.directive('palladioDataUpload', function (dataService, loadService, spinnerService) {
 		var directiveObj = {
 			scope: {
-				'load': '&onLoad'
+				'load': '&onLoad',
 			},
 			transclude: true,
 			templateUrl: 'partials/palladio-data-upload/template.html',
@@ -17,7 +17,9 @@ angular.module('palladioDataUpload', ['palladio.services'])
 					reader.onload = function() {
 						var json = JSON.parse(reader.result);
 						loadService.loadJson(json);
-						scope.$apply(function(s) { s.load(); });
+						scope.$apply(function(s) {
+							s.load(json);
+						});
 					};
 					reader.readAsText(input.files[0]);
 					// We need to clear the input so that we pick up future uploads. This is *not*

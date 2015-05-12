@@ -9,7 +9,6 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 
 			link: function(scope) {
 				scope.exportDataModel = function() {
-
 					// Strip autoFields, uniques, errors from all files/fields
 					var files = dataService.getFiles().map(function(f) {
 						f.autoFields = [];
@@ -35,6 +34,7 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 						files: files,
 						links: links,
 						layout: scope.layout,
+						metadata: scope.project,
 						vis: palladioService.getStateFunctions().map(function(s) {
 							return {
 								type: s.type,

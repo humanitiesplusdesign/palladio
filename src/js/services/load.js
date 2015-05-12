@@ -7,7 +7,7 @@ angular.module('palladio.services.load', ['palladio.services.data'])
 		var visStateDirty = false;
 
 		function loadJson(json) {
-			json.files.forEach(function (f) { 
+			json.files.forEach(function (f) {
 
 				// Rebuild autofields
 				f.autoFields = parseService.getFields(f.data);
@@ -36,6 +36,9 @@ angular.module('palladio.services.load', ['palladio.services.data'])
 				layoutState = json.layout;
 				visStateDirty = true;
 			}
+
+			// Set metadata
+			dataService.setMetadata(json.metadata);
 		}
 
 		function buildVis(stateFunctions) {
