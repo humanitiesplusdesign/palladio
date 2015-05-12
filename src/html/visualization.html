@@ -39,9 +39,9 @@
 
     <div class="row margin-top">
       <div class="col-lg-12">
-        <a class="btn btn-default" data-ng-click="addFilter('facet')">Facet</a>
-        <a class="btn btn-default" data-ng-click="addFilter('timeline')">Timeline</a>
-        <a class="btn btn-default" data-ng-click="addFilter('partime')">Timespan</a>
+        <a class="btn btn-default" data-ng-class="{disabled: blurFacet}" data-ng-click="addFilter('facet')">Facet</a>
+        <a class="btn btn-default" data-ng-class="{disabled: blurTimeline}" data-ng-click="addFilter('timeline')">Timeline</a>
+        <a class="btn btn-default" data-ng-class="{disabled: blurTimeSpan}" data-ng-click="addFilter('partime')">Timespan</a>
         <div class="" data-palladio-selection-view></div>
         <div class="pull-right">
           <a class="btn btn-default" ng-class="{disabled:!hasFilters()}" data-ng-click="expandedFilters = !expandedFilters" data-ng-init="expandedFilters = true">
