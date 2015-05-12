@@ -627,9 +627,9 @@ label.inline {
 .field {
   border-color: #f5f5f5;
 
-  -webkit-transition: padding .2s ease-in-out, height .2s ease-in-out, opacity .1s ease-out;
-  -o-transition: padding .2s ease-in-out, height .2s ease-in-out, opacity .1s ease-out;
-  transition: padding .2s ease-in-out, height .2s ease-in-out, opacity .1s ease-out;
+  -webkit-transition: padding .3s ease-in-out, height .3s ease-in-out, opacity .1s ease-out;
+  -o-transition: padding .3s ease-in-out, height .3s ease-in-out, opacity .1s ease-out;
+  transition: padding .3s ease-in-out, height .3s ease-in-out, opacity .1s ease-out;
 
   border: none;
   border-top: 1px solid #eee;
@@ -755,6 +755,21 @@ a.fa:hover {
 .table > thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
   border-top: none;
   padding: 6px 8px;
+}
+
+.tag {
+  color: #888;
+  background-color: #ddd;
+}
+
+.tag-selected {
+  color: #fff;
+  background-color: #888;
+}
+
+.tag:hover {
+  text-decoration: none;
+  background: #bbb;
 }
 
 /* Tooltip */

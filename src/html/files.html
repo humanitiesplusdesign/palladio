@@ -300,7 +300,7 @@
 												data-toggle="modal"
 												data-target="#myModal"
 												data-ng-click="setSelected(field,file)"
-												ng-show="!field.delete && !hasLinks(field).lookup.file && field.unassignedSpecialChars.length > 0 && !hasLinks(field).lookup.file && !field.errors.length"></i>
+												ng-show="!field.delete && !hasLinks(field).lookup.file && field.unassignedSpecialChars.length > 0 && !hasLinks(field).lookup.file || field.errors.length"></i>
 
 											<i
 												class="fa fa-arrow-circle-right"

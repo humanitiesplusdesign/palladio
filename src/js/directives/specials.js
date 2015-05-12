@@ -5,7 +5,7 @@ angular.module('palladio.directives.specials', [])
 			restrict: 'A',
 			scope: false,
 			template: '<a data-ng-repeat="char in selectedFieldMetadata.unassignedSpecialChars" class="tag"' +
-						'data-toggle="tooltip" title="Click to search this character in the values"' +
+						'data-tooltip="Click to search this value"' +
 						'data-ng-click="filterUniquesOnChar(char, $event)">' +
 						'{{char}}' +
 					'</a>',
