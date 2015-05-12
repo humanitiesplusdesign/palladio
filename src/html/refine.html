@@ -4,8 +4,7 @@
 		<div class="modal-content">
 			<!-- Modal Header -->
 			<div class="modal-header">
-				<a data-ng-show="addingTable" ng-click="hideNewTable()">< Back</a>
-				<span data-ng-hide="addingTable">Edit dimension</span>
+				Edit dimension
 			</div>
 
 			<!-- Modal Body -->
@@ -235,7 +234,8 @@
 
 			<!-- Modal Footer -->
 			<div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal" ng-click="hideNewTable()">Done</button>
+				<button data-ng-show="!addingTable" type="button" class="btn btn-default" data-dismiss="modal" ng-click="hideNewTable()">Done</button>
+				<button data-ng-show="addingTable" type="button" class="btn btn-default" ng-click="hideNewTable()">Cancel</button>
 			</div>
 		</div>
 	</div>
