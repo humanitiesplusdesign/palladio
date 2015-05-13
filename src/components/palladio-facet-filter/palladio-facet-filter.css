@@ -93,8 +93,8 @@
 	width: 200px;
 	margin-bottom: 2px;
 	background-color: #dddddd;
-	font-size: 11px;
-	padding: 1px 0px;
+	font-size: 12px;
+	padding: 0px 0px;
 	cursor: pointer;
 }
 
@@ -133,4 +133,5 @@
 [data-palladio-facet-filter] .btn-mini {
 	color: #666;
 	font-size: 12px;
+	margin-left: 3px;
 }

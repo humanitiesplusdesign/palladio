@@ -213,7 +213,7 @@
 											data-ng-show="hasLinks(selectedFieldMetadata).lookup">
 
 											<span ng-class="hasLinks(selectedFieldMetadata).metadata.claz">
-												<span>{{hasLinks(selectedFieldMetadata).metadata.matches}}</span> out of {{hasLinks(selectedFieldMetadata).metadata.total}} matches for {{selectedFieldMetadata.description}} in {{hasLinks(selectedFieldMetadata).lookup.file.label}}. <a class="text-danger" ng-click="deleteLink(hasLinks(selectedFieldMetadata)); selectedFieldMetadata.augmentId = undefined; updateMetadata()">Remove extension</a>
+												<span>{{hasLinks(selectedFieldMetadata).metadata.matches}}</span> out of {{hasLinks(selectedFieldMetadata).metadata.total}} matches for {{selectedFieldMetadata.description}} in {{hasLinks(selectedFieldMetadata).lookup.file.label}} <a class="text-danger pull-right" ng-click="deleteLink(hasLinks(selectedFieldMetadata)); selectedFieldMetadata.augmentId = undefined; updateMetadata()">Remove extension</a>
 											</span>
 
 										</span>

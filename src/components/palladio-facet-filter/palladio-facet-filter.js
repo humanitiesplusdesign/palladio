@@ -201,7 +201,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 						// 		.on("click", function(d, i) {
 						// 			if(!d.highlight) {
 						// 				d.highlight = true;
-										
+
 						// 				// Switch icon
 						// 				d3.select(this).select('i').classed('fa-square', false);
 						// 				d3.select(this).select('i').classed('fa-square-o', true);
@@ -228,6 +228,8 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 
 						// Sort options twiddle the cells.
 						buttonGroup.append("a").attr("class", "btn-mini")
+							.attr("tooltip","Select")
+							.attr("tooltip-append-to-body","true")
 								.on("click", function(d) {
 									$(this).toggleClass('active');
 									// Remove all current filter values.
