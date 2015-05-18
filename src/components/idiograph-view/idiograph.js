@@ -270,8 +270,8 @@
           d.px = d.x;
           d.py = d.y;
         });
-
-        repositionNodes();
+        tick();
+        //repositionNodes();
       });
 
 
@@ -437,7 +437,7 @@
         .select("g.nodes")
         .selectAll(".node")
         .data(data.nodes, function(d){ return d.id; });
-      
+
       node
         .call(drag)
 
@@ -460,7 +460,7 @@
       // remove old nodes
       node.exit().remove();
 
-      // if(runForce) { 
+      // if(runForce) {
         force.start();
         // runForce = false;
       // }
