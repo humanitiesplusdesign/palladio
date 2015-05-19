@@ -189,7 +189,12 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 		};
 
 		var addLinkRaw = function (link) {
+			
+			// Recalculate metadata
+			link.metadata = calcLinkMetadata(link.source, link.lookup);
+
 			links.push(link);
+
 			setDirty();
 		}
 
@@ -252,11 +257,9 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 			}
 
 			if(matches/total < 0.30) {
-				color = "rgb(247, 0, 69)"
-				clas = "text-danger"
+				color = "rgb(247, 0, 69)";
+				clas = "text-danger";
 			}
-
-			console.log(clas)
 
 			return {
 				matches: matches,
