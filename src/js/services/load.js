@@ -1,5 +1,5 @@
 angular.module('palladio.services.load', ['palladio.services.data'])
-	.factory("loadService", ['dataService', '$q', 'parseService', 'validationService', 
+	.factory("loadService", ['dataService', '$q', 'parseService', 'validationService',
 			function(dataService, $q, parseService, validationService) {
 
 		var visState = {};
@@ -26,6 +26,8 @@ angular.module('palladio.services.load', ['palladio.services.data'])
 				// First fix the file references.
 				l.lookup.file = dataService.getFiles().filter(function(f) { return f.uniqueId === l.lookup.file.uniqueId; })[0];
 				l.source.file = dataService.getFiles().filter(function(f) { return f.uniqueId === l.source.file.uniqueId; })[0];
+				l.lookup.field = l.lookup.file.fields.filter(function(f) { return f.key === l.lookup.field.key; })[0];
+				l.source.field = l.source.file.fields.filter(function(f) { return f.key === l.source.field.key; })[0];
 
 				dataService.addLinkRaw(l);
 			});

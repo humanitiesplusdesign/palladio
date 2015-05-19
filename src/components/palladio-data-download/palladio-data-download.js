@@ -43,6 +43,7 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 						})
 					};
 
+					console.log(ex);
 					var blob = new Blob(
 						[ JSON.stringify(ex) ],
 						{type: "application/json;charset=utf-8"}
