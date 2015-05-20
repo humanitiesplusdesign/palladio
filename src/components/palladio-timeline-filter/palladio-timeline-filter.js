@@ -1231,6 +1231,9 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 						scope.$digest();
 						scope.shortVersion = state.shortVersion;
 
+						// TODO: Short version is not supported in 1.0 version.
+						scope.shortVersion = false;
+
 						// Manually digest here, or some of the above can trigger filter-clears
 						// before the getFilter processing is complete.
 						scope.$digest();
