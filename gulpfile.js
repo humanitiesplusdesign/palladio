@@ -11,23 +11,14 @@ var order = require('gulp-order');
 var angularTemplates = require('gulp-angular-templates');
 
 var palladioSources = [
-	"./lib/crossfilter/crossfilter-helpers.js",
-	"./lib/bootstrap-tag/bootstrap-tag.js",
-	"./lib/d3/d3.timeline.js",
-	"./lib/d3/d3.graph.js",
-	"./lib/d3/d3.svg.multibrush.js",
 	"./lib/d3-bootstrap/d3-bootstrap-plugins.js",
-	"./lib/codemirror/placeholder.js",
-	// "./lib/yasqe/yasqe.min.js",
-	// "./lib/yasr/yasr.min.js",
+	"./lib/bootstrap-tag/bootstrap-tag.js",
 	"./src/js/**/*.js",
-	"./src/components/**/*.js",
-	"./src/unfinished_components/**/*.js"
+	"./src/components/**/*.js"
 ];
 var palladioCSS = [ "./lib/**/*.css", "./src/**/*.css" ];
 var palladioTemplate = [
 	"./src/html/*.html",
-	// "./src/unfinished_components/**/*.html",
 	"./src/components/**/*.html"
 ];
 
@@ -73,6 +64,7 @@ gulp.task('css', function () {
         .pipe(gulp.dest('./apps/template/'));
 });
 
+// Copy over mapbox.js images
 gulp.task('images', function () {
 	gulp.src('./bower_components/mapbox.js/images/*')
 		.pipe(gulp.dest('./images/'))

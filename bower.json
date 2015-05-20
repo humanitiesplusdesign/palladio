@@ -4,11 +4,15 @@
     "palladio.js",
     "palladio.css"
   ],
-  "version": "0.8.0",
+  "version": "1.0.0",
   "homepage": "https://github.com/humanitiesplusdesign/palladio",
-  "authors": [],
-  "license": "",
-  "private": true,
+  "authors": [
+    "Nicole Coleman",
+    "Giorgio Caviglia",
+    "Ethan Jewett"
+  ],
+  "license": "BSD",
+  "private": false,
   "ignore": [
     "**/.*",
     "node_modules",

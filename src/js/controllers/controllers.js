@@ -26,7 +26,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			title : null,
 			author : null,
 			description : null
-		}
+		};
 
 		$scope.$watch('searchText', function (nv, ov) {
 			if(nv !== ov) {
@@ -68,45 +68,9 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			$('*[data-toggle="tooltip"]').tooltip({container:'body'});
 		});
 
-
-
-
-		// TODO: Remove - this is no longer required as we don't run off of data on $scope.
-		$scope.refreshData = function (data) {
-			// Data setup.
-			if(dataService.isDirty() || data === undefined) {
-				// If data has been added/deleted/changed, we need to wipe out the existing
-				// filters that rely on the old data...
-			/*	if(angular.element("#filters").scope()) {
-					angular.element("#filters").scope().$broadcast('$destroy');
-					angular.element("#filters").children().remove();
-					$scope.$emit('triggerFilterReset');
-				}*/
-
-				// ... then we reload the data.
-				dataService.getData().then(function (resolvedData) {
-					$scope.data = resolvedData.data;
-					$scope.metadata = resolvedData.metadata;
-					$scope.xfilter = resolvedData.xfilter;
-
-					$scope.$emit('triggerUpdate');
-				});
-			} else {
-				if (data !== undefined) {
-					$scope.data = data.data;
-					$scope.metadata = data.metadata;
-					$scope.xfilter = data.xfilter;
-
-					$scope.$emit('triggerUpdate');
-				}
-			}
-		};
-
 		$scope.setLayout = function (layout) {
 			$scope.layout = layout;
 		};
-
-		$scope.refreshData();
 
 		$scope.clearFiles = function () {
 			while(dataService.getFiles().length > 0) {
@@ -117,6 +81,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 
 
 		$scope.onLoad = function(json) {
+
 			// Only move on to the visualization if the save file has a visualization part, in
 			// which case it would have a layout specified.
 			if(!loadService.layout()) {
@@ -167,7 +132,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 	.controller('UploadRefineCtrl', function ($scope, $location, parseService, dataService, validationService, $controller) {
 
 		// Instantiate the WorkflowCtrl controller in scope if it is not already.
-		if($scope.refreshData === undefined) {
+		if($scope.clearFiles === undefined) {
 			$controller('WorkflowCtrl', { '$scope': $scope });
 		}
 
@@ -533,12 +498,9 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		};
 
 		// Instantiate the WorkflowCtrl controller in scope if it is not already.
-		if($scope.refreshData === undefined) {
+		if($scope.clearFiles === undefined) {
 			$controller('WorkflowCtrl', { '$scope': $scope });
 		}
-
-		// We need to get the data onto the higher-level WorkflowCtrl scope.
-		$scope.refreshData(data);
 
 		// If the data is undefined, redirect back to '/'
 		if(data.metadata === undefined) {

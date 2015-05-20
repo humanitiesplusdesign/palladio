@@ -17,12 +17,11 @@ var app = angular.module('palladioApp', [
 	'palladioDataDownload',
 
 	// Palette
-	'palladioPalette',
+	// 'palladioPalette',
 
 	// Filters
 	'palladioTimelineFilter',
 	'palladioFacetFilter',
-	'palladioTimespanFilter',
 	'palladioPartimeFilter',
 	// Views
 /*	'palladioListView',
