@@ -1096,7 +1096,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 				function importState(state) {
 					scope.$apply(function (s) {
-						if(state.tileSets.length) s.tileSets = state.tileSets;
+						if(state.tileSets && state.tileSets.length) s.tileSets = state.tileSets;
 						if(state.layers) {
 							state.layers.forEach(function(d) {
 								// Set the layer type
