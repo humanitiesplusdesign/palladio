@@ -40,7 +40,8 @@
     "YASR": "https://github.com/YASGUI/YASR.git#~1.2.0",
     "angular-ui-select": "~0.10.0",
     "mapbox.js": "2.1.9",
-    "angular-bootstrap-colorpicker": "~3.0.13"
+    "angular-bootstrap-colorpicker": "~3.0.13",
+    "d3.svg.multibrush": "~0.9.0"
   },
   "overrides": {
     "FileSaver": {
