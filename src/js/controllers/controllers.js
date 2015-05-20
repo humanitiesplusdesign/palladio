@@ -358,11 +358,11 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		};
 
 		$scope.allowedTypes = [
-			{id: 'text', name: 'Text', description: 'This is a description'},
-			{id: 'number', name: 'Number', description: 'This is description'},
+			{id: 'text', name: 'Text', description: 'Any text-based data'},
+			{id: 'number', name: 'Number', description: 'Numeric data such as 1234 or 1.234'},
 			{id: 'date', name: 'Date', description: 'Dates can be YYYY or YYYY-MM-DD'},
-			{id: 'latlong', name: 'Coordinates', description: 'This is description'},
-			{id: 'url', name: 'URL', description: 'This is description'}
+			{id: 'latlong', name: 'Coordinates', description: 'Latitude, Longitude coordinates such as 12,34'},
+			{id: 'url', name: 'URL', description: 'The URL of a website or image in form http://www.site.org/dir/file.html'}
 		];
 
 		$scope.hasLinks = function (field) {

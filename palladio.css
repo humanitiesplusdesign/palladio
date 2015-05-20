@@ -8449,10 +8449,33 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	font-size: 13px;
 	background: #f5f5f5;
 	margin-bottom: 2px;
+
+	-webkit-transition: background ease-out .15s;
+	-o-transition: background ease-out .15s;
+	transition: background ease-out .15s;
+}
+
+[data-palladio-map-view-with-settings] .layer-item:hover {
+	background: #eee;
+	cursor: move;
 }
 
 [data-palladio-map-view-with-settings] .layer-item:last-child {
 		margin-bottom: 0px
+}
+
+[data-palladio-partime-filter] path {
+	fill: #dddddd;
+}
+
+[data-palladio-partime-filter] .axis path, [data-palladio-partime-filter] .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-partime-filter] .axis text {
+	font-size: 10px;
 }
 
 [data-palladio-palette] .palette-new-dimension-button {
@@ -8485,20 +8508,6 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
   margin-left: 5px;
   border-radius: 2px;
 }
-[data-palladio-partime-filter] path {
-	fill: #dddddd;
-}
-
-[data-palladio-partime-filter] .axis path, [data-palladio-partime-filter] .axis line {
-	fill: none;
-	stroke: #000;
-	shape-rendering: crispEdges;
-}
-
-[data-palladio-partime-filter] .axis text {
-	font-size: 10px;
-}
-
 [data-palladio-selection-view] {
 	display: inline-block;
 }
@@ -10211,16 +10220,25 @@ h1 {
 h2 {
   font-weight: 300;
   line-height: normal;
+  color: #222;
 }
 
 h2.title {
-  line-height: 5;
-  font-size: 21px;
+  line-height: 2;
+  font-size: 25px;
   font-weight: normal;
+  color: #fff;
 }
 
 h2 a {
-  font-weight: 400;
+  font-weight: 300;
+  color: #fff;
+}
+
+h2 a:hover {
+  color: #fff;
+  border-bottom: 2px solid #fff;
+  text-decoration: none;
 }
 
 h4 {
@@ -10282,6 +10300,12 @@ h4 {
 
 .bg-dark {
   background: #444;
+  padding: 60px 0px 20px 0px;
+}
+
+.bg-dark2 {
+  background: #555;
+  padding: 60px 0px 20px 0px;
 }
 
 .control-hover .show-hover{
@@ -11030,7 +11054,7 @@ a.fa:hover {
   background: url(img/home.png);
   background-size: cover;
   background-position: 50%;
-  height: 400px;
+  height: 600px;
 
   /* Internet Explorer 10 */
   display:-ms-flexbox;
@@ -11159,9 +11183,9 @@ a.fa:hover {
 .thumb {
   background-size: cover;
   width: 100%;
-  -webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.15);
-  -moz-box-shadow: 0 1px 2px rgba(0,0,0,0.15);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  -webkit-box-shadow: 0 3px 6px rgba(0,0,0,.2);
+  -moz-box-shadow: 0 3px 6px rgba(0,0,0,.2);
+  box-shadow: 0 3px 6px rgba(0,0,0,.2);
   border-radius: 2px;
   margin-bottom: 40px;
 }

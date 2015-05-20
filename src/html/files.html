@@ -1,6 +1,6 @@
 <div class="container" data-ng-show="!files.length">
 
-			<div class="row padding-top">
+			<div class="row padding-top margin-top">
 
 				<div class="col-lg-3 col-md-4">
 					<ul class="list-unstyled sidenav" data-ng-init="sidenav='create'">
@@ -17,7 +17,7 @@
 							<div class="panel panel-default">
 							<div class="panel-body">
 								<p class="">You can load an existing Palladio project by selecting the file (.json format) from your computer.</p>
-								<div palladio-data-upload on-load="onLoad()" >Upload a Palladio file</div>
+								<div palladio-data-upload on-load="onLoad()">Upload a Palladio file</div>
 							</div>
 							</div>
 
@@ -41,25 +41,25 @@
 											<p>Copy and paste out of your spreadsheets, drag-and-drop to upload tabular data (e.g. .csv, .tab, .tsv), or link to a file in a public Dropbox folder to create a new Palladio project. <a target="_blank" href="http://hdlab.stanford.edu/lab-notebook/palladio/2014/11/18/palladio-faqs-0-8-0/#2">Not sure how to structure your data?</a></p>
 											<textarea ui-codemirror="{ mode : 'text',  lineNumbers : true, lineWrapping: true, onDrop : onDrop }" placeholder="Paste your data or drop a file here" ng-model="text"></textarea>
 											<div class="alert alert-warning" ng-show="parseError">{{parseError}}</div>
-											<a class="btn btn-primary" ng-click="parseExtendTable()" ng-disabled="!text">Load</a>
+											<a class="btn btn-default" ng-click="parseExtendTable()" ng-disabled="!text">Load</a>
 										</div>
 
 										<div class="col-lg-12 margin-top">
 											<div class="well">
-												<span><strong>More than one table? No problem!</strong> If you have more than one table, start by uploading your primary table. The primary table should contain the main entities you want to visualize. It could be a collection of objects, like persons or letters, or more abstract concepts, like relationships or flows. Once you have uploaded your primary table, you will be able to extend it with additional information from other tables.</span>
+												<span class="small"><strong>More than one table? No problem!</strong> If you have more than one table, start by uploading your primary table. The primary table should contain the main entities you want to visualize. It could be a collection of objects, like persons or letters, or more abstract concepts, like relationships or flows. Once you have uploaded your primary table, you will be able to extend it with additional information from other tables.</span>
 											</div>
 										</div>
 
 										<div class="col-lg-12">
 
-											<p class="" data-ng-show="!showSPARQL"><a data-ng-click="showSPARQL=true">Load data from a SPARQL endpoint (beta).</a></p>
+											<p class="" data-ng-show="!showSPARQL"><a data-ng-click="showSPARQL=true">Load data from a SPARQL endpoint (beta)</a></p>
 
 											<div data-ng-show="showSPARQL" class="margin-top padding-top">
 												<p><strong>SPARQL endpoint (beta)</strong></p>
 												<p>You can load data from a SPARQL endpoint by providing both the endpoint URL and a valid SPARQL query. After you run the SPARQL query you will have the opportunity to validate your data and re-run the query if necessary before loading the data into Palladio.</p>
 												<yasgui data="text" endpoint="sparqlEndpoint"></yasgui>
 												<div class="">
-													<button class="btn btn-primary" ng-click="parseExtendTable()" ng-show="text">Load data</button>
+													<button class="btn btn-default" ng-click="parseExtendTable()" ng-show="text">Load data</button>
 												</div>
 												<div class="alert alert-warning" ng-show="parseError">{{parseError}}</div>
 											</div>
@@ -101,17 +101,8 @@
 
 		<div class="col-lg-12">
 			<input class="form-control editable" type="text" placeholder="Provide a title to this project" ng-model="project.title"></input>
-			<p class="" ng-show="!showDetails"><a class="small text-muted" ng-click="showDetails=true" ng-init="showDetails=false">Show project details</a></p>
+			<p class="" ng-show="!showDetails"><a class="small text-muted" ng-click="showDetails=true" ng-init="showDetails=false">Show details</a></p>
 			<p class="" ng-show="showDetails"><a class="small text-muted" ng-click="showDetails=false">Hide details</a></p>
-		</div>
-
-		<div class="col-lg-12" ng-show="shwDetails">
-			<div class="row">
-				<div class="col-lg-3 col-md-3">
-					<label>Author</label>
-					<input class="form-control" type="text"></input>
-				</div>
-			</div>
 		</div>
 
 	</div>
@@ -156,8 +147,8 @@
 						</input>
 
 						<div class="margin-top">
-							<span ng-show="$index==0" class="pull-left text-muted text-uppercase">Primary table</span>
-							<span class="text-muted pull-right text-uppercase">{{file.data.length}} rows</span>
+							<span ng-show="$index==0" class="pull-left text-muted">Primary table</span>
+							<span class="text-muted pull-right">{{file.data.length}} rows</span>
 							<span class="clearfix"></span>
 						</div>
 

@@ -1191,7 +1191,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					{
 						"description": "Map tiles",
 						"value": "tiles",
-						"info": "Map tiles provide... "
+						"info": "Map tiles provide "
 					},
 					{
 						"description": "geoJSON",
@@ -1211,7 +1211,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					{
 						"mbId": "cesta.k8g7eofo",
 						"description": "Buildings and Areas",
-						"info" : "Shows buildings",
+						"info" : "Buildings and green areas",
 						"img" : "img/map_buildings.jpg"
 					},
 					{
