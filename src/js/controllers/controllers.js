@@ -140,12 +140,13 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			spinnerService.spin();
 			$http.get(path)
 				.success(function(data) {
+					$scope.loadError = null;
 					loadService.loadJson(data);
 					$scope.onLoad();
 				})
 				.error(function() {
 					spinnerService.hide();
-					console.log("Attempted to load " + path + " but it did not exist.");
+					$scope.loadError = "There was a problem loading the URL " + path + ". Please check that the URL exists, is a Palladio file, and is CORS-enabled.";
 				});
 		}
 

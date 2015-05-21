@@ -29,6 +29,7 @@
 									<p class="title">Load a remote Palladio file</p>
 									<p class="">You can enter the URL of an existing Palladio project file. Please make sure that the server is <a href="http://enable-cors.org/">CORS-enabled</a>.</p>
 									<input class="form-control margin-bottom" placeholder="http://www.example.org/file.json" type="text" ng-model="loadFileUrl"></input>
+									<div class="alert alert-warning" ng-show="loadError">{{loadError}}</div>
 									<a class="btn btn-default" ng-click="loadFile(loadFileUrl)">Load</a>
 								</div>
 
