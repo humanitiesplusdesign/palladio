@@ -517,7 +517,9 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 							legend.append("div")
 								.attr("class","legend-title")
-								.html(layer.countDescription);
+								.html(layer.aggDescription);
+
+							console.log(layer)
 
 							legend.selectAll("div.circle")
 								.data([ maxPointSize, 1 ])
