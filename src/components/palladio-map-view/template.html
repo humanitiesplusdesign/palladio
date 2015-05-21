@@ -25,7 +25,7 @@
 
 					<div class="row margin-top" data-ng-show="!addNewLayer">
 						<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
-							<label class="inline">Data</label>
+							<label class="inline">Data/Shapes</label>
 						</div>
 						<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
 								<ul class="layer-list list-unstyled" ui-sortable="{axis:y, containment: 'parent'}" data-ng-model="layers" data-ng-show="layers.length">
@@ -126,7 +126,7 @@
 								<ul class="nav nav-tabs" role="tablist" data-ng-init="layerType=layerTypes[0]">
 									<li data-ng-class="{'active' : layerType.value =='data'}"><a ng-click="layerType=layerTypes[0]" role="tab" data-toggle="tab">Data</a></li>
 									<li data-ng-class="{'active' : layerType.value =='tiles'}"><a ng-click="layerType=layerTypes[1]" role="tab" data-toggle="tab">Tiles</a></li>
-									<li data-ng-class="{'active' : layerType.value =='geoJSON'}"><a ng-click="layerType=layerTypes[2]" role="tab" data-toggle="tab">Polygons</a></li>
+									<li data-ng-class="{'active' : layerType.value =='geoJSON'}"><a ng-click="layerType=layerTypes[2]" role="tab" data-toggle="tab">Shapes</a></li>
 								</ul>
 								<span class="help-block">{{layerType.info}}</span>
 							</div>
