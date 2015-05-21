@@ -18,8 +18,8 @@
 							<div class="panel-body">
 								<p class="">You can load an existing Palladio project by selecting the file (json format) from your computer.</p>
 								<div palladio-data-upload on-load="onLoad()"><i class="fa fa-upload margin-right text-primary"></i>Upload a Palladio file</div>
-								<input class="form-control" type="text"></input>
-								<a class="btn btn-default">Upload</a>
+								<input class="form-control" type="text" ng-model="loadFileUrl"></input>
+								<a class="btn btn-default" ng-click="loadFile(loadFileUrl)">Upload</a>
 							</div>
 							</div>
 

@@ -145,9 +145,11 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 				})
 				.error(function() {
 					spinnerService.hide();
-					console.log("Attempted to load auto-load.json but it did not exist. This is not usually a problem.");
+					console.log("Attempted to load " + path + " but it did not exist.");
 				});
 		}
+
+		$scope.loadFile = loadFile;
 
 		if($location.search().file) {
 			// Load the file from the path on the URL.
