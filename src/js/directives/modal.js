@@ -18,7 +18,7 @@ angular.module('palladio.directives.modal', [])
 
 	  				'<div class="modal-header">' +
 				    	'<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>' +
-				    	'<h4 style="line-height: normal">{{ description ? description : "Choose the dimension(s)" }}</h4>' +
+				    	'<span>{{ description ? description : "Choose the dimension(s)" }}</span>' +
 				  	'</div>' +
 
 				  	'<div class="modal-body">' +

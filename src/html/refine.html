@@ -4,7 +4,8 @@
 		<div class="modal-content">
 			<!-- Modal Header -->
 			<div class="modal-header">
-				Edit dimension
+				<span data-ng-show="!addingTable">Edit dimension</span>
+				<span data-ng-show="addingTable">Add new table</span>
 			</div>
 
 			<!-- Modal Body -->
@@ -13,14 +14,11 @@
 				<div class="row" data-ng-show="addingTable">
 
 					<div class="col-lg-12">
+						<p class="">Copy and paste out of your spreadsheets, drag-and-drop to upload tabular data (e.g. .csv, .tab, .tsv), or link to a file in a public Dropbox folder to add a new table to your Palladio project. <a target="_blank" href="http://hdlab.stanford.edu/lab-notebook/palladio/2014/11/18/palladio-faqs-0-8-0/#2">Not sure how to structure your data?</a></p>
 						<textarea ui-refresh="selectedFieldMetadata" ui-codemirror="{ mode : 'text',  lineNumbers : true, lineWrapping: true, onDrop : onDrop }" placeholder="Paste your data or drop a file here" ng-model="text"></textarea>
-						<p class="help-block">Copy and paste out of your spreadsheets, drag-and-drop to upload tabular data (e.g. .csv, .tab, .tsv), or link to a file in a public Dropbox folder to add a new table to your Palladio project. <a target="_blank" href="http://hdlab.stanford.edu/lab-notebook/palladio/2014/11/18/palladio-faqs-0-8-0/#2">Not sure how to structure your data?</a></p>
 						<div class="alert alert-warning" ng-show="parseError">{{parseError}}</div>
 
-						<div class="pull-right">
-							<a class="btn btn-default" ng-click="parseExtendTable()" ng-disabled="!text">Load</a>
-
-						</div>
+						<a class="btn btn-default" ng-click="parseExtendTable()" ng-disabled="!text">Load</a>
 
 					</div>
 
@@ -76,11 +74,11 @@
 							</ui-select-match>
 							<ui-select-choices repeat="type.id as type in allowedTypes | filter: {name:$select.search}">
 								<span ng-bind-html="type.name | highlight: $select.search"></span><br/>
-								<span class="text-muted small" ng-bind-html="type.description"></span>
+								<span class="text-muted" ng-bind-html="type.description"></span>
 							</ui-select-choices>
 						</ui-select>
 
-						<p class="help-block" data-ng-show="selectedFieldMetadata.errors.length">{{selectedFieldMetadata.errors.length}} unique values do not match this data type! <a data-ng-click="downloadErrors()">Download the list of errors.</a></p>
+						<p class="help-block" data-ng-show="selectedFieldMetadata.errors.length">{{selectedFieldMetadata.errors.length}} unique values do not match this data type! <a data-ng-click="downloadErrors()">Download errors</a></p>
 						<p class="help-block" data-ng-hide="selectedFieldMetadata.errors.length">All the values match this type.</p>
 					</div>
 				</div>
@@ -234,7 +232,7 @@
 
 			<!-- Modal Footer -->
 			<div class="modal-footer">
-				<button data-ng-show="!addingTable" type="button" class="btn btn-default" data-dismiss="modal" ng-click="hideNewTable()">Done</button>
+				<button data-ng-show="!addingTable" type="button" class="btn btn-default" data-dismiss="modal" ng-click="hideNewTable()"><i class="fa fa-check margin-right text-primary"></i>Done</button>
 				<button data-ng-show="addingTable" type="button" class="btn btn-default" ng-click="hideNewTable()">Cancel</button>
 			</div>
 		</div>

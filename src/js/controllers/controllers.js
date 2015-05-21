@@ -361,8 +361,8 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			{id: 'text', name: 'Text', description: 'Any text-based data'},
 			{id: 'number', name: 'Number', description: 'Numeric data such as 1234 or 1.234'},
 			{id: 'date', name: 'Date', description: 'Dates can be YYYY or YYYY-MM-DD'},
-			{id: 'latlong', name: 'Coordinates', description: 'Latitude, Longitude coordinates such as 12,34'},
-			{id: 'url', name: 'URL', description: 'The URL of a website or image in form http://www.site.org/dir/file.html'}
+			{id: 'latlong', name: 'Coordinates', description: 'Latitude, Longitude coordinates such as 12.345,67.890'},
+			{id: 'url', name: 'URL', description: 'The URL of a website or image such as http://www.example.org/file.yyy'}
 		];
 
 		$scope.hasLinks = function (field) {

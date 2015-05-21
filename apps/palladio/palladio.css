@@ -10781,6 +10781,8 @@ label.inline {
 
 .modal-header {
   border: none;
+  background: #fafafa;
+  font-weight: 600;
 }
 
 .modal.fade .modal-dialog {
@@ -10832,6 +10834,9 @@ label.inline {
   display: none;
 }
 
+.modal-footer {
+  padding: 10px 15px;
+}
 
 
 .fa {
@@ -10974,6 +10979,10 @@ a.fa:hover {
 
 .unique-values .table {
   margin-bottom: 0px;
+}
+
+.unique-values .small {
+  font-size: 13px;
 }
 
 .table > thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
