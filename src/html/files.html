@@ -17,17 +17,17 @@
 							<div class="panel panel-default">
 							<div class="panel-body">
 
-								<p>If you already have a Palladio project file (json)</p>
+								<p>If you already have a Palladio project file (.json) you can load one from your computer or a URL.</p>
 
 								<div class="margin-bottom margin-top">
 									<p class="title">Upload from your computer</p>
-									<p class="">You can load an existing Palladio project by selecting the file (json format) from your computer.</p>
+									<p class="">You can load an existing Palladio project by selecting the file from your computer.</p>
 									<div palladio-data-upload on-load="onLoad()">Choose a file</div>
 								</div>
 
 								<div class="margin-top padding-top">
 									<p class="title">Load a remote Palladio file</p>
-									<p class="">You can load an existing Palladio project by selecting the file (json format) from your computer.</p>
+									<p class="">You can enter the URL of an existing Palladio project file. Please make sure that the server is <a href="http://enable-cors.org/">CORS-enabled</a>.</p>
 									<input class="form-control margin-bottom" placeholder="http://www.example.org/file.json" type="text" ng-model="loadFileUrl"></input>
 									<a class="btn btn-default" ng-click="loadFile(loadFileUrl)">Load</a>
 								</div>
