@@ -13,7 +13,7 @@
 		<div class="settings col-lg-5 col-lg-offset-7 col-md-6 col-md-offset-6">
 			<div class="panel panel-default">
 
-				<a class="settings-toggle" data-toggle="tooltip" data-original-title="Settings" data-placement="bottom">
+				<a class="settings-toggle">
 					<i class="fa fa-bars"></i>
 				</a>
 
@@ -25,7 +25,7 @@
 
 					<div class="row margin-top" data-ng-show="!addNewLayer">
 						<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
-							<label class="inline">Data</label>
+							<label class="inline">Data/Shapes</label>
 						</div>
 						<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
 								<ul class="layer-list list-unstyled" ui-sortable="{axis:y, containment: 'parent'}" data-ng-model="layers" data-ng-show="layers.length">
@@ -43,7 +43,13 @@
 											tooltip-animation="false"
 											tooltip-append-to-body="true"
 											class="fa fa-trash-o pull-right text-danger" data-container="body" data-title="Delete" bs-tooltip data-ng-click="layer.remove();" style="line-height: 1.6"></i>
-										<i class="fa fa-pencil pull-right margin-right text-primary" data-container="body" data-title="Edit" bs-tooltip data-ng-click="layer.edit();" style="line-height: 1.6"></i>
+
+										<i
+										tooltip="Edit"
+										tooltip-animation="false"
+										tooltip-append-to-body="true"
+										class="fa fa-pencil pull-right margin-right text-primary" data-container="body" data-title="Edit" bs-tooltip data-ng-click="layer.edit();" style="line-height: 1.6"></i>
+
 									</li>
 								</ul>
 
@@ -52,6 +58,16 @@
 										<span class="text-muted">No data layers</span>
 									</li>
 								</ul>
+
+								<a
+								ng-show="layers.length"
+								tooltip="Export data layers (svg)"
+								tooltip-animation="false"
+								tooltip-append-to-body="true"
+								class="pull-right small margin-bottom" ng-click="exportSvg(this, 'Palladio Map.svg')">
+									Export
+								</a>
+
 						</div>
 					</div>
 
@@ -88,6 +104,17 @@
 					</div>
 
 
+					<div class="row margin-top">
+						<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
+						</div>
+						<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
+
+						</div>
+					</div>
+
+
+
+
 					<!-- Choosing layer -->
 
 					<div class="" data-ng-show="addNewLayer">
@@ -99,7 +126,7 @@
 								<ul class="nav nav-tabs" role="tablist" data-ng-init="layerType=layerTypes[0]">
 									<li data-ng-class="{'active' : layerType.value =='data'}"><a ng-click="layerType=layerTypes[0]" role="tab" data-toggle="tab">Data</a></li>
 									<li data-ng-class="{'active' : layerType.value =='tiles'}"><a ng-click="layerType=layerTypes[1]" role="tab" data-toggle="tab">Tiles</a></li>
-									<li data-ng-class="{'active' : layerType.value =='geoJSON'}"><a ng-click="layerType=layerTypes[2]" role="tab" data-toggle="tab">Polygons</a></li>
+									<li data-ng-class="{'active' : layerType.value =='geoJSON'}"><a ng-click="layerType=layerTypes[2]" role="tab" data-toggle="tab">Shapes</a></li>
 								</ul>
 								<span class="help-block">{{layerType.info}}</span>
 							</div>
@@ -113,6 +140,8 @@
 									<input class="form-control" type="text" ng-model="description" placeholder="Layer {{tileSets.length}}">
 							</div>
 						</div>
+
+
 
 
 					<!-- Tiles -->

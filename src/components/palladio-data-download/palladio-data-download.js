@@ -49,6 +49,9 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 						{type: "application/json;charset=utf-8"}
 					);
 					var fileName = "Data export.palladio." + version + ".json";
+					if(scope && scope.project && scope.project.title) {
+						fileName = scope.project.title + ".palladio." + version + ".json";
+					}
 					saveAs(blob, fileName);
 				};
 			}

@@ -105,14 +105,17 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			spinnerService.spin();
 			$http.get(path)
 				.success(function(data) {
+					$scope.loadError = null;
 					loadService.loadJson(data);
 					$scope.onLoad();
 				})
 				.error(function() {
 					spinnerService.hide();
-					console.log("Attempted to load auto-load.json but it did not exist. This is not usually a problem.");
+					$scope.loadError = "There was a problem loading the URL " + path + ". Please check that the URL exists, is a Palladio file, and is CORS-enabled.";
 				});
 		}
+
+		$scope.loadFile = loadFile;
 
 		if($location.search().file) {
 			// Load the file from the path on the URL.
@@ -323,11 +326,11 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		};
 
 		$scope.allowedTypes = [
-			{id: 'text', name: 'Text', description: 'This is a description'},
-			{id: 'number', name: 'Number', description: 'This is description'},
+			{id: 'text', name: 'Text', description: 'Any text-based data'},
+			{id: 'number', name: 'Number', description: 'Numeric data such as 1234 or 1.234'},
 			{id: 'date', name: 'Date', description: 'Dates can be YYYY or YYYY-MM-DD'},
-			{id: 'latlong', name: 'Coordinates', description: 'This is description'},
-			{id: 'url', name: 'URL', description: 'This is description'}
+			{id: 'latlong', name: 'Coordinates', description: 'Latitude, Longitude coordinates such as 12.345,67.890'},
+			{id: 'url', name: 'URL', description: 'The URL of a website or image such as http://www.example.org/file.yyy'}
 		];
 
 		$scope.hasLinks = function (field) {

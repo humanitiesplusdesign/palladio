@@ -16,16 +16,26 @@ h1 {
 h2 {
   font-weight: 300;
   line-height: normal;
+  color: #222;
+  font-family: roboto slab, serif;
 }
 
 h2.title {
-  line-height: 5;
-  font-size: 21px;
+  line-height: 2;
+  font-size: 25px;
   font-weight: normal;
+  color: #fff;
 }
 
 h2 a {
-  font-weight: 400;
+  font-weight: 300;
+  color: #fff;
+}
+
+h2 a:hover {
+  color: #fff;
+  border-bottom: 2px solid #fff;
+  text-decoration: none;
 }
 
 h4 {
@@ -87,6 +97,12 @@ h4 {
 
 .bg-dark {
   background: #444;
+  padding: 60px 0px 20px 0px;
+}
+
+.bg-dark2 {
+  background: #555;
+  padding: 60px 0px 20px 0px;
 }
 
 .control-hover .show-hover{
@@ -562,6 +578,8 @@ label.inline {
 
 .modal-header {
   border: none;
+  background: #fafafa;
+  font-weight: 600;
 }
 
 .modal.fade .modal-dialog {
@@ -613,6 +631,9 @@ label.inline {
   display: none;
 }
 
+.modal-footer {
+  padding: 10px 15px;
+}
 
 
 .fa {
@@ -757,6 +778,10 @@ a.fa:hover {
   margin-bottom: 0px;
 }
 
+.unique-values .small {
+  font-size: 13px;
+}
+
 .table > thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
   border-top: none;
   padding: 6px 8px;
@@ -832,10 +857,10 @@ a.fa:hover {
 
 .home {
 
-  background: url(img/home.png);
+  background: url(img/home.jpg);
   background-size: cover;
   background-position: 50%;
-  height: 400px;
+  height: 600px;
 
   /* Internet Explorer 10 */
   display:-ms-flexbox;
@@ -964,9 +989,9 @@ a.fa:hover {
 .thumb {
   background-size: cover;
   width: 100%;
-  -webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.15);
-  -moz-box-shadow: 0 1px 2px rgba(0,0,0,0.15);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  -webkit-box-shadow: 0 3px 6px rgba(0,0,0,.2);
+  -moz-box-shadow: 0 3px 6px rgba(0,0,0,.2);
+  box-shadow: 0 3px 6px rgba(0,0,0,.2);
   border-radius: 2px;
   margin-bottom: 40px;
 }

@@ -183,6 +183,15 @@
 	font-size: 13px;
 	background: #f5f5f5;
 	margin-bottom: 2px;
+
+	-webkit-transition: background ease-out .15s;
+	-o-transition: background ease-out .15s;
+	transition: background ease-out .15s;
+}
+
+[data-palladio-map-view-with-settings] .layer-item:hover {
+	background: #eee;
+	cursor: move;
 }
 
 [data-palladio-map-view-with-settings] .layer-item:last-child {

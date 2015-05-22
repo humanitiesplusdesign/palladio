@@ -412,7 +412,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 									return c[0] === d.properties.source &&
 										c[1] === d.properties.destination;
 								});
-						    	deregister.push(palladioService.setFilter(identifier, layer.title, layer.sourceAccessor(d.properties.data) + "/" + layer.destinationAccessor(d.properties.data), resetLink));
+						    	deregister.push(palladioService.setFilter(identifier, scope.title, layer.sourceAccessor(d.properties.data) + "/" + layer.destinationAccessor(d.properties.data), resetLink));
 								palladioService.update();
 						    })
 						    .on("mouseover", linkTip.show)
@@ -431,7 +431,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 									return c[0] === d.properties.source &&
 										c[1] === d.properties.destination;
 								});
-						    	deregister.push(palladioService.setFilter(identifier, layer.title, layer.sourceAccessor(d.properties.data) + "/" + layer.destinationAccessor(d.properties.data), resetLink));
+						    	deregister.push(palladioService.setFilter(identifier, scope.title, layer.sourceAccessor(d.properties.data) + "/" + layer.destinationAccessor(d.properties.data), resetLink));
 								palladioService.update();
 						    })
 						    .on("mouseover", linkTip.show)
@@ -462,7 +462,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 									return c[0] === d.properties.key ||
 										c[1] === d.properties.key;
 								});
-						    	deregister.push(palladioService.setFilter(identifier, layer.title, d.properties.value.desc.valueList, resetNode));
+						    	deregister.push(palladioService.setFilter(identifier, scope.title, description(d.properties.value.desc.valueList), resetNode));
 								palladioService.update();
 						    })
 						    .on("mouseover", nodeTip.show)
@@ -480,7 +480,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 									return c[0] === d.properties.key ||
 										c[1] === d.properties.key;
 								});
-						    	deregister.push(palladioService.setFilter(identifier, layer.title, description(d.properties.value.desc.valueList), resetNode));
+						    	deregister.push(palladioService.setFilter(identifier, scope.title, description(d.properties.value.desc.valueList), resetNode));
 								palladioService.update();
 						    })
 						    .on("mouseover", nodeTip.show)
@@ -517,7 +517,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 							legend.append("div")
 								.attr("class","legend-title")
-								.html(layer.countDescription);
+								.html(layer.aggDescription);
 
 							legend.selectAll("div.circle")
 								.data([ maxPointSize, 1 ])
@@ -1096,7 +1096,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 				function importState(state) {
 					scope.$apply(function (s) {
-						if(state.tileSets.length) s.tileSets = state.tileSets;
+						if(state.tileSets && state.tileSets.length) s.tileSets = state.tileSets;
 						if(state.layers) {
 							state.layers.forEach(function(d) {
 								// Set the layer type
@@ -1191,7 +1191,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					{
 						"description": "Map tiles",
 						"value": "tiles",
-						"info": "Map tiles provide... "
+						"info": "Map tiles provide "
 					},
 					{
 						"description": "geoJSON",
@@ -1211,7 +1211,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					{
 						"mbId": "cesta.k8g7eofo",
 						"description": "Buildings and Areas",
-						"info" : "Shows buildings",
+						"info" : "Buildings and green areas",
 						"img" : "img/map_buildings.jpg"
 					},
 					{

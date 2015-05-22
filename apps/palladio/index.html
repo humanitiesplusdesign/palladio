@@ -14,11 +14,11 @@
         <link href="https://netdna.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
 
         <!-- Google Fonts -->
-        <link href='http://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic,500,700,500italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
-        <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:300,700' rel='stylesheet' type='text/css'>
-        <link href='http://fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
-        <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,900,300italic,400italic' rel='stylesheet' type='text/css'>
-        <link href='http://fonts.googleapis.com/css?family=Karla:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic,500,700,500italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:300,700' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,900,300italic,400italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Karla:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
     </head>
 
     <body data-ng-controller="WorkflowCtrl">
@@ -37,11 +37,18 @@
           </div>
 
           <div class="collapse navbar-collapse" id="main-navbar">
+
+            <ul class="nav navbar-nav" data-ng-show="!files.length && location.path() != '/upload'">
+              <form class="navbar-form">
+                <a ui-sref="/upload" class="btn btn-default">Start<i class="fa fa-angle-double-right margin-left"></i></a>
+              </form>
+            </ul>
+
             <ul class="nav navbar-nav">
 
               <li data-ng-class="{'active' : location.path() == '/upload'}">
                   <a ui-sref="/upload" data-ng-show="files.length">Data</a>
-                  <a ui-sref="/upload" data-ng-show="!files.length && location.path() != '/upload'">Start</a>
+                  <!--<a ui-sref="/upload" data-ng-show="!files.length && location.path() != '/upload'">Start</a>-->
               </li>
 
               <li data-ng-show="files.length"
@@ -73,11 +80,8 @@
 
             <ul class="nav navbar-nav navbar-right">
               <p class="navbar-text">{{project.title}}</p>
-              <p class="navbar-text">v. {{version}}</p>
+              <p class="navbar-text">v {{version}}</p>
               <form class="navbar-form navbar-left" role="search">
-                <!--<div class="form-group">
-                  <input type="text" class="form-control" placeholder="Search">
-                </div>-->
                 <div palladio-data-download data-ng-show="files.length"><i class="fa fa-download margin-right text-primary"></i>Download</div>
               </form>
             </ul>
@@ -88,84 +92,6 @@
 
       <div ui-view id="main" data-ng-class="{'palette-displayed' : showPalette}"></div>
 
-
-      <!--
-        <div class="wrapper">
-
-            <div class="navbar navbar-fixed-top">
-              <div class="navbar-inner">
-                <div class="container-fluid">
-
-                  <a class="brand"
-                        ui-sref="/">
-                        Palladio
-                    </a>
-
-                  <ul class="nav">
-
-                    <li data-ng-class="{'active' : location.path() == '/upload'}">
-                        <a ui-sref="/upload" class="short" data-ng-show="files.length">Data</a>
-                        <a ui-sref="/upload" class="short" data-ng-show="!files.length && location.path() == '/upload'">Start</a>
-                        <span data-ng-show="!files.length && location.path() != '/upload'">
-                            <button ui-sref="/upload" class="btn" style="margin-top:0px">Start</button>
-                        </span>
-                    </li>
-
-                    <li data-ng-show="files.length"
-                        data-ng-class="{'active' : location.path() == '/visualization' && layout=='geo'}">
-                        <a ui-sref="/visualization" ui-sref-opts="{reload: reload}" data-ng-click="setLayout('geo')" class="short">Map</a>
-                    </li>
-
-                    <li data-ng-show="files.length"
-                        data-ng-class="{'active' : location.path() == '/visualization' && layout=='graph'}">
-                        <a ui-sref="/visualization" ui-sref-opts="{reload: reload}" data-ng-click="setLayout('graph')" class="short">Graph</a>
-                    </li>
-
-                    <li data-ng-show="files.length"
-                        data-ng-class="{'active' : location.path() == '/visualization' && layout=='table'}"><a ui-sref="/visualization" ui-sref-opts="{reload: reload}" data-ng-click="setLayout('table')" class="short">List</a>
-                    </li>
-
-                    <li data-ng-show="files.length"
-                        data-ng-class="{'active' : location.path() == '/visualization' && layout=='grid'}"><a ui-sref="/visualization" ui-sref-opts="{reload: reload}" data-ng-click="setLayout('grid')" class="short">Gallery</a>
-                    </li>
-
-                    <li data-ng-show="files.length"
-                        data-ng-class="{'active' : location.path() == '/visualization' && layout=='time'}"><a ui-sref="/visualization" ui-sref-opts="{reload: reload}" data-ng-click="setLayout('time')" class="short">Time</a>
-                    </li>
-
-                    <li data-ng-show="files.length"
-                        data-ng-class="{'active' : location.path() == '/visualization' && layout=='duration'}"><a ui-sref="/visualization" ui-sref-opts="{reload: reload}" data-ng-click="setLayout('duration')" class="short">Duration</a>
-                    </li>
-
-                    <li data-ng-show="files.length"
-                        data-ng-class="{'active' : location.path() == '/visualization' && layout=='idiograph'}"><a ui-sref="/visualization" ui-sref-opts="{reload: reload}" data-ng-click="setLayout('idiograph')" class="short">Idiograph</a>
-                    </li>
-
-                    <li data-ng-show="files.length">
-                        <span><button palladio-data-download class="btn" style="margin-top:0px">Save</button></span>
-                    </li>
-
-                    <li data-ng-show="!files.length"><span class="muted tiny small">The design of Palladio is an active research project. Your contributions have been essential. Please help us improve the tool by <a class="navbar-text small tiny" href="mailto:palladio@designhumanities.org">sharing any thoughts or suggestions.</a></span></li>
-
-                  </ul>
-
-                  <ul class="nav pull-right">
-                    <li id="search-top" class="pull-right" style="margin-right:20px">
-                        <span>
-                            <i class="fa fa-search" style="margin-right:10px"></i><input class="search" ng-model="searchText" type="text" placeholder="Search in the view..." style="margin-bottom: 0px"></input>
-                        </span>
-                    </li>
-                  </ul>
-
-                </div>
-              </div>
-            </div>
-
-            <div ui-view id="main"
-                data-ng-class="{'palette-displayed' : showPalette}"></div>
-
-        </div>
-        -->
 
         <div id="spinner">
           <div class="msg">Loading data. Please wait...</div>
