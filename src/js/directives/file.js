@@ -41,9 +41,7 @@ angular.module('palladio.directives.file', [])
             .removeClass(animationOut)
             .removeClass(animationIn);
         });
-      })
-
-
+      });
     }
   };
 

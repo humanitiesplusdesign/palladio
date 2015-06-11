@@ -1,7 +1,7 @@
 angular.module('palladio.directives.files', [
 	'palladio.services',
 	'palladio'])
-	.directive('filesDirective', function ($rootScope, parseService, dataService) {
+	.directive('filesDirective', function ($rootScope, parseService, dataService, $window) {
 		var directiveDefObj = {
 			templateUrl: 'partials/files.html',
 
@@ -73,6 +73,11 @@ angular.module('palladio.directives.files', [
 					);
 					var fileName = file.label + ".csv";
 					saveAs(blob, fileName);
+				};
+
+				scope.loadSample = function() {
+					$window.location = "index.html#/upload?file=sample.json";
+					$window.location.reload();
 				};
 
 
