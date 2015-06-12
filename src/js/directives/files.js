@@ -76,7 +76,7 @@ angular.module('palladio.directives.files', [
 				};
 
 				scope.loadSample = function() {
-					$window.location = "index.html#/upload?file=sample.json";
+					$window.location = "#/upload?file=sample.json";
 					$window.location.reload();
 				};
 
