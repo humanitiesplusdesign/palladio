@@ -796,7 +796,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 			});
 		}
 
-		var metadata = {};
+		metadata = [];
 		function setMetadata(obj) {
 			metadata = obj;
 		}
