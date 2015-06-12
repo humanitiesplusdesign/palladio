@@ -7963,7 +7963,7 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 }
 
 [data-palladio-facet-filter] .facet-container {
-	overflow-x: scroll;
+	overflow-x: auto;
 	overflow-y: hidden;
 }
 
@@ -7980,9 +7980,9 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 [data-palladio-facet-filter] .facet {
 	font-size: 12px;
 	display: inline-block;
-	width: 200px;
+	width: 215px;
 	margin-right: 10px;
-	overflow-y: scroll;
+	overflow-y: auto;
 }
 
 [data-palladio-facet-filter] .facet-drop-area {
@@ -8494,6 +8494,20 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
   margin-left: 5px;
   border-radius: 2px;
 }
+[data-palladio-partime-filter] path {
+	fill: #dddddd;
+}
+
+[data-palladio-partime-filter] .axis path, [data-palladio-partime-filter] .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-partime-filter] .axis text {
+	font-size: 10px;
+}
+
 [data-palladio-selection-view] {
 	display: inline-block;
 }
@@ -8556,18 +8570,21 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	vertical-align: top;
 }
 
-[data-palladio-partime-filter] path {
-	fill: #dddddd;
+[data-palladio-table-view] {
+	width: 100%;
+	margin-bottom: 90px;
+	padding-top: 5px;
 }
 
-[data-palladio-partime-filter] .axis path, [data-palladio-partime-filter] .axis line {
-	fill: none;
-	stroke: #000;
-	shape-rendering: crispEdges;
+[data-palladio-table-view] table {
+	font-size: 12px;
 }
 
-[data-palladio-partime-filter] .axis text {
-	font-size: 10px;
+[data-palladio-table-view] td {
+}
+
+[data-palladio-table-view] {
+	overflow: auto;
 }
 
 /*[data-palladio-timeline-filter] .list-title {
@@ -8595,23 +8612,6 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 [data-palladio-timeline-filter] .resize path {
   fill: #eee;
   stroke: #666;
-}
-
-[data-palladio-table-view] {
-	width: 100%;
-	margin-bottom: 90px;
-	padding-top: 5px;
-}
-
-[data-palladio-table-view] table {
-	font-size: 12px;
-}
-
-[data-palladio-table-view] td {
-}
-
-[data-palladio-table-view] {
-	overflow: auto;
 }
 
 [data-palladio-arctime-filter] .list-title {

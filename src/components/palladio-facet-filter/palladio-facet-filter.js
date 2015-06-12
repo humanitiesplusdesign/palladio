@@ -183,9 +183,9 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 
 								// Extend the width of the inner- and mid-facet-container
 								d3.select(element[0]).select('.inner-facet-container')
-									.style('width', (210 * count) + 'px');
+									.style('width', (225 * count) + 'px');
 								d3.select(element[0]).select('.mid-facet-container')
-									.style('width', (210 * count) + 'px');
+									.style('width', (225 * count) + 'px');
 							});
 
 						var cells = facets.selectAll('.cell')

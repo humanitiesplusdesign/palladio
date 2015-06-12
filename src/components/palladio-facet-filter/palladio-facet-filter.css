@@ -32,7 +32,7 @@
 }
 
 [data-palladio-facet-filter] .facet-container {
-	overflow-x: scroll;
+	overflow-x: auto;
 	overflow-y: hidden;
 }
 
@@ -49,9 +49,9 @@
 [data-palladio-facet-filter] .facet {
 	font-size: 12px;
 	display: inline-block;
-	width: 200px;
+	width: 215px;
 	margin-right: 10px;
-	overflow-y: scroll;
+	overflow-y: auto;
 }
 
 [data-palladio-facet-filter] .facet-drop-area {
