@@ -48,7 +48,20 @@ angular.module('palladio.directives.yasgui', [
 					scope.$apply(function(scope) {
 						spinnerService.hide();
 						yasr.setResponse({response: data, contentType: xhr.getResponseHeader("Content-Type")});
-						scope.data = data;
+						if(typeof data === "string") {
+							// Palladio expects the SPARQL to return a CSV formatted string
+							scope.data = data;
+						} else {
+							// JSON structured format. We discard type information and convert to CSV
+							if(data.results.bindings.length > 0) {
+								scope.data = d3.csv.format(data.results.bindings.map(function(d) {
+									for(var prop in d) {
+										d[prop] = d[prop].value;
+									}
+									return d;
+								}));
+							}
+						}
 					});
 				};
 				yasqe.options.sparql.handlers.error = function(xhr, textStatus, errorThrown) {
