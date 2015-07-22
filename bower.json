@@ -16,7 +16,14 @@
     "test",
     "tests",
     "apps",
-    "lib"
+    "lib",
+    "src",
+    "fonts",
+    "images",
+    "img",
+    "gulpfile.js",
+    "old_bower.json",
+    "package.json"
   ],
   "devDependencies": {
     "jquery": "~2.1.3",
