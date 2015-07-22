@@ -39,7 +39,7 @@ var filterByExtension = function(extension){
 
 gulp.task('scripts', function () {
 	var files = gulp.src(
-			mainBowerFiles()
+			mainBowerFiles({includeDev: true})
 				.concat(palladioSources)
 		)
 		.pipe(filterByExtension("js"))
@@ -61,7 +61,7 @@ gulp.task('scripts', function () {
 });
 
 gulp.task('css', function () {
-	gulp.src(mainBowerFiles()
+	gulp.src(mainBowerFiles({includeDev: true})
 				.concat(palladioCSS))
 		.pipe(filterByExtension("css"))
 		.pipe(concat('palladio.css'))
