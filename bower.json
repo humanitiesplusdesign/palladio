@@ -8,7 +8,7 @@
   "homepage": "https://github.com/humanitiesplusdesign/palladio",
   "authors": [],
   "license": "",
-  "private": true,
+  "private": false,
   "ignore": [
     "**/.*",
     "node_modules",
