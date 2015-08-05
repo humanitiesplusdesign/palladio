@@ -27,8 +27,8 @@
 			</div>
 		</div>
 
-		<div ng-show="showSettings === 'true'" class="well well-expand" ng-show="!fieldDescriptions()">Select at least one dimension on the right</div>
-		<div ng-show="showSettings !== 'true'" class="well well-expand" ng-show="!fieldDescriptions()">No dimensions configured for facet display</div>
+		<div class="well well-expand" ng-show="!fieldDescriptions() && showSettings === 'true'">Select at least one dimension on the right</div>
+		<div class="well well-expand" ng-show="!fieldDescriptions() && showSettings !== 'true'">No dimensions configured for facet display</div>
 
 	</div>
 
