@@ -177,16 +177,13 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 								.attr("class", "mode-buttons")
 							.append("div").attr("class", "btn-group");
 
-						facets
-							.call(function(sel) {
 								var count = scope.dims.length;
 
-								// Extend the width of the inner- and mid-facet-container
-								d3.select(element[0]).select('.inner-facet-container')
-									.style('width', (225 * count) + 'px');
-								d3.select(element[0]).select('.mid-facet-container')
-									.style('width', (225 * count) + 'px');
-							});
+						// Extend the width of the inner- and mid-facet-container
+						selection
+							.style('width', (225 * count) + 'px');
+						selection.select('.mid-facet-container')
+							.style('width', (225 * count) + 'px');
 
 						var cells = facets.selectAll('.cell')
 								.data(function (d) { return d.group.top(Infinity)

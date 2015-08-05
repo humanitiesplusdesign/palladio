@@ -1,31 +1,3 @@
-<!--<div class="row">
-
-	<div class="col-lg-9 col-md-9 col-sm-11 col-xs-11 margin-bottom">
-		<input type="text" class="form-control" data-ng-model="title" placeholder="Untitled"></input>
-	</div>
-
-	<div class="col-lg-3 col-md-3 col-sm-1 col-xs-1 margin-bottom">
-
-		<a data-ng-show="showControls === 'true'"
-			class="btn btn-default"
-			data-ng-click="filterReset()"
-			tooltip-animation="false"
-			tooltip-append-to-body="true"
-			tooltip="Clear">Clear</a>
-
-
-		<a data-ng-show="showControls === 'true'"
-			 class="text-danger fa fa-trash-o pull-right margin-top"
-			 data-ng-click="$parent.removeFilter($event)"
-			 tooltip-animation="false"
-			 tooltip-append-to-body="true"
-			 tooltip="Delete"></a>
-
-		<span class="clearfix"></span>
-
-	</div>
-</div>-->
-
 <div class="row" ng-show="collapse" ng-init="collapse=false">
 	<div class="col-lg-12">
 		{{title}}<span class="text-muted margin-left small">Facet</span>
@@ -42,9 +14,9 @@
 
 <div class="row" ng-show="!collapse">
 
-	<div class="col-lg-9 col-md-8">
+	<div ng-class="{'col-lg-9': showSettings === 'true', 'col-md-8': showSettings === 'true', 'col-lg-12': !(showSettings === 'true'), 'col-md-12': !(showSettings === 'true')}">
 
-		<div class="facet-container" style="height: {{calcHeight+15}}">
+		<div class="facet-container" style="height: {{calcHeight}}">
 			<div class="mid-facet-container" style="height: {{calcHeight}};">
 				<div class="inner-facet-container" style="height: {{calcHeight}};"></div>
 				<div ng-show="showDropArea === 'true'" palladio-droppable model="dropModel" class="facet-drop-area" style="margin-top: {{dropMarginTop}};">
@@ -55,11 +27,12 @@
 			</div>
 		</div>
 
-		<div class="well well-expand" ng-show="!fieldDescriptions()">Select at least one dimension on the right</div>
+		<div ng-show="showSettings === 'true'" class="well well-expand" ng-show="!fieldDescriptions()">Select at least one dimension on the right</div>
+		<div ng-show="showSettings !== 'true'" class="well well-expand" ng-show="!fieldDescriptions()">No dimensions configured for facet display</div>
 
 	</div>
 
-	<div class="col-lg-3 col-md-4">
+	<div ng-show="showSettings === 'true'" class="col-lg-3 col-md-4">
 
 		<div class="row">
 			<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right ">
@@ -115,9 +88,12 @@
 			</div>
 			<div class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">
 
-				<a class="small" data-ng-click="filterReset()">Clear</a>
+				<a class="small" 
+					data-ng-show="showControls === 'true'"
+					data-ng-click="filterReset()">Clear</a>
 
 				<a class="text-danger pull-right"
+					data-ng-show="showControls === 'true'"
 				 	tooltip-animation="false"
 				 	tooltip-append-to-body="true"
 					tooltip-placement="left"
