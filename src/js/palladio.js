@@ -169,6 +169,8 @@ angular.module('palladio', [])
 		//		dimensions: []
 		//		aggregation: []
 		//		height: 300px
+		//
+		// NOTE: To be removed. Going into a separate service
 		var facetFilter = function(selector, options) {
 			if(options === undefined) options = {};
 
@@ -215,7 +217,47 @@ angular.module('palladio', [])
 			onSearch: registerSearchCallback,
 			search: search,
 			registerStateFunctions: registerStateFunctions,
-			getStateFunctions: getStateFunctions,
-			facetFilter: facetFilter
+			getStateFunctions: getStateFunctions
 		};
 	}]);
+
+var bootstrap = function(selector, additionalModules) {
+	if(!Array.isArray(additionalModules)) { additionalModules = []; }
+	var modules = [
+		'palladio',
+		'palladio.components',
+		'palladio.controllers',
+		'palladio.services',
+		'palladio.directives',
+		'palladio.filters',
+
+		'ui.codemirror',
+		'ui.bootstrap',
+		'ui.router',
+		'ui.sortable',
+		'ui.select',
+		'colorpicker.module',
+
+		'palladioDataUpload',
+		'palladioDataDownload',
+
+		// Filters
+		'palladioTimelineFilter',
+		'palladioFacetFilter',
+		'palladioPartimeFilter',
+		// Views
+		'palladioListView',
+		'palladioMapView',
+		'palladioTableView',
+		'palladioSelectionView',
+		'palladioGraphView'
+	].concat(additionalModules);
+	
+	angular.module('palladioApp', modules);
+	
+	if(!selector) { selector = document; }
+	
+	var app = angular.bootstrap(selector, ['palladioApp']);
+	
+	return app.get('componentService');
+};

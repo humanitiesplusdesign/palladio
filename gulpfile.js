@@ -105,6 +105,13 @@ gulp.task('webserver', function() {
 			port: 8001,
 			livereload: {enable: true, port: 2346}
 		}));
+
+	gulp.src('apps/standalone')
+		.pipe(webserver({
+			livereload: true,
+			port: 8002,
+			livereload: {enable: true, port: 2347}
+		}));
 });
 
 gulp.task('default', ['scripts', 'css', 'images', 'webserver', 'watch']);

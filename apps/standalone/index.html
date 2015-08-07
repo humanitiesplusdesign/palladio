@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ng-app="palladioStandaloneApp" xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <meta charset="utf-8">
         <title>Palladio-based standalone example</title>
@@ -15,11 +15,34 @@
     </head>
 
     <body>
-        <div ui-view id="main"></div>
+        <div class="row-fluid">
+            <div class="col-md-10 col-md-offset-1" id="data-upload-here"></div>
+        </div>
+        <div class="row-fluid">
+            <div class="col-md-10 col-md-offset-1" id="facet-filter-here"></div>
+        </div>
+        <div class="row-fluid">
+            <div class="col-md-10 col-md-offset-1" id="table-view-here"></div>
+        </div>
 
         <script src="palladio.js"></script>
+        <script>
+            var components = bootstrap(document);
 
-        <script src="js/app.js"></script>
+            components.dataUpload('#data-upload-here', function() {
+                angular.element('#data-upload-here').remove();
+
+                components.facetFilter("#facet-filter-here", {
+                    height: "300px",
+                    showControls: false,
+                    showSettings: true,
+                    showAccordion: false,
+                    showDropArea: false
+                });
+
+                components.tableView("#table-view-here");
+            });
+        </script>
 
     </body>
 </html>
