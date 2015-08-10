@@ -224,7 +224,10 @@ angular.module('palladioTableView', ['palladio', 'palladio.services'])
 
 		return {
 			scope: {
-				height: '@'
+				height: '@',
+				showSettings: '@',
+				configDimensions: '=',
+				configRow: '='
 			},
 			templateUrl : 'partials/palladio-table-view/template.html',
 			link: {
@@ -252,6 +255,17 @@ angular.module('palladioTableView', ['palladio', 'palladio.services'])
 					scope.countDims = scope.metadata
 							.sort(function (a, b) { return a.description < b.description ? -1 : 1; });
 					scope.countDim = null;
+
+					if(scope.configRow) {
+						scope.countDim = scope.countDims.filter(function(d) { return d.key === scope.configRow.key; })[0];
+					}
+
+					if(scope.configDimensions) {
+						scope.configDimensions.forEach(function(d) {
+							scope.tableDimensions.push(scope.fields.filter(function(f) { return f.key === d.key; })[0]);
+						});
+					}
+
 					scope.getCountDescription = function (field) {
 						// return field.countDescription;
 						return field.description;

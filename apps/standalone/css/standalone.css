@@ -125,10 +125,6 @@ strong {
   z-index: 99997;
 }
 
-.modal.fade {
-  top: 10%;
-}
-
 .panel {
   background-color: #fff;
   border: 1px solid #ddd;
@@ -890,56 +886,6 @@ input[type="checkbox"] {
 
 .refine-close:hover {
   opacity: 1;
-}
-
-/* Settings panel */
-
-.settings {
-  position: absolute;
-  top: 575px;
-  right: 0;
-  z-index: 10;
-  background: rgba(255,255,255,.9);
-  -webkit-transition: all 0.5s;
-  transition: all 0.5s;
-  padding: 20px;
-  border-top: 1px solid #eee;
-}
-
-.settings.open {
-  -webkit-transform: translate3d(0, 0, 0);
-  -ms-transform: translate3d(0, 0, 0);
-  transform: translate3d(0, 0, 0);
-}
-
-.settings.close {
-  -webkit-transform: translate3d(100%, 0, 0);
-  -ms-transform: translate3d(100%, 0, 0);
-  transform: translate3d(100%, 0, 0);
-  opacity: 0;
-}
-
-.toggle {
-  position: absolute;
-  width: 32px;
-  height: 32px;
-  opacity: .7;
-  top: 540px;
-  right: 7px;
-  z-index: 110000;
-  -webkit-transition: all 0.5s;
-  transition: all 0.5s;
-  color: #444444;
-  font-size: 16px;
-}
-
-.toggle:hover {
-  opacity:1;
-}
-
-.with-settings {
-  overflow: hidden;
-  position: relative;
 }
 
 #filters {

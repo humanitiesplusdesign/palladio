@@ -1,5 +1,6 @@
 angular.module('palladio.components', ['palladio.services.data', 'palladio.services.load'])
-	.factory('componentService', ['$compile', "$rootScope", function($compile, $scope) {
+	.factory('componentService', ['$compile', "$rootScope", "$http", "loadService", "dataService",
+		function($compile, $scope, $http, loadService, dataService) {
 
 		// Insert a facet filter into the DOM, wired into the Palladio model.
 		//
@@ -10,7 +11,7 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 		//		dimensions: []
 		//		aggregation: []
 		//		height: 300px
-		var facetFilter = function(selector, options) {
+		var facetComponent = function(selector, options) {
 			if(options === undefined) options = {};
 
 			// var newScope = scope.$new(true, scope.$parent);
@@ -40,19 +41,33 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 			$(selector).append(directive);
 		};
 
-		var tableView = function(selector, options) {
+		var tableComponent = function(selector, options) {
 			if(options === undefined) options = {};
 
 			// var newScope = scope.$new(true, scope.$parent);
 			var newScope = $scope.$new(false);
-			var compileString = '<div class="with-settings" data-palladio-table-view-with-settings></div>';
+			var compileString = '<div class="with-settings" data-palladio-table-view-with-settings ';
+			compileString += options.showSettings !== undefined ? 'show-settings="' + options.showSettings + '" ' : 'show-settings="false" ';
+			compileString += options.height ? 'height="' + options.height + '" ' : 'height="300px" ';
+
+			if(options.dimensions) {
+				newScope.dimensions = angular.copy(options.dimensions);
+				compileString += 'config-dimensions="dimensions" ';
+			}
+
+			if(options.row) {
+				newScope.row = angular.copy(options.row);
+				compileString += 'config-row="row" ';
+			}
+
+			compileString += '></div>';
 
 			var directive = $compile(compileString)(newScope);
 
 			$(selector).append(directive);
 		};
 
-		var dataUpload = function(selector, loadFunction) {
+		var uploadComponent = function(selector, loadFunction) {
 
 			// var newScope = scope.$new(true, scope.$parent);
 			var newScope = $scope.$new(false);
@@ -67,10 +82,66 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 			$(selector).append(directive);
 		};
 
+		var loadData = function(url, successFunction, errorFunction) {
+			if(!errorFunction) { errorFunction = function () {}; }
+			$http.get(url)
+				.success(function(data) {
+					loadService.loadJson(data);
+					successFunction(data);
+				})
+				.error(errorFunction);
+		};
+
+		var dimensions = function () {
+			return dataService.getDataSync().metadata;
+		};
 
 		return {
-			facetFilter: facetFilter,
-			tableView: tableView,
-			dataUpload: dataUpload
+			facetComponent: facetComponent,
+			tableComponent: tableComponent,
+			uploadComponent: uploadComponent,
+			loadData: loadData,
+			dimensions: dimensions
 		};
 	}]);
+
+var startPalladio = function(selector, additionalModules) {
+	if(!Array.isArray(additionalModules)) { additionalModules = []; }
+	var modules = [
+		'palladio',
+		'palladio.components',
+		'palladio.controllers',
+		'palladio.services',
+		'palladio.directives',
+		'palladio.filters',
+
+		'ui.codemirror',
+		'ui.bootstrap',
+		'ui.router',
+		'ui.sortable',
+		'ui.select',
+		'colorpicker.module',
+
+		'palladioDataUpload',
+		'palladioDataDownload',
+
+		// Filters
+		'palladioTimelineFilter',
+		'palladioFacetFilter',
+		'palladioPartimeFilter',
+		// Views
+		'palladioListView',
+		'palladioMapView',
+		'palladioTableView',
+		'palladioSelectionView',
+		'palladioGraphView'
+	].concat(additionalModules);
+	
+	angular.module('palladioApp', modules);
+	
+	if(!selector) { selector = document; }
+	
+	var app = angular.bootstrap(selector, ['palladioApp']);
+	
+	return app.get('componentService');
+};

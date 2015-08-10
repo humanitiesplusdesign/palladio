@@ -13,7 +13,7 @@
 </div>
 
 <!-- Settings -->
-<div class="row">
+<div class="row" data-ng-show="showSettings !== 'false'">
 
     <div class="settings col-lg-4 col-lg-offset-8 col-md-6 col-md-offset-6">
       <div class="panel panel-default">
@@ -79,7 +79,7 @@
 
 </div>
 
-<div id="{{uniqueModalId}}">
+<div id="{{uniqueModalId}}" data-ng-show="showSettings !== 'false'">
 	<div id="table-modal" data-modal description="Choose data dimensions" dimensions="fields" model="tableDimensions" sortable="true"></div>
 	<div id="count-modal" data-modal description="Choose key dimension (one row for each value of this dimension)" dimensions="countDims" model="countDim" description-accessor="getCountDescription"></div>
 </div>

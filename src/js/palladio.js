@@ -5,7 +5,7 @@
 // for usage examples.
 
 angular.module('palladio', [])
-	.constant('version', '1.0.4')
+	.constant('version', '1.1.0')
 	.factory('palladioService', ['$compile', "$rootScope", function($compile, $scope) {
 
 		var updateListeners = d3.map();
@@ -220,44 +220,3 @@ angular.module('palladio', [])
 			getStateFunctions: getStateFunctions
 		};
 	}]);
-
-var bootstrap = function(selector, additionalModules) {
-	if(!Array.isArray(additionalModules)) { additionalModules = []; }
-	var modules = [
-		'palladio',
-		'palladio.components',
-		'palladio.controllers',
-		'palladio.services',
-		'palladio.directives',
-		'palladio.filters',
-
-		'ui.codemirror',
-		'ui.bootstrap',
-		'ui.router',
-		'ui.sortable',
-		'ui.select',
-		'colorpicker.module',
-
-		'palladioDataUpload',
-		'palladioDataDownload',
-
-		// Filters
-		'palladioTimelineFilter',
-		'palladioFacetFilter',
-		'palladioPartimeFilter',
-		// Views
-		'palladioListView',
-		'palladioMapView',
-		'palladioTableView',
-		'palladioSelectionView',
-		'palladioGraphView'
-	].concat(additionalModules);
-	
-	angular.module('palladioApp', modules);
-	
-	if(!selector) { selector = document; }
-	
-	var app = angular.bootstrap(selector, ['palladioApp']);
-	
-	return app.get('componentService');
-};

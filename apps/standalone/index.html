@@ -27,20 +27,27 @@
 
         <script src="palladio.js"></script>
         <script>
-            var components = bootstrap(document);
+            var components = startPalladio(document);
 
-            components.dataUpload('#data-upload-here', function() {
-                angular.element('#data-upload-here').remove();
-
-                components.facetFilter("#facet-filter-here", {
+            components.loadData('sample.json', function() {
+                components.facetComponent("#facet-filter-here", {
                     height: "300px",
                     showControls: false,
-                    showSettings: true,
+                    showSettings: false,
                     showAccordion: false,
-                    showDropArea: false
+                    showDropArea: false,
+                    dimensions: components.dimensions()
+                        .filter(function(d) { return ["Position", "Name", "Gender", "Birthplace"].indexOf(d.key) !== -1; })
                 });
 
-                components.tableView("#table-view-here");
+                components.tableComponent("#table-view-here", {
+                    height: "300px",
+                    showSettings: false,
+                    row: components.dimensions()
+                        .filter(function(d) { return d.key === "Name"; })[0],
+                    dimensions: components.dimensions()
+                        .filter(function(d) { return ["Position", "Gender", "Birthdate", "Date of Death"].indexOf(d.key) !== -1; })
+                });
             });
         </script>
 
