@@ -243,7 +243,7 @@ angular.module('palladioTableView', ['palladio', 'palladio.services'])
 					scope.metadata = dataService.getDataSync().metadata;
 					scope.xfilter = dataService.getDataSync().xfilter;
 
-					scope.uniqueToggleId = "mapView" + Math.floor(Math.random() * 10000);
+					scope.uniqueToggleId = "tableView" + Math.floor(Math.random() * 10000);
 					scope.uniqueModalId = scope.uniqueToggleId + "modal";
 
 					scope.fields = scope.metadata.sort(function (a, b) { return a.description < b.description ? -1 : 1; });
