@@ -136,10 +136,12 @@ var startPalladio = function(additionalModules) {
 		'palladioSelectionView',
 		'palladioGraphView'
 	].concat(additionalModules);
+
+	var appId = "palladioApp" + Math.floor(Math.random() * 10000);
 	
-	angular.module('palladioApp', modules);
+	angular.module(appId, modules);
 	
-	var app = angular.bootstrap(document.createElement("div"), ['palladioApp']);
+	var app = angular.bootstrap(document.createElement("div"), [appId]);
 	
 	return app.get('componentService');
 };
