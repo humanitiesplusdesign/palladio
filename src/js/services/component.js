@@ -105,7 +105,7 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 		};
 	}]);
 
-var startPalladio = function(selector, additionalModules) {
+var startPalladio = function(additionalModules) {
 	if(!Array.isArray(additionalModules)) { additionalModules = []; }
 	var modules = [
 		'palladio',
@@ -139,9 +139,7 @@ var startPalladio = function(selector, additionalModules) {
 	
 	angular.module('palladioApp', modules);
 	
-	if(!selector) { selector = document; }
-	
-	var app = angular.bootstrap(selector, ['palladioApp']);
+	var app = angular.bootstrap(document.createElement("div"), ['palladioApp']);
 	
 	return app.get('componentService');
 };
