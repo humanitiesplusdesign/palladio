@@ -1,4 +1,27 @@
 angular.module('palladioTableView', ['palladio', 'palladio.services'])
+	.run(['componentService', function(componentService) {
+		var compileStringFunction = function (options, newScope) {
+			var compileString = '<div class="with-settings" data-palladio-table-view-with-settings ';
+			compileString += options.showSettings !== undefined ? 'show-settings="' + options.showSettings + '" ' : 'show-settings="false" ';
+			compileString += options.height ? 'height="' + options.height + '" ' : 'height="300px" ';
+
+			if(options.dimensions) {
+				newScope.dimensions = angular.copy(options.dimensions);
+				compileString += 'config-dimensions="dimensions" ';
+			}
+
+			if(options.row) {
+				newScope.row = angular.copy(options.row);
+				compileString += 'config-row="row" ';
+			}
+
+			compileString += '></div>';
+
+			return compileString;
+		};
+
+		componentService.register('table', compileStringFunction);
+	}])
 	// Palladio Table View
 	.directive('palladioTableView', function (palladioService) {
 

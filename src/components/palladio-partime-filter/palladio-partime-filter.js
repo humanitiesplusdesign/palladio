@@ -1,6 +1,33 @@
 // Palladio template component module
 
 angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
+	.run(['componentService', function(componentService) {
+		var compileStringFunction = function (options, newScope) {
+
+			// Options
+			//		showControls: true
+			//		showAccordion: true
+			//		showSettings: true
+			//		fullWidth: false
+			//		fullHeight: false
+			//		view: false
+
+			var compileString = '<div data-palladio-partime-filter ';
+
+			compileString += options.showControls !== undefined ? 'show-controls="' + options.showControls + '" ' : 'show-controls="false" ';
+			compileString += options.showAccordion !== undefined ? 'show-accordion="' + options.showAccordion + '" ' : 'show-accordion="false" ';
+			compileString += options.showSettings !== undefined ? 'show-settings="' + options.showSettings + '" ' : 'show-settings="true" ';
+			compileString += options.fullWidth !== undefined ? 'full-width="' + options.fullWidth + '" ' : 'full-width="false" ';
+			compileString += options.fullHeight !== undefined ? 'full-height="' + options.fullHeight + '" ' : 'full-height="false" ';
+			compileString += options.view !== undefined ? 'view="' + options.view + '" ' : 'view="false" ';
+
+			compileString += '></div>';
+
+			return compileString;
+		};
+
+		componentService.register('timespan', compileStringFunction);
+	}])
 	.directive('palladioPartimeFilter', function (dateService, palladioService, dataService) {
 		var directiveObj = {
 			scope: {
@@ -8,6 +35,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 				fullWidth: '@',
 				showControls: '@',
 				showAccordion: '@',
+				showSettings: '@',
 				view: '@'
 			},
 			templateUrl: 'partials/palladio-partime-filter/template.html',

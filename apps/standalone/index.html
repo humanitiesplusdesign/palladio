@@ -21,12 +21,12 @@
         <div class="row-fluid">
             <div class="col-md-10 col-md-offset-1" id="table-view-here"></div>
         </div>
+        <div class="row-fluid">
+            <div class="col-md-10 col-md-offset-1" id="timespan-here"></div>
+        </div>
 
         <div class="row-fluid">
             <div class="col-md-10 col-md-offset-1" id="facet-filter-here-2"></div>
-        </div>
-        <div class="row-fluid">
-            <div class="col-md-10 col-md-offset-1" id="table-view-here-2"></div>
         </div>
 
         <script src="palladio.js"></script>
@@ -34,7 +34,7 @@
             var components = startPalladio();
 
             components.loadData('sample.json', function() {
-                components.facetComponent("#facet-filter-here", {
+                components.add('facet', "#facet-filter-here", {
                     height: "300px",
                     showControls: false,
                     showSettings: false,
@@ -44,7 +44,7 @@
                         .filter(function(d) { return ["Position", "Name", "Gender", "Birthplace"].indexOf(d.key) !== -1; })
                 });
 
-                components.tableComponent("#table-view-here", {
+                components.add('table', "#table-view-here", {
                     height: "300px",
                     showSettings: false,
                     row: components.dimensions()
@@ -52,12 +52,18 @@
                     dimensions: components.dimensions()
                         .filter(function(d) { return ["Position", "Gender", "Birthdate", "Date of Death"].indexOf(d.key) !== -1; })
                 });
+
+                components.add('timespan', "#timespan-here", {
+                    showControls: false,
+                    showSettings: false,
+                    showAccordion: false
+                })
             });
 
             var components2 = startPalladio();
 
-            components2.loadData('sample.json', function() {
-                components2.facetComponent("#facet-filter-here-2", {
+            components2.loadData('sample-facet.json', function() {
+                components2.add('facet', "#facet-filter-here-2", {
                     height: "300px",
                     showControls: false,
                     showSettings: false,
@@ -65,15 +71,6 @@
                     showDropArea: false,
                     dimensions: components.dimensions()
                         .filter(function(d) { return ["Position", "Name", "Gender", "Birthplace"].indexOf(d.key) !== -1; })
-                });
-
-                components2.tableComponent("#table-view-here-2", {
-                    height: "300px",
-                    showSettings: false,
-                    row: components.dimensions()
-                        .filter(function(d) { return d.key === "Name"; })[0],
-                    dimensions: components.dimensions()
-                        .filter(function(d) { return ["Position", "Gender", "Birthdate", "Date of Death"].indexOf(d.key) !== -1; })
                 });
             });
         </script>

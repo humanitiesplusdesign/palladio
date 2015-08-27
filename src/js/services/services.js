@@ -1,6 +1,7 @@
 angular.module('palladio.services',
 	[	'palladio.services.date',
 		'palladio.services.spinner',
+		'palladio.components',
 		'palladio.services.parse',
 		'palladio.services.validation',
 		'palladio.services.export',

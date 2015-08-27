@@ -1,6 +1,19 @@
 // Palladio data upload component
 
 angular.module('palladioDataUpload', ['palladio.services'])
+	.run(['componentService', function(componentService) {
+		var compileStringFunction = function (options, newScope) {
+
+			newScope.onLoad = options.loadFunction;
+			var compileString = '<button class="btn" palladio-data-upload on-load="onLoad()">';
+			compileString += '<i class="fa fa-upload"></i>&nbsp;';
+			compileString += 'Import a Palladio data model</button>';
+
+			return compileString;
+		};
+
+		componentService.register('upload', compileStringFunction);
+	}])
 	.directive('palladioDataUpload', function (dataService, loadService, spinnerService) {
 		var directiveObj = {
 			scope: {

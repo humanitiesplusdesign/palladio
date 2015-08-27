@@ -1,6 +1,42 @@
 // Facet filter module
 
 angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
+	.run(['componentService', function(componentService) {
+		var compileStringFunction = function (options, newScope) {
+
+			// Options
+			//		showControls: true
+			//		showAccordion: true
+			//		showDropArea: true
+			//		dimensions: []
+			//		aggregation: []
+			//		height: 300px
+
+			var compileString = '<div data-palladio-facet-filter ';
+
+			compileString += options.showControls !== undefined ? 'show-controls="' + options.showControls + '" ' : 'show-controls="false" ';
+			compileString += options.showAccordion !== undefined ? 'show-accordion="' + options.showAccordion + '" ' : 'show-accordion="false" ';
+			compileString += options.showDropArea !== undefined ? 'show-drop-area="' + options.showDropArea + '" ' : 'show-drop-area="false" ';
+			compileString += options.showSettings !== undefined ? 'show-settings="' + options.showSettings + '" ' : 'show-settings="false" ';
+			compileString += options.height ? 'height="' + options.height + '" ' : 'height="300px" ';
+
+			if(options.dimensions) {
+				newScope.dimensions = angular.copy(options.dimensions);
+				compileString += 'config-dimensions="dimensions" ';
+			}
+
+			if(options.aggregation) {
+				newScope.aggregation = angular.copy(options.aggregation);
+				compileString += 'config-aggregation="aggregation" ';
+			}
+
+			compileString += '></div>';
+
+			return compileString;
+		};
+
+		componentService.register('facet', compileStringFunction);
+	}])
 	.directive('palladioFacetFilter', function (palladioService, dataService) {
 		return {
 			scope : {
