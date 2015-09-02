@@ -14,7 +14,7 @@
 
 <div class="row" ng-show="!collapse">
 
-	<div ng-class="{'col-lg-9': showSettings === 'true', 'col-md-8': showSettings === 'true', 'col-lg-12': !(showSettings === 'true'), 'col-md-12': !(showSettings === 'true')}">
+	<div>
 
 		<div class="main-viz">
 			<div id="{{uniqueToggleId}}"></div>
@@ -24,13 +24,13 @@
 
 	</div>
 
-	<div data-ng-show="showSettings !== 'false'" class="col-lg-3">
+	<div data-ng-show="showSettings" class="col-lg-3">
 
 		<div class="row">
 			<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right ">
 				<label class="inline text-muted">Timespan</label>
 			</div>
-			<div ng-show="showAccordion !== 'false'" class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">
+			<div ng-show="showAccordion" class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">
 				<a class="btn btn-default btn-xs pull-right"
 					tooltip-animation="false"
 					tooltip-append-to-body="true"
@@ -99,7 +99,7 @@
 			</div>
 		</div>
 
-		<div data-ng-show="showControls !== 'false'" class="row margin-top">
+		<div data-ng-show="showControls" class="row margin-top">
 			<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right ">
 			</div>
 			<div class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">

@@ -2,7 +2,7 @@
 
 angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 	.run(['componentService', function(componentService) {
-		var compileStringFunction = function (options, newScope) {
+		var compileStringFunction = function (newScope, options) {
 
 			// Options
 			//		showControls: true
@@ -12,14 +12,21 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 			//		fullHeight: false
 			//		view: false
 
+			newScope.showControls = newScope.showControls === undefined ? true : newScope.showControls;
+			newScope.showAccordion = newScope.showAccordion === undefined ? true : newScope.showAccordion;
+			newScope.showSettings = newScope.showSettings === undefined ? true : newScope.showSettings;
+			newScope.fullWidth = newScope.fullWidth === undefined ? false : newScope.fullWidth;
+			newScope.fullHeight = newScope.fullHeight === undefined ? false : newScope.fullHeight;
+			newScope.view = newScope.view === undefined ? false : newScope.view;
+
 			var compileString = '<div data-palladio-partime-filter ';
 
-			compileString += options.showControls !== undefined ? 'show-controls="' + options.showControls + '" ' : 'show-controls="false" ';
-			compileString += options.showAccordion !== undefined ? 'show-accordion="' + options.showAccordion + '" ' : 'show-accordion="false" ';
-			compileString += options.showSettings !== undefined ? 'show-settings="' + options.showSettings + '" ' : 'show-settings="true" ';
-			compileString += options.fullWidth !== undefined ? 'full-width="' + options.fullWidth + '" ' : 'full-width="false" ';
-			compileString += options.fullHeight !== undefined ? 'full-height="' + options.fullHeight + '" ' : 'full-height="false" ';
-			compileString += options.view !== undefined ? 'view="' + options.view + '" ' : 'view="false" ';
+			compileString += 'show-controls=showControls ';
+			compileString += 'show-accordion=showAccordion ';
+			compileString += 'show-settings=showSettings ';
+			compileString += 'full-width=fullWidth ';
+			compileString += 'full-height=fullHeight ';
+			compileString += 'view=view ';
 
 			compileString += '></div>';
 
@@ -31,12 +38,12 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 	.directive('palladioPartimeFilter', function (dateService, palladioService, dataService) {
 		var directiveObj = {
 			scope: {
-				fullHeight: '@',
-				fullWidth: '@',
-				showControls: '@',
-				showAccordion: '@',
-				showSettings: '@',
-				view: '@'
+				fullHeight: '=',
+				fullWidth: '=',
+				showControls: '=',
+				showAccordion: '=',
+				showSettings: '=',
+				view: '='
 			},
 			templateUrl: 'partials/palladio-partime-filter/template.html',
 
@@ -79,7 +86,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 					scope.title = "Time Span Filter";
 
 					scope.stepModes = ['Bars', 'Parallel'];
-					if(scope.view === 'true') scope.stepModes.push('Grouped Bars');
+					if(scope.view) scope.stepModes.push('Grouped Bars');
 					scope.stepMode = scope.stepModes[0];
 
 					// Handle collapsing
@@ -116,11 +123,16 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 
 					var format = dateService.format;
 
+					// ng-class is not compiled before directive post-compile function (really!)
+					// So we apply width classes manually...
+					element.find('.main-viz').parent().addClass(scope.showSettings ? 'col-lg-9' : 'col-lg-12');
+					element.find('.main-viz').parent().addClass(scope.showSettings ? 'col-md-8' : 'col-md-12');
+
 					// Constants...
 					var margin = 25;
-					var width = scope.fullWidth === 'true' ? element.find('.main-viz').width() - margin*2 : element.find('.main-viz').width();
+					var width = scope.fullWidth ? element.find('.main-viz').width() - margin*2 : element.find('.main-viz').width();
 					var height = scope.height ? +scope.height : 200;
-					height = scope.fullHeight === 'true' ? $(window).height()-200 : height;
+					height = scope.fullHeight ? $(window).height()-200 : height;
 					var filterColor = '#9DBCE4';
 
 					function setup() {
@@ -606,7 +618,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 					$(element[0]).find('#date-start-modal').parent().appendTo('body');
 
 					// Set up the toggle if in view state.
-					if(scope.view === 'true') {
+					if(scope.view) {
 						$(document).ready(function(){
 							$(element[0]).find('.toggle').click(function() {
 								$(element[0]).find('.settings').toggleClass('open close');

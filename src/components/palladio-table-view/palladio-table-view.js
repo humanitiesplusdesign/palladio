@@ -1,17 +1,19 @@
 angular.module('palladioTableView', ['palladio', 'palladio.services'])
 	.run(['componentService', function(componentService) {
-		var compileStringFunction = function (options, newScope) {
-			var compileString = '<div class="with-settings" data-palladio-table-view-with-settings ';
-			compileString += options.showSettings !== undefined ? 'show-settings="' + options.showSettings + '" ' : 'show-settings="false" ';
-			compileString += options.height ? 'height="' + options.height + '" ' : 'height="300px" ';
+		var compileStringFunction = function (newScope, options) {
 
-			if(options.dimensions) {
-				newScope.dimensions = angular.copy(options.dimensions);
+			newScope.showSettings = newScope.showSettings === undefined ? false : newScope.showSettings;
+			newScope.tableHeight = newScope.height === undefined ? undefined : newScope.height;
+
+			var compileString = '<div class="with-settings" data-palladio-table-view-with-settings ';
+			compileString += 'show-settings=showSettings ';
+			compileString += 'table-height=tableHeight ';
+
+			if(newScope.dimensions) {
 				compileString += 'config-dimensions="dimensions" ';
 			}
 
-			if(options.row) {
-				newScope.row = angular.copy(options.row);
+			if(newScope.row) {
 				compileString += 'config-row="row" ';
 			}
 
@@ -30,7 +32,7 @@ angular.module('palladioTableView', ['palladio', 'palladio.services'])
 			scope : {
 				dimensions : '=',
 				dimension : '=',
-				height: '@',
+				tableHeight: '=',
 				xfilter: '=',
 				exportFunc: '='
 			},
@@ -38,10 +40,10 @@ angular.module('palladioTableView', ['palladio', 'palladio.services'])
 			link: function (scope, element, attrs) {
 
 				function refresh() {
-					if(!scope.height) {
+					if(!scope.tableHeight) {
 						scope.calcHeight = $(window).height();
 					} else {
-						scope.calcHeight = scope.height;
+						scope.calcHeight = scope.tableHeight;
 					}
 
 					element.height(scope.calcHeight);
@@ -247,8 +249,8 @@ angular.module('palladioTableView', ['palladio', 'palladio.services'])
 
 		return {
 			scope: {
-				height: '@',
-				showSettings: '@',
+				tableHeight: '=',
+				showSettings: '=',
 				configDimensions: '=',
 				configRow: '='
 			},
@@ -344,10 +346,11 @@ angular.module('palladioTableView', ['palladio', 'palladio.services'])
 
 				post: function(scope, element, attrs) {
 
+					console.log(scope);
 
-						element.find('.settings-toggle').click(function() {
-						  element.find('.settings').toggleClass('closed');
-						});
+					element.find('.settings-toggle').click(function() {
+						element.find('.settings').toggleClass('closed');
+					});
 
 
 				}

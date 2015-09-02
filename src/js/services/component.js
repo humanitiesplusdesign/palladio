@@ -8,7 +8,12 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 			if(options === undefined) options = {};
 
 			var newScope = $scope.$new(false);
-			var compileString = components[componentName](options, newScope);
+
+			for(var prop in options) {
+				newScope[prop] = options[prop];
+			}
+
+			var compileString = components[componentName](newScope, options);
 			var directive = $compile(compileString)(newScope);
 
 			$(selector).append(directive);

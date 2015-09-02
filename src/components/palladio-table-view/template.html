@@ -3,7 +3,7 @@
 		<div data-ng-show="countDim"
 			data-palladio-table-view
 			dimension="countDim"
-			height="{{height}}"
+			table-height="tableHeight"
 			dimensions="tableDimensions"
 			xfilter="xfilter"
 			export-func="exportCsv">
@@ -12,7 +12,7 @@
 </div>
 
 <!-- Settings -->
-<div class="row" data-ng-show="showSettings !== 'false'">
+<div class="row" data-ng-show="showSettings || showSettings === undefined">
 
     <div class="settings col-lg-4 col-lg-offset-8 col-md-6 col-md-offset-6">
       <div class="panel panel-default">
@@ -78,7 +78,7 @@
 
 </div>
 
-<div id="{{uniqueModalId}}" data-ng-show="showSettings !== 'false'">
+<div id="{{uniqueModalId}}" data-ng-show="showSettings || showSettings === undefined">
 	<div id="table-modal" data-modal description="Choose data dimensions" dimensions="fields" model="tableDimensions" sortable="true"></div>
 	<div id="count-modal" data-modal description="Choose key dimension (one row for each value of this dimension)" dimensions="countDims" model="countDim" description-accessor="getCountDescription"></div>
 </div>

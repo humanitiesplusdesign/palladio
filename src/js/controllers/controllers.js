@@ -489,7 +489,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		$(window).resize(resizeLinks);*/
 	})
 
-	.controller("VisualizationCtrl", function ($scope, data, $controller, $window, $location, $compile, exportService, loadService, palladioService) {
+	.controller("VisualizationCtrl", function ($scope, data, $controller, $window, $location, $compile, exportService, loadService, palladioService, componentService) {
 
 		$scope.showFilters = function () {
 			if($location.path() === '/upload' || $location.path() === '/link' || $location.path() === '/' || $location.path() === '/index.html') {
@@ -523,7 +523,9 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 					break;
 				case 'partime':
 					if(!$scope.blurTimeSpan) {
-						$('#filters').prepend($compile('<li><div data-palladio-partime-filter></div></li>')($scope));
+						var newId = 'palladio-partime-filter-' + Math.floor(Math.random() * 10000);
+						$('#filters').prepend('<li><div id="' + newId + '"></div></li>');
+						componentService.add('timespan', "#"+newId);
 					}
 					break;
 				case 'facet':

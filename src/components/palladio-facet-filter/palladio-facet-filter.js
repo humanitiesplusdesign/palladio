@@ -2,7 +2,7 @@
 
 angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 	.run(['componentService', function(componentService) {
-		var compileStringFunction = function (options, newScope) {
+		var compileStringFunction = function (newScope, options) {
 
 			// Options
 			//		showControls: true
