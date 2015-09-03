@@ -346,8 +346,6 @@ angular.module('palladioTableView', ['palladio', 'palladio.services'])
 
 				post: function(scope, element, attrs) {
 
-					console.log(scope);
-
 					element.find('.settings-toggle').click(function() {
 						element.find('.settings').toggleClass('closed');
 					});

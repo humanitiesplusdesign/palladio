@@ -7,26 +7,33 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 			// Options
 			//		showControls: true
 			//		showAccordion: true
+			//		showSettings: true
 			//		showDropArea: true
 			//		dimensions: []
 			//		aggregation: []
 			//		height: 300px
 
+			newScope.showControls = newScope.showControls === undefined ? true : newScope.showControls;
+			newScope.showAccordion = newScope.showAccordion === undefined ? true : newScope.showAccordion;
+			newScope.showDropArea = newScope.showDropArea === undefined ? true : newScope.showDropArea;
+			newScope.showSettings = newScope.showSettings === undefined ? true : newScope.showSettings;
+			newScope.dimensions = newScope.dimensions === undefined ? [] : newScope.dimensions;
+			newScope.aggregation = newScope.aggregation === undefined ? [] : newScope.aggregation;
+			newScope.height = newScope.height === undefined ? "300px" : newScope.height;
+
 			var compileString = '<div data-palladio-facet-filter ';
 
-			compileString += options.showControls !== undefined ? 'show-controls="' + options.showControls + '" ' : 'show-controls="false" ';
-			compileString += options.showAccordion !== undefined ? 'show-accordion="' + options.showAccordion + '" ' : 'show-accordion="false" ';
-			compileString += options.showDropArea !== undefined ? 'show-drop-area="' + options.showDropArea + '" ' : 'show-drop-area="false" ';
-			compileString += options.showSettings !== undefined ? 'show-settings="' + options.showSettings + '" ' : 'show-settings="false" ';
-			compileString += options.height ? 'height="' + options.height + '" ' : 'height="300px" ';
+			compileString += 'show-controls=showControls ';
+			compileString += 'show-accordion=showAccordion ';
+			compileString += 'show-drop-area=showDropArea ';
+			compileString += 'show-settings=showSettings ';
+			compileString += 'height=height ';
 
-			if(options.dimensions) {
-				newScope.dimensions = angular.copy(options.dimensions);
+			if(newScope.dimensions.length > 0) {
 				compileString += 'config-dimensions="dimensions" ';
 			}
 
-			if(options.aggregation) {
-				newScope.aggregation = angular.copy(options.aggregation);
+			if(newScope.aggregation.length > 0) {
 				compileString += 'config-aggregation="aggregation" ';
 			}
 
@@ -40,11 +47,11 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 	.directive('palladioFacetFilter', function (palladioService, dataService) {
 		return {
 			scope : {
-				height: '@',
-				showControls: '@',
-				showAccordion: '@',
-				showDropArea: '@',
-				showSettings: '@',
+				height: '=',
+				showControls: '=',
+				showAccordion: '=',
+				showDropArea: '=',
+				showSettings: '=',
 				configDimensions: '=',
 				configAggregation: '='
 			},

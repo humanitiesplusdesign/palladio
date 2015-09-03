@@ -14,7 +14,7 @@
 
 <div class="row" ng-show="!collapse">
 
-	<div ng-class="{'col-lg-9': showSettings === 'true', 'col-md-8': showSettings === 'true', 'col-lg-12': !(showSettings === 'true'), 'col-md-12': !(showSettings === 'true')}">
+	<div ng-class="{'col-lg-9': showSettings, 'col-md-8': showSettings, 'col-lg-12': !showSettings, 'col-md-12': !showSettings}">
 
 		<div class="facet-container" style="height: {{calcHeight}}">
 			<div class="mid-facet-container" style="height: {{calcHeight}};">
@@ -32,9 +32,9 @@
 
 	</div>
 
-	<div ng-show="showSettings === 'true'" class="col-lg-3 col-md-4">
+	<div ng-show="showSettings" class="col-lg-3 col-md-4">
 
-		<div class="row" data-ng-show="showAccordion === 'true'">
+		<div class="row" data-ng-show="showAccordion">
 			<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right ">
 				<label class="inline text-muted">Facet</label>
 			</div>
