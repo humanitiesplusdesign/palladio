@@ -5,7 +5,7 @@
 // for usage examples.
 
 angular.module('palladio', [])
-	.constant('version', '1.1.0')
+	.constant('version', '1.1.0-alpha.01')
 	.factory('palladioService', ['$compile', "$rootScope", function($compile, $scope) {
 
 		var updateListeners = d3.map();
