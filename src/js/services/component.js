@@ -4,10 +4,11 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 
 		var components = {};
 
-		var add = function(componentName, selector, options) {
+		var add = function(componentName, selector, options, parentScope) {
 			if(options === undefined) options = {};
+			if(parentScope === undefined) parentScope = $scope;
 
-			var newScope = $scope.$new(false);
+			var newScope = parentScope.$new(false);
 
 			for(var prop in options) {
 				newScope[prop] = options[prop];

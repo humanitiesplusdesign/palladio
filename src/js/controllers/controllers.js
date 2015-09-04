@@ -501,7 +501,12 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			// '$destroy' event isn't getting fired properly with just .remove(), so we do it
 			// ourselves.
 			angular.element(event.currentTarget.parentElement).scope().$broadcast('$destroy');
-			angular.element(event.currentTarget.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement).remove();
+			// Handle differing node tree depths.
+			if(angular.element(event.currentTarget.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement)[0].nodeName === 'LI') {
+				angular.element(event.currentTarget.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement).remove();
+			} else {
+				angular.element(event.currentTarget.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement).remove();
+			}
 			palladioService.update();
 			$('.tooltip').remove();
 		};
@@ -525,7 +530,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 					if(!$scope.blurTimeSpan) {
 						var newId = 'palladio-partime-filter-' + Math.floor(Math.random() * 10000);
 						$('#filters').prepend('<li><div id="' + newId + '"></div></li>');
-						componentService.add('timespan', "#"+newId);
+						componentService.add('timespan', "#"+newId, {}, $scope);
 					}
 					break;
 				case 'facet':
