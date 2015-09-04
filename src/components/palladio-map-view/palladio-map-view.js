@@ -1,11 +1,34 @@
 angular.module('palladioMapView', ['palladio', 'palladio.services'])
+	.run(['componentService', function(componentService) {
+		var compileStringFunction = function (newScope, options) {
+
+			// Options
+			//		showSettings: true
+			//		height: 300px
+
+			newScope.showSettings = newScope.showSettings === undefined ? true : newScope.showSettings;
+			newScope.mapHeight = newScope.height === undefined ? "100%" : newScope.height;
+			newScope.functions = {};
+
+			var compileString = '<div class="with-settings" data-palladio-map-view-with-settings ';
+			compileString += 'show-settings=showSettings ';
+			compileString += 'map-height=mapHeight ';
+			compileString += 'functions=functions ';
+			compileString += '></div>';
+
+			return compileString;
+		};
+
+		componentService.register('map', compileStringFunction);
+	}])
 	.directive('palladioMapView', function (palladioService) {
 
 		var directiveDefObj = {
 
 			scope: {
 				layers: '=',
-				tileSets: '='
+				tileSets: '=',
+				mapHeight: '='
 			},
 
 			link: function (scope, element, attrs) {
@@ -15,6 +38,14 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				var search = '';
 				var l; // User-defined map layer
 				var line = d3.svg.line().interpolate('bundle');
+
+				// Height backwards compatibility
+				if(scope.mapHeight) {
+					// debugger;
+					element.attr('style', 'height: ' + scope.mapHeight);
+				} else {
+					element.attr('style', 'height: 100%;');
+				}
 
 				deregister.push(palladioService.onUpdate(uniqueId, function() {
 					// Only update if the table is visible.
@@ -808,7 +839,9 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				});
 
 				function refresh() {
-					element.height($(window).height()-50);
+					if(!scope.mapHeight || scope.mapHeight === "100%") {
+						element.height($(window).height()-50);
+					}
 					m.invalidateSize(false);
 				}
 
@@ -824,7 +857,11 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 	})
 	.directive('palladioMapViewWithSettings', function (dataService, palladioService) {
 		var directiveObj = {
-			scope: true,
+			scope: {
+				showSettings: '=',
+				mapHeight: '=',
+				functions: '='
+			},
 
 			templateUrl : 'partials/palladio-map-view/template.html',
 
@@ -832,6 +869,11 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 				scope.metadata = dataService.getDataSync().metadata;
 				scope.xfilter = dataService.getDataSync().xfilter;
+				scope.data = dataService.getDataSync().data;
+
+				if(scope.showSettings === undefined) {
+					scope.settings = true;
+				} else { scope.settings = scope.showSettings; }
 
 				scope.tileSets = [
 					{
@@ -1180,6 +1222,11 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							};
 						})
 					};
+				}
+
+				if(scope.functions) {
+					scope.functions["importState"] = importState;
+					scope.functions["exportState"] = exportState;
 				}
 
 				scope.layerTypes = [

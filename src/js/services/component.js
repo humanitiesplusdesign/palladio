@@ -17,6 +17,10 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 			var directive = $compile(compileString)(newScope);
 
 			$(selector).append(directive);
+
+			return {
+				getOptions: function() { return newScope.functions; }
+			};
 		};
 
 		var register = function(componentName, compileStringFunction) {
