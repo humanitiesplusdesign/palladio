@@ -196,7 +196,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 			links.push(link);
 
 			setDirty();
-		}
+		};
 
 		var deleteLink = function (link, index) {
 
@@ -212,6 +212,9 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 					}
 				});
 			}
+
+			// Remove any augmentId that is defined.
+			links[index].source.field.augmentId = undefined;
 
 			links.splice(index,1);
 			setDirty();
