@@ -579,6 +579,10 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						scope.dateStartDim = scope.dateDims.filter(function(d) { return d.key === state.dateStartDim; })[0];
 						scope.dateEndDim = scope.dateDims.filter(function(d) { return d.key === state.dateEndDim; })[0];
 						scope.tooltipLabelDim = scope.labelDims.filter(function(d) { return d.key === state.tooltipLabelDim; })[0];
+
+						// Apply settings
+						scope.$digest();
+						
 						topBrush.extent(state.topExtent.map(function(d) { return dateService.format.parse(d); }));
 						midBrush.extent(state.midExtent.map(function(d) { return dateService.format.parse(d); }));
 						bottomBrush.extent(state.bottomExtent.map(function(d) { return dateService.format.parse(d); }));
