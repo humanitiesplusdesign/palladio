@@ -16,26 +16,26 @@ angular.module('palladio.directives.modal', [])
 				'<div class="modal-dialog">' +
 					'<div class="modal-content">' +
 
-	  				'<div class="modal-header">' +
-				    	'<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>' +
-				    	'<span>{{ description ? description : "Choose the dimension(s)" }}</span>' +
-				  	'</div>' +
-
-				  	'<div class="modal-body">' +
-				    	'<ul ui-sortable="sortableOptions" class="list-unstyled" data-ng-model="internalDimensions">' +
-				    		'<li ng-repeat="field in internalDimensions" class="pill" data-ng-class="{checked: check(field)}"  ng-click="change(field)">' +
-				    			'<i data-ng-show="!sortableOptions.disabled" class="icon-move"></i>' +
-				    			'<label class="checkbox">' +
-			    					'<input type="checkbox" ng-checked="check(field)" ng-click="change(field)"> {{getDescription(field)}}' +
-						    	'</label>' +
-				    		'</li>' +
-				    	'</ul>' +
-				  	'</div>' +
-				  	'<div class="modal-footer">' +
-				    	'<button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Close</button>' +
-				  	'</div>' +
-
+						'<div class="modal-header">' +
+							'<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>' +
+							'<span>{{ description ? description : "Choose the dimension(s)" }}</span>' +
 						'</div>' +
+
+						'<div class="modal-body">' +
+							'<ul ui-sortable="sortableOptions" class="list-unstyled" data-ng-model="internalDimensions">' +
+								'<li ng-repeat="field in internalDimensions" class="pill" data-ng-class="{checked: check(field)}" ng-click="change(field)">' +
+									'<i data-ng-show="!sortableOptions.disabled" class="icon-move"></i>' +
+									'<span class="checkbox">' +
+										'<input type="checkbox" ng-checked="check(field)"> {{getDescription(field)}}' +
+									'</span>' +
+								'</li>' +
+							'</ul>' +
+						'</div>' +
+						'<div class="modal-footer">' +
+							'<button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Close</button>' +
+						'</div>' +
+
+					'</div>' +
 				'</div>' +
 
 			'</div>',

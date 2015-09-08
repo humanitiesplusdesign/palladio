@@ -623,6 +623,21 @@ label.inline {
   color: #eee;
 }
 
+/* Switching to spans because labels trigger clicks */
+.modal .pill span {
+  display: inline-block;
+  color: #565a5c;
+  font-size: 13px;
+  margin: 0px;
+  line-height: 1;
+  font-weight: 300;
+  cursor: pointer;
+}
+
+.modal .pill.checked span {
+  color: #eee;
+}
+
 .modal .pill i {
   margin-right: 10px;
 }
