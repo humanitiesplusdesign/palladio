@@ -24,7 +24,7 @@ angular.module('palladio.directives.modal', [])
 						'<div class="modal-body">' +
 							'<ul ui-sortable="sortableOptions" class="list-unstyled" data-ng-model="internalDimensions">' +
 								'<li ng-repeat="field in internalDimensions" class="pill" data-ng-class="{checked: check(field)}" ng-click="change(field)">' +
-									'<i data-ng-show="!sortableOptions.disabled" class="icon-move"></i>' +
+									'<i data-ng-show="!sortableOptions.disabled" class="fa fa-arrows"></i>' +
 									'<span class="checkbox">' +
 										'<input type="checkbox" ng-checked="check(field)"> {{getDescription(field)}}' +
 									'</span>' +
