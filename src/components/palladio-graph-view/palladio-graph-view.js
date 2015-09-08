@@ -1,11 +1,33 @@
 angular.module('palladioGraphView', ['palladio.services', 'palladio'])
-	// Palladio Timechart View
+	.run(['componentService', function(componentService) {
+		var compileStringFunction = function (newScope, options) {
+
+			// Options
+			//		showSettings: true
+			//		height: 300px
+
+			newScope.showSettings = newScope.showSettings === undefined ? true : newScope.showSettings;
+			newScope.graphHeight = newScope.height === undefined ? "100%" : newScope.height;
+			newScope.functions = {};
+
+			var compileString = '<div class="with-settings" data-palladio-graph-view-with-settings ';
+			compileString += 'show-settings=showSettings ';
+			compileString += 'graph-height=graphHeight ';
+			compileString += 'functions=functions ';
+			compileString += '></div>';
+
+			return compileString;
+		};
+
+		componentService.register('graph', compileStringFunction);
+	}])
 	.directive('palladioGraphView', function (palladioService) {
 
 		return {
 
 			scope : {
 				linkDimension: '=',
+				graphHeight: '=',
 				showLinks: '=',
 				showLabels: '=',
 				nodeSize: '=',
@@ -44,7 +66,7 @@ angular.module('palladioGraphView', ['palladio.services', 'palladio'])
 				var search = "";
 
 				var width = element.width() || 1000,
-					height = element.height() || 800;
+					height = scope.graphHeight ? scope.graphHeight.slice(0, scope.graphHeight.length-2) : element.height() || 800;
 
 				var canvas = d3.select(element[0])
 					.append('canvas')
@@ -209,7 +231,7 @@ angular.module('palladioGraphView', ['palladio.services', 'palladio'])
 				});
 
 				function refresh() {
-					element.height($(window).height());
+					element.height(scope.graphHeight ? scope.graphHeight.slice(0, scope.graphHeight.length-2) : $(window).height());
 				}
 
 				$(document).ready(refresh);
@@ -224,13 +246,21 @@ angular.module('palladioGraphView', ['palladio.services', 'palladio'])
 	.directive('palladioGraphViewWithSettings', function (exportService, palladioService, dataService) {
 
 		return {
-			scope: true,
+			scope: {
+				showSettings: '=',
+				graphHeight: '=',
+				functions: '='
+			},
 
 			templateUrl : 'partials/palladio-graph-view/template.html',
 
 			link : {
 
 				pre: function (scope, element, attrs) {
+
+					if(scope.showSettings === undefined) {
+						scope.settings = true;
+					} else { scope.settings = scope.showSettings; }
 
 					var deregister = [];
 
@@ -412,12 +442,43 @@ angular.module('palladioGraphView', ['palladio.services', 'palladio'])
 
 					deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'graphView', exportState, importState));
 
+					if(scope.functions) {
+						scope.functions["source"] = function(dim) {
+							scope.$apply(function(s) {
+								s.mapping.sourceDimension = s.fields.filter(function(f) { return f.key === dim.key; })[0];
+							});
+						};
+						scope.functions["target"] = function(dim) {
+							scope.$apply(function(s) {
+								s.mapping.targetDimension = s.fields.filter(function(f) { return f.key === dim.key; })[0];
+							});
+						};
+						scope.functions["showLinks"] = function(bool) {
+							scope.$apply(function(s) {
+								s.showLinks = bool;
+							});
+						};
+						scope.functions["showLabels"] = function(bool) {
+							scope.$apply(function(s) {
+								s.showLabels = bool;
+							});
+						};
+						scope.functions["nodeSize"] = function(bool) {
+							scope.$apply(function(s) {
+								s.nodeSize = bool;
+							});
+						};
+					}
 				},
 
 				post: function(scope, element, attrs) {
 					element.find('.settings-toggle').click(function() {
-					  element.find('.settings').toggleClass('closed');
+						element.find('.settings').toggleClass('closed');
 					});
+
+					if(scope.graphHeight) {
+						element.height(scope.graphHeight);
+					}
 				}
 			}
 
