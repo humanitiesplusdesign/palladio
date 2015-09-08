@@ -453,7 +453,11 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 
 					function applyFilterOrHighlight(d) {
 						if(typeof d.highlight === 'function' ? !d.highlight() : !d.highlight) {
-							d.dimension.filterFunction(filterFunction.bind(null, d));
+							if(d.filters.length === 1) {
+								d.dimension.filterExact(d.filters[0]);
+							} else {
+								d.dimension.filterFunction(filterFunction.bind(null, d));
+							}
 
 							if(d.filters.length > 0) {
 								deregister.push(
