@@ -25,6 +25,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		$scope.project = {
 			title : null,
 			author : null,
+			date: null,
 			description : null
 		}
 
@@ -132,6 +133,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			if(metadata) {
 				$scope.project.title = metadata.title;
 				$scope.project.author = metadata.author;
+				$scope.project.date = metadata.date;
 				$scope.project.description = metadata.description;
 			}
 		};
