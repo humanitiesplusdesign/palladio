@@ -90,7 +90,7 @@
                     showSettings: false,
                     showAccordion: false,
                     showDropArea: false,
-                    dimensions: components.dimensions()
+                    dimensions: components2.dimensions()
                         .filter(function(d) { return ["Position", "Name", "Gender", "Birthplace"].indexOf(d.key) !== -1; })
                 });
 
@@ -106,17 +106,22 @@
 
                 // Setting the context of the components needs to run after the components have been
                 // instantiated (not clear why this is asynchronous - we will be looking into it).
-                window.setTimeout(function() {
+                var graphFunc = function() {
                     var graphOpts = graph.getOptions();
-                    graphOpts.source(components.dimensions().filter(function(d) {
+                    graphOpts.source(components2.dimensions().filter(function(d) {
                         return d.key === 'Birthplace'; })[0]);
-                    graphOpts.target(components.dimensions().filter(function(d) {
+                    graphOpts.target(components2.dimensions().filter(function(d) {
                         return d.key === 'Place of Death'; })[0]);
                     graphOpts.nodeSize(true);
-                }, 100);
+                };
+                setTimeout(graphFunc, 100);
 
-                window.setTimeout(function() { map.getOptions().importState({"tileSets":[{"url":null,"mbId":"cesta.hd9ak6ie","enabled":true,"description":"Land"}],"layers":[{"aggDescription":"Number of People","aggregateKey":null,"aggregationType":"COUNT","color":"#820000","countBy":"Name","description":"Birthplace","enabled":true,"layerType":"data","mapping":{"sourceCoordinatesKey":"Coordinates","sourceCoordinatesType":["Place type"],"sourceCoordinatesDescription":"Birthplace","destinationCoordinatesKey":null,"destinationCoordinatesType":null,"destinationCoordinatesDescription":null},"pointSize":true,"showLinks":false,"type":"points"}]});
-                })});
+                var mapFunc = function() {
+                    map.getOptions().importState({"tileSets":[{"url":null,"mbId":"cesta.hd9ak6ie","enabled":true,"description":"Land"}],"layers":[{"aggDescription":"Number of People","aggregateKey":null,"aggregationType":"COUNT","color":"#820000","countBy":"Name","description":"Birthplace","enabled":true,"layerType":"data","mapping":{"sourceCoordinatesKey":"Coordinates","sourceCoordinatesType":["Place type"],"sourceCoordinatesDescription":"Birthplace","destinationCoordinatesKey":null,"destinationCoordinatesType":null,"destinationCoordinatesDescription":null},"pointSize":true,"showLinks":false,"type":"points"}]});
+                };
+                setTimeout(mapFunc, 100);
+
+            });
 
         </script>
 
