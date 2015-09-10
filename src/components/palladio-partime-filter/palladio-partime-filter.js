@@ -18,6 +18,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 			newScope.fullWidth = newScope.fullWidth === undefined ? false : newScope.fullWidth;
 			newScope.fullHeight = newScope.fullHeight === undefined ? false : newScope.fullHeight;
 			newScope.view = newScope.view === undefined ? false : newScope.view;
+			newScope.functions = {};
 
 			var compileString = '<div data-palladio-partime-filter ';
 
@@ -26,6 +27,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 			compileString += 'show-settings=showSettings ';
 			compileString += 'full-width=fullWidth ';
 			compileString += 'full-height=fullHeight ';
+			compileString += 'functions=functions ';
 			compileString += 'view=view ';
 
 			compileString += '></div>';
@@ -43,7 +45,8 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 				showControls: '=',
 				showAccordion: '=',
 				showSettings: '=',
-				view: '='
+				view: '=',
+				functions: '='
 			},
 			templateUrl: 'partials/palladio-partime-filter/template.html',
 
@@ -110,6 +113,19 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 					scope.showGroupModal = function () {
 						$('#' + scope.uniqueModalId).find('#group-modal').modal('show');
 					};
+
+					if(scope.functions) {
+						scope.functions["startDimension"] = function(dim) {
+							scope.$apply(function(s) {
+								s.dateStartDim = s.dateDims.filter(function(f) { return f.key === dim.key; })[0];
+							});
+						};
+						scope.functions["endDimension"] = function(dim) {
+							scope.$apply(function(s) {
+								s.dateEndDim = s.dateDims.filter(function(f) { return f.key === dim.key; })[0];
+							});
+						};
+					}
 
 				}, post: function(scope, element) {
 

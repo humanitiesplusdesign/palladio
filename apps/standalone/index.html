@@ -74,11 +74,19 @@
                         .filter(function(d) { return ["Position", "Gender", "Birthdate", "Date of Death"].indexOf(d.key) !== -1; })
                 });
 
-                components.add('timespan', "#timespan-here", {
+                var timespan = components.add('timespan', "#timespan-here", {
                     showControls: false,
                     showSettings: false,
                     showAccordion: false
-                })
+                });
+
+                var timespanFunc = function () {
+                    timespan.getOptions().startDimension(components.dimensions().filter(function(d) {
+                        return d.key === 'Birthdate'; })[0]);
+                    timespan.getOptions().endDimension(components.dimensions().filter(function(d) {
+                        return d.key === 'Date of Death'; })[0]);
+                };
+                setTimeout(timespanFunc, 100);
             });
 
             var components2 = startPalladio();
