@@ -10,7 +10,7 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 			link: function(scope) {
 				scope.exportDataModel = function() {
 					// Strip autoFields, uniques, errors from all files/fields
-					var files = dataService.getFiles().map(function(f) {
+					var files = angular.copy(dataService.getFiles()).map(function(f) {
 						f.autoFields = [];
 
 						f.fields.forEach(function(g) {
@@ -22,7 +22,7 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 					});
 
 					// Strip everything but the unique file id from links
-					var links = dataService.getLinks().map(function(l) {
+					var links = angular.copy(dataService.getLinks()).map(function(l) {
 						l.lookup.file = { uniqueId: l.lookup.file.uniqueId };
 						l.source.file = { uniqueId: l.source.file.uniqueId };
 
