@@ -51,7 +51,14 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 					if(scope && scope.project && scope.project.title) {
 						fileName = scope.project.title + ".palladio." + version + ".json";
 					}
-					saveAs(blob, fileName);
+
+					// Guard against Safari (download doesn't work in Safari) until we can
+					// revamp the download/share/export UI to explain this.
+					if(navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0) {
+						alert("Unfortunately, download functionality doesn't work right now in Safari. Chrome and Firefox are both supported.");
+					} else {
+						saveAs(blob, fileName);
+					}
 				};
 			}
 		};
