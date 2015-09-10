@@ -753,6 +753,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 		            	scrollWheelZoom : true
 		       		});
 
+		        m.attributionControl.addAttribution("© <a href='https://www.mapbox.com/map-feedback/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap contributors</a>");
+
 				// Tooltips
 				var nodeTip = d3.tip()
 				  	.offset([-10, 0])

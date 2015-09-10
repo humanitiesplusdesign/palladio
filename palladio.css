@@ -8365,6 +8365,7 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 
 [data-palladio-map-view] .leaflet-bottom {
 	z-index: 10;
+	margin-bottom: 60px;
 }
 
 
