@@ -1,46 +1,67 @@
 angular.module('palladio.services.load', ['palladio.services.data'])
-	.factory("loadService", ['dataService', '$q', 'parseService', 'validationService',
-			function(dataService, $q, parseService, validationService) {
+	.factory("loadService", ['dataService', '$q', 'parseService', 'validationService', '$rootScope',
+			function(dataService, $q, parseService, validationService, $rootScope) {
 
 		var visState = {};
 		var layoutState;
 		var visStateDirty = false;
 
 		function loadJson(json) {
-			json.files.forEach(function (f) {
+			var urlLoading = new Promise(function(resolve, reject) {
+				var allLoads = [];
 
-				// Rebuild autofields
-				f.autoFields = parseService.getFields(f.data);
-
-				// Rebuild unique values and errors for each field.
-				f.fields.forEach(function(g) {
-					if(f.autoFields.filter(function (d) { return d.key === g.key; })[0]) {
-						g.uniques = f.autoFields.filter(function (d) { return d.key === g.key; })[0].uniques;
-						g.errors = validationService(g.uniques.map(function(d) { return d.key; }), g.type);
+				json.files.forEach(function(f) {
+					if(f.loadFromURL) {
+						// Load from URL
+						allLoads.push(parseService.parseUrl(f.url).then(function(csv) {
+							f.data = parseService.parseText(csv);
+						}));
 					}
 				});
 
-				dataService.addFileRaw(f);
-			});
-			json.links.forEach(function (l) {
-				// First fix the file references.
-				l.lookup.file = dataService.getFiles().filter(function(f) { return f.uniqueId === l.lookup.file.uniqueId; })[0];
-				l.source.file = dataService.getFiles().filter(function(f) { return f.uniqueId === l.source.file.uniqueId; })[0];
-				l.lookup.field = l.lookup.file.fields.filter(function(f) { return f.key === l.lookup.field.key; })[0];
-				l.source.field = l.source.file.fields.filter(function(f) { return f.key === l.source.field.key; })[0];
-
-				dataService.addLinkRaw(l);
+				Promise.all(allLoads).then(function() {
+					// All done
+					resolve();
+				});
 			});
 
-			// Does this file include visualization state information?
-			if(json.vis && json.vis.length > 0) {
-				visState = json.vis;
-				layoutState = json.layout;
-				visStateDirty = true;
-			}
+			urlLoading.then(function(){
+				json.files.forEach(function (f) {
 
-			// Set metadata
-			dataService.setMetadata(json.metadata);
+					// Rebuild autofields
+					f.autoFields = parseService.getFields(f.data);
+
+					// Rebuild unique values and errors for each field.
+					f.fields.forEach(function(g) {
+						if(f.autoFields.filter(function (d) { return d.key === g.key; })[0]) {
+							g.uniques = f.autoFields.filter(function (d) { return d.key === g.key; })[0].uniques;
+							g.errors = validationService(g.uniques.map(function(d) { return d.key; }), g.type);
+						}
+					});
+
+					dataService.addFileRaw(f);
+				});
+				json.links.forEach(function (l) {
+					// First fix the file references.
+					l.lookup.file = dataService.getFiles().filter(function(f) { return f.uniqueId === l.lookup.file.uniqueId; })[0];
+					l.source.file = dataService.getFiles().filter(function(f) { return f.uniqueId === l.source.file.uniqueId; })[0];
+					l.lookup.field = l.lookup.file.fields.filter(function(f) { return f.key === l.lookup.field.key; })[0];
+					l.source.field = l.source.file.fields.filter(function(f) { return f.key === l.source.field.key; })[0];
+
+					dataService.addLinkRaw(l);
+				});
+
+				// Does this file include visualization state information?
+				if(json.vis && json.vis.length > 0) {
+					visState = json.vis;
+					layoutState = json.layout;
+					visStateDirty = true;
+				}
+
+				// Set metadata
+				dataService.setMetadata(json.metadata);
+				$rootScope.$digest();
+			});
 		}
 
 		function buildVis(stateFunctions) {

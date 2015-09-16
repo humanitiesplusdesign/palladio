@@ -18,9 +18,10 @@ angular.module('palladio.directives.files', [
 						try {
 							parseService.parseUrl(scope.text).then(
 								function(csv){
+									var url = scope.text;
 									scope.text = csv;
 									var data = parseService.parseText(scope.text);
-									addFile(data, scope.lastFileName);
+									addFile(data, scope.lastFileName, url);
 									if(afterParse) afterParse();
 								},
 								function(error){
@@ -83,9 +84,9 @@ angular.module('palladio.directives.files', [
 
 				/* Creates a new file */
 
-				var addFile = function(data, label) {
+				var addFile = function(data, label, url) {
 					scope.text = null;
-					dataService.addFile(data, label);
+					dataService.addFile(data, label, url);
 					scope.lastFileName = null;
 				};
 

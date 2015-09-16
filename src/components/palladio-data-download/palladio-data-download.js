@@ -29,6 +29,10 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 							return g;
 						});
 
+						if(f.url && f.loadFromURL) {
+							f.data = [];
+						}
+
 						return f;
 					});
 
@@ -37,6 +41,13 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 						l = shallowCopy(l);
 						l.lookup = shallowCopy(l.lookup);
 						l.source = shallowCopy(l.source);
+						l.lookup.field = shallowCopy(l.lookup.field);
+						l.source.field = shallowCopy(l.source.field);
+
+						l.lookup.field.uniques = [];
+						l.lookup.field.errors = [];
+						l.source.field.uniques = [];
+						l.source.field.errors = [];
 
 						l.lookup.file = { uniqueId: l.lookup.file.uniqueId };
 						l.source.file = { uniqueId: l.source.file.uniqueId };

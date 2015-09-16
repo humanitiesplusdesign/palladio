@@ -85,17 +85,6 @@
 										</div>
 
 									</div>
-
-									<!--
-									<div class="margin-top">
-										<strong>SPARQL (beta)</strong>
-										<p>You can load data from a SPARQL endpoint by providing both the endpoint URL and a valid SPARQL query. After you run the SPARQL query you will have the opportunity to validate your data and re-run the query if necessary before loading the data into Palladio.</p>
-										<yasgui data="text" endpoint="sparqlEndpoint"></yasgui>
-										<div class="">
-											<button class="btn btn-default" ng-click="parseExtendTable()" ng-show="text">Load data</button>
-										</div>
-										<div class="alert alert-warning" ng-show="parseError">{{parseError}}</div>
-									</div>-->
 								</div>
 
 							</div>
@@ -169,36 +158,22 @@
 
 						<div class="margin-top">
 							<span ng-show="$index==0" class="pull-left text-muted">Primary table</span>
+							<span ng-show="file.url" class="pull-left text-muted margin-left"
+								data-container="body"
+								tooltip="Originally from: {{file.url}} &ndash; {{file.loadFromURL ? 'Will load from this URL again after saving' : 'Data will be saved in Palladio format and not loaded from this URL after saving'}}"
+								tooltip-animation="false"
+								tooltip-append-to-body="true"
+								data-ng-click="file.loadFromURL = !file.loadFromURL">
+
+								<i class="fa"
+									ng-class="{ 'fa-chain' : file.loadFromURL, 'fa-chain-broken' : !file.loadFromURL }">
+								</i>
+							</span>
 							<span class="text-muted pull-right">{{file.data.length}} rows</span>
 							<span class="clearfix"></span>
 						</div>
 
-
-
 					</div>
-
-					<!--<div class="panel-body">
-
-						<div class="text-center">
-							<div class="btn-group btn-group-small">
-								<label class="btn btn-default" ng-model="fieldView" btn-radio="'field-view-list'">List</label>
-								<label class="btn btn-default" ng-model="fieldView" btn-radio="'field-view-fingerprint'">Fingerprint</label>
-								<label class="btn btn-default" ng-model="fieldView" btn-radio="'field-view-overview'">Overview</label>
-							</div>
-						</div>
-					</div>-->
-
-					<!-- File Body -->
-					<!--<div class="panel-body">
-
-
-						<span class="small"><strong>{{file.data.length}}</strong> rows</span>
-						<span class="pull-right">
-							<span ng-show="$index==0" class="text-uppercase small-caps text-white">primary table</span>
-						</span>
-
-
-					</div>-->
 
 					<!-- SOOOOO BAD -->
 					<div class="fieldview-container"><!-- ng-style="myStyle={'height':file.fields.length*38}">-->

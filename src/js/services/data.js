@@ -14,8 +14,11 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 		// We give files unique numeric identifiers.
 		var uniqueCounter = 0;
 
-		var addFile = function (data, label) {
+		var addFile = function (data, label, url) {
 			var file = {};
+
+			file.url = url;
+			file.loadFromURL = true;
 			file.label = label || "Untitled";
 			file.id = files.length;
 			// Do auto-recognition on load
