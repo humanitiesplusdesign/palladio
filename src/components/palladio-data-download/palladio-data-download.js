@@ -8,21 +8,36 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 			templateUrl: 'partials/palladio-data-download/template.html',
 
 			link: function(scope) {
+				function shallowCopy(obj) {
+					var copy = {};
+					for (var attr in obj) {
+						if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
+					}
+					return copy;
+				}
+
 				scope.exportDataModel = function() {
 					// Strip autoFields, uniques, errors from all files/fields
-					var files = angular.copy(dataService.getFiles()).map(function(f) {
-						f.autoFields = [];
+					var files = dataService.getFiles().map(function(f) {
+						f = shallowCopy(f);
 
-						f.fields.forEach(function(g) {
+						f.autoFields = [];
+						f.fields = f.fields.concat([]).map(function(g) {
+							g = shallowCopy(g);
 							g.uniques = [];
 							g.errors = [];
+							return g;
 						});
 
 						return f;
 					});
 
 					// Strip everything but the unique file id from links
-					var links = angular.copy(dataService.getLinks()).map(function(l) {
+					var links = dataService.getLinks().map(function(l) {
+						l = shallowCopy(l);
+						l.lookup = shallowCopy(l.lookup);
+						l.source = shallowCopy(l.source);
+
 						l.lookup.file = { uniqueId: l.lookup.file.uniqueId };
 						l.source.file = { uniqueId: l.source.file.uniqueId };
 
