@@ -344,8 +344,8 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 
 			filesToProcess.forEach(function (f) {
 				determineCountableFields(f);
-				f.sourceFor = function () {
-					return internalLinks.filter( function (l) {
+				f.sourceFor = function (sourceLinks) {
+					return sourceLinks.filter( function (l) {
 						return l.source.file.uniqueId === f.uniqueId;
 					});
 				};
@@ -378,16 +378,16 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 			});
 
 			// Function to perform lookups recursively.
-			function performLookups(file) {
+			function performLookups(file, lookupLinks) {
 
 				var nf = transformFile(file);
 
 				// For a single file, just return that file.
-				if(nf.sourceFor().length === 0) {
+				if(nf.sourceFor(lookupLinks).length === 0) {
 					return nf;
 				}
 
-				nf.sourceFor().forEach( function (l) {
+				nf.sourceFor(lookupLinks).forEach( function (l) {
 
 					var lookup = function () {
 						// Build the lookup map.
@@ -471,16 +471,27 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 					});
 				});
 
-				// Remove all links with this file as the source so we don't reprocess them.
+				// Filter all links with this file as the source so we don't reprocess them.
 				// Note: The current forEach is looping over an array of links that the
 				//		sourceFor() function compiled before this deletion, so we will still
 				//		process links that are pending in the current loop.
-				var newLinks = internalLinks.filter(function (link) {
+				var newLinks = lookupLinks.map(function (link) {
+					return {
+						source: {
+							file: link.source.file,
+							field: link.source.field
+						},
+						lookup: {
+							file: link.lookup.file,
+							field: link.lookup.field
+						}
+					};
+				}).filter(function(link) {
 					return link.source.file.uniqueId !== nf.uniqueId;
 				});
 
-				// Rewrite links whoose source is the lookup file for this link.
-				nf.sourceFor().forEach(function (l) {
+				// Rewrite links whose source is the lookup file for this link.
+				nf.sourceFor(lookupLinks).forEach(function (l) {
 					newLinks.forEach(function (link) {
 						if(link.source.file.uniqueId === l.lookup.file.uniqueId) {
 							// We need to re-point the file.
@@ -489,25 +500,54 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 					});
 				});
 
-				internalLinks = newLinks;
-
 				// Re-run lookups (eventually there won't be any more).
-				nf = performLookups(nf);
+				nf = performLookups(nf, newLinks);
 
 				return nf;
 			}
 
 			if(centralFile) {
 
-				var newFile = performLookups(centralFile);
+				xfilter = crossfilter([]);
+				data = [];
+				var newFile = {};
+				var lookedUpFile = {};
+				newFile.autoFields = centralFile.autoFields.map(copyField);
+				newFile.fields = centralFile.fields;
+				newFile.id = centralFile.id;
+				newFile.label = centralFile.label;
+				newFile.sourceFor = centralFile.sourceFor;
+				newFile.uniqueId = centralFile.uniqueId;
+
+				// Limit to processing 1000 central rows at a time.
+				for(var j = 0; j < centralFile.data.length; j = j + 1000) {
+					console.log("Processed " + j + " records from " + centralFile.label + " table.");
+					newFile = {};
+					newFile.autoFields = centralFile.autoFields.map(copyField);
+					newFile.fields = centralFile.fields;
+					newFile.id = centralFile.id;
+					newFile.label = centralFile.label;
+					newFile.sourceFor = centralFile.sourceFor;
+					newFile.uniqueId = centralFile.uniqueId;
+					newFile.data = centralFile.data.slice(j, j + 1000);
+
+					lookedUpFile = performLookups(newFile, internalLinks);
+
+					data = data.concat(lookedUpFile.data);
+					xfilter.add(lookedUpFile.data);
+				}
+
+				console.log("Processed " + centralFile.data.length + " records from " + centralFile.label + " table.");
+
+				metadata = lookedUpFile.fields;
 
 				// Update typeField uniques.
-				newFile.fields.forEach(function (f) {
+				lookedUpFile.fields.forEach(function (f) {
 					if(f.typeField !== undefined && f.typeField.length > 0) {
 						f.typeFieldUniques = [];
 						f.typeField.forEach(function (t, i) {
 							f.typeFieldUniques[i] = [];
-							newFile.data.forEach(function (d) {
+							data.forEach(function (d) {
 								if(f.typeFieldUniques[i].indexOf(d[t]) === -1) {
 									f.typeFieldUniques[i].push(d[t]);
 								}
@@ -515,10 +555,6 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 						});
 					}
 				});
-
-				metadata = newFile.fields;
-				data = newFile.data;
-				xfilter = crossfilter(data);
 			}
 		}
 
@@ -706,63 +742,64 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 				}
 			});
 
-			file.data.map(function(r) {
-				// Start by splitting the comma-delimited values into arrays and stripping spaces
-				tempRow = angular.extend({}, r);
-				dimsToExplode.forEach(function(k) {
-					tempArr = [];
-					if(r[k.key] !== undefined)  {
-						tempArr = r[k.key].split(k.mvDelimiter).map(function (v) {
-							return v.trim();
-						});
-					}
-					tempRow[k.key] = tempArr;
-				});
-
-				return tempRow;
-			}).forEach(function(r) {  // Then we have to add several rows for each record.
-
-				// Start by getting the cardinality (number of rows we need to create) by multiplying the
-				// length of all the arrays in the attributes we need to explode.
-				card = dimsToExplode.reduce(function(p, c) {
-					// What if the length is 0? Then treat it as 1.
-					return p * ( r[c.key].length ? r[c.key].length : 1 );
-				}, 1);
-
-				if(card <= 1) { // If it's 1 or less, then we only need one row.
+			if(dimsToExplode.length === 0) {
+				data = file.data;
+			} else {
+				file.data.forEach(function(r) {
+					// Start by splitting the comma-delimited values into arrays and stripping spaces
 					tempRow = angular.extend({}, r);
-
-					// Convert back to strings
 					dimsToExplode.forEach(function(k) {
-						tempArr = r[k.key];
-						tempRow[k.key] = tempArr.shift();
+						tempArr = [];
+						if(r[k.key] !== undefined)  {
+							tempArr = r[k.key].split(k.mvDelimiter).map(function (v) {
+								return v.trim();
+							});
+						}
+						tempRow[k.key] = tempArr;
 					});
 
-					data.push(tempRow);
-				} else {        // It's multiple rows, so things get a little interesting.
+					// Then we have to add several rows for each record.
 
-					// Get the arrays of values of which we're going to take the cartesian product.
-					tempArr = dimsToExplode.map(function(k) {
-						return r[k.key];
-					});
+					// Start by getting the cardinality (number of rows we need to create) by multiplying the
+					// length of all the arrays in the attributes we need to explode.
+					card = dimsToExplode.reduce(function(p, c) {
+						// What if the length is 0? Then treat it as 1.
+						return p * ( tempRow[c.key].length ? tempRow[c.key].length : 1 );
+					}, 1);
 
-					// tempArr is now the cartesian product.
-					tempArr = cartesian(tempArr);
+					if(card <= 1) { // If it's 1 or less, then we only need one row.
 
-					// Cycle through the cartesian product array and create new rows, then append them to
-					// newData.
-
-					tempArr.forEach(function(a) {
-						tempRow = angular.extend({}, r);
-
-						dimsToExplode.forEach(function(k, i) {
-							tempRow[k.key] = a[i];
+						// Convert back to strings
+						dimsToExplode.forEach(function(k) {
+							tempRow[k.key] = tempRow[k.key].shift();
 						});
 
 						data.push(tempRow);
-					});
-				}
-			});
+					} else {        // It's multiple rows, so things get a little interesting.
+
+						// Get the arrays of values of which we're going to take the cartesian product.
+						tempArr = dimsToExplode.map(function(k) {
+							return tempRow[k.key];
+						});
+
+						// tempArr is now the cartesian product.
+						tempArr = cartesian(tempArr);
+
+						// Cycle through the cartesian product array and create new rows, then append them to
+						// newData.
+
+						tempArr.forEach(function(a) {
+							tempRow = angular.extend({}, tempRow);
+
+							dimsToExplode.forEach(function(k, i) {
+								tempRow[k.key] = a[i];
+							});
+
+							data.push(tempRow);
+						});
+					}
+				});
+			}
 
 			newFile = {};
 			newFile.autoFields = file.autoFields.map(function(f) { return copyField(f); });
