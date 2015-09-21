@@ -59,8 +59,6 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 			link : {
 				pre : function(scope, element) {
 
-					console.log("Facet");
-
 					var numericHeight;
 					var headerHeight = 30;
 					var minCellHeight = 20;
