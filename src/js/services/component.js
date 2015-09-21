@@ -34,8 +34,9 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 			if(!errorFunction) { errorFunction = function () {}; }
 			$http.get(url)
 				.success(function(data) {
-					loadService.loadJson(data);
-					successFunction(data);
+					loadService.loadJson(data).then(function() {
+						successFunction(data);
+					});
 				})
 				.error(errorFunction);
 		};

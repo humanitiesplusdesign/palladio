@@ -25,7 +25,7 @@ angular.module('palladio.services.load', ['palladio.services.data'])
 				});
 			});
 
-			urlLoading.then(function(){
+			return urlLoading.then(function(){
 				json.files.forEach(function (f) {
 
 					// Rebuild autofields
@@ -60,6 +60,7 @@ angular.module('palladio.services.load', ['palladio.services.data'])
 
 				// Set metadata
 				dataService.setMetadata(json.metadata);
+				console.log("Loaded");
 				$rootScope.$digest();
 			});
 		}
