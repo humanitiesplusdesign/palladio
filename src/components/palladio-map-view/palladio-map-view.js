@@ -234,8 +234,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 					var groupPoints = d3.map();
 
-					layer.sourceGroups.top(Infinity)
-						.filter( function (d) { return d.key && d.value.agg > 0; })
+					layer.sourceGroups.all()
+						// .filter( function (d) { return d.key && d.value.agg > 0; })
 						.forEach( function (d) {
 							// Must copy the group value because these values will be updated if we have a destGroup.
 							groupPoints.set(d.key, angular.copy(d.value));
@@ -245,8 +245,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					// but we'll get to that eventually.
 					if(layer.destGroups) {
 						// Merge sources and destinations;
-						var dests = layer.destGroups.top(Infinity)
-							.filter( function (d) { return d.key && d.value.agg > 0; })
+						var dests = layer.destGroups.all()
+							// .filter( function (d) { return d.key && d.value.agg > 0; })
 							.forEach( function (d) {
 								if(groupPoints.has(d.key)) {
 									groupPoints.get(d.key).agg += +d.value.agg;
@@ -430,7 +430,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					    var links = layer.showLinks ? edges.features || [] : [];
 
 					    link = g.selectAll(".link")
-							.data(links, function(d) { return d.properties.source + "-" + d.properties.destination; })
+							.data(links.filter(function(d) { return d.properties.value > 0; }),
+								function(d) { return d.properties.source + "-" + d.properties.destination; })
 
 						link.exit().remove();
 
@@ -449,7 +450,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						    .on("mouseover", linkTip.show)
 							.on("mouseout", linkTip.hide)
 
-						link.enter().append("path")
+						link.enter()
+							.append("path")
 							.classed("link",true)
 							.attr("stroke-width", function(d){ return value(d.properties.value); })
 							.attr("stroke-linecap", "round")
@@ -479,7 +481,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 			        	// nodes
 
 			        	node = g.selectAll(".node")
-			            	.data(nodes.features, function (d) { return d.properties.key; });
+			            	.data(nodes.features.filter(function(d) { return d.properties.value.agg > 0 && !isNaN(d.geometry.coordinates[0]) && !isNaN(d.geometry.coordinates[1]); }),
+			            		function (d) { return d.properties.key; });
 
 			            node.exit().remove();
 
