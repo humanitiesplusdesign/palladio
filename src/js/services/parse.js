@@ -18,11 +18,7 @@ angular.module('palladio.services.parse', [])
 				} else {
 
 					// Search for special characters depending on the field type.
-					specials.filter(function(s) {
-						// Ignore some specials depending on the data type.
-						return !(type === 'date' && s === '-' ) &&
-								!(type === 'url' && (s === ':' || s === '/' || s === '_' || s === '-' ));
-					}).forEach(function (s) {
+					specials.forEach(function (s) {
 						if(curr[prop].indexOf(s) !== -1) {
 							prev.specials.push(s);
 							// We've already seen this char once so we don't have to check

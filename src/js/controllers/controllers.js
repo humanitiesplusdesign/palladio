@@ -315,9 +315,27 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		};
 
 		function calcUnassignedSpecialCharacters() {
-			var inMv, inHier, inIgnore;
+			var inMv, inHier, inIgnore, validForType = false;
 
 			return $scope.selectedFieldMetadata.special.filter(function (d) {
+				if($scope.selectedFieldMetadata.type === 'latlong' &&
+					(d === '-' || d === ',')) {
+
+					validForType = true;
+				}
+
+				if($scope.selectedFieldMetadata.type === 'date' &&
+					(d === '-')) {
+
+					validForType = true;
+				}
+
+				if($scope.selectedFieldMetadata.type === 'url' &&
+					(d === ':' || d === '/' || d === '_' || d === '-' )) {
+
+					validForType = true;
+				}
+				
 				if(typeof $scope.selectedFieldMetadata.mvDelimiter === 'string') {
 					inMv = $scope.selectedFieldMetadata.mvDelimiter.indexOf(d) !== -1;
 				} else { inMv = false; }
@@ -330,7 +348,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 					inIgnore = $scope.selectedFieldMetadata.ignore.join("").indexOf(d) !== -1;
 				} else { inIgnore = false; }
 
-				return !inMv && !inHier && !inIgnore;
+				return !inMv && !inHier && !inIgnore && !validForType;
 			});
 		}
 

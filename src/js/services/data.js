@@ -68,7 +68,12 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 					uniques: d.uniques,
 					uniqueKey: d.uniqueKey,
 					special: d.special,
-					unassignedSpecialChars: d.special,
+					unassignedSpecialChars: d.special.filter(function(s) {
+						// Ignore some specials depending on the data type.
+						return !(d.type === 'date' && s === '-' ) &&
+								!(d.type === 'latlong' && (s === '-' || s === ',') ) &&
+								!(d.type === 'url' && (s === ':' || s === '/' || s === '_' || s === '-' ));
+					}),
 					countBy: d.countBy,
 					errors: validationService(d.uniques.map(function(d) { return d.key; }), d.type),
 					descriptiveField: d.descriptiveField
