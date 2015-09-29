@@ -8825,19 +8825,6 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 [data-palladio-histogram-filter] .axis text {
 	font: 10px Helvetica, Arial, sans-serif;
 }
-[data-palladio-parduration-filter] path {
-	fill: #dddddd;
-}
-
-[data-palladio-parduration-filter] .axis path, [data-palladio-partime-filter] .axis line {
-	fill: none;
-	stroke: #000;
-	shape-rendering: crispEdges;
-}
-
-[data-palladio-parduration-filter] .axis text {
-	font: 10px Helvetica, Arial, sans-serif;
-}
 [data-palladio-timespan-filter] path {
 	fill: #dddddd;
 }
@@ -8849,6 +8836,19 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 }
 
 [data-palladio-timespan-filter] .axis text {
+	font: 10px Helvetica, Arial, sans-serif;
+}
+[data-palladio-parduration-filter] path {
+	fill: #dddddd;
+}
+
+[data-palladio-parduration-filter] .axis path, [data-palladio-partime-filter] .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-parduration-filter] .axis text {
 	font: 10px Helvetica, Arial, sans-serif;
 }
 .pt-perspective {

@@ -53,19 +53,24 @@
 
 		<div class="row margin-top">
 			<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right ">
-				<label class="inline">Upper date</label>
+				<label class="inline">Layout</label>
 			</div>
 			<div class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">
-				<span class="btn btn-default btn-modal" ng-click="showDateEndModal()">
-					{{dateEndDim.description || "Choose"}}
-					<span class="caret"></span>
-				</span>
+				<ui-select ng-model="$parent.stepMode" theme="selectize">
+					<ui-select-match placeholder="Select">
+						{{$select.selected}}
+						<span class="caret"></span>
+					</ui-select-match>
+				    <ui-select-choices repeat="mode in stepModes">
+				      <span ng-bind-html="mode"></span>
+				    </ui-select-choices>
+				</ui-select>
 			</div>
 		</div>
 
 		<div class="row margin-top">
 			<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right ">
-				<label class="inline">Lower date</label>
+				<label class="inline">Start date</label>
 			</div>
 			<div class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">
 				<span class="btn btn-default btn-modal" ng-click="showDateStartModal()">
@@ -77,7 +82,19 @@
 
 		<div class="row margin-top">
 			<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right ">
-				<label class="inline">Tooltip</label>
+				<label class="inline">End date</label>
+			</div>
+			<div class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">
+				<span class="btn btn-default btn-modal" ng-click="showDateEndModal()">
+					{{dateEndDim.description || "Choose"}}
+					<span class="caret"></span>
+				</span>
+			</div>
+		</div>
+
+		<div class="row margin-top">
+			<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right ">
+				<label class="inline">Label</label>
 			</div>
 			<div class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">
 				<span class="btn btn-default btn-modal" ng-click="showTooltipLabelModal()">

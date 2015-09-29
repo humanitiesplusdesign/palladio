@@ -88,8 +88,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 
 					scope.title = "Time Span Filter";
 
-					scope.stepModes = ['Bars', 'Parallel'];
-					if(scope.view) scope.stepModes.push('Grouped Bars');
+					scope.stepModes = ['Bars', 'Parallel', 'Grouped Bars'];
 					scope.stepMode = scope.stepModes[0];
 
 					// Handle collapsing
@@ -147,7 +146,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 					// Constants...
 					var margin = 25;
 					var width = scope.fullWidth ? element.find('.main-viz').width() - margin*2 : element.find('.main-viz').width();
-					var height = scope.height ? +scope.height : 200;
+					var height = scope.height ? +scope.height : 270;
 					height = scope.fullHeight ? $(window).height()-200 : height;
 					var filterColor = '#9DBCE4';
 
@@ -371,6 +370,10 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						}
 					}
 
+					function fill(d) {
+						return filter(d.key) ? "#555555" : "#CCCCCC";
+					}
+
 					function update() {
 						if(svg && scope.dateStartDim && scope.dateEndDim && scope.tooltipLabelDim && scope.groupDim) {
 
@@ -388,10 +391,6 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 										}),
 									function (d) { return d.key[0] + " - " + d.key[1] + " - " + d.key[3]; });
 
-							function fill(d) {
-								return filter(d.key) ? "#555555" : "#CCCCCC";
-							}
-
 							paths.exit().remove();
 							var newPaths = paths.enter()
 									.append('g')
@@ -400,7 +399,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 							newPaths
 								.tooltip(function (d){
 									return {
-										text : d.key[2] + ": " + d.key[0] + " - " + d.key[1],
+										text : d.key[2] + " (" + d.key[3] + ")" + ": " + d.key[0] + " - " + d.key[1],
 										displacement : [0,20],
 										position: [0,0],
 										gravity: "right",
