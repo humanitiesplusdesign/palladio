@@ -134,7 +134,8 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 					// d3.select(element[0]);
 
 					var sel, svg, dim, group, x, y, xStart, xEnd, emitFilterText, removeFilterText,
-						topBrush, midBrush, bottomBrush, top, bottom, middle, filter, yStep, tooltip;
+						topBrush, midBrush, bottomBrush, top, bottom, middle, filter, yStep, tooltip,
+						xAxisStart, xAxisEnd;
 
 					var format = dateService.format;
 
@@ -203,32 +204,11 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 							// 'countBy' functionality we need to use the Crossfilter helpers or Reductio.
 							group = dim.group();
 
-							var startValues = dim.top(Infinity).map(function (d) { return format.reformatExternal(d[scope.dateStartDim.key]); })
-									// Check for invalid dates
-									.filter(function (d) { return format.parse(d).valueOf(); });
-							var endValues = dim.top(Infinity).map(function (d) { return format.reformatExternal(d[scope.dateEndDim.key]); })
-									// Check for invalid dates
-									.filter(function (d) { return format.parse(d).valueOf(); });
-							var allValues = startValues.concat(endValues).map(function(d) { return format.parse(d); });
+							setScales();
 
-							// Scales
-							x = d3.time.scale().range([0, width])
-									.domain([ d3.min(allValues), d3.max(allValues) ]);
-							xStart = d3.time.scale().range([0, width])
-									.domain([ d3.min(allValues), d3.max(allValues) ]);
-							xEnd = d3.time.scale().range([0, width])
-									.domain([ d3.min(allValues), d3.max(allValues) ]);
-							y = d3.scale.linear().range([height, 0])
-									.domain([0, 1]);
-							yStep = d3.scale.linear().range([height, 0])
-									.domain([-1, group.top(Infinity)
-										.filter(function (d) {
-											return d.key[0] !== "" && d.key[1] !== "" && d.value !== 0;
-										}).length]);
-
-							var xAxisStart = d3.svg.axis().orient("bottom")
+							xAxisStart = d3.svg.axis().orient("bottom")
 									.scale(x);
-							var xAxisEnd = d3.svg.axis().orient("top")
+							xAxisEnd = d3.svg.axis().orient("top")
 									.scale(x);
 
 							var topExtent = [];
@@ -370,12 +350,51 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						}
 					}
 
+					function setScales() {
+						var startValues = group.all().map(function (d) { return d.key[0]; })
+								// Check for invalid dates
+								.filter(function (d) { return format.parse(d).valueOf(); });
+						var endValues = group.all().map(function (d) { return d.key[1]; })
+								// Check for invalid dates
+								.filter(function (d) { return format.parse(d).valueOf(); });
+						var allValues = startValues.concat(endValues).map(function(d) { return format.parse(d); });
+
+						// Scales
+						x = d3.time.scale().range([0, width])
+								.domain([ d3.min(allValues), d3.max(allValues) ]);
+						xStart = d3.time.scale().range([0, width])
+								.domain([ d3.min(allValues), d3.max(allValues) ]);
+						xEnd = d3.time.scale().range([0, width])
+								.domain([ d3.min(allValues), d3.max(allValues) ]);
+						y = d3.scale.linear().range([height, 0])
+								.domain([0, 1]);
+						yStep = d3.scale.linear().range([height, 0])
+								.domain([-1, group.top(Infinity)
+									.filter(function (d) {
+										return d.key[0] !== "" && d.key[1] !== "" && d.value !== 0;
+									}).length]);
+					}
+
+					function reApplyAxes() {
+						topBrush.x(xEnd);
+						bottomBrush.x(xStart);
+						midBrush.x(x);
+						bottom.call(bottomBrush)
+							.call(xAxisStart);
+						top.call(topBrush)
+							.call(xAxisEnd);
+						middle.call(midBrush);
+					}
+
 					function fill(d) {
 						return filter(d.key) ? "#555555" : "#CCCCCC";
 					}
 
 					function update() {
 						if(svg && scope.dateStartDim && scope.dateEndDim && scope.tooltipLabelDim && scope.groupDim) {
+
+							setScales();
+							reApplyAxes();
 
 							var paths = svg.select('g').selectAll('.path')
 								.data(group.top(Infinity)
