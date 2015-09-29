@@ -156,7 +156,7 @@
 							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8">
 								<div class="row">
 									<div class="col-lg-6 col-md-6 margin-bottom" style="padding-left:0" data-ng-repeat="tile in tilesTypes" data-ng-click="selectTile(tile)">
-										<div class="layer-img" style="background-image:url({{tile.img}})" data-ng-class="{active:tilesType==tile}">
+										<div class="layer-img" style="background-image:url({{tile.img}})" data-ng-class="{active:tilesType==tile, 'short-layer-img': tilesType.custom}">
 											<span data-ng-class="{'text-white':tile.description=='Satellite'}">{{tile.description}}</span>
 										</div>
 									</div>
@@ -184,11 +184,29 @@
 
 						<div class="row" ng-show="tilesType && tilesType.custom">
 							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
+								<label class="inline">WMS URL</label>
+							</div>
+							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
+								<input type="text" id="layerWmsUrl" ng-model="wmsUrl" class="form-control" placeholder="e.g. http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi">
+							</div>
+						</div>
+
+						<div class="row margin-top" ng-show="tilesType && tilesType.custom">
+							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
+								<label class="inline">WMS Layers</label>
+							</div>
+							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
+								<input type="text" id="layerWmsLayers" ng-model="wmsLayers" class="form-control" placeholder="e.g. nexrad-n0r-900913">
+							</div>
+						</div>
+
+						<div class="row margin-top" ng-show="tilesType && tilesType.custom">
+							<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 text-right">
 								<label class="inline">Mapbox ID</label>
 							</div>
 							<div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
 							<input type="text" id="layerMbId" ng-model="mbId" class="form-control" placeholder="e.g. examples.map-zr0njcqy">
-							<span class="help-block">A Mapbox map ID. <a href="https://www.mapbox.com/help/define-map-id/" target="_blank">Click here to know more</a></span>
+							<span class="help-block">A Mapbox map ID. <a href="https://www.mapbox.com/help/define-map-id/" target="_blank">Click here to learn more</a></span>
 							</div>
 						</div>
 

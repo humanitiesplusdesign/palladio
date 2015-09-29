@@ -807,6 +807,13 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 								// Example: http://a.tile.stamen.com/watercolor/{z}/{x}/{y}.png
 								ts.layer = L.tileLayer(ts.url);
 							}
+							if(ts.wmsUrl) {
+								ts.layer = L.tileLayer.wms(ts.wmsUrl, {
+									layers: ts.wmsLayers,
+									format: 'image/png',
+									transparent: true
+								});
+							}
 							if(ts.mbId) {
 								// Assume we have a mapbox id. Example: esjewett.k36b48ge
 								ts.layer = L.mapbox.tileLayer(ts.mbId);
@@ -1196,6 +1203,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						tileSets: scope.tileSets.map(function (t) {
 							return {
 								"url": t.url,
+								"wmsUrl": t.umsUrl,
+								"wms:Layers": t.wmsLayers,
 								"mbId": t.mbId,
 								"enabled": t.enabled,
 								"description": t.description,
@@ -1294,6 +1303,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				scope.tilesType = scope.tilesTypes[0];
 
 				scope.url = null;
+				scope.wmsUrl = null;
+				scope.wmsLayers = null;
 				scope.mbId = null;
 				scope.description = null;
 
@@ -1310,10 +1321,12 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							"layer": null
 						});
 					}
-					else if (scope.layerType.value === 'tiles' && (scope.url || scope.mbId)) {
+					else if (scope.layerType.value === 'tiles' && (scope.url || scope.mbId || (scope.wmsUrl && scope.wmsLayers))) {
 						scope.tileSets.unshift({
 							"url": scope.url ? scope.url : null,
 							"mbId": scope.mbId ? scope.mbId : null,
+							"wmsUrl": scope.wmsUrl ? scope.wmsUrl : null,
+							"wmsLayers": scope.wmsLayers ? scope.wmsLayers : null,
 							"enabled": true,
 							"description": scope.description,
 							"layer": null
@@ -1337,6 +1350,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					}
 
 					scope.url = null;
+					scope.wmsUrl = null;
+					scope.wmsLayers = null;
 					scope.mbId = null;
 					scope.description = null;
 					scope.mapping = {};

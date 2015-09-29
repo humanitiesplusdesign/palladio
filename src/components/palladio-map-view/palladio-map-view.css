@@ -158,8 +158,10 @@
 
 	cursor: pointer;
 	opacity: .8;
+}
 
-
+.short-layer-img {
+	height: 20px;
 }
 
 .layer-img:hover {

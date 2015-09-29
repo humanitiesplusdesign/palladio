@@ -8422,8 +8422,10 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 
 	cursor: pointer;
 	opacity: .8;
+}
 
-
+.short-layer-img {
+	height: 20px;
 }
 
 .layer-img:hover {
