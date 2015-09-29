@@ -1252,7 +1252,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					{
 						"description": "Map tiles",
 						"value": "tiles",
-						"info": "Map tiles provide "
+						"info": null
 					},
 					{
 						"description": "geoJSON",
