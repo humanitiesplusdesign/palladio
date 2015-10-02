@@ -351,6 +351,7 @@ angular.module('palladioGraphView', ['palladio.services', 'palladio'])
 						if(scope.linkDimension) scope.linkDimension.remove();
 						if(scope.mapping.sourceDimension && scope.mapping.targetDimension) {
 							scope.linkDimension = scope.xfilter.dimension(function(d) { return [ sourceAccessor(d), targetAccessor(d) ]; });
+							scope.linkDimension.accessor = function(d) { return [ sourceAccessor(d), targetAccessor(d) ]; };
 						}
 					}
 

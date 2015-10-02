@@ -220,6 +220,7 @@ angular.module('palladioTableView', ['palladio', 'palladio.services'])
 					if(scope.dimension) {
 						if(uniqueDimension) uniqueDimension.remove();
 						uniqueDimension = scope.xfilter.dimension(function (d) { return "" + d[scope.dimension.key]; });
+						uniqueDimension.accessor = function (d) { return "" + d[scope.dimension.key]; };
 					}
 					update();
 				});

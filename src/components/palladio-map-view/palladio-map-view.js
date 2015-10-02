@@ -1051,6 +1051,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 					if (layer.source) layer.source.remove();
 					layer.source = !layer.mapping.sourceCoordinates ? null : scope.xfilter.dimension(layer.sourceCoordinatesAccessor);
+					if(layer.source) layer.source.accessor = layer.sourceCoordinatesAccessor;
 
 					// If we are dealing with a type-based field, build a lookup mapping.
 					var destTypeMap = d3.map();
@@ -1094,6 +1095,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 					if (layer.destination) layer.destination.remove();
 					layer.destination = !layer.mapping.destinationCoordinates ? null : scope.xfilter.dimension(layer.destinationCoordinatesAccessor);
+					if(layer.destination) layer.destination.accessor = layer.destinationCoordinatesAccessor;
 
 					buildFilterDimension(layer);
 

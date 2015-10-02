@@ -207,6 +207,7 @@ angular.module('palladioListView', ['palladio', 'palladio.services'])
 					}
 
 					scope.id = scope.xfilter.dimension(function (d) { return "" + d[scope.listDim.key]; });
+					scope.id.accessor = function (d) { return "" + d[scope.listDim.key]; };
 					
 					scope.$watch('titleDim', function (nv, ov) {
 						if(nv !== ov && nv) {

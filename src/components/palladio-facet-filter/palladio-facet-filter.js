@@ -366,11 +366,23 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 						data.dimension = scope.xfilter.dimension(function (l) { return "" + l[data.key]; });
 						var exceptionKey = scope.aggDim.key;
 						var summationKey = countDims.get(scope.aggDim.fileId).key;
-						data.group = scope.aggDim.type === "count" ?
-							reductio().exception(function (d) { return d[exceptionKey]; })
-								.exceptionCount(true)(data.dimension.group()) :
-							reductio().exception(function (d) { return d[exceptionKey]; })
+						var countReducer = reductio()
+								.exception(function (d) { return d[exceptionKey]; })
+									.exceptionCount(true);
+						countReducer.value("of")
+							.filter(function(d, nf) { return nf; })
+							.exception(function (d) { return d[exceptionKey]; })
+								.exceptionCount(true);
+						var sumReducer = reductio()
+							.exception(function (d) { return d[exceptionKey]; })
 								.exceptionSum(function(d) { return d[summationKey]; });
+						sumReducer.value("of")
+							.filter(function(d, nf) { return nf; })
+							.exception(function (d) { return d[exceptionKey]; })
+								.exceptionSum(function(d) { return d[summationKey]; });
+						data.group = scope.aggDim.type === "count" ?
+							countReducer(data.dimension.group()) :
+							sumReducer(data.dimension.group());
 						if(scope.aggDim.type === "count") {
 							data.group.order(function (d) { return d.exceptionCount; });
 						} else {
@@ -418,7 +430,7 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 							.text(function(d) { return d.displayValue > 0 ? d.key : ''; });
 
 						sel.select('.cell-value')
-							.text(function(d) { return d.displayValue > 0 ? d.displayValue : ''; });
+							.text(function(d) { return d.displayValue > 0 ? d.displayValue + " / " + d.unfilteredValue : ''; });
 					}
 
 					function buildCellData(cellData, facetData) {
@@ -431,8 +443,10 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 						cellData.inFilter = cellData.filters.indexOf(cellData.key) !== -1;
 						if(scope.aggDim.type === "count") {
 							cellData.displayValue = cellData.value.exceptionCount;
+							cellData.unfilteredValue = cellData.value.of.exceptionCount;
 						} else {
 							cellData.displayValue = cellData.value.exceptionSum;
+							cellData.unfilteredValue = cellData.value.of.exceptionSum;
 						}
 						return cellData;
 					}
