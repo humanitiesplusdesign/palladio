@@ -137,6 +137,24 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						topBrush, midBrush, bottomBrush, top, bottom, middle, filter, yStep, tooltip,
 						xAxisStart, xAxisEnd;
 
+					var strokeWidth = 0.8;
+					var highlightStrokeWidth = 1.5;
+					var r = 1;
+					var highlightR = 2;
+
+					var highlightIn = function(d) {
+						d3.selectAll(this.parentNode.children)
+							.attr('stroke', '#222222')
+							// .attr('r', highlightR)
+							.attr('stroke-width', highlightStrokeWidth);
+					};
+					var highlightOut = function(d) {
+						d3.selectAll(this.parentNode.children)
+							.attr('stroke', fill)
+							// .attr('r', r)
+							.attr('stroke-width', strokeWidth);
+					};
+
 					var format = dateService.format;
 
 					// ng-class is not compiled before directive post-compile function (really!)
@@ -430,25 +448,31 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 							newPaths
 									.append('circle')
 										.attr('class', 'path-start')
-										.attr('r', 1)
+										.attr('r', r)
 										.attr('fill-opacity', 0.8)
 										.attr('stroke-opacity', 0.8)
-										.attr('stroke-width', 0.8)
-										.style("display", "none");
+										.attr('stroke-width', strokeWidth)
+										.style("display", "none")
+										.on('mouseover', highlightIn)
+										.on('mouseout', highlightOut);
 
 							newPaths
 									.append('circle')
 										.attr('class', 'path-end')
-										.attr('r', 1)
+										.attr('r', r)
 										.attr('fill-opacity', 0.8)
 										.attr('stroke-opacity', 0.8)
-										.attr('stroke-width', 0.8)
-										.style("display", "none");
+										.attr('stroke-width', strokeWidth)
+										.style("display", "none")
+										.on('mouseover', highlightIn)
+										.on('mouseout', highlightOut);
 
 							newPaths
 									.append('line')
 										.attr('stroke-width', 1)
-										.attr('stroke-opacity', 0.8);
+										.attr('stroke-opacity', strokeWidth)
+										.on('mouseover', highlightIn)
+										.on('mouseout', highlightOut);
 
 							var lines = paths.selectAll('line');
 							var circles = paths.selectAll('circle');
