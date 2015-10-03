@@ -143,13 +143,17 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 					var highlightR = 2;
 
 					var highlightIn = function(d) {
-						d3.selectAll(this.parentNode.children)
+						svg.select('g').selectAll('.path')
+								.filter(function(p) { return p.key.slice(0,3).join() === d.key.slice(0,3).join(); })
+								.selectAll("*")
 							.attr('stroke', '#222222')
 							// .attr('r', highlightR)
 							.attr('stroke-width', highlightStrokeWidth);
 					};
 					var highlightOut = function(d) {
-						d3.selectAll(this.parentNode.children)
+						svg.select('g').selectAll('.path')
+								.filter(function(p) { return p.key.slice(0,3).join() === d.key.slice(0,3).join(); })
+								.selectAll("*")
 							.attr('stroke', fill)
 							// .attr('r', r)
 							.attr('stroke-width', strokeWidth);
