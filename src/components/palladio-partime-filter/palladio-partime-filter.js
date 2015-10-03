@@ -135,7 +135,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 
 					var sel, svg, dim, group, x, y, xStart, xEnd, emitFilterText, removeFilterText,
 						topBrush, midBrush, bottomBrush, top, bottom, middle, filter, yStep, tooltip,
-						xAxisStart, xAxisEnd;
+						xAxisStart, xAxisEnd, pathData;
 
 					var strokeWidth = 0.8;
 					var highlightStrokeWidth = 1.5;
@@ -373,6 +373,8 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 					}
 
 					function setScales() {
+						buildPathData();
+
 						var startValues = group.all().map(function (d) { return d.key[0]; })
 								// Check for invalid dates
 								.filter(function (d) { return format.parse(d).valueOf(); });
@@ -391,10 +393,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						y = d3.scale.linear().range([height, 0])
 								.domain([0, 1]);
 						yStep = d3.scale.linear().range([height, 0])
-								.domain([-1, group.top(Infinity)
-									.filter(function (d) {
-										return d.key[0] !== "" && d.key[1] !== "" && d.value !== 0;
-									}).length]);
+								.domain([-1, pathData.length]);
 					}
 
 					function reApplyAxes() {
@@ -412,6 +411,26 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 						return filter(d.key) ? "#555555" : "#CCCCCC";
 					}
 
+					function buildPathData() {
+						pathData = group.top(Infinity)
+							.filter(function (d) {
+								// Require start OR end date.
+								return (d.key[0] !== "" || d.key[1] !== "") && d.value !== 0;
+							}).sort(function (a, b) {
+								if(scope.stepMode !== 'Grouped Bars' || a.key[3] === b.key[3]) {
+									return a.key[0] < b.key[0] ? -1 : 1;
+								} else {
+									return a.key[3] < b.key[3] ? -1 : 1;
+								}
+							});
+
+						// Build duplicate lookup array.
+						var pathLookup = pathData.map(function(d) { return d.key.slice(0,3).join(); });
+						pathData = pathData.filter(function(d) {
+							return scope.stepMode !== 'Grouped Bars' ? pathLookup.indexOf(d.key.slice(0,3).join()) === pathLookup.lastIndexOf(d.key.slice(0,3).join()) : true;
+						});
+					}
+
 					function update() {
 						if(svg && scope.dateStartDim && scope.dateEndDim && scope.tooltipLabelDim && scope.groupDim) {
 
@@ -419,17 +438,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 							reApplyAxes();
 
 							var paths = svg.select('g').selectAll('.path')
-								.data(group.top(Infinity)
-										.filter(function (d) {
-											// Require start OR end date.
-											return (d.key[0] !== "" || d.key[1] !== "") && d.value !== 0;
-										}).sort(function (a, b) {
-											if(scope.stepMode !== 'Grouped Bars' || a.key[3] === b.key[3]) {
-												return a.key[0] < b.key[0] ? -1 : 1;
-											} else {
-												return a.key[3] < b.key[3] ? -1 : 1;
-											}
-										}),
+								.data(pathData,
 									function (d) { return d.key[0] + " - " + d.key[1] + " - " + d.key[3]; });
 
 							paths.exit().remove();
@@ -485,11 +494,7 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 
 							if(scope.stepMode === "Bars" || scope.stepMode === 'Grouped Bars') {
 								// We need to refigure the yStep scale since the number of groups can change.
-								yStep.domain([-1, group.top(Infinity)
-										.filter(function (d) {
-											// Require start OR end date.
-											return (d.key[0] !== "" || d.key[1] !== "") && d.value !== 0;
-										}).length]);
+								yStep.domain([-1, pathData.length]);
 
 								// Calculate fille based on selection.
 								lines.attr('stroke', fill);
