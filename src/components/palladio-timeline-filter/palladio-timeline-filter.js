@@ -1,6 +1,37 @@
 // Timeline filter module
 
 angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
+	.run(['componentService', function(componentService) {
+		var compileStringFunction = function (newScope, options) {
+
+			// Options
+			//		showControls: true
+			//		showAccordion: true
+			//		showSettings: true
+			//		fullWidth: false
+			//		fullHeight: false
+
+			newScope.showControls = newScope.showControls === undefined ? true : newScope.showControls;
+			newScope.showAccordion = newScope.showAccordion === undefined ? true : newScope.showAccordion;
+			newScope.showSettings = newScope.showSettings === undefined ? true : newScope.showSettings;
+			newScope.timelineHeight = newScope.height === undefined ? 200 : newScope.height;
+			newScope.functions = {};
+
+			var compileString = '<div data-palladio-timeline-filter-with-settings ';
+
+			compileString += 'show-controls=showControls ';
+			compileString += 'show-accordion=showAccordion ';
+			compileString += 'show-settings=showSettings ';
+			compileString += 'timeline-height=timelineHeight ';
+			compileString += 'functions=functions ';
+
+			compileString += '></div>';
+
+			return compileString;
+		};
+
+		componentService.register('timeline', compileStringFunction);
+	}])
 	.directive('palladioTimelineFilter', ['dateService', 'palladioService', function (dateService, palladioService) {
 		var filterColor = "#9DBCE4";
 
@@ -1024,7 +1055,13 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 	}])
 	.directive('palladioTimelineFilterWithSettings', ['dateService', 'palladioService', 'dataService', function (dateService, palladioService, dataService) {
 		var directiveObj = {
-			scope: true,
+			scope: {
+				timelineHeight: '=',
+				showControls: '=',
+				showAccordion: '=',
+				showSettings: '=',
+				functions: '='
+			},
 			templateUrl: 'partials/palladio-timeline-filter/template.html',
 
 			link: { pre: function(scope, element, attrs) {
@@ -1219,6 +1256,24 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					// Placeholder
 					scope.getFilter = function (extent) { };
 
+					if(scope.functions) {
+						scope.functions["date"] = function(dim) {
+							scope.$apply(function(s) {
+								s.dateProp = s.dateDims.filter(function(f) { return f.key === dim.key; })[0];
+							});
+						};
+						scope.functions["aggregation"] = function(dim) {
+							scope.$apply(function(s) {
+								s.aggDim = s.aggDims.filter(function(f) { return f.key === dim.key; })[0];
+							});
+						};
+						scope.functions["group"] = function(dim) {
+							scope.$apply(function(s) {
+								s.groupProp = s.groupDims.filter(function(f) { return f.key === dim.key; })[0];
+							});
+						};
+					}
+
 					var importState = function(state) {
 						scope.dateProp = scope.dateDims.filter(function(d) { return d.key === state.dateProp; })[0];
 						scope.$digest();
@@ -1256,6 +1311,11 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					};
 
 					deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'timeline', exportState, importState));
+
+					// ng-class is not compiled before directive post-compile function (really!)
+					// So we apply width classes manually...
+					element.find('.main-viz').addClass(scope.showSettings ? 'col-lg-9' : 'col-lg-12');
+					element.find('.main-viz').addClass(scope.showSettings ? 'col-md-8' : 'col-md-12');
 
 				}, post: function(scope, element, attrs) {
 

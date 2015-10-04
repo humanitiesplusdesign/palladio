@@ -33,6 +33,9 @@
         <div class="row-fluid">
             <div class="col-md-10 col-md-offset-1" id="timespan-here"></div>
         </div>
+        <div class="row-fluid">
+            <div class="col-md-10 col-md-offset-1" id="timeline-here"></div>
+        </div>
 
         <div class="row-fluid">
             <h1 class="col-md-12">Second set of components</h1>
@@ -80,6 +83,13 @@
                     showAccordion: false
                 });
 
+                var timeline = components.add('timeline', "#timeline-here", {
+                    showControls: false,
+                    showSettings: false,
+                    showAccordion: false,
+                    height: 300
+                });
+
                 var timespanFunc = function () {
                     timespan.getOptions().startDimension(components.dimensions().filter(function(d) {
                         return d.key === 'Birthdate'; })[0]);
@@ -87,6 +97,14 @@
                         return d.key === 'Date of Death'; })[0]);
                 };
                 setTimeout(timespanFunc, 100);
+
+                var timelineFunc = function () {
+                    timeline.getOptions().date(components.dimensions().filter(function(d) {
+                        return d.key === 'Date of Death'; })[0]);
+                    timeline.getOptions().group(components.dimensions().filter(function(d) {
+                        return d.key === 'Position'; })[0]);
+                };
+                setTimeout(timelineFunc, 100);
             });
 
             var components2 = startPalladio();

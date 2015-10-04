@@ -543,7 +543,14 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			switch (filter) {
 				case 'timeline':
 					if(!$scope.blurTimeline) {
-						$('#filters').prepend($compile('<li><div data-palladio-timeline-filter-with-settings></div></li>')($scope));
+						var newTLId = 'palladio-timeline-filter-' + Math.floor(Math.random() * 10000);
+						$('#filters').prepend('<li><div id="' + newTLId + '"></div></li>');
+						componentService.add('timeline', "#"+newTLId, {
+								showControls: true,
+								showSettings: true,
+								showAccordion: true,
+								height: 250
+							}, $scope);
 					}
 					break;
 				case 'partime':
