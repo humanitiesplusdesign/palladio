@@ -148,14 +148,14 @@
 								</div>-->
 
 								<div class="margin-bottom" ng-show="selectedFieldMetadata.unassignedSpecialChars.length">
-									<label class="">Special characters <i class="fa fa-question-circle hint" popover-trigger="mouseenter" popover="Special characters are sometimes errors in the data or should be configured as multipe-value delimiters."></i></label>
-									<p class="help-block">
-										<span class="text-danger">Some of the values in this dimension contain the following special characters.</span>
-									</p>
+									<label>
+										<span data-ng-class="{ 'text-danger': selectedFieldMetadata.unassignedSpecialChars.length !==  selectedFieldMetadata.verifiedSpecialChars.length}">
+											Verify special characters
+										</span> <i class="fa fa-question-circle hint" popover-trigger="mouseenter" popover="Special characters may be errors or multiple-value delimiters."></i></label>
 									<div specials></div>
 								</div>
 
-								<label class="">Multiple values <i class="fa fa-question-circle hint" popover-trigger="mouseenter" popover="Field contains multiple values that are split by this character."></i></label>
+								<label>Multiple values <i class="fa fa-question-circle hint" popover-trigger="mouseenter" popover="Field contains multiple values that are split by this character."></i></label>
 								<input type="text" id="val-delimiter" class="form-control"
 									data-ng-model="selectedFieldMetadata.mvDelimiter"
 									data-ng-change="updateMetadata()"/>
@@ -232,7 +232,8 @@
 
 			<!-- Modal Footer -->
 			<div class="modal-footer">
-				<button data-ng-show="!addingTable" type="button" class="btn btn-default" data-dismiss="modal" ng-click="hideNewTable()"><i class="fa fa-check margin-right text-primary"></i>Done</button>
+				<button data-ng-show="!addingTable && selectedFieldMetadata.unassignedSpecialChars.length === selectedFieldMetadata.verifiedSpecialChars.length" type="button" class="btn btn-default" data-dismiss="modal" ng-click="hideNewTable()"><i class="fa fa-check margin-right text-primary"></i>Done</button>
+				<button data-ng-show="!addingTable && selectedFieldMetadata.unassignedSpecialChars.length !== selectedFieldMetadata.verifiedSpecialChars.length" type="button" class="btn btn-default" data-dismiss="modal" ng-click="hideNewTable()">Close</button>
 				<button data-ng-show="addingTable" type="button" class="btn btn-default" ng-click="hideNewTable()">Cancel</button>
 			</div>
 		</div>

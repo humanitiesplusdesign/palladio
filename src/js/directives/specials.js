@@ -5,17 +5,23 @@ angular.module('palladio.directives.specials', [])
 			restrict: 'A',
 			scope: false,
 			template: '<a data-ng-repeat="char in selectedFieldMetadata.unassignedSpecialChars" class="tag"' +
+						'data-ng-class="{ \'error-glow\': (selectedFieldMetadata.verifiedSpecialChars.indexOf(char) === -1) }"' +
 						'data-tooltip="Click to search this value"' +
-						'data-ng-click="filterUniquesOnChar(char, $event)">' +
+						'data-ng-click="verifyAndFilterUniquesOnChar(char, $event)">' +
 						'{{char}}' +
 					'</a>',
 			link: function (scope, element, attrs) {
 
 				scope.$watch("selectedFieldMetadata.unassignedSpecialChars", function(val){
 					$('.tag').tooltip();
-				})
+				});
 
-				scope.filterUniquesOnChar = function (str, event) {
+				scope.verifyAndFilterUniquesOnChar = function (str, event) {
+					// First add to verified list.
+					if(scope.selectedFieldMetadata.verifiedSpecialChars.indexOf(str) === -1) {
+						scope.selectedFieldMetadata.verifiedSpecialChars.push(str);
+					}
+
 					var tag = angular.element(event.target);
 					var tags = angular.element(element[0]).children('.tag');
 

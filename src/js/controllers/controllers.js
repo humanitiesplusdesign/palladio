@@ -235,6 +235,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			}
 
 			field.unassignedSpecialChars = calcUnassignedSpecialCharacters();
+			field.verifiedSpecialChars = calcVerifiedSpecialCharacters(field.unassignedSpecialChars, field.verifiedSpecialChars);
 
 			// Update unique values and detect errors.
 			$scope.updateUniques();
@@ -274,6 +275,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			$scope.selectedFieldMetadata.cardinality = md.cardinality;
 			$scope.selectedFieldMetadata.blanks = md.blanks;
 			$scope.selectedFieldMetadata.unassignedSpecialChars = calcUnassignedSpecialCharacters();
+			$scope.selectedFieldMetadata.verifiedSpecialChars = calcVerifiedSpecialCharacters($scope.selectedFieldMetadata.unassignedSpecialChars, $scope.selectedFieldMetadata.verifiedSpecialChars);
 			$scope.selectedFieldMetadata.uniqueKey = md.uniqueKey;
 
 			// Check to make sure that the currently selected special character is in the list
@@ -313,6 +315,11 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 
 			return false;
 		};
+
+		function calcVerifiedSpecialCharacters(unassigned, verified) {
+			if(!verified) { verified = []; }
+			return verified.filter(function(d) { return unassigned.indexOf(d) !== -1; });
+		}
 
 		function calcUnassignedSpecialCharacters() {
 			var inMv, inHier, inIgnore, validForType = false;
