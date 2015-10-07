@@ -18,7 +18,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 			var file = {};
 
 			file.url = url;
-			file.loadFromURL = true;
+			file.loadFromURL = url ? true : false;
 			file.label = label || "Untitled";
 			file.id = files.length;
 			// Do auto-recognition on load

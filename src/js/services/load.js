@@ -11,8 +11,10 @@ angular.module('palladio.services.load', ['palladio.services.data'])
 				var allLoads = [];
 
 				json.files.forEach(function(f) {
-					if(f.loadFromURL) {
+					if(f.loadFromURL && f.url) {
 						// Load from URL
+						console.log(f.loadFromURL);
+						console.log(f.url);
 						allLoads.push(parseService.parseUrl(f.url).then(function(csv) {
 							f.data = parseService.parseText(csv);
 						}));

@@ -29,9 +29,10 @@ angular.module('palladioDataUpload', ['palladio.services'])
 					var reader = new FileReader();
 					reader.onload = function() {
 						var json = JSON.parse(reader.result);
-						loadService.loadJson(json);
-						scope.$apply(function(s) {
-							s.load(json);
+						loadService.loadJson(json).then(function() {
+							scope.$apply(function(s) {
+								s.load(json);
+							});
 						});
 					};
 					reader.readAsText(input.files[0]);
