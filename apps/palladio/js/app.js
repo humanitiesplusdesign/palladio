@@ -60,4 +60,4 @@ var app = angular.module('palladioApp', [
 					}
 				}
 			});
-	})
+	});

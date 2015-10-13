@@ -8508,6 +8508,22 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	font-size: 10px;
 }
 
+[data-palladio-table-view] {
+	width: 100%;
+	padding-top: 5px;
+}
+
+[data-palladio-table-view] table {
+	font-size: 12px;
+}
+
+[data-palladio-table-view] td {
+}
+
+[data-palladio-table-view] {
+	overflow: auto;
+}
+
 [data-palladio-selection-view] {
 	display: inline-block;
 }
@@ -8568,22 +8584,6 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	text-overflow: ellipsis;
 	max-width: 300px;
 	vertical-align: top;
-}
-
-[data-palladio-table-view] {
-	width: 100%;
-	padding-top: 5px;
-}
-
-[data-palladio-table-view] table {
-	font-size: 12px;
-}
-
-[data-palladio-table-view] td {
-}
-
-[data-palladio-table-view] {
-	overflow: auto;
 }
 
 /*[data-palladio-timeline-filter] .list-title {

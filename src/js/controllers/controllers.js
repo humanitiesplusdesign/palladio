@@ -104,6 +104,10 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		};
 
 		$scope.setLayout = function (layout) {
+			// Hacking to display spinner.
+			if(dataService.isDirty()) {
+				spinnerService.spin();
+			}
 			$scope.layout = layout;
 		};
 
@@ -516,7 +520,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 		$(window).resize(resizeLinks);*/
 	})
 
-	.controller("VisualizationCtrl", function ($scope, data, $controller, $window, $location, $compile, exportService, loadService, palladioService, componentService) {
+	.controller("VisualizationCtrl", function ($scope, $controller, data, $window, $location, $compile, exportService, loadService, palladioService, componentService, dataService) {
 
 		$scope.showFilters = function () {
 			if($location.path() === '/upload' || $location.path() === '/link' || $location.path() === '/' || $location.path() === '/index.html') {
