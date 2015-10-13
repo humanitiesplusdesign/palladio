@@ -8748,6 +8748,19 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	shape-rendering: crispEdges;
 }
 
+[data-palladio-timestep-filter] path {
+	fill: #dddddd;
+}
+
+[data-palladio-timestep-filter] .axis path, [data-palladio-timestep-filter] .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-timestep-filter] .axis text {
+	font: 10px Helvetica, Arial, sans-serif;
+}
 [data-palladio-timechart-view] svg {
   shape-rendering: crispEdges;
 }
@@ -8800,19 +8813,6 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
   fill: #888;
   fill-opacity: .165;
   shape-rendering: crispEdges;
-}
-[data-palladio-timestep-filter] path {
-	fill: #dddddd;
-}
-
-[data-palladio-timestep-filter] .axis path, [data-palladio-timestep-filter] .axis line {
-	fill: none;
-	stroke: #000;
-	shape-rendering: crispEdges;
-}
-
-[data-palladio-timestep-filter] .axis text {
-	font: 10px Helvetica, Arial, sans-serif;
 }
 [data-palladio-histogram-filter] path {
 	fill: #dddddd;

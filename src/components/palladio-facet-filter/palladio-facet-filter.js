@@ -568,11 +568,14 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 						}
 
 						// Need to do this one-by-one because of the way we watch for changes.
-						scope.fields.filter(function(f) { return state.dimKeys.indexOf(f.key) !== -1; })
-							.forEach(function(d) {
-								scope.addKey = d.key;
-								scope.$digest();
-							});
+						// Important to iterate through the state, not the scope, to maintain order.
+						state.dimKeys.forEach(function(d) {
+							scope.fields.filter(function(f) { return f.key === d; })
+								.forEach(function(d) {
+									scope.addKey = d.key;
+									scope.$digest();
+								});
+						});
 
 						// Set the aggregation.
 						if(state.aggDimKey) scope.aggDim = scope.aggDims.filter(function(f) { return f.key === state.aggDimKey; })[0];
@@ -588,23 +591,23 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 						// Set up the filters.
 						state.filters.forEach(function(f, i) {
 							var simpleArrayOfKeys = [];
-							if(f[0] && typeof f[0] === 'string') {
+							if(f && f[0] && typeof f[0] === 'string') {
 								// New format.
 								simpleArrayOfKeys = f;
-							} else {
+							} else if(f) {
 								simpleArrayOfKeys = f.map(function(d) { return d.key; });
 							}
 
-							// Filter the celsl to the ones in the saved filter.
-							var cells = d3.select(facetSelection[i]).selectAll('.cell')
-								.filter(function(d) {
-									return simpleArrayOfKeys.indexOf(d.key) !== -1;
-								});
-
-							// Click 'em
-							cells.each(function() {
-								this.click();
-							});
+							if(simpleArrayOfKeys.length) {
+								console.log(simpleArrayOfKeys);
+								// Filter the cells to the ones in the saved filter.
+								var cells = d3.select(facetSelection[i]).selectAll('.cell')
+										.filter(function(d) {
+											return simpleArrayOfKeys.indexOf(d.key) !== -1;
+										}).each(function() {
+											this.click();
+										});
+							}
 						});
 					};
 
