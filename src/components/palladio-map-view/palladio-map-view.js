@@ -141,7 +141,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 								});
 
 							// Track descriptions.
-							reducer.value('desc').valueList(sourceAccessor);
+							reducer.value('desc').exception(sourceAccessor);
 
 							layer.sourceGroups = reducer(layer.source.group())
 									.order(function (p) { return p.agg; });
@@ -154,7 +154,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 								.exception(function(v) { return v[layer.countBy]; });
 
 							// Track descriptions.
-							reducer.value('desc').valueList(sourceAccessor);
+							reducer.value('desc').exception(sourceAccessor);
 
 							if(layer.aggregationType === 'COUNT') {
 								reducer.exceptionCount(true);
@@ -191,7 +191,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 								});
 
 							// Track descriptions.
-							reducer.value('desc').valueList(destinationAccessor);
+							reducer.value('desc').exception(destinationAccessor);
 
 							layer.destGroups = reducer(layer.destination.group())
 									.order(function (p) { return p.agg; });
@@ -204,7 +204,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 								.exception(function(v) { return v[layer.countBy]; });
 
 							// Track descriptions.
-							reducer.value('desc').valueList(destinationAccessor);
+							reducer.value('desc').exception(destinationAccessor);
 
 							if(layer.aggregationType === 'COUNT') {
 								reducer.exceptionCount(true);
@@ -238,6 +238,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						// .filter( function (d) { return d.key && d.value.agg > 0; })
 						.forEach( function (d) {
 							// Must copy the group value because these values will be updated if we have a destGroup.
+							d.value.desc.valueList = d.value.desc.values.map(function(f){ return f[0]; });
 							groupPoints.set(d.key, angular.copy(d.value));
 						});
 
@@ -252,7 +253,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 									groupPoints.get(d.key).agg += +d.value.agg;
 									groupPoints.get(d.key).hl.agg += +d.value.hl.agg;
 									groupPoints.get(d.key).initialAgg += d.value.initialAgg;
-									groupPoints.get(d.key).desc.valueList = groupPoints.get(d.key).desc.valueList.concat(d.value.desc.valueList);
+									groupPoints.get(d.key).desc.valueList = groupPoints.get(d.key).desc.valueList.concat(d.value.desc.values.map(function(f){ return f[0]; }));
 								} else {
 									// Must copy the group value because these values will be updated.
 									groupPoints.set(d.key, angular.copy(d.value));
@@ -289,8 +290,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							.exception(function(v) { return v[layer.countBy]; });
 
 						// Track descriptions.
-						reducer.value('sourceDesc').valueList(layer.sourceAccessor);
-						reducer.value('destDesc').valueList(layer.destinationAccessor);
+						reducer.value('sourceDesc').exception(layer.sourceAccessor);
+						reducer.value('destDesc').exception(layer.destinationAccessor);
 
 						if(layer.aggregationType === 'COUNT') {
 							reducer.exceptionCount(true);
@@ -326,8 +327,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 								source: d.key[0],
 								destination: d.key[1],
 								value: d.value.agg,
-								sourceDescriptions: d.value.sourceDesc.valueList,
-								destinationDescriptions: d.value.destDesc.valueList,
+								sourceDescriptions: d.value.sourceDesc.values.map(function(f){ return f[0]; }),
+								destinationDescriptions: d.value.destDesc.values.map(function(f){ return f[0]; }),
 								data: d.value.record
 							}
 						);
