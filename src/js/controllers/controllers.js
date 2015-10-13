@@ -162,8 +162,9 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			// Load the file from the path on the URL.
 			loadFile($location.search().file);
 		} else {
-			// Otherwise auto-load file auto-load.json if it exists.
-			loadFile('auto-load.json');
+			// Otherwise just initialize the spinner service.
+			spinnerService.spin();
+			spinnerService.hide();
 		}
 
 		// Alert when leaving
