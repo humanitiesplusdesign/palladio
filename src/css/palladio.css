@@ -971,7 +971,7 @@ a.fa:hover {
 }
 
 #spinner {
-   display: none;
+  display: none;
   background-color: #fff;
   position: fixed;
   top: 0px;
@@ -1006,6 +1006,15 @@ a.fa:hover {
   margin-top: 100px;
 }
 
+#p-spinner {
+  display: none;
+  position: fixed;
+  top: 25px;
+  left: 25px;
+  z-index: 99999;
+  opacity: .8;
+}
+
 .thumb {
   background-size: cover;
   width: 100%;
@@ -1019,7 +1028,6 @@ a.fa:hover {
 .thumb-top {
   background-position: top;
 }
-
 
 /* Codemirror */
 

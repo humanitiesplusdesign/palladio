@@ -1,6 +1,14 @@
 angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 	.controller('WorkflowCtrl', function (version, $rootScope, $scope, $location, $controller, $compile, $timeout, dataService, spinnerService, loadService, palladioService, $http) {
 
+		spinnerService.pSpin();
+		spinnerService.pHide();
+		spinnerService.spin();
+		spinnerService.hide();
+
+		palladioService.preUpdate(spinnerService.pSpin);
+		palladioService.postUpdate(spinnerService.pHide);
+
 		// Show/hide filters on panel
 		$scope.$watch(function(){ return $location.path(); }, function (path){
 			// If we don't have data, redirect to the 'start' page.

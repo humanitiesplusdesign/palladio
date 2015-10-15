@@ -6,7 +6,7 @@
 
 angular.module('palladio', [])
 	.constant('version', '1.1.0-alpha.03')
-	.factory('palladioService', ['$compile', "$rootScope", function($compile, $scope) {
+	.factory('palladioService', ['$compile', "$rootScope", '$q', function($compile, $scope, $q) {
 
 		var updateListeners = d3.map();
 
@@ -20,11 +20,28 @@ angular.module('palladio', [])
 		};
 
 		var update = function () {
-			updateListeners.values().forEach(function (u) {
-				u();
+			preUpdate.forEach(function(f) { f(); });
+			$q.all(updateListeners.values().map(function (u) {
+				var d = $q.defer();
+				setTimeout(function() {
+					u();
+					d.resolve();
+				});
+				return d.promise;
+			})).then(function(){
+				postUpdate.forEach(function(f) { f(); });
 			});
 		};
 
+		var preUpdate = [];
+		var registerPreUpdateFunction = function(func) {
+			preUpdate.push(func);
+		};
+
+		var postUpdate = [];
+		var registerPostUpdateFunction = function(func) {
+			postUpdate.push(func);
+		};
 
 		var filters = d3.map();
 
@@ -217,6 +234,8 @@ angular.module('palladio', [])
 			onSearch: registerSearchCallback,
 			search: search,
 			registerStateFunctions: registerStateFunctions,
-			getStateFunctions: getStateFunctions
+			getStateFunctions: getStateFunctions,
+			preUpdate: registerPreUpdateFunction,
+			postUpdate: registerPostUpdateFunction
 		};
 	}]);
