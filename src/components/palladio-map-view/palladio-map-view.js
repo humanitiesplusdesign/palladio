@@ -239,7 +239,20 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						.forEach( function (d) {
 							// Must copy the group value because these values will be updated if we have a destGroup.
 							d.value.desc.valueList = d.value.desc.values.map(function(f){ return f[0]; });
-							groupPoints.set(d.key, angular.copy(d.value));
+							groupPoints.set(d.key, {
+								agg: d.value.agg,
+								desc: {
+									values: d.value.desc.values,
+									exceptionCount: d.value.desc.exceptionCount,
+									valueList: d.value.desc.valueList
+								},
+								hl: {
+									agg: d.value.hl.agg,
+									exceptionCount: d.value.hl.exceptionCount,
+									values: d.value.hl.values
+								},
+								initialAgg: d.value.initialAgg
+							});
 						});
 
 					// Having to merge is not ideal. Would be better to maintain a different grouping,
@@ -256,7 +269,21 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 									groupPoints.get(d.key).desc.valueList = groupPoints.get(d.key).desc.valueList.concat(d.value.desc.values.map(function(f){ return f[0]; }));
 								} else {
 									// Must copy the group value because these values will be updated.
-									groupPoints.set(d.key, angular.copy(d.value));
+									d.value.desc.valueList = d.value.desc.values.map(function(f){ return f[0]; });
+									groupPoints.set(d.key, {
+										agg: d.value.agg,
+										desc: {
+											values: d.value.desc.values,
+											exceptionCount: d.value.desc.exceptionCount,
+											valueList: d.value.desc.valueList
+										},
+										hl: {
+											agg: d.value.hl.agg,
+											exceptionCount: d.value.hl.exceptionCount,
+											values: d.value.hl.values
+										},
+										initialAgg: d.value.initialAgg
+									});
 								}
 							});
 					}
