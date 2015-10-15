@@ -122,6 +122,7 @@
 [data-palladio-facet-filter] .cell-value {
 	float: right;
 	margin-right: 4px;
+	line-height: 1.7;
 }
 
 [data-palladio-facet-filter] .mode-buttons {
