@@ -401,7 +401,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 			        maxPointSize = scope.layers.reduce(function(a,b) {
 			        	var t = 0;
 			        	if(!b.geoJson) {
-			        		t = d3.max(generatePoints(b).features, function(d){ return d.properties.value.initialAgg; });
+			        		t = d3.max(generatePoints(b).features.filter(function(d) { return d.properties.key; }), function(d){ return d.properties.value.initialAgg; });
 			        	}
 			        	return a > t ? a : t;
 			        }, 0);
