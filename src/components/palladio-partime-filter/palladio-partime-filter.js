@@ -37,7 +37,9 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 
 		componentService.register('timespan', compileStringFunction);
 	}])
-	.directive('palladioPartimeFilter', function (dateService, palladioService, dataService) {
+	.directive('palladioPartimeFilter', ['dateService', 'palladioService', 'dataService', 'filterService',
+		function (dateService, palladioService, dataService, filterService) {
+
 		var directiveObj = {
 			scope: {
 				fullHeight: '=',
@@ -273,12 +275,17 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 								palladioService.update();
 							};
 
+							var filterFunction = function () {};
+
 							// Brush on end date
 							topBrush = d3.svg.brush()
 								.x(xEnd);
 							topBrush.on('brush', function () {
 								topExtent = topBrush.empty() ? [] : topBrush.extent();
-								dim.filterFunction(filter);
+								filterFunction = function(d) {
+									d.filterFunction(filter);
+								};
+								filterService.filter(dim, filterFunction);
 								palladioService.update();
 							});
 							topBrush.on('brushend', function () {
@@ -290,7 +297,10 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 								.x(xStart);
 							bottomBrush.on('brush', function () {
 								bottomExtent = bottomBrush.empty() ? [] : bottomBrush.extent();
-								dim.filterFunction(filter);
+								filterFunction = function(d) {
+									d.filterFunction(filter);
+								};
+								filterService.filter(dim, filterFunction);
 								palladioService.update();
 							});
 							bottomBrush.on('brushend', function () {
@@ -302,7 +312,10 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 								.x(x);
 							midBrush.on('brush', function () {
 								midExtent = midBrush.empty() ? [] : midBrush.extent();
-								dim.filterFunction(filter);
+								filterFunction = function(d) {
+									d.filterFunction(filter);
+								};
+								filterService.filter(dim, filterFunction);
 								palladioService.update();
 							});
 							midBrush.on('brushend', function () {
@@ -701,4 +714,4 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 		};
 
 		return directiveObj;
-	});
+	}]);

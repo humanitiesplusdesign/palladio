@@ -1,5 +1,5 @@
 angular.module('palladio.controllers', ['palladio.services', 'palladio'])
-	.controller('WorkflowCtrl', function (version, $rootScope, $scope, $location, $controller, $compile, $timeout, dataService, spinnerService, loadService, palladioService, $http) {
+	.controller('WorkflowCtrl', function (version, $rootScope, $scope, $location, $controller, $compile, $timeout, dataService, spinnerService, loadService, palladioService, $http, filterService) {
 
 		spinnerService.pSpin();
 		spinnerService.pHide();
@@ -8,6 +8,8 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 
 		palladioService.preUpdate(spinnerService.pSpin);
 		palladioService.postUpdate(spinnerService.pHide);
+		filterService.preFilter(spinnerService.pSpin);
+		filterService.postFilter(spinnerService.pHide);
 
 		// Show/hide filters on panel
 		$scope.$watch(function(){ return $location.path(); }, function (path){
