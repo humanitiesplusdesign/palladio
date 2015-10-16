@@ -19,18 +19,39 @@ angular.module('palladio', [])
 			updateListeners.remove(id);
 		};
 
+		var updateRunning = false;
+		var updateQueued = false;
+
 		var update = function () {
-			preUpdate.forEach(function(f) { f(); });
-			$q.all(updateListeners.values().map(function (u) {
-				var d = $q.defer();
-				setTimeout(function() {
-					u();
-					d.resolve();
+			if(!updateRunning) {
+				updateRunning = true;
+				preUpdate.forEach(function(f) { f(); });
+				$q.all(updateListeners.values().map(function (u) {
+					var d = $q.defer();
+					setTimeout(function() {
+						u();
+						d.resolve();
+					});
+					return d.promise;
+				})).then(function(){
+					postUpdate.forEach(function(f) { f(); });
+
+					// Check for a queued update. Happens if an update is requested
+					// while this update was running.
+					if(updateQueued) {
+						updateRunning = false;
+						updateQueued = false;
+						update();
+					} else {
+						updateRunning = false;
+						updateQueued = false;
+					}
 				});
-				return d.promise;
-			})).then(function(){
-				postUpdate.forEach(function(f) { f(); });
-			});
+			} else {
+				// An update is already running. Queue so that another update is run
+				// once the current one is finished.
+				updateQueued = true;
+			}
 		};
 
 		var preUpdate = [];

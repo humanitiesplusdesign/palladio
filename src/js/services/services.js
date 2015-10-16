@@ -7,4 +7,5 @@ angular.module('palladio.services',
 		'palladio.services.export',
 		'palladio.services.data',
 		'palladio.services.date',
+		'palladio.services.filter',
 		'palladio.services.load' ]);
