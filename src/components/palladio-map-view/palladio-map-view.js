@@ -467,14 +467,14 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							.attr("stroke-width", function(d){ return value(d.properties.value); })
 							.attr("d", curve)
 							.style("stroke",layer.color)
-							.on("click", function(d){
-								layer.filterDimension.filter(function (c) {
-									return c[0] === d.properties.source &&
-										c[1] === d.properties.destination;
-								});
-						    	deregister.push(palladioService.setFilter(identifier, scope.title, layer.sourceAccessor(d.properties.data) + "/" + layer.destinationAccessor(d.properties.data), resetLink));
-								palladioService.update();
-						    })
+							// .on("click", function(d){
+							// 	layer.filterDimension.filter(function (c) {
+							// 		return c[0] === d.properties.source &&
+							// 			c[1] === d.properties.destination;
+							// 	});
+						 //    	deregister.push(palladioService.setFilter(identifier, scope.title, layer.sourceAccessor(d.properties.data) + "/" + layer.destinationAccessor(d.properties.data), resetLink));
+							// 	palladioService.update();
+						 //    })
 						    .on("mouseover", linkTip.show)
 							.on("mouseout", linkTip.hide)
 
@@ -487,14 +487,14 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							.style("stroke",layer.color)
 							.style("opacity",".2")
 							.attr("d", curve)
-							.on("click", function(d){
-								layer.filterDimension.filter(function (c) {
-									return c[0] === d.properties.source &&
-										c[1] === d.properties.destination;
-								});
-						    	deregister.push(palladioService.setFilter(identifier, scope.title, layer.sourceAccessor(d.properties.data) + "/" + layer.destinationAccessor(d.properties.data), resetLink));
-								palladioService.update();
-						    })
+							// .on("click", function(d){
+							// 	layer.filterDimension.filter(function (c) {
+							// 		return c[0] === d.properties.source &&
+							// 			c[1] === d.properties.destination;
+							// 	});
+						 //    	deregister.push(palladioService.setFilter(identifier, scope.title, layer.sourceAccessor(d.properties.data) + "/" + layer.destinationAccessor(d.properties.data), resetLink));
+							// 	palladioService.update();
+						 //    })
 						    .on("mouseover", linkTip.show)
 							.on("mouseout", linkTip.hide)
 
@@ -519,14 +519,14 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				          	.style("fill", layer.color)
 						    .style("stroke", layer.color)
 						    .style("opacity", opacity)
-				          	.on("click", function(d){
-						    	layer.filterDimension.filter(function (c) {
-									return c[0] === d.properties.key ||
-										c[1] === d.properties.key;
-								});
-						    	deregister.push(palladioService.setFilter(identifier, scope.title, description(d.properties.value.desc.valueList), resetNode));
-								palladioService.update();
-						    })
+				    //       	.on("click", function(d){
+						  //   	layer.filterDimension.filter(function (c) {
+								// 	return c[0] === d.properties.key ||
+								// 		c[1] === d.properties.key;
+								// });
+						  //   	deregister.push(palladioService.setFilter(identifier, scope.title, description(d.properties.value.desc.valueList), resetNode));
+								// palladioService.update();
+						  //   })
 						    .on("mouseover", nodeTip.show)
 							.on("mouseout", nodeTip.hide)
 
@@ -536,15 +536,15 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						    .style("fill", layer.color)
 						    .style("stroke", layer.color)
 						    .style("opacity", opacity)
-						    .on("click", function(d){
-						    	nodeTip.hide();
-						    	layer.filterDimension.filter(function (c) {
-									return c[0] === d.properties.key ||
-										c[1] === d.properties.key;
-								});
-						    	deregister.push(palladioService.setFilter(identifier, scope.title, description(d.properties.value.desc.valueList), resetNode));
-								palladioService.update();
-						    })
+						  //   .on("click", function(d){
+						  //   	nodeTip.hide();
+						  //   	layer.filterDimension.filter(function (c) {
+								// 	return c[0] === d.properties.key ||
+								// 		c[1] === d.properties.key;
+								// });
+						  //   	deregister.push(palladioService.setFilter(identifier, scope.title, description(d.properties.value.desc.valueList), resetNode));
+								// palladioService.update();
+						  //   })
 						    .on("mouseover", nodeTip.show)
 							.on("mouseout", nodeTip.hide)
 
