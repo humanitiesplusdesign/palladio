@@ -828,7 +828,14 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 		       		onLayerChange();
 		       	})
 
-		       	scope.$watchCollection('tileSets', function () {
+		       	scope.$watchCollection('tileSets', function (nv, ov) {
+		       		// Remove old layers that are no longer in the new set.
+		       		ov.forEach(function(o) {
+		       			if(nv.indexOf(o) === -1) {
+		       				m.removeLayer(o.layer);
+		       			}
+		       		})
+
 					scope.tileSets.forEach(function(ts, i) {
 						if(!ts.layer) {
 							if(ts.url) {
