@@ -1187,6 +1187,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 				function importState(state) {
 					scope.$apply(function (s) {
+						console.log(state.tileSets);
 						if(state.tileSets && state.tileSets.length) s.tileSets = state.tileSets;
 						if(state.layers) {
 							state.layers.forEach(function(d) {
@@ -1240,8 +1241,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						tileSets: scope.tileSets.map(function (t) {
 							return {
 								"url": t.url,
-								"wmsUrl": t.umsUrl,
-								"wms:Layers": t.wmsLayers,
+								"wmsUrl": t.wmsUrl,
+								"wmsLayers": t.wmsLayers,
 								"mbId": t.mbId,
 								"enabled": t.enabled,
 								"description": t.description,
