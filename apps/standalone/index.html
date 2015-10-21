@@ -36,6 +36,9 @@
         <div class="row-fluid">
             <div class="col-md-10 col-md-offset-1" id="timeline-here"></div>
         </div>
+        <div class="row-fluid">
+            <div class="col-md-10 col-md-offset-1" id="short-timeline-here"></div>
+        </div>
 
         <div class="row-fluid">
             <h1 class="col-md-12">Second set of components</h1>
@@ -90,6 +93,13 @@
                     height: 300
                 });
 
+                var shortTimeline = components.add('timeline', "#short-timeline-here", {
+                    showControls: false,
+                    showSettings: false,
+                    showAccordion: false,
+                    height: 80
+                });
+
                 var timespanFunc = function () {
                     timespan.getOptions().startDimension(components.dimensions().filter(function(d) {
                         return d.key === 'Birthdate'; })[0]);
@@ -105,6 +115,14 @@
                         return d.key === 'Position'; })[0]);
                 };
                 setTimeout(timelineFunc, 100);
+
+                var shortTimelineFunc = function () {
+                    shortTimeline.getOptions().date(components.dimensions().filter(function(d) {
+                        return d.key === 'Birthdate'; })[0]);
+                    shortTimeline.getOptions().group(components.dimensions().filter(function(d) {
+                         return d.key === 'Position'; })[0]);
+                };
+                setTimeout(shortTimelineFunc, 100);
             });
 
             var components2 = startPalladio();

@@ -809,7 +809,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 
 					var helper = crossfilterHelpers
 						.countByDimensionWithInitialCountAndData(
-							function (d) { return d[uniqueDimension]; },
+							function (d) { return d[uniqueDimension] + ":" + groupAccessor(d); },
 							function (v, p, t) {
 								if(p === undefined) {
 									// Populate the group hash:

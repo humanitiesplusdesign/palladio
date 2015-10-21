@@ -1187,7 +1187,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 				function importState(state) {
 					scope.$apply(function (s) {
-						console.log(state.tileSets);
 						if(state.tileSets && state.tileSets.length) s.tileSets = state.tileSets;
 						if(state.layers) {
 							state.layers.forEach(function(d) {
