@@ -844,13 +844,13 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 			});
 		}
 
-		metadata = [];
+		projectMetadata = [];
 		function setMetadata(obj) {
-			metadata = obj;
+			projectMetadata = obj;
 		}
 
 		function getMetadata() {
-			return metadata;
+			return projectMetadata;
 		}
 
 		function getDataSync() {
