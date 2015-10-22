@@ -28,7 +28,9 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 			scope: {
 				layers: '=',
 				tileSets: '=',
-				mapHeight: '='
+				mapHeight: '=',
+				center: '=',
+				zoom: '='
 			},
 
 			link: function (scope, element, attrs) {
@@ -772,12 +774,15 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				// init map
 				var node,
 					link,
-					zoom = 3,
+					coordinates = [45.4640, 9.1916],
+					zoom = scope.zoom && typeof scope.zoom === 'number' ? scope.zoom : 3,
+					center = scope.center && Array.isArray(scope.center) && scope.center.length === 2 ?
+						new L.LatLng(scope.center[0], scope.center[1]) :
+						new L.LatLng(coordinates[0], coordinates[1]);
 		        	minZoom = 1,
 		        	maxZoom = 20,
-		        	coordinates = [45.4640, 9.1916],
 		        	m = new L.Map(element[0], {
-		            	center: new L.LatLng(coordinates[0], coordinates[1]),
+		            	center: center,
 		            	zoom: zoom,
 		            	minZoom : minZoom,
 		            	maxZoom : maxZoom,
@@ -827,6 +832,19 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 		       	scope.$watch('layers', function () {
 		       		onLayerChange();
 		       	})
+
+		       	scope.$watch('center', function() {
+		       		if(scope.center && Array.isArray(scope.center) && scope.center.length === 2) {
+		       			var center = new L.LatLng(scope.center[0], scope.center[1]);
+		       			m.setView(center);
+		       		}
+		       	});
+
+		       	scope.$watch('zoom', function() {
+					if(scope.zoom && typeof scope.zoom === 'number') {
+						m.setZoom(scope.zoom);
+					}
+		       	});
 
 		       	scope.$watchCollection('tileSets', function (nv, ov) {
 		       		// Remove old layers that are no longer in the new set.
@@ -1275,9 +1293,23 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					};
 				}
 
+				function setCenterCoordinates(center) {
+					scope.$apply(function(s) {
+						s.center = center;
+					});
+				}
+
+				function setZoomLevel(zoom) {
+					scope.$apply(function(s) {
+						s.zoom = zoom;
+					});
+				}
+
 				if(scope.functions) {
 					scope.functions["importState"] = importState;
 					scope.functions["exportState"] = exportState;
+					scope.functions["centerCoordinates"] = setCenterCoordinates;
+					scope.functions["zoomLevel"] = setZoomLevel;
 				}
 
 				scope.layerTypes = [

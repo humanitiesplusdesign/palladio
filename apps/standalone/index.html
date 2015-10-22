@@ -162,6 +162,8 @@
 
                 var mapFunc = function() {
                     map.getOptions().importState({"tileSets":[{"url":null,"mbId":"cesta.hd9ak6ie","enabled":true,"description":"Land"}],"layers":[{"aggDescription":"Number of People","aggregateKey":null,"aggregationType":"COUNT","color":"#820000","countBy":"Name","description":"Birthplace","enabled":true,"layerType":"data","mapping":{"sourceCoordinatesKey":"Coordinates","sourceCoordinatesType":["Place type"],"sourceCoordinatesDescription":"Birthplace","destinationCoordinatesKey":null,"destinationCoordinatesType":null,"destinationCoordinatesDescription":null},"pointSize":true,"showLinks":false,"type":"points"}]});
+                    map.getOptions().centerCoordinates([50, 0]);
+                    map.getOptions().zoomLevel(6);
                 };
                 setTimeout(mapFunc, 100);
 
