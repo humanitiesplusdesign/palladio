@@ -496,7 +496,8 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 							filledGroups = null,
 							tempDate = null;
 
-					// Hack to include end-dates that are not UTC.
+					// Hack to include end-dates that are not UTC. Need to do this for month/year
+					// as well, if the format dictates that.
 					var interimHT = format.parse(highestTime);
 					interimHT.setUTCDate(interimHT.getUTCDate() + 1);
 					highestTime = format(interimHT);
@@ -529,6 +530,10 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 						} else {
 							if(format.toString().length === 5) {
 								// Month-based
+								interimHT = format.parse(highestTime);
+								interimHT.setUTCMonth(interimHT.getUTCMonth()+1);
+								highestTime = format(interimHT)
+								divisions = [highestTime];
 								while(format.parse(divisions[0]) > format.parse(lowestTime)) {
 									tempDate = format.parse(divisions[0]);
 									tempDate.setUTCMonth(tempDate.getUTCMonth() - 1);
@@ -536,6 +541,10 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 								}
 							} else {
 								// Year-based
+								interimHT = format.parse(highestTime);
+								interimHT.setUTCFullYear(interimHT.getUTCFullYear()+1);
+								highestTime = format(interimHT)
+								divisions = [highestTime];
 								while(format.parse(divisions[0]) > format.parse(lowestTime)) {
 									tempDate = format.parse(divisions[0]);
 									tempDate.setUTCFullYear(tempDate.getUTCFullYear() - 1);
@@ -727,8 +736,19 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 					lowestTime = d3.min(groups, function(d) { return format.parse(d.key); });
 					highestTime = d3.max(groups, function(d) { return format.parse(d.key); });
 
-					// Hack to include end-dates that are not UTC.
-					highestTime.setUTCDate(highestTime.getUTCDate()+1);
+					// Hack to include end-dates that are not UTC. Adjust based on format granularity.
+					if(format.toString().length === 8) {
+						// Day-based
+						highestTime.setUTCDate(highestTime.getUTCDate() + 1);
+					} else {
+						if(format.toString().length === 5) {
+							// Month-based
+							highestTime.setUTCMonth(highestTime.getUTCMonth() + 1);
+						} else {
+							// Year-based
+							highestTime.setUTCFullYear(highestTime.getUTCFullYear() + 1);
+						}
+					}
 
 					if(lowestTime instanceof Date) {
 						x = d3.time.scale().range([0, mainWidth])
