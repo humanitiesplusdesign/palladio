@@ -920,7 +920,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 		return directiveDefObj;
 	})
-	.directive('palladioMapViewWithSettings', function (dataService, palladioService) {
+	.directive('palladioMapViewWithSettings', function (dataService, palladioService, exportService) {
 		var directiveObj = {
 			scope: {
 				showSettings: '=',
@@ -1539,7 +1539,9 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					scope.mapType = d;
 				}
 
-
+				scope.getAndExportSvg = function() {
+					exportService(d3.select(element[0]).select('svg'), 'Palladio Map.svg')
+				}
 
 				deregister.push(palladioService.registerStateFunctions(scope.uniqueToggleId, 'mapView', exportState, importState));
 

@@ -19,7 +19,7 @@ angular.module('palladio.services.export', [])
           	var isSafari = (navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1);
 
 	        if (isSafari) {
-	            var img = "data:image/svg+xml;utf8," + html;
+	            var img = "data:image/svg+xml;utf8," + text;
 	            var newWindow = window.open(img, 'download');
 	        } else {
 	            var blob = new BB([text], { type: "data:image/svg+xml" });
