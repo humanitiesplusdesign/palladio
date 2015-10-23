@@ -7909,6 +7909,26 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
   shape-rendering: crispEdges;
 }
 
+[data-palladio-duration-view] path {
+	fill: #dddddd;
+}
+
+[data-palladio-duration-view] .axis path, [data-palladio-duration-view] .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-duration-view] .x-grid line {
+	fill: none;
+	stroke: #DDD;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-duration-view] .axis text {
+	font: 10px Merriweather, Helvetica, Arial, sans-serif;
+}
+
 [data-palladio-facet-filter] .selection-title {
 	text-transform: uppercase;
 	margin-top: 7px;
@@ -8044,26 +8064,6 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	color: #666;
 	font-size: 12px;
 	margin-left: 3px;
-}
-
-[data-palladio-duration-view] path {
-	fill: #dddddd;
-}
-
-[data-palladio-duration-view] .axis path, [data-palladio-duration-view] .axis line {
-	fill: none;
-	stroke: #000;
-	shape-rendering: crispEdges;
-}
-
-[data-palladio-duration-view] .x-grid line {
-	fill: none;
-	stroke: #DDD;
-	shape-rendering: crispEdges;
-}
-
-[data-palladio-duration-view] .axis text {
-	font: 10px Merriweather, Helvetica, Arial, sans-serif;
 }
 
 [data-palladio-graph-view] {
