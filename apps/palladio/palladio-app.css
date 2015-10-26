@@ -5,3 +5,7 @@
 [data-palladio-table-view] table {
 	margin-bottom: 55px;
 }
+
+[data-palladio-map-view] .leaflet-bottom {
+	margin-bottom: 60px;
+}
