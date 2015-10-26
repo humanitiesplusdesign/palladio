@@ -13,8 +13,6 @@ angular.module('palladio.services.load', ['palladio.services.data'])
 				json.files.forEach(function(f) {
 					if(f.loadFromURL && f.url) {
 						// Load from URL
-						console.log(f.loadFromURL);
-						console.log(f.url);
 						allLoads.push(parseService.parseUrl(f.url).then(function(csv) {
 							f.data = parseService.parseText(csv);
 						}));
@@ -35,10 +33,10 @@ angular.module('palladio.services.load', ['palladio.services.data'])
 
 					// Rebuild unique values and errors for each field.
 					f.fields.forEach(function(g) {
-						if(f.autoFields.filter(function (d) { return d.key === g.key; })[0]) {
-							g.uniques = f.autoFields.filter(function (d) { return d.key === g.key; })[0].uniques;
-							g.errors = validationService(g.uniques.map(function(d) { return d.key; }), g.type);
-						}
+						var md = parseService.parseColumn(g.key, f.data, g.mvDelimiter,
+															g.hierDelimiter, [], g.type);
+						g.uniques = md.uniques;
+						g.errors = validationService(g.uniques.map(function(d) { return d.key; }), g.type);
 					});
 
 					dataService.addFileRaw(f);
