@@ -1193,6 +1193,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 								// Set the layer type
 								scope.layerType = scope.layerTypes.filter(function(l) { return l.value === d.layerType; })[0];
 								scope.description = d.description;
+								scope.descriptiveDim = scope.descriptiveDims.filter(function(f) { return f.key === d.descriptiveDimKey; })[0] ? scope.descriptiveDims.filter(function(f) { return f.key === d.descriptiveDimKey; })[0] : scope.descriptiveDim;
 								scope.mapping = {
 									sourceCoordinates: scope.latlonFields.filter(function(f) { return f.key === d.mapping.sourceCoordinatesKey && f.description === d.mapping.sourceCoordinatesDescription; })[0],
 									destinationCoordinates: scope.latlonFields.filter(function(f) { return f.key === d.mapping.destinationCoordinatesKey && f.description === d.mapping.destinationCoordinatesDescription; })[0],
@@ -1259,6 +1260,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 								description: l.description,
 								enabled: l.enabled,
 								layerType: l.layerType,
+								descriptiveDimKey: l.descriptiveDim.key,
 								mapping: {
 									sourceCoordinatesKey: l.mapping && l.mapping.sourceCoordinates && l.mapping.sourceCoordinates.key ? l.mapping.sourceCoordinates.key : null,
 									sourceCoordinatesType: l.mapping && l.mapping.sourceCoordinates && l.mapping.sourceCoordinates.typeField ? l.mapping.sourceCoordinates.typeField : null,
