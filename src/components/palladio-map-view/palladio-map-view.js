@@ -1251,11 +1251,19 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							}
 							s.addLayer();
 						}
+						if(state.center) {
+							m.setView(state.center);
+						}
+						if(state.zoom) {
+							m.setZoom(state.zoom);
+						}
 					});
 				}
 
 				function exportState() {
 					return {
+						center: [ m.getCenter().lat, m.getCenter().lng ],
+						zoom: m.getZoom(),
 						tileSets: scope.tileSets.map(function (t) {
 							return {
 								"url": t.url,
