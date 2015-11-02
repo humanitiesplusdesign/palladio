@@ -173,10 +173,6 @@
 					.attr("class", function (d) { return "node " + d.dimension; })
 					.classed("fixed", function (d) { return d.fixed; })
 					.attr("r", function (d) { return nodeSize ? sizeScale(d.agg) : 5; })
-					.style('fill','#bbbbbb')
-					.style('stroke', '#eee')//function (d) { return d.fixed ? "#222" : "#eee"; } )
-					.style('stroke-width','2px')
-					.style('fill-opacity','.95')
 					.on("mouseover", mouseover)
 					.on("mouseout", mouseout)
 					.call(drag);
@@ -196,7 +192,7 @@
 				anchorNode.enter().append("g")
 					.attr("class", "anchor-node")
 					.append("svg:text")
-						.style("fill", "#555")
+						// .style("fill", "#555")
 						.style("font-family", "karla, Arial, Helvetica")
 						.style("font-size", 11)
 						.text(function(d, i) {
@@ -215,26 +211,21 @@
 
 			highlightSource = function () {
 				main.selectAll(".node")
-					.classed("highlighted", false)
-					.style("fill","#bbb");
+					.classed("highlighted", false);
 				main.selectAll(".source")
-					.classed("highlighted", true)
-					.style("fill","#666");
+					.classed("highlighted", true);
 			};
 
 			highlightTarget = function () {
 				main.selectAll(".node")
-					.classed("highlighted", false)
-					.style("fill","#bbb");
+					.classed("highlighted", false);
 				main.selectAll(".target")
-					.classed("highlighted", true)
-					.style("fill","#666");
+					.classed("highlighted", true);
 			};
 
 			removeHighlight = function () {
 				main.selectAll(".node")
-					.classed("highlighted", false)
-					.style("fill","#bbb");
+					.classed("highlighted", false);
 			};
 
 			function mouseover (d,i) {

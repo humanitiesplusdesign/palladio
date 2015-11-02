@@ -8123,6 +8123,17 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
     font-weight: 600;
 }
 
+[data-palladio-graph-view] .node {
+    fill: #bbbbbb;
+    stroke: #eee;
+    stroke-width: 2px;
+    fill-opacity: .95;
+}
+
+[data-palladio-graph-view] .node.highlighted {
+    fill: #666;
+}
+
 [data-palladio-graph-view] rect.overlay {
   cursor:hand;
   cursor:grab;
