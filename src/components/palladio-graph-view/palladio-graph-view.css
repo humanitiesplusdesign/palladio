@@ -2,55 +2,8 @@
 	width: 100%;
 	height: 100%;
 	position: relative;
+    z-index: 0;
 }
-/*
-[data-palladio-graph-view] path.link {
-    fill: none;
-    stroke-opacity: .5;
-    stroke: #666;
-    stroke-width: 1px;
-}
-
-[data-palladio-graph-view] .node {
-    fill: #BBBBBB;
-    stroke: #eee;
-    stroke-width: 1px;
-    fill-opacity: .95;
-}
-
-
-[data-palladio-graph-view] .highlighted {
-    fill: #666666;
-}
-
-[data-palladio-graph-view] .node.fixed.target {
-    stroke: #222222;
-}
-
-[data-palladio-graph-view] .node.fixed.source {
-    stroke: #222222;
-}
-
-
-[data-palladio-graph-view] text.label,
-[data-palladio-graph-view] text.shadow {
-    font-family: Helvetica, Arial;
-    font-size: 11px;
-    font-weight: 300;
-}
-
-[data-palladio-graph-view] text {
-    pointer-events: none;
-}
-
-[data-palladio-graph-view] text.shadow {
-    stroke: #fff;
-    stroke-width: 2px;
-    stroke-opacity: .7;
-    stroke-linejoin: round;
-}
-
-*/
 
  .leaflet-bar a {
     background-color: #fff;

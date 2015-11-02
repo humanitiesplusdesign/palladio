@@ -55,7 +55,7 @@ gulp.task('scripts', function () {
         .pipe(gulp.dest('./'))
         .pipe(gulp.dest('./apps/palladio/'))
         .pipe(gulp.dest('./apps/piranesi/'))
-        .pipe(gulp.dest('./apps/standalone/'))
+        .pipe(gulp.dest('./apps/standalone/assets/js/'))
         .pipe(gulp.dest('./apps/timespans/'))
         .pipe(gulp.dest('./apps/template/'));
 });
@@ -68,7 +68,7 @@ gulp.task('css', function () {
 		.pipe(gulp.dest('./'))
         .pipe(gulp.dest('./apps/palladio/'))
         .pipe(gulp.dest('./apps/piranesi/'))
-        .pipe(gulp.dest('./apps/standalone/'))
+        .pipe(gulp.dest('./apps/standalone/assets/css/'))
         .pipe(gulp.dest('./apps/timespans/'))
         .pipe(gulp.dest('./apps/template/'));
 });
@@ -78,7 +78,7 @@ gulp.task('images', function () {
 		.pipe(gulp.dest('./images/'))
         .pipe(gulp.dest('./apps/palladio/images/'))
         .pipe(gulp.dest('./apps/piranesi/images/'))
-        .pipe(gulp.dest('./apps/standalone/images/'))
+        .pipe(gulp.dest('./apps/standalone/assets/images/'))
         .pipe(gulp.dest('./apps/timespans/images/'))
         .pipe(gulp.dest('./apps/template/images/'));
 })
