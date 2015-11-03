@@ -39,7 +39,7 @@
     "crossfilter2": "v2.0.0-alpha.03",
     "d3-tip": "~0.6.6",
     "leaflet": "~0.7.3",
-    "reductio": "~0.4.0",
+    "reductio": "~0.5.0",
     "classie": "~1.0.1",
     "Blob": "*",
     "FileSaver": "*",

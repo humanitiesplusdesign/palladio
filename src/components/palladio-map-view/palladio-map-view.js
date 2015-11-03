@@ -30,7 +30,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				tileSets: '=',
 				mapHeight: '=',
 				center: '=',
-				zoom: '='
+				zoom: '=',
+				popoverDims: '='
 			},
 
 			link: function (scope, element, attrs) {
@@ -145,6 +146,10 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							// Track descriptions.
 							reducer.value('desc').exception(sourceAccessor);
 
+							if(scope.popoverDims && scope.popoverDims.length) {
+								reducer.dataList(true);
+							}
+
 							layer.sourceGroups = reducer(layer.source.group())
 									.order(function (p) { return p.agg; });
 						} else {
@@ -154,6 +159,10 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							var highlight = reducer.value('hl')
 								.filter(palladioService.getHighlight())
 								.exception(function(v) { return v[layer.countBy]; });
+
+							if(scope.popoverDims && scope.popoverDims.length) {
+								reducer.dataList(true);
+							}
 
 							// Track descriptions.
 							reducer.value('desc').exception(sourceAccessor);
@@ -195,6 +204,10 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							// Track descriptions.
 							reducer.value('desc').exception(destinationAccessor);
 
+							if(scope.popoverDims && scope.popoverDims.length) {
+								reducer.dataList(true);
+							}
+
 							layer.destGroups = reducer(layer.destination.group())
 									.order(function (p) { return p.agg; });
 						} else {
@@ -204,6 +217,10 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 							var highlight = reducer.value('hl')
 								.filter(palladioService.getHighlight())
 								.exception(function(v) { return v[layer.countBy]; });
+
+							if(scope.popoverDims && scope.popoverDims.length) {
+								reducer.dataList(true);
+							}
 
 							// Track descriptions.
 							reducer.value('desc').exception(destinationAccessor);
@@ -253,7 +270,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 									exceptionCount: d.value.hl.exceptionCount,
 									values: d.value.hl.values
 								},
-								initialAgg: d.value.initialAgg
+								initialAgg: d.value.initialAgg,
+								data: d.value.dataList
 							});
 						});
 
@@ -269,6 +287,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 									groupPoints.get(d.key).hl.agg += +d.value.hl.agg;
 									groupPoints.get(d.key).initialAgg += d.value.initialAgg;
 									groupPoints.get(d.key).desc.valueList = groupPoints.get(d.key).desc.valueList.concat(d.value.desc.values.map(function(f){ return f[0]; }));
+									groupPoints.get(d.key).data = groupPoints.get(d.key).data.concat(d.value.dataList);
 								} else {
 									// Must copy the group value because these values will be updated.
 									d.value.desc.valueList = d.value.desc.values.map(function(f){ return f[0]; });
@@ -284,7 +303,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 											exceptionCount: d.value.hl.exceptionCount,
 											values: d.value.hl.values
 										},
-										initialAgg: d.value.initialAgg
+										initialAgg: d.value.initialAgg,
+										data: d.value.dataList
 									});
 								}
 							});
@@ -317,6 +337,10 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						var highlight = reducer.value('hl')
 							.filter(palladioService.getHighlight())
 							.exception(function(v) { return v[layer.countBy]; });
+
+						if(scope.popoverDims && scope.popoverDims.length) {
+							reducer.dataList(true);
+						}
 
 						// Track descriptions.
 						reducer.value('sourceDesc').exception(layer.sourceAccessor);
@@ -375,6 +399,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				}
 
 				var maxPointSize;
+				var popoverMap = d3.map();
 
 				function update() {
 
@@ -549,6 +574,90 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						  //   })
 						    .on("mouseover", nodeTip.show)
 							.on("mouseout", nodeTip.hide)
+							.on('click', function(d) {
+								if(popoverMap.get(d.properties.key) && popoverMap.get(d.properties.key).hasPopover && popoverMap.get(d.properties.key).popoverDisplayed) {
+									$(this).popover('hide');
+									popoverMap.get(d.properties.key).popoverDisplayed = false;
+								} else if(popoverMap.get(d.properties.key) && popoverMap.get(d.properties.key).hasPopover) {
+									$(this).popover('show');
+									popoverMap.get(d.properties.key).popoverDisplayed = true;
+								} else {
+									if(scope.popoverDims && scope.popoverDims.length) {
+										popoverMap.set(d.properties.key, { node: this });
+										// XSS issue here.
+										$(this).popover({
+											title: function() {
+												var datum = d3.select(this).datum();
+												return description(datum.properties.value.desc.valueList) + " (" + datum.properties.value.agg + ")"
+											},
+											content: function() {
+												var datum = d3.select(this).datum();
+												var s = "";
+												scope.popoverDims.forEach(function(dim) {
+													var values = [];
+													datum.properties.value.data.map(function(f) { return f[dim.key]; })
+														.forEach(function(f) {
+															if(values.indexOf(f) === -1) {
+																values.push(f);
+															}
+														});
+													s += "<b>" + dim.description + "</b>: " + values.join(",") + "<br />";
+												})
+												return s;
+											},
+											html: true,
+											container: $('body'),
+											placement: 'top'
+										});
+
+										$(this).popover('show');
+										popoverMap.get(d.properties.key).hasPopover = true;
+										popoverMap.get(d.properties.key).popoverDisplayed = true;
+									}
+								}
+							});
+
+						// Destroy all popovers.
+						popoverMap.values().forEach(function(d) {
+							$(d.node).popover('destroy');
+						});
+
+						// Recreate them if necessary.
+						node.each(function(d) {
+							if(scope.popoverDims && scope.popoverDims.length && popoverMap.get(d.properties.key) && popoverMap.get(d.properties.key).hasPopover) {
+								var that = this;
+								setTimeout(function() {
+									$(that).popover({
+										title: function() {
+											var datum = d3.select(that).datum();
+											return description(datum.properties.value.desc.valueList) + " (" + datum.properties.value.agg + ")"
+										},
+										content: function() {
+											var datum = d3.select(that).datum();
+											var s = "";
+											scope.popoverDims.forEach(function(dim) {
+												var values = [];
+												datum.properties.value.data.map(function(f) { return f[dim.key]; })
+													.forEach(function(f) {
+														if(values.indexOf(f) === -1) {
+															values.push(f);
+														}
+													});
+												s += "<b>" + dim.description + "</b>: " + values.join(",") + "<br />";
+											})
+											return s;
+										},
+										html: true,
+										container: $('body'),
+										placement: 'top'
+									});
+									if(popoverMap.get(d.properties.key) && popoverMap.get(d.properties.key).popoverDisplayed) {
+										$(that).popover('show');
+									}
+									popoverMap.get(d.properties.key).node = that;
+								}, 500);
+							}
+						});
 
 						// This function should do what needs to be done to remove the filter.
 				    	var resetNode = function () {
@@ -822,6 +931,11 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 		       		clearAllGroups();
 		       		update();
 		       	}
+
+		       	scope.$watch('popoverDims', function () {
+		       		clearAllGroups();
+		       		update();
+		       	});
 
 		       	// Shallow watch
 		       	scope.$watchCollection('layers', function () {
@@ -1315,11 +1429,18 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					});
 				}
 
+				function setPopoverDims(dims) {
+					scope.$apply(function(s) {
+						s.popoverDims = dims;
+					});
+				}
+
 				if(scope.functions) {
 					scope.functions["importState"] = importState;
 					scope.functions["exportState"] = exportState;
 					scope.functions["centerCoordinates"] = setCenterCoordinates;
 					scope.functions["zoomLevel"] = setZoomLevel;
+					scope.functions["popoverDims"] = setPopoverDims;
 				}
 
 				scope.layerTypes = [

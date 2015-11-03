@@ -6925,6 +6925,7 @@ span.CodeMirror-selectedtext { background: none; }
 .leaflet-container {
 	overflow: hidden;
 	-ms-touch-action: none;
+	touch-action: none;
 	}
 .leaflet-tile,
 .leaflet-marker-icon,
@@ -7909,26 +7910,6 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
   shape-rendering: crispEdges;
 }
 
-[data-palladio-duration-view] path {
-	fill: #dddddd;
-}
-
-[data-palladio-duration-view] .axis path, [data-palladio-duration-view] .axis line {
-	fill: none;
-	stroke: #000;
-	shape-rendering: crispEdges;
-}
-
-[data-palladio-duration-view] .x-grid line {
-	fill: none;
-	stroke: #DDD;
-	shape-rendering: crispEdges;
-}
-
-[data-palladio-duration-view] .axis text {
-	font: 10px Merriweather, Helvetica, Arial, sans-serif;
-}
-
 [data-palladio-facet-filter] .selection-title {
 	text-transform: uppercase;
 	margin-top: 7px;
@@ -8064,6 +8045,26 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	color: #666;
 	font-size: 12px;
 	margin-left: 3px;
+}
+
+[data-palladio-duration-view] path {
+	fill: #dddddd;
+}
+
+[data-palladio-duration-view] .axis path, [data-palladio-duration-view] .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-duration-view] .x-grid line {
+	fill: none;
+	stroke: #DDD;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-duration-view] .axis text {
+	font: 10px Merriweather, Helvetica, Arial, sans-serif;
 }
 
 [data-palladio-graph-view] {
@@ -8652,59 +8653,6 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	min-height: 200px;
 }
 
-[data-palladio-timechart-view] svg {
-  shape-rendering: crispEdges;
-}
-
-[data-palladio-timechart-view] .context rect {
-    shape-rendering: crispEdges;
-
-}
-[data-palladio-timechart-view] svg text {
-  alignment-baseline: middle;
-  font: 10px "Lato", sans-serif; 
-}
- 
-[data-palladio-timechart-view] .groupText {
-  alignment-baseline: middle;
-  font: 11px "Lato", sans-serif;  
-}
- 
-[data-palladio-timechart-view] .month text {
-  text-anchor: start;
-}
- 
-[data-palladio-timechart-view] .todayLine {
-  stroke: blue;
-  stroke-width: 1.5;
-}
- 
-[data-palladio-timechart-view] .axis line, .axis path {
-  stroke: black;
-}
- 
-[data-palladio-timechart-view] .contextItem {
-  stroke: #ffffff;
-  fill: #cccccc;
-  stroke-width: 1;
-}
- 
-[data-palladio-timechart-view] .future {
-  stroke: gray;
-  fill: #ddd;
-}
- 
-[data-palladio-timechart-view] .focusItem {
-  stroke: #aaaaaa;
-  fill: #dddddd;
-}
- 
-[data-palladio-timechart-view] .brush .extent {
-  stroke: gray;
-  fill: #888;
-  fill-opacity: .165;
-  shape-rendering: crispEdges;
-}
 [data-palladio-lifetime-filter] .list-title {
 	height: 1.4em;
 	font-weight: bold;
@@ -8765,6 +8713,59 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	shape-rendering: crispEdges;
 }
 
+[data-palladio-timechart-view] svg {
+  shape-rendering: crispEdges;
+}
+
+[data-palladio-timechart-view] .context rect {
+    shape-rendering: crispEdges;
+
+}
+[data-palladio-timechart-view] svg text {
+  alignment-baseline: middle;
+  font: 10px "Lato", sans-serif; 
+}
+ 
+[data-palladio-timechart-view] .groupText {
+  alignment-baseline: middle;
+  font: 11px "Lato", sans-serif;  
+}
+ 
+[data-palladio-timechart-view] .month text {
+  text-anchor: start;
+}
+ 
+[data-palladio-timechart-view] .todayLine {
+  stroke: blue;
+  stroke-width: 1.5;
+}
+ 
+[data-palladio-timechart-view] .axis line, .axis path {
+  stroke: black;
+}
+ 
+[data-palladio-timechart-view] .contextItem {
+  stroke: #ffffff;
+  fill: #cccccc;
+  stroke-width: 1;
+}
+ 
+[data-palladio-timechart-view] .future {
+  stroke: gray;
+  fill: #ddd;
+}
+ 
+[data-palladio-timechart-view] .focusItem {
+  stroke: #aaaaaa;
+  fill: #dddddd;
+}
+ 
+[data-palladio-timechart-view] .brush .extent {
+  stroke: gray;
+  fill: #888;
+  fill-opacity: .165;
+  shape-rendering: crispEdges;
+}
 [data-palladio-timestep-filter] path {
 	fill: #dddddd;
 }
