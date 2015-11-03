@@ -55,7 +55,8 @@ gulp.task('scripts', function () {
         .pipe(gulp.dest('./'))
         .pipe(gulp.dest('./apps/palladio/'))
         .pipe(gulp.dest('./apps/piranesi/'))
-        .pipe(gulp.dest('./apps/standalone/assets/js/'))
+        .pipe(gulp.dest('./apps/standalone/'))
+        .pipe(gulp.dest('./apps/projectexample/assets/js/'))
         .pipe(gulp.dest('./apps/timespans/'))
         .pipe(gulp.dest('./apps/template/'));
 });
@@ -68,7 +69,8 @@ gulp.task('css', function () {
 		.pipe(gulp.dest('./'))
         .pipe(gulp.dest('./apps/palladio/'))
         .pipe(gulp.dest('./apps/piranesi/'))
-        .pipe(gulp.dest('./apps/standalone/assets/css/'))
+        .pipe(gulp.dest('./apps/standalone/'))
+        .pipe(gulp.dest('./apps/projectexample/assets/css/'))
         .pipe(gulp.dest('./apps/timespans/'))
         .pipe(gulp.dest('./apps/template/'));
 });
@@ -78,10 +80,11 @@ gulp.task('images', function () {
 		.pipe(gulp.dest('./images/'))
         .pipe(gulp.dest('./apps/palladio/images/'))
         .pipe(gulp.dest('./apps/piranesi/images/'))
-        .pipe(gulp.dest('./apps/standalone/assets/images/'))
+        .pipe(gulp.dest('./apps/standalone/images/'))
+        .pipe(gulp.dest('./apps/projectexample/assets/images/'))
         .pipe(gulp.dest('./apps/timespans/images/'))
         .pipe(gulp.dest('./apps/template/images/'));
-})
+});
 
 // Watch Files For Changes
 gulp.task('watch', function() {
@@ -94,26 +97,29 @@ gulp.task('watch', function() {
 gulp.task('webserver', function() {
 	gulp.src('apps/palladio')
 		.pipe(webserver({
-			livereload: true,
 			port: 8000,
 			livereload: {enable: true, port: 2345}
 		}));
 
 	gulp.src('apps/piranesi')
 		.pipe(webserver({
-			livereload: true,
 			port: 8001,
 			livereload: {enable: true, port: 2346}
 		}));
 
 	gulp.src('apps/standalone')
 		.pipe(webserver({
-			livereload: true,
 			port: 8002,
 			livereload: {enable: true, port: 2347}
+		}));
+
+	gulp.src('apps/projectexample')
+		.pipe(webserver({
+			port: 8003,
+			livereload: {enable: true, port: 2348}
 		}));
 });
 
 gulp.task('default', ['scripts', 'css', 'images', 'webserver', 'watch']);
 gulp.task('all', ['scripts', 'css', 'images']);
-gulp.task('serve', ['webserver'])
+gulp.task('serve', ['webserver']);

@@ -1,0 +1,31 @@
+body, .container {
+  font-family: 'Lato', sans-serif; font-weight: 300;
+  font-size: 14px;
+  color: #444;
+  background-color: white;
+  height: 100%;
+}
+
+.palladio-component {
+	padding:0;
+
+}
+
+h1{
+  font-family: 'Lato', sans-serif; font-weight: 400;
+  font-size: 24px;
+}
+
+h2{
+  font-family: 'Lato', sans-serif; font-weight: 300;
+  font-size: 20px;
+}
+
+h3{
+  font-family: 'Lato', sans-serif; font-weight: 300;
+  font-size: 18px;
+}
+
+.bordered {
+	border: 1px solid #ccc;
+}
