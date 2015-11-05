@@ -601,7 +601,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 																values.push(f);
 															}
 														});
-													s += "<b>" + dim.description + "</b>: " + values.join(",") + "<br />";
+													s += "<b>" + dim.description + "</b>: " + values.join(", ") + "<br />";
 												})
 												return s;
 											},
@@ -643,7 +643,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 															values.push(f);
 														}
 													});
-												s += "<b>" + dim.description + "</b>: " + values.join(",") + "<br />";
+												s += "<b>" + dim.description + "</b>: " + values.join(", ") + "<br />";
 											})
 											return s;
 										},
