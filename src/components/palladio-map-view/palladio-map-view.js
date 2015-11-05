@@ -888,15 +888,18 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					center = scope.center && Array.isArray(scope.center) && scope.center.length === 2 ?
 						new L.LatLng(scope.center[0], scope.center[1]) :
 						new L.LatLng(coordinates[0], coordinates[1]);
-		        	minZoom = 1,
+		        	minZoom = 2,
 		        	maxZoom = 20,
 		        	m = new L.Map(element[0], {
 		            	center: center,
 		            	zoom: zoom,
 		            	minZoom : minZoom,
 		            	maxZoom : maxZoom,
-		            	scrollWheelZoom : true
+		            	scrollWheelZoom : true,
+		            	worldCopyJump: true
 		       		});
+
+		       	console.log(m);
 
 		        m.attributionControl.addAttribution("© <a href='https://www.mapbox.com/map-feedback/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap contributors</a>");
 
