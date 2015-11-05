@@ -899,8 +899,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 		            	worldCopyJump: true
 		       		});
 
-		       	console.log(m);
-
 		        m.attributionControl.addAttribution("© <a href='https://www.mapbox.com/map-feedback/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap contributors</a>");
 
 				// Tooltips
@@ -1337,10 +1335,16 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 								scope.color = d.color;
 								scope.geoJson = JSON.stringify(d.geoJson);
 								scope.mapType = scope.mapTypes.filter(function (m) { return m.value === d.type; })[0];
-								// TODO: populate descriptive dim.
+
 								scope.pointSize = d.pointSize;
 								scope.showLinks = d.showLinks;
-								// TODO: aggregation stuff
+								
+								scope.aggDescription = d.aggDescription;
+								scope.aggregateKey = d.aggregateKey;
+								scope.aggregationType = d.aggregationType;
+								// This is horrific - just FYI
+								scope.aggDim = scope.aggDims.filter(function(f) { return scope.getAggDescription(f) === d.aggDescription; })[0];
+
 								scope.addLayer();
 							});
 						} else {
