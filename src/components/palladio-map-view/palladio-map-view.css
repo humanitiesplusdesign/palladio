@@ -19,6 +19,10 @@
 
 [data-palladio-map-view] .legend-title{
 	margin-bottom: 5px;
+	width: 70px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 [data-palladio-map-view] .legend-value{

@@ -22,7 +22,8 @@ var palladioSources = [
 	// "./lib/yasr/yasr.min.js",
 	"./src/js/**/*.js",
 	"./src/components/**/*.js",
-	"./src/unfinished_components/**/*.js"
+	"./src/unfinished_components/**/*.js",
+	"./bower_components/bootstrap/js/tooltip.js"
 ];
 var palladioCSS = [ "./lib/**/*.css", "./src/**/*.css" ];
 var palladioTemplate = [

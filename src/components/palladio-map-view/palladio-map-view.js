@@ -688,8 +688,12 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 			          			.append("div")
 			          				.style("position","relative");
 
-							legend.append("div")
+							var legendTitle = legend.append("div")
 								.attr("class","legend-title")
+								.attr("data-toggle", "tooltip")
+								.attr("data-placement", "right")
+								.attr("data-container", "body")
+								.attr("title", layer.aggDescription)
 								.html(layer.aggDescription);
 
 							legend.selectAll("div.circle")
@@ -705,6 +709,10 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 										.attr("class","legend-title")
 										.style("margin-left", function(d){ return (-(pointSize(maxPointSize)-pointSize(d))+pointSize(maxPointSize)*2 + 10) + "px"; })
 										.html(String)
+
+							$(legendTitle[0][0]).tooltip({
+								template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
+							});
 
 						}
 			        }
