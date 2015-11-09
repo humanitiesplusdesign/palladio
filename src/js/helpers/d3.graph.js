@@ -190,7 +190,7 @@
 				anchorNode.exit().remove();
 
 				anchorNode.enter().append("g")
-					.attr("class", "anchor-node")
+					.attr("class", function(d) { return "anchor-node " + d.node.dimension; })
 					.append("svg:text")
 						// .style("fill", "#555")
 						.style("font-family", "karla, Arial, Helvetica")
