@@ -73,8 +73,8 @@ angular.module('palladioGraphView', ['palladio.services', 'palladio'])
 						.attr('style', 'position: absolute; left: 0; top: 0; z-index: -100');
 
 				var svg = d3.select(element[0])
-					.append('svg:svg')
-					.attr("pointer-events", "all");
+					.append('svg:svg');
+					// .attr("pointer-events", "all");
 
 				var chart = d3.graph();
 
