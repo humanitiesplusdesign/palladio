@@ -8228,36 +8228,6 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	background-color: #ccc;
 }
 
-[data-palladio-palette] .palette-new-dimension-button {
-	width: 100%;
-	margin-top: 10px;
-	display: inline-block;
-	text-align: center;
-}
-
-[data-palladio-palette] .dimension-pill {
-  background-color: #fafafa;
-  width: 135px;
-}
-
-[data-palladio-palette] .palette-property-list .dimension-pill {
-  background-color: #eee;
-  width: 135px;
-}
-
-[data-palladio-palette] .palette-property-list {
-  list-style: none;
-  margin-left: 15px;
-}
-
-[data-palladio-palette] .palette-dimension {
-  background-color: #fafafa;
-  display: inline-block;
-  padding: 2px 5px;
-  margin: 2px;
-  margin-left: 5px;
-  border-radius: 2px;
-}
 [data-palladio-map-view] {
 	width: 100%;
 	background: #ddd;
@@ -8463,6 +8433,36 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 		margin-bottom: 0px
 }
 
+[data-palladio-palette] .palette-new-dimension-button {
+	width: 100%;
+	margin-top: 10px;
+	display: inline-block;
+	text-align: center;
+}
+
+[data-palladio-palette] .dimension-pill {
+  background-color: #fafafa;
+  width: 135px;
+}
+
+[data-palladio-palette] .palette-property-list .dimension-pill {
+  background-color: #eee;
+  width: 135px;
+}
+
+[data-palladio-palette] .palette-property-list {
+  list-style: none;
+  margin-left: 15px;
+}
+
+[data-palladio-palette] .palette-dimension {
+  background-color: #fafafa;
+  display: inline-block;
+  padding: 2px 5px;
+  margin: 2px;
+  margin-left: 5px;
+  border-radius: 2px;
+}
 [data-palladio-partime-filter] path {
 	fill: #dddddd;
 }

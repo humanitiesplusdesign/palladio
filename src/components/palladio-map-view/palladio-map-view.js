@@ -401,6 +401,19 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				var maxPointSize;
 				var popoverMap = d3.map();
 
+				function hidePopovers() {
+					popoverMap.values().forEach(function(d) {
+						$(d.node).popover('hide');
+					});
+				}
+
+				function destroyPopovers() {
+					popoverMap.values().forEach(function(d) {
+						$(d.node).popover('hide');
+					});
+					popoverMap = d3.map();
+				}
+
 				function update() {
 
 					var svg = d3.select(m.getPanes().overlayPane).select("svg");
@@ -575,65 +588,19 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						    .on("mouseover", nodeTip.show)
 							.on("mouseout", nodeTip.hide)
 							.on('click', function(d) {
-								if(popoverMap.get(d.properties.key) && popoverMap.get(d.properties.key).hasPopover && popoverMap.get(d.properties.key).popoverDisplayed) {
-									$(this).popover('hide');
-									popoverMap.get(d.properties.key).popoverDisplayed = false;
-								} else if(popoverMap.get(d.properties.key) && popoverMap.get(d.properties.key).hasPopover) {
-									$(this).popover('show');
-									popoverMap.get(d.properties.key).popoverDisplayed = true;
-								} else {
-									if(scope.popoverDims && scope.popoverDims.length) {
-										popoverMap.set(d.properties.key, { node: this });
-										// XSS issue here.
-										$(this).popover({
-											title: function() {
-												var datum = d3.select(this).datum();
-												return description(datum.properties.value.desc.valueList) + " (" + datum.properties.value.agg + ")"
-											},
-											content: function() {
-												var datum = d3.select(this).datum();
-												var s = "";
-												scope.popoverDims.forEach(function(dim) {
-													var values = [];
-													datum.properties.value.data.map(function(f) { return f[dim.key]; })
-														.forEach(function(f) {
-															if(values.indexOf(f) === -1) {
-																values.push(f);
-															}
-														});
-													s += "<b>" + dim.description + "</b>: " + values.join(", ") + "<br />";
-												})
-												return s;
-											},
-											html: true,
-											container: $('body'),
-											placement: 'top'
-										});
-
-										$(this).popover('show');
-										popoverMap.get(d.properties.key).hasPopover = true;
-										popoverMap.get(d.properties.key).popoverDisplayed = true;
-									}
-								}
-							});
-
-						// Destroy all popovers.
-						popoverMap.values().forEach(function(d) {
-							$(d.node).popover('destroy');
-						});
-
-						// Recreate them if necessary.
-						node.each(function(d) {
-							if(scope.popoverDims && scope.popoverDims.length && popoverMap.get(d.properties.key) && popoverMap.get(d.properties.key).hasPopover) {
-								var that = this;
-								setTimeout(function() {
-									$(that).popover({
+								if(popoverMap.get(d.properties.key) && popoverMap.get(d.properties.key).hasPopover === true) {
+									destroyPopovers();
+								} else if(scope.popoverDims && scope.popoverDims.length) {
+									destroyPopovers();
+									popoverMap.set(d.properties.key, { node: this });
+									// XSS issue here.
+									$(this).popover({
 										title: function() {
-											var datum = d3.select(that).datum();
-											return description(datum.properties.value.desc.valueList) + " (" + datum.properties.value.agg + ")"
+											var datum = d3.select(this).datum();
+											return description(datum.properties.value.desc.valueList) + " (" + datum.properties.value.agg + ")";
 										},
 										content: function() {
-											var datum = d3.select(that).datum();
+											var datum = d3.select(this).datum();
 											var s = "";
 											scope.popoverDims.forEach(function(dim) {
 												var values = [];
@@ -648,16 +615,56 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 											return s;
 										},
 										html: true,
+										trigger: 'manual',
 										container: $('body'),
-										placement: 'top'
+										placement: 'top',
+										template: '<div class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'
 									});
-									if(popoverMap.get(d.properties.key) && popoverMap.get(d.properties.key).popoverDisplayed) {
-										$(that).popover('show');
-									}
-									popoverMap.get(d.properties.key).node = that;
-								}, 500);
-							}
-						});
+
+									$(this).popover('show');
+									popoverMap.get(d.properties.key).hasPopover = true;
+								}
+							});
+
+						// Destroy all popovers.
+						destroyPopovers();
+
+						// // Recreate them if necessary.
+						// node.each(function(d) {
+						// 	if(scope.popoverDims && scope.popoverDims.length && popoverMap.get(d.properties.key) && popoverMap.get(d.properties.key).hasPopover) {
+						// 		var that = this;
+						// 		setTimeout(function() {
+						// 			$(that).popover({
+						// 				title: function() {
+						// 					var datum = d3.select(that).datum();
+						// 					return description(datum.properties.value.desc.valueList) + " (" + datum.properties.value.agg + ")"
+						// 				},
+						// 				content: function() {
+						// 					var datum = d3.select(that).datum();
+						// 					var s = "";
+						// 					scope.popoverDims.forEach(function(dim) {
+						// 						var values = [];
+						// 						datum.properties.value.data.map(function(f) { return f[dim.key]; })
+						// 							.forEach(function(f) {
+						// 								if(values.indexOf(f) === -1) {
+						// 									values.push(f);
+						// 								}
+						// 							});
+						// 						s += "<b>" + dim.description + "</b>: " + values.join(", ") + "<br />";
+						// 					})
+						// 					return s;
+						// 				},
+						// 				html: true,
+						// 				container: $('body'),
+						// 				placement: 'top'
+						// 			});
+						// 			if(popoverMap.get(d.properties.key) && popoverMap.get(d.properties.key).popoverDisplayed) {
+						// 				$(that).popover('show');
+						// 			}
+						// 			popoverMap.get(d.properties.key).node = that;
+						// 		}, 500);
+						// 	}
+						// });
 
 						// This function should do what needs to be done to remove the filter.
 				    	var resetNode = function () {
@@ -1327,6 +1334,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				// State save/load.
 
 				function importState(state) {
+					console.log(state);
 					scope.$apply(function (s) {
 						if(state.tileSets && state.tileSets.length) s.tileSets = state.tileSets;
 						if(state.layers) {
@@ -1622,6 +1630,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						scope.color = layer.color;
 						scope.addNewLayer = true;
 					}
+
+					console.log(layer);
 
 					return layer;
 				}
