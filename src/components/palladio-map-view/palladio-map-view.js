@@ -31,7 +31,8 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				mapHeight: '=',
 				center: '=',
 				zoom: '=',
-				popoverDims: '='
+				popoverDims: '=',
+				popoverTitleLinkDim: '='
 			},
 
 			link: function (scope, element, attrs) {
@@ -597,7 +598,15 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 									$(this).popover({
 										title: function() {
 											var datum = d3.select(this).datum();
-											return description(datum.properties.value.desc.valueList) + " (" + datum.properties.value.agg + ")";
+											var title = description(datum.properties.value.desc.valueList) + " (" + datum.properties.value.agg + ")";
+											// We assume only a single link URL for the title.
+											if(scope.popoverTitleLinkDim) {
+												var titleUrl = datum.properties.value.data[0][scope.popoverTitleLinkDim.key];
+												if(titleUrl) {
+													title = '<a target="_blank" href="' + datum.properties.value.data[0][scope.popoverTitleLinkDim.key] + '">' + title + "</a>";
+												}
+											}
+											return title;
 										},
 										content: function() {
 											var datum = d3.select(this).datum();
@@ -1457,6 +1466,12 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						s.popoverDims = dims;
 					});
 				}
+				
+				function setPopoverTitleLinkDim(dim) {
+					scope.$apply(function(s) {
+						s.popoverTitleLinkDim = dim;
+					})
+				}
 
 				if(scope.functions) {
 					scope.functions["importState"] = importState;
@@ -1464,6 +1479,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 					scope.functions["centerCoordinates"] = setCenterCoordinates;
 					scope.functions["zoomLevel"] = setZoomLevel;
 					scope.functions["popoverDims"] = setPopoverDims;
+					scope.functions["popoverTitleLinkDim"] = setPopoverTitleLinkDim;
 				}
 
 				scope.layerTypes = [

@@ -469,6 +469,12 @@ angular.module('palladioGraphView', ['palladio.services', 'palladio'])
 								s.nodeSize = bool;
 							});
 						};
+						scope.functions["zoomOut"] = function() {
+							scope.$apply(function(s) { s.zoomOut(); });
+						};
+						scope.functions["zoomIn"] = function() {
+							scope.$apply(function(s) { s.zoomIn(); });
+						}
 					}
 				},
 
