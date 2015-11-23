@@ -17,6 +17,10 @@
 	padding: 10px;
 }
 
+[data-palladio-map-view] .zoom-to-data-control {
+	border: none;
+}
+
 [data-palladio-map-view] .legend-title{
 	margin-bottom: 5px;
 	width: 70px;

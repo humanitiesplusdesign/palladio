@@ -924,6 +924,53 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 		       		});
 
 		        m.attributionControl.addAttribution("© <a href='https://www.mapbox.com/map-feedback/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap contributors</a>");
+				L.control.scale().addTo(m);
+				
+				// Zoom to data control
+				var ToDataControl = L.Control.extend({
+					options: {
+						position: 'topleft'
+					},
+				
+					onAdd: function (map) {
+						// create the control container with a particular class name
+						var container = L.DomUtil.create('div', 'zoom-to-data-control leaflet-bar');
+						L.DomEvent
+							.addListener(container, 'click', L.DomEvent.stopPropagation)
+							.addListener(container, 'click', L.DomEvent.preventDefault)
+							.addListener(container, 'click', function () {
+								// First calculate bounds.
+								var coords = [];
+								scope.layers.forEach(function(l) {
+									coords = coords.concat(l.sourceGroups.all().map(function(g) {
+										return g.key.split(',').map(parseFloat);
+									}));
+									if(l.destGroups) {
+										coords = coords.concat(l.destGroups.all().map(function(g) {
+											return g.key.split(',').map(parseFloat);
+										}));
+									}
+								});
+								
+								coords = coords.filter(function(d) { return !isNaN(d[0]) && !isNaN(d[1]); });
+								
+								// Then fit the map to the bounds.
+								if(coords.length > 0) {
+									m.fitBounds(L.latLngBounds(coords));	
+								}
+							});
+				
+						var link = L.DomUtil.create('a', 'leaflet-control-to-data', container);
+						var icom = L.DomUtil.create('i', 'fa fa-object-group', link);
+						
+						link.title = "Zoom to data";
+						link.href = "#";
+				
+						return container;
+					}
+				});
+				
+				m.addControl(new ToDataControl());
 
 				// Tooltips
 				var nodeTip = d3.tip()
@@ -1343,7 +1390,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				// State save/load.
 
 				function importState(state) {
-					console.log(state);
 					scope.$apply(function (s) {
 						if(state.tileSets && state.tileSets.length) s.tileSets = state.tileSets;
 						if(state.layers) {
@@ -1646,8 +1692,6 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 						scope.color = layer.color;
 						scope.addNewLayer = true;
 					}
-
-					console.log(layer);
 
 					return layer;
 				}
