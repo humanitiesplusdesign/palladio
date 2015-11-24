@@ -126,6 +126,16 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 								s.dateEndDim = s.dateDims.filter(function(f) { return f.key === dim.key; })[0];
 							});
 						};
+						scope.functions["tooltipDimension"] = function(dim) {
+							scope.$apply(function(s) {
+								s.tooltipLabelDim = s.labelDims.filter(function(f) { return f.key === dim.key; })[0];
+							});
+						};
+						scope.functions["groupDimension"] = function(dim) {
+							scope.$apply(function(s) {
+								s.groupDim = s.labelDims.filter(function(f) { return f.key === dim.key; })[0];
+							});
+						};
 					}
 
 				}, post: function(scope, element) {
