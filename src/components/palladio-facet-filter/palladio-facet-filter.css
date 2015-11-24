@@ -49,6 +49,7 @@
 	display: inline-block;
 	width: 215px;
 	margin-right: 10px;
+	vertical-align: top;
 	overflow-y: auto;
 }
 
