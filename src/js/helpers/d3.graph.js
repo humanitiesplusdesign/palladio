@@ -437,6 +437,26 @@
 					c[1] + (t[1] - c[1]) / scale * newScale]);
 			}
 		}
+		
+		function zoomToData() {
+			var y = [0,0];
+			var x = [0,0];
+			var scale = zoom.scale();
+			force.nodes().forEach(function(d) {
+				if(d.y < y[0]) y[0] = d.y;
+				if(d.y > y[1]) y[1] = d.y;
+				if(d.x < x[0]) x[0] = d.x;
+				if(d.x > x[1]) x[1] = d.x;
+			});
+			while((x[1] - x[0])*scale > width || (y[1] - y[0])*scale > height) {
+				zoomByFactor(0.8);
+				scale = zoom.scale();
+			}
+			var xmid = (x[1] + x[0])/2;
+			var ymid = (y[1] + y[0])/2;
+			zoom.translate([width/2 - xmid*scale, height/2 - ymid*scale])
+			redraw();
+		}
 
 		/* Getter/Setter */
 
@@ -518,6 +538,7 @@
 			zoomByFactor(0.8);
 			redraw();
 		};
+		chart.zoomToData = zoomToData;
 		chart.fixedNodes = function (names) {
 			if (!arguments.length) {
 				if(force) {

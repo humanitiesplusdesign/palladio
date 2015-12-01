@@ -18,9 +18,12 @@
 		count-description="{{aggDescription}}">
 
 		<div class="leaflet-top leaflet-left">
-			<div class="leaflet-control-zoom leaflet-bar leaflet-control">
+			<div class="leaflet-control-zoom-graph leaflet-bar leaflet-control">
 				<a class="leaflet-control-zoom-in" ng-click="zoomIn()" title="Zoom in">+</a>
 				<a class="leaflet-control-zoom-out" ng-click="zoomOut()" title="Zoom out">-</a>
+			</div>
+			<div class="zoom-to-data-control leaflet-bar leaflet-control">
+				<a class="leaflet-control-to-data" title="Zoom to data" ng-click="zoomToData()"><i class="fa fa-object-group"></i></a>
 			</div>
 		</div>
 

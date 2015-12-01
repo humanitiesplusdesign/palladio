@@ -167,6 +167,10 @@ angular.module('palladioGraphView', ['palladio.services', 'palladio'])
 				scope.$on('zoomOut', function(){
 					chart.zoomOut();
 				});
+				
+				scope.$on('zoomToData', function() {
+					chart.zoomToData();
+				})
 
 				// update on xfilters events
 				deregister.push(palladioService.onUpdate(uniqueId, function() {
@@ -386,6 +390,10 @@ angular.module('palladioGraphView', ['palladio.services', 'palladio'])
 					scope.zoomOut = function(){
 						scope.$broadcast('zoomOut');
 					};
+					
+					scope.zoomToData = function() {
+						scope.$broadcast('zoomToData');
+					};
 
 					// State save/load.
 
@@ -474,6 +482,9 @@ angular.module('palladioGraphView', ['palladio.services', 'palladio'])
 						};
 						scope.functions["zoomIn"] = function() {
 							scope.$apply(function(s) { s.zoomIn(); });
+						}
+						scope.functions["zoomToData"] = function() {
+							scope.$apply(function(s) { s.zoomToData(); });
 						}
 					}
 				},
