@@ -448,6 +448,12 @@
 				if(d.x < x[0]) x[0] = d.x;
 				if(d.x > x[1]) x[1] = d.x;
 			});
+			// First zoom in.
+			while((x[1] - x[0])*scale < width || (y[1] - y[0])*scale < height) {
+				zoomByFactor(1.2);
+				scale = zoom.scale();
+			}
+			// Then zoom out.
 			while((x[1] - x[0])*scale > width || (y[1] - y[0])*scale > height) {
 				zoomByFactor(0.8);
 				scale = zoom.scale();
