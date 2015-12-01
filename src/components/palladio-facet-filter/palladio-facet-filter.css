@@ -53,6 +53,10 @@
 	overflow-y: auto;
 }
 
+[data-palladio-facet-filter] .facet-container {
+	display: inline-block;
+}
+
 [data-palladio-facet-filter] .facet-drop-area {
 	float: right;
 	font-size: 12px;
@@ -85,6 +89,7 @@
 	font-size: 12px;
 	width: 200px;
 	padding: 6px 0px;
+	overflow-x: auto;
 }
 
 [data-palladio-facet-filter] .cell {

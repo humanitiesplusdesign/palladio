@@ -203,24 +203,32 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 
 						var selection = d3.select(element[0]).select('.inner-facet-container');
 
-						var facets = selection
-							.selectAll('.facet')
+						var facetContainers = selection
+							.selectAll('.facet-container')
 								.data(scope.dims, function(d) { return calculateDomKey(d.key); });
-
-						// Build facets and button group
-						var buttonGroup = facets.enter()
+								
+						var newFacetContainers = facetContainers.enter()
 							.append('div')
-								.classed('facet', true)
 								.style('height', function() { return scope.calcHeight; })
+								.attr('class', 'facet-container');
+								
+						var buttonGroup = facetContainers
 							.append('div')
 								.classed('facet-header', true)
 								.style('height', headerHeight)
 								.text(function(d) { return d.description + " (" + d.group.size() + ")"; })
 							.append("span")
 								.attr("class", "mode-buttons")
-							.append("div").attr("class", "btn-group");
+							.append("div").attr("class", "btn-group");;
 
-								var count = scope.dims.length;
+						newFacetContainers
+							.append('div')
+								.classed('facet', true)
+								.style('height', function() { return (numericHeight) + "px"; })
+								
+						var facets = facetContainers.select('.facet');
+
+						var count = scope.dims.length;
 
 						// Extend the width of the inner- and mid-facet-container
 						selection
@@ -320,7 +328,9 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 								})
 								.append("i").attr("class", "fa fa-sort-alpha-asc");
 
-						buttonGroup.append("a").attr("class", "btn-mini")
+						if(scope.showSettings) {
+							// Only allow closing the facet if settings are displayed ... for now.
+							buttonGroup.append("a").attr("class", "btn-mini")
 								.on("click", function (d) {
 									if(d.highlight) {
 										// If highlighting is in place, remove it.
@@ -332,7 +342,8 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 										});
 									});
 								})
-								.append("i").attr("class", "fa fa-times");
+								.append("i").attr("class", "fa fa-times");	
+						}
 
 						var newCells = cells.enter()
 							.append('div')
@@ -348,13 +359,13 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 						newCells.call(updateCell);
 
 						// Remove facets.
-						facets.exit().each(function(d) {
+						facetContainers.exit().each(function(d) {
 							palladioService.removeFilter(scope.uniqueToggleId + d.key);
 							removeFacetData(d);
 							palladioService.update();
 						});
 
-						facets.exit().remove();
+						facetContainers.exit().remove();
 					});
 
 
@@ -431,6 +442,9 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 
 						sel.select('.cell-value')
 							.text(function(d) { return d.displayValue > 0 ? d.displayValue + " / " + d.unfilteredValue : ''; });
+							
+						// Title for facets that will display the full text
+						sel.attr('title', function(d) { return d.key; });
 					}
 
 					function buildCellData(cellData, facetData) {

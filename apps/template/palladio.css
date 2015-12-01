@@ -7985,6 +7985,10 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	overflow-y: auto;
 }
 
+[data-palladio-facet-filter] .facet-container {
+	display: inline-block;
+}
+
 [data-palladio-facet-filter] .facet-drop-area {
 	float: right;
 	font-size: 12px;
@@ -8017,6 +8021,7 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	font-size: 12px;
 	width: 200px;
 	padding: 6px 0px;
+	overflow-x: auto;
 }
 
 [data-palladio-facet-filter] .cell {
@@ -8482,6 +8487,49 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	font-size: 10px;
 }
 
+[data-palladio-table-view] {
+	width: 100%;
+	padding-top: 5px;
+}
+
+[data-palladio-table-view] table {
+	font-size: 12px;
+}
+
+[data-palladio-table-view] td {
+}
+
+[data-palladio-table-view] {
+	overflow: auto;
+}
+
+/*[data-palladio-timeline-filter] .list-title {
+	height: 1.4em;
+	font-weight: bold;
+	margin-top: 1.5em;
+	margin-left: 1.5em;
+	margin-bottom: 0.25em;
+}*/
+
+[data-palladio-timeline-filter] path {
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-timeline-filter] .axis path, [data-palladio-timeline-filter] .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-timeline-filter] .axis text {
+	font-size: 10px;
+}
+
+[data-palladio-timeline-filter] .resize path {
+  fill: #eee;
+  stroke: #666;
+}
+
 [data-palladio-selection-view] {
 	display: inline-block;
 }
@@ -8542,49 +8590,6 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	text-overflow: ellipsis;
 	max-width: 300px;
 	vertical-align: top;
-}
-
-[data-palladio-table-view] {
-	width: 100%;
-	padding-top: 5px;
-}
-
-[data-palladio-table-view] table {
-	font-size: 12px;
-}
-
-[data-palladio-table-view] td {
-}
-
-[data-palladio-table-view] {
-	overflow: auto;
-}
-
-/*[data-palladio-timeline-filter] .list-title {
-	height: 1.4em;
-	font-weight: bold;
-	margin-top: 1.5em;
-	margin-left: 1.5em;
-	margin-bottom: 0.25em;
-}*/
-
-[data-palladio-timeline-filter] path {
-	shape-rendering: crispEdges;
-}
-
-[data-palladio-timeline-filter] .axis path, [data-palladio-timeline-filter] .axis line {
-	fill: none;
-	stroke: #000;
-	shape-rendering: crispEdges;
-}
-
-[data-palladio-timeline-filter] .axis text {
-	font-size: 10px;
-}
-
-[data-palladio-timeline-filter] .resize path {
-  fill: #eee;
-  stroke: #666;
 }
 
 [data-palladio-arctime-filter] .list-title {
