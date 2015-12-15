@@ -115,7 +115,7 @@ angular.module('palladio.services.parse', [])
 				var isDateLike = function(value){
 					// We allow zero-dates (1999-00-00) even though they aren't technically valid.
 					// We allow negative years in dates
-					var dateTest = RegExp('^[-]\\d\\d\\d\\d($)|([-](0[0-9]|1[012]|[0-9])[-](0[0-9]|[12][0-9]|3[01]|[0-9])$)');
+					var dateTest = RegExp('^[-]?\\d\\d\\d\\d($)|([-](0[0-9]|1[012]|[0-9])[-](0[0-9]|[12][0-9]|3[01]|[0-9])$)');
 					if(dateTest.test(value)) return true;
 					return false;
 				};
@@ -136,11 +136,11 @@ angular.module('palladio.services.parse', [])
 					if (typeof value === 'undefined' || value === null || value.length === 0) return 'null';
 					if (isObject(value)) return 'object';
 					if (isArray(value)) return 'array';
+          if (isDateLike(value)) return 'date';
 					if (isNumber(value)) return 'number';
 					// String
 					if (isUrlLike(value)) return 'url';
 					//if (isBooleanLike(value)) return 'boolean';
-					if (isDateLike(value)) return 'date';
 					if (isNumberLike(value)) return 'number';
 					if (isLatLonLike(value)) return 'latlong';
 					if (isString(value)) return 'text';
