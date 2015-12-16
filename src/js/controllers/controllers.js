@@ -353,7 +353,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 				}
 
 				if($scope.selectedFieldMetadata.type === 'url' &&
-					(d === ':' || d === '/' || d === '_' || d === '-' )) {
+					(d === ':' || d === '/' || d === '_' || d === '-' || d === '?' )) {
 
 					validForType = true;
 				}
