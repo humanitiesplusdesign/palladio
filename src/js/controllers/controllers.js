@@ -157,8 +157,7 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			$http.get(path)
 				.success(function(data) {
 					$scope.loadError = null;
-					loadService.loadJson(data);
-					$scope.onLoad();
+					loadService.loadJson(data).then($scope.onLoad);
 				})
 				.error(function() {
 					spinnerService.hide();
