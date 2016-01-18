@@ -5,7 +5,7 @@
 // for usage examples.
 
 angular.module('palladio', [])
-	.constant('version', '1.1.3')
+	.constant('version', '1.1.4')
 	.factory('palladioService', ['$compile', "$rootScope", '$q', function($compile, $scope, $q) {
 
 		var updateListeners = d3.map();
@@ -185,7 +185,7 @@ angular.module('palladio', [])
 				return overrideHandlers.get(type)(id, type, exp, imp);
 			} else {
 				stateFunctions.set(id, { type: type, export: exp, import: imp });
-				return deregisterStateFunctions.bind(id);
+				return deregisterStateFunctions.bind(null, id);
 			}
 		};
 
