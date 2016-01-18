@@ -185,7 +185,7 @@ angular.module('palladio', [])
 				return overrideHandlers.get(type)(id, type, exp, imp);
 			} else {
 				stateFunctions.set(id, { type: type, export: exp, import: imp });
-				return deregisterStateFunctions.bind(id);
+				return deregisterStateFunctions.bind(null, id);
 			}
 		};
 
