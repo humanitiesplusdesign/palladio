@@ -304,12 +304,12 @@
 												class="text-small fa fa-circle"
 												tooltip-animation="false"
 												tooltip-append-to-body="true"
-												tooltip="Please review"
+												tooltip="Verified"
 												data-container="body"
 												data-toggle="modal"
 												data-target="#myModal"
 												data-ng-click="setSelected(field,file)"
-												ng-show="!field.delete && !hasLinks(field).lookup.file && field.unassignedSpecialChars.length > 0 && field.unassignedSpecialChars.length === field.verifiedSpecialChars.length && !isLinked(field) || field.errors.length && !isLinked(field)"></i>
+												ng-show="!field.delete && !hasLinks(field).lookup.file && field.unassignedSpecialChars.length > 0 && field.unassignedSpecialChars.length === field.verifiedSpecialChars.length && !isLinked(field) && !(field.errors.length && !isLinked(field))"></i>
 
 											<i
 												class="fa fa-arrow-circle-right"
