@@ -84,7 +84,18 @@
               <p class="navbar-text">{{project.title}}</p>
               <p class="navbar-text">v {{version}}</p>
               <form class="navbar-form navbar-left" role="search">
-                <div palladio-data-download data-ng-show="files.length"><i class="fa fa-download margin-right text-primary"></i>Download</div>
+                <div palladio-data-download
+                  data-container="body"
+                  tooltip-placement="left"
+                  tooltip="Download the Palladio project"
+                  tooltip-animation="false"
+                  tooltip-append-to-body="true"
+                  data-ng-show="files.length">
+                  <span>
+                    <i class="fa fa-download margin-right text-primary"></i>
+                    Download
+                  </span>
+                </div>
               </form>
             </ul>
 
