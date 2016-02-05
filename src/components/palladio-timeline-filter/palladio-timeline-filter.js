@@ -1306,7 +1306,8 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 						if(state.aggDimKey) scope.aggDim = scope.aggDims.filter(function(f) { return f.key === state.aggDimKey; })[0];
 
 						scope.$digest();
-						scope.groupProp = scope.groupDims.filter(function(d) { return d.key === state.groupProp; })[0];
+						scope.groupProp = state.groupProp ? 
+              scope.groupDims.filter(function(d) { return d.key === state.groupProp; })[0] : null;
 						scope.$digest();
 						scope.shortVersion = state.shortVersion;
 
@@ -1327,7 +1328,7 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 						return destroyed ? false : {
 							countDim: scope.aggDim.key,
 							dateProp: scope.dateProp.key,
-							groupProp: scope.groupProp.key,
+							groupProp: scope.groupProp ? scope.groupProp.key : null,
 							shortVersion: scope.shortVersion,
 							extent: currentFilter,
 							aggDimKey: scope.aggDim.key
