@@ -34,7 +34,7 @@
             <label class="inline">Data/Shapes</label>
           </div>
           <div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
-            <ul class="layer-list list-unstyled" ui-sortable="{axis:y, containment: 'parent'}" data-ng-model="layers" data-ng-show="layers.length">
+            <ul class="layer-list list-unstyled sortable-override" ui-sortable="{axis:y, containment: 'parent'}" data-ng-model="layers" data-ng-show="layers.length">
               <li class="layer-item" data-ng-repeat="layer in layers | orderBy:index" ng-style="{'border-right':'5px solid ' + layer.color}">
 
                 <i
@@ -59,7 +59,7 @@
               </li>
             </ul>
 
-            <ul data-ng-show="!layers.length" class="list-unstyled">
+            <ul data-ng-show="!layers.length" class="list-unstyled sortable-override">
               <li class="layer-item">
                 <span class="text-muted">No data layers</span>
               </li>
@@ -82,7 +82,7 @@
             <label class="inline">Tiles</label>
           </div>
           <div class="col-lg-9 col-md-9 col-md-8 col-xs-8 col-condensed">
-            <ul class="layer-list list-unstyled" ui-sortable="{axis:y, containment: 'parent'}" data-ng-model="tileSets" data-ng-show="tileSets.length">
+            <ul class="layer-list list-unstyled sortable-override" ui-sortable="{axis:y, containment: 'parent'}" data-ng-model="tileSets" data-ng-show="tileSets.length">
               <li class="layer-item" data-ng-repeat="layer in tileSets | orderBy:index">
 
                 <i tooltip="{{layer.enabled ? 'Hide' : 'Show'}}"
@@ -98,7 +98,7 @@
                 class="fa fa-trash-o pull-right" data-title="Delete" bs-tooltip data-ng-click="layer.remove();" style="line-height: 1.6"></i>
               </li>
             </ul>
-            <ul data-ng-show="!tileSets.length" class="list-unstyled">
+            <ul data-ng-show="!tileSets.length" class="list-unstyled sortable-override">
               <li class="layer-item">
                 <span class="text-muted">No tilesets</span>
               </li>

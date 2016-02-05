@@ -17,6 +17,14 @@
 	padding: 10px;
 }
 
+[data-palladio-map-view-with-settings] .sortable-override:empty {
+  cursor: default;
+}
+
+[data-palladio-map-view-with-settings] .sortable-override li:only-child {
+  cursor: default;
+}
+
 [data-palladio-map-view] .zoom-to-data-control {
 	border: none;
 }

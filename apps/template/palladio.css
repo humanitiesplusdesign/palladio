@@ -8253,6 +8253,14 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	padding: 10px;
 }
 
+[data-palladio-map-view-with-settings] .sortable-override:empty {
+  cursor: default;
+}
+
+[data-palladio-map-view-with-settings] .sortable-override li:only-child {
+  cursor: default;
+}
+
 [data-palladio-map-view] .zoom-to-data-control {
 	border: none;
 }
