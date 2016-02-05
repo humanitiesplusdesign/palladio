@@ -589,6 +589,14 @@ angular.module('palladioPartimeFilter', ['palladio', 'palladio.services'])
 							update();
 						}
 					});
+          
+          // Save SVG
+          scope.saveAsSVG = function() {
+            var svgsaver = new SvgSaver();
+            var svg = element.find("svg")[0];
+            console.log(svg);
+            svgsaver.asSvg(svg, "Palladio_timespan_" + scope.title + ".svg");      
+          };
 
 					//
 					// If you are going to programatically instantiate your visualization, do it
