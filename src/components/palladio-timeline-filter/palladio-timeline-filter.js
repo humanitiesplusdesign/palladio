@@ -1129,7 +1129,11 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 						scope.metadata.sort(function(a,b) { return a.cardinality < b.cardinality ? -1 : 1; })[0] :
 						undefined;
 					scope.$watch('groupProp', function() {
-						scope.groupAccessor = function(d) { return d[scope.groupProp.key] + ""; };
+            if(scope.groupProp) {
+              scope.groupAccessor = function(d) { return d[scope.groupProp.key] + ""; }; 
+            } else {
+              scope.groupAccessor = function(d) { return "No group"; }
+            }
 					});
 
 					// Set up count selection.
