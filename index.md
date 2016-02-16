@@ -2,6 +2,9 @@
 layout: archive
 permalink: /
 title: "Latest Posts"
+image:
+  feature: palladio.png
+
 ---
 
 <div class="tiles">
