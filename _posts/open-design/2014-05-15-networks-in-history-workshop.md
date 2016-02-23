@@ -3,7 +3,7 @@ layout: post
 title:  "Networks in History Workshop"
 author: Nicole Coleman
 date:   2014-05-02 11:34:22
-categories: news
+categories: open-design
 published: false
 image: 
 image-description: "Palladio logo."
