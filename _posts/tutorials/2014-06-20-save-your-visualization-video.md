@@ -12,7 +12,7 @@ excerpt: "In this video tutorial, Mark shows how to save an instance of a visual
 
 
 
-{% vimeo 97762819 %}
+vimeo 97762819
 
 New feature for Palladio 0.5.0: Export and Import specific instances of your data and visualizations. Says Mark: “We can work with our data and mess about in the different views, apply filters and so forth, and then export that to our desktop and have a file that then can be used later with those specific changes still in place.”
 
