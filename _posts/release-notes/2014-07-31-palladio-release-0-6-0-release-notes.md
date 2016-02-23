@@ -3,7 +3,7 @@ layout: post
 title:  "Palladio Release Notes: 0.6.0"
 author: Ethan Jewett
 date:   2014-07-31 09:00:00
-category: palladio
+categories: release-notes
 published: true
 tags: front
 excerpt: "New features and bug fixes in release 0.6.0"
