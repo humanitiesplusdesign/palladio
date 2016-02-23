@@ -4,4 +4,4 @@ categories: faq
 ---
 
 
-{% include latest-posts-lists.html %}
+{% include latest-posts-list.html %}
