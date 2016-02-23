@@ -37,16 +37,11 @@ titlecase: true
 
 
 # Site owner
-owner: Humanities + Design
-  name:
-  email:apps@designhumanities.org
-  twitter:@hdstanford
-  google:
-    ad-client:
-    ad-slot:
-  bio:
+  owner: Humanities + Design
+  name: Humanities + Design
+  email: apps@designhumanities.org
+  twitter: @hdstanford
   avatar: bio-photo.jpg # 160x160 px image for author byline
-  disqus-shortname:
 
 
 exclude: ["lib", "config.rb", ".sass-cache", "Capfile", "config", "log", "Rakefile", "Rakefile.rb", "tmp", "*.sublime-project", "*.sublime-workspace", "Gemfile", "Gemfile.lock", "README.md", "LICENSE", "node_modules", "Gruntfile.js", "package.json"]
