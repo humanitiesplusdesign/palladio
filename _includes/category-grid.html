@@ -1,4 +1,4 @@
 <article class="tile" itemscope itemtype="http://schema.org/Article">
-  <h2 class="post-title" itemprop="name"><a href="{{ site.url }}{{ category.title }}">{{ category.title }}</a></h2>
+  <h2 class="post-title" itemprop="name"><a href="{{ site.url }}/{{ category.title | downcase }}">{{ category.title }}</a></h2>
   <p class="post-excerpt" itemprop="description">{{ category.description | strip_html | truncate: 160 }}</p>
 </article><!-- /.tile -->
