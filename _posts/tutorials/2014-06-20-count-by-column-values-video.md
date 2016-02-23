@@ -4,7 +4,7 @@ layout: post
 title:  "Video Tutorial: Count By Column Values"
 author: Mark Braude
 date:   2014-06-20 11:34:22
-category: palladio
+categories: tutorials
 published: true
 tags:
 excerpt: "If you have numeric values in your data, Palladio can now plot those more easily than before."
