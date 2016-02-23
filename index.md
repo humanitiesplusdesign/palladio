@@ -1,7 +1,7 @@
 ---
 layout: home
 permalink: /
-title: "Latest Posts"
+title: "Palladio Resources"
 image:
   feature: palladio.png
 
