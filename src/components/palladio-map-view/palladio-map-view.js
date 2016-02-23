@@ -880,21 +880,27 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 
 		        	// From http://stackoverflow.com/questions/9229645/remove-duplicates-from-javascript-array
 		        	function uniq_fast(a) {
-						var seen = {};
-						var out = [];
-						var len = a.length;
-						var j = 0;
-						for(var i = 0; i < len; i++) {
-							var item = a[i];
-							if(seen[item] !== 1) {
-								seen[item] = 1;
-								out[j++] = item;
-							}
-						}
-						return out;
-					}
-
-		        	return uniq_fast(arr).join(', ');
+                var seen = {};
+                var out = [];
+                var len = a.length;
+                var j = 0;
+                for(var i = 0; i < len; i++) {
+                  var item = a[i];
+                  if(seen[item] !== 1) {
+                    seen[item] = 1;
+                    out[j++] = item;
+                  }
+                }
+                return out;
+              }
+              
+              var unique_array = uniq_fast(arr)
+              
+              if(unique_array.length > 5) {
+                return (unique_array.slice(0,5).join(', ') + " plus " + (unique_array.length - 5) + " more");
+              } else {
+                return unique_array.join(', ');
+              }
 		        }
 
 		        function linkDescription(sourceArr, destArr) {
