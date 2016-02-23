@@ -3,7 +3,7 @@ layout: post
 title: "The Palladio 1.1 Release"
 author: Nicole Coleman
 date: 2015-10-21 14:50:22
-category: palladio
+categories: release-notes
 published: true
 tags: front
 excerpt: "Many bug fixes. Performance improvements. New features for the map view and the timespan."
