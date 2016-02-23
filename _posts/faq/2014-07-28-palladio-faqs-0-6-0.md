@@ -3,7 +3,7 @@ layout: post
 title:  "Palladio FAQ"
 author: Mark Braude
 date:   2014-08-18 11:34:22
-category: palladio
+categories: faq
 published: true
 tags: 
 excerpt: "The FAQs have been updated for our July 2014 release, 0.6.0, to reflect the new features and fixes."
@@ -186,8 +186,17 @@ See the Scenario: Creating Data for a Point to Point Map for more information ab
 
 [Download PDF]({{ site.baseurl }}/doc/scenario-point-to-point.pdf)
 
-### <a name="13"></a>How do I get the most use out of the TimeSpan feature?Use the TimeSpan feature to visualize any data for which you have both a starting date and an end date, such as a lifetime, or a season. Palladio will recognize any dimensions entered in the correct format (ie. 2014-06-27) and will allow you to select any such dimension as either the start date or end date within the timeline view. Choose from a parallel or bar view. 
-### <a name="14"></a>How does the List view work?Use this view to filter and arrange data to create customized lists. First select the Row Dimension by which your list will be arranged.  Then select the specific Dimensions you would like to see.  Palladio will then return a list including those Dimensions, arranged according to the Row Dimension you’ve selected.  Data can then be filtered using the usual suite of filters provided in other visualizations. Lists can be exported as csv files. Understanding how lists are created:Let’s say you have a list of unique names, and the places where each person was born. If you created a list with the dimensions “Names” and “Places of Birth,” and arranged this list by the Row Dimension “Names,” then you would see a list where each row contains a single name and the place of birth of the person listed. But if you created that same list, but now arranged it by the Row Dimension “Places of Birth” you would see a list where each row contains a single Place of Birth and every person born in that place. So, if more than one person in your data was born in Paris, you would not have a simple 1 to 1 ratio across the dimensions; instead your Paris row might contain several names, while your New York row might contain only one name. The point is not to be misled into thinking that the List view will automatically return something akin to a simple table, where every row lines up across the various columns. 
+### <a name="13"></a>How do I get the most use out of the TimeSpan feature?
+
+Use the TimeSpan feature to visualize any data for which you have both a starting date and an end date, such as a lifetime, or a season. Palladio will recognize any dimensions entered in the correct format (ie. 2014-06-27) and will allow you to select any such dimension as either the start date or end date within the timeline view. Choose from a parallel or bar view. 
+
+
+### <a name="14"></a>How does the List view work?
+
+Use this view to filter and arrange data to create customized lists. First select the Row Dimension by which your list will be arranged.  Then select the specific Dimensions you would like to see.  Palladio will then return a list including those Dimensions, arranged according to the Row Dimension you’ve selected.  Data can then be filtered using the usual suite of filters provided in other visualizations. Lists can be exported as csv files. 
+
+Understanding how lists are created:
+Let’s say you have a list of unique names, and the places where each person was born. If you created a list with the dimensions “Names” and “Places of Birth,” and arranged this list by the Row Dimension “Names,” then you would see a list where each row contains a single name and the place of birth of the person listed. But if you created that same list, but now arranged it by the Row Dimension “Places of Birth” you would see a list where each row contains a single Place of Birth and every person born in that place. So, if more than one person in your data was born in Paris, you would not have a simple 1 to 1 ratio across the dimensions; instead your Paris row might contain several names, while your New York row might contain only one name. The point is not to be misled into thinking that the List view will automatically return something akin to a simple table, where every row lines up across the various columns. 
 
  
 Please email us at <a href="mailto:palladio@designhumanities.org">palladio@designhumanities.org</a> to share your experience.
