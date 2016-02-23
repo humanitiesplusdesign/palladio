@@ -1,13 +1,15 @@
----
-layout: post
-title:  "Palladio FAQ"
-author: Mark Braude
-date:   2014-06-20 11:34:22
-categories: faq
-published: true
-tags: 
-excerpt: "The FAQs have been updated for our June 2014 release, 0.5.0, to reflect the new features and fixes."
 
+---
+layout: {{ article }}
+title: {{ Palladio FAQ }}
+modified: 2014-06-20 11:34:22
+categories: {{ faq }}
+excerpt: "The FAQs have been updated for our June 2014 release, 0.5.0, to reflect the new features and fixes."
+tags: []
+image:
+  feature:
+  teaser:
+  thumb:
 ---
 
 
