@@ -3,7 +3,7 @@ layout: post
 title:  "Networks in History Dev Workshop - June"
 author: Nicole Coleman
 date:   2014-06-21 12:00
-category: palladio
+categories: open-design
 published: true
 tags: front
 
