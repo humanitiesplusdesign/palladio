@@ -2,7 +2,7 @@
 
 title: Palladio App Documentation
 description: "Full documentation for the Palladio application developed by Humanities + Design at Stanford University. Record of software updates, bug fixes, and enhancements as well as tutorials for teaching and research with Palladio."
-#logo: # 120x120 px default image used for Twitter summary card
+logo: images/palladio_sq.png
 #teaser: # 400x250 px default teaser image used in image archive grid
 #locale: en
 url: http://hdlab.stanford.edu/palladio
