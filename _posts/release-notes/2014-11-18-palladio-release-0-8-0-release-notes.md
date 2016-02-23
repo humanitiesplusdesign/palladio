@@ -3,7 +3,7 @@ layout: post
 title: "Palladio Release Notes: 0.8.0"
 author: Mark Braude
 date: 2014-11-18 11:34:22
-category: palladio
+categories: release-notes
 published: true
 tags: front
 excerpt: "New features and bug fixes in release 0.8.0"
