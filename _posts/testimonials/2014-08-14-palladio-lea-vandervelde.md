@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: article
 title:  "Lea VanderVelde and Social Networking in the Frontier's Global Business: The Fur Trade / A Palladio Open Design Case Study"
 author: Mark Braude
 date:   2014-08-14 11:34:22
