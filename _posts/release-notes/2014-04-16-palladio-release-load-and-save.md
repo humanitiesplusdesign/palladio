@@ -3,7 +3,7 @@ layout: post
 title:  "Palladio Release: Load and Save"
 author: Mark Braude
 date:   2014-04-16 11:34:22
-category: palladio
+categores: release-notes
 published: true
 tags:
 excerpt: "New Features for Load and Save"
