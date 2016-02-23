@@ -1,5 +1,6 @@
 ---
 layout: archive
+title: Frequently Asked Questions
 ---
 
 
