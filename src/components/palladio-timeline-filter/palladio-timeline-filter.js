@@ -377,14 +377,22 @@ angular.module('palladioTimelineFilter', ['palladio', 'palladio.services'])
 								d3.select(this).style("fill", function(d) { return color(d[0].i); });
 							})
 							.tooltip(function (d,i){
-								return {
-									text : stackGroups[d[0].i],
-									displacement : [0,20],
-									position: [0,0],
-									gravity: "right",
-									placement: "mouse",
-									mousemove : true
-								};
+                if(stackGroups[d[0].i]) {
+                  return {
+                    text : stackGroups[d[0].i],
+                    displacement : [0,20],
+                    position: [0,0],
+                    gravity: "right",
+                    placement: "mouse",
+                    mousemove : true
+                  };
+                } else {
+                  // Place off screen
+                  return {
+                    position: [0,0],
+                    displacement: [-1000,0]
+                  };
+                }
 							});
 
 					if(tooltip.empty()) {
