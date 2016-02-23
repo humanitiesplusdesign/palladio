@@ -685,53 +685,51 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 				    	highlight(layer);
 
 				    	// legend
+              
+              if(!layer.pointSize) d3.select(element[0]).selectAll("div.legend").remove();
 
-				    	if(layer.pointSize) {
+              if(layer.pointSize) {
 
-					    	d3.select(element[0]).selectAll("div.legend").remove();
+                d3.select(element[0]).selectAll("div.legend").remove();
 
-					    	if (!layer.pointSize) return;
+                if (!layer.pointSize) return;
 
-					    	var circles,legend,labels;
+                var circles,legend,labels;
 
-					    	legend = d3.select(element[0]).selectAll("div.legend")
-			          			.data(function(d){ return [d]; })
-			          			.enter()
-			          			.append("div")
-			          			.attr("class", "legend")
-			          			//.style("min-width", function(){ return pointSize(maxPointSize) * 2 + "px"; })
-			          			//.style("min-height", function(){ return pointSize(maxPointSize) * 2 + "px"; })
-			          			.append("div")
-			          				.style("position","relative");
+                legend = d3.select(element[0]).selectAll("div.legend")
+                    .data(function(d){ return [d]; })
+                  .enter()
+                  .append("div")
+                    .attr("class", "legend")
+                    .append("div")
+                      .style("position","relative");
 
-							var legendTitle = legend.append("div")
-								.attr("class","legend-title")
-								.attr("data-toggle", "tooltip")
-								.attr("data-placement", "right")
-								.attr("data-container", "body")
-								.attr("title", layer.aggDescription)
-								.html(layer.aggDescription);
+                var legendTitle = legend.append("div")
+                  .attr("class","legend-title")
+                  .attr("data-toggle", "tooltip")
+                  .attr("data-placement", "right")
+                  .attr("data-container", "body")
+                  .attr("title", layer.aggDescription)
+                  .html(layer.aggDescription);
 
-							legend.selectAll("div.circle")
-								.data([ maxPointSize, 1 ])
-								.enter().append("div")
-									.attr("class", "circle")
-									.style("width", function (d,i){ return (pointSize(d) * 2) + "px"; })
-									.style("height", function (d,i){ return (pointSize(d) * 2) + "px"; })
-									.style("border-radius", "50%")
-									.style("margin-top", function(d,i){ return d < maxPointSize ? -(pointSize(d)*2) + "px" : 0; })
-									.style("margin-left", function(d,i){ return d < maxPointSize ? (pointSize(maxPointSize)-pointSize(d)) + "px" : 0; })
-									.append("span")
-										.attr("class","legend-title")
-										.style("margin-left", function(d){ return (-(pointSize(maxPointSize)-pointSize(d))+pointSize(maxPointSize)*2 + 10) + "px"; })
-										.html(String)
+                legend.selectAll("div.circle")
+                    .data([ maxPointSize, 1 ])
+                  .enter().append("div")
+                    .attr("class", "circle")
+                    .style("width", function (d,i){ return (pointSize(d) * 2) + "px"; })
+                    .style("height", function (d,i){ return (pointSize(d) * 2) + "px"; })
+                    .style("border-radius", "50%")
+                    .style("margin-top", function(d,i){ return d < maxPointSize ? -(pointSize(d)*2) + "px" : 0; })
+                    .style("margin-left", function(d,i){ return d < maxPointSize ? (pointSize(maxPointSize)-pointSize(d)) + "px" : 0; })
+                    .append("span")
+                    .attr("class","legend-title")
+                    .style("margin-left", function(d){ return (-(pointSize(maxPointSize)-pointSize(d))+pointSize(maxPointSize)*2 + 10) + "px"; })
+                    .html(String)
 
-							$(legendTitle[0][0]).tooltip({
-								template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
-							});
-
-						}
-			        }
+                $(legendTitle[0][0]).tooltip({
+                  template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
+                });
+			        }}
 
 			        function drawGeoJson(layer, elem) {
 
