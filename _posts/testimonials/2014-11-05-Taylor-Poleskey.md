@@ -3,7 +3,7 @@ layout: post
 title:  "Food Culture, Palladio, and Representing Magnitude / Molly Taylor-Poleskey"
 author: Mark Braude
 date:   2014-11-03 11:34:22
-category: palladio
+categories: testimonials
 published: true
 tags: 
 excerpt: "Stanford PhD candidate Molly Taylor-Poleskey on how Palladio can be developed to aid her research on food culture in Brandenburg Prussia; Mark Braude responds."
