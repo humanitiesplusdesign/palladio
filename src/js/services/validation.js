@@ -28,7 +28,7 @@ angular.module('palladio.services.validation', ['palladio.services.date'])
 						}
 						break;
 					case 'latlong':
-						if(!latlongTest.test(d)) errors.push({ value: d, message: '"' + d + '" is not a lat/long pair'});
+						if(!latlongTest.test(d) || (+d.split(',')[0]) < -90 || (+d.split(',')[0]) > 90) errors.push({ value: d, message: '"' + d + '" is not a lat/long pair'});
 						break;
 					case 'url':
 						break;
