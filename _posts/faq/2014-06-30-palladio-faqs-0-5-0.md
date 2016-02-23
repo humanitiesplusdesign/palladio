@@ -1,5 +1,5 @@
-
 ---
+
 layout: {{ article }}
 title: {{ Palladio FAQ }}
 modified: 2014-06-20 11:34:22
@@ -10,6 +10,7 @@ image:
   feature:
   teaser:
   thumb:
+  
 ---
 
 
