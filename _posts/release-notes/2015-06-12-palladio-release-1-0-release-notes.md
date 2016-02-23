@@ -3,7 +3,7 @@ layout: post
 title: "The Palladio 1.0 Release"
 author: Nicole Coleman
 date: 2015-06-12 11:34:22
-category: palladio
+categories: release-notes
 published: true
 tags: front
 excerpt: "We made it to 1.0 with a redesigned responsive interface and improvements all around."
