@@ -54,7 +54,6 @@ gulp.task('scripts', function () {
 		.pipe(order(['*.js', '*.tmpl']))
         .pipe(concat('palladio.js'))
         .pipe(gulp.dest('./'))
-        .pipe(gulp.dest('./apps/standalone/'))
         .pipe(gulp.dest('./apps/projectexample/assets/js/'))
         .pipe(gulp.dest('./apps/timespans/'))
         .pipe(gulp.dest('./apps/template/'));
@@ -66,7 +65,6 @@ gulp.task('css', function () {
 		.pipe(filterByExtension("css"))
 		.pipe(concat('palladio.css'))
 		.pipe(gulp.dest('./'))
-        .pipe(gulp.dest('./apps/standalone/'))
         .pipe(gulp.dest('./apps/projectexample/assets/css/'))
         .pipe(gulp.dest('./apps/timespans/'))
         .pipe(gulp.dest('./apps/template/'));
@@ -75,7 +73,6 @@ gulp.task('css', function () {
 gulp.task('images', function () {
 	gulp.src('./bower_components/mapbox.js/images/*')
 		.pipe(gulp.dest('./images/'))
-        .pipe(gulp.dest('./apps/standalone/images/'))
         .pipe(gulp.dest('./apps/projectexample/assets/images/'))
         .pipe(gulp.dest('./apps/timespans/images/'))
         .pipe(gulp.dest('./apps/template/images/'));
@@ -90,12 +87,6 @@ gulp.task('watch', function() {
 });
 
 gulp.task('webserver', function() {
-	gulp.src('apps/standalone')
-		.pipe(webserver({
-			port: 8002,
-			livereload: {enable: true, port: 2347}
-		}));
-
 	gulp.src('apps/projectexample')
 		.pipe(webserver({
 			port: 8003,
