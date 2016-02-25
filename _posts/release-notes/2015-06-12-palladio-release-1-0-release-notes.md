@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: article
 title: "The Palladio 1.0 Release"
 author: Nicole Coleman
 date: 2015-06-12 11:34:22

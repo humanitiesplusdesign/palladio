@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: article
 title: "Video Tutorial: Overview of Palladio"
 categories: tutorials
 excerpt: "If you have never used Palladio before, this is a good place to start."

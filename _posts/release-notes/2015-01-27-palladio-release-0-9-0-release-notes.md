@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: article
 title: "Palladio Release Notes: 0.9.0"
 author: Mark Braude
 date: 2015-01-27 11:34:22

@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: article
 title:  "Networks in History Dev Workshop - July"
 author: Nicole Coleman
 date:   2014-08-10 12:00

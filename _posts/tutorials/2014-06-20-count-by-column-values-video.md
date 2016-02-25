@@ -1,6 +1,6 @@
 ---
 
-layout: post
+layout: article
 title:  "Video Tutorial: Count By Column Values"
 author: Mark Braude
 date:   2014-06-20 11:34:22

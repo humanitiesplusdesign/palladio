@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: article
 title:  "Palladio FAQ"
 author: Mark Braude
 date:   2014-08-18 11:34:22
@@ -62,33 +62,33 @@ Examples of data:
 
 Correct:
 
-First name, Last name, Age
+	First name, Last name, Age
 
-John, Doe, 28
+	John, Doe, 28
 
-Jane, Smith, 35
+	Jane, Smith, 35
 
 Incorrect (missing header):
 
-John, Doe, 28
+	John, Doe, 28
 
-Jane, Smith, 35
+	Jane, Smith, 35
 
 Incorrect (two headers with the same name):
 
-Name, Name, Age
+	Name, Name, Age
 
-John, Doe, 28
+	John, Doe, 28
 
-Jane, Smith, 35
+	Jane, Smith, 35
 
 Incorrect (special characters in the header):
 
-First_Name, Last-Name, Age
+	First_Name, Last-Name, Age
 
-John, Doe, 28
+	John, Doe, 28
 
-Jane, Smith, 35
+	Jane, Smith, 35
 
 *Other Data Issues:*
 

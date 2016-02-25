@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: article
 title:  "Food Culture, Palladio, and Representing Magnitude / Molly Taylor-Poleskey"
 author: Mark Braude
 date:   2014-11-03 11:34:22

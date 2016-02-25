@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: article
 title:  "Palladio Release Notes: 0.6.0"
 author: Ethan Jewett
 date:   2014-07-31 09:00:00

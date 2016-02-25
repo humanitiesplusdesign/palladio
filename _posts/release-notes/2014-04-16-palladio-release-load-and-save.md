@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: article
 title:  "Palladio Release: Load and Save"
 author: Mark Braude
 date:   2014-04-16 11:34:22

@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: article
 title:  "Video Tutorial: Save Your Visualization"
 author: Mark Braude
 date:   2014-06-20 11:34:22

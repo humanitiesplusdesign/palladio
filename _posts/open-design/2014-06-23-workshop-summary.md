@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: article
 title:  "Networks in History / Palladio Workshop"
 author: Mark Braude
 date:   2014-06-23 16:32:00
