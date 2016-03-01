@@ -560,6 +560,26 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 						});
 					}
 				});
+        
+        // Generate boolean reference dimensions for coordinate dimensions
+        lookedUpFile.fields.forEach(function(f) {
+          if(f.type === 'latlong') {
+            var newField = {
+              type: 'text',
+              key: Math.random().toString(36),
+              description: f.description + ": Exists",
+              errors: [],
+              special: [],
+              uniques: []
+            };
+            
+            lookedUpFile.fields.push(newField);
+            
+            for(var j=0; j<lookedUpFile.data.length; j++) {
+              lookedUpFile.data[j][newField.key] = !!lookedUpFile.data[j][f.key]; 
+            }
+          }
+        });
 			}
 		}
 
