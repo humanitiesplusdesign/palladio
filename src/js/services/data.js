@@ -149,6 +149,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 				description: field.description,
 				descriptiveField: field.descriptiveField,
 				errors: field.errors.slice(0),
+        existenceDimension: field.existenceDimension,
 				hierDelimiter: field.hierDelimiter,
 				ignore: field.ignore,
 				key: field.key,
@@ -523,6 +524,9 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 				newFile.label = centralFile.label;
 				newFile.sourceFor = centralFile.sourceFor;
 				newFile.uniqueId = centralFile.uniqueId;
+        
+        // Store existence dimensions.
+        var coordToExists = d3.map();
 
 				// Limit to processing 1000 central rows at a time.
 				for(var j = 0; j < centralFile.data.length; j = j + 1000) {
@@ -537,6 +541,32 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 					newFile.data = centralFile.data.slice(j, j + 1000);
 
 					lookedUpFile = performLookups(newFile, internalLinks);
+          
+          // Generate boolean reference dimensions for coordinate dimensions
+          lookedUpFile.fields.forEach(function(f) {
+            if(f.type === 'latlong') {
+              var newField;
+              if(coordToExists.has(f.key)) {
+                newField = coordToExists.get(f.key);
+              } else {
+                newField = {
+                  type: 'text',
+                  key: Math.random().toString(36),
+                  description: f.description + ": Exists",
+                  errors: [],
+                  special: [],
+                  uniques: []
+                };
+                coordToExists.set(f.key, newField);
+              }
+              
+              lookedUpFile.fields.push(newField);
+              
+              for(var j=0; j<lookedUpFile.data.length; j++) {
+                lookedUpFile.data[j][newField.key] = !!lookedUpFile.data[j][f.key]; 
+              }
+            }
+          });
 
 					data = data.concat(lookedUpFile.data);
 					xfilter.add(lookedUpFile.data);
@@ -560,26 +590,6 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 						});
 					}
 				});
-        
-        // Generate boolean reference dimensions for coordinate dimensions
-        lookedUpFile.fields.forEach(function(f) {
-          if(f.type === 'latlong') {
-            var newField = {
-              type: 'text',
-              key: Math.random().toString(36),
-              description: f.description + ": Exists",
-              errors: [],
-              special: [],
-              uniques: []
-            };
-            
-            lookedUpFile.fields.push(newField);
-            
-            for(var j=0; j<lookedUpFile.data.length; j++) {
-              lookedUpFile.data[j][newField.key] = !!lookedUpFile.data[j][f.key]; 
-            }
-          }
-        });
 			}
 		}
 
