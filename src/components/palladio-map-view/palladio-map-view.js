@@ -288,7 +288,7 @@ angular.module('palladioMapView', ['palladio', 'palladio.services'])
 									groupPoints.get(d.key).hl.agg += +d.value.hl.agg;
 									groupPoints.get(d.key).initialAgg += d.value.initialAgg;
 									groupPoints.get(d.key).desc.valueList = groupPoints.get(d.key).desc.valueList.concat(d.value.desc.values.map(function(f){ return f[0]; }));
-									groupPoints.get(d.key).data = groupPoints.get(d.key).data.concat(d.value.dataList);
+									groupPoints.get(d.key).data = groupPoints.get(d.key).data ? groupPoints.get(d.key).data.concat(d.value.dataList) : undefined;
 								} else {
 									// Must copy the group value because these values will be updated.
 									d.value.desc.valueList = d.value.desc.values.map(function(f){ return f[0]; });
