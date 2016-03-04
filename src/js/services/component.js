@@ -40,6 +40,10 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 				})
 				.error(errorFunction);
 		};
+    
+    var loadJson = function(json) {
+      return loadService.loadJson(json);
+    }
 
 		var dimensions = function () {
 			return dataService.getDataSync().metadata;
@@ -47,6 +51,7 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 
 		return {
 			loadData: loadData,
+      loadJson: loadJson,
 			dimensions: dimensions,
 			register: register,
 			add: add
