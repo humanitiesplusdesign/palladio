@@ -6,8 +6,8 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 
 		var add = function(componentName, selector, options, parentScope) {
 			if(options === undefined) options = {};
-			if(parentScope === undefined) parentScope = $scope;
-
+			if(parentScope === undefined || parentScope === null) parentScope = $scope;
+      
 			var newScope = parentScope.$new(false);
 
 			for(var prop in options) {
@@ -23,6 +23,16 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 				getOptions: function() { return newScope.functions; }
 			};
 		};
+    
+    var promiseAdd = function(componentName, selector, options, parentScope) {
+      var obj = add(componentName, selector, options, parentScope);
+      var p = new Promise(function(resolve, reject) {
+        window.setTimeout(function() {
+          resolve(obj.getOptions());
+        })
+      });
+      return p;
+    }
 
 		var register = function(componentName, compileStringFunction) {
 			// compileStringFunction has signature (options, newScope)
@@ -48,13 +58,26 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 		var dimensions = function () {
 			return dataService.getDataSync().metadata;
 		};
+    
+    var dimensionFromKey = function(key) {
+      return dimensions().filter(function(d) { return d.key === key; })[0];
+    };
+    
+    var dimensionsFromKeys = function(keys) {
+      return keys.map(function(k) {
+        return dimensionFromKey(k);
+      });
+    };
 
 		return {
 			loadData: loadData,
       loadJson: loadJson,
 			dimensions: dimensions,
+      dimensionFromKey: dimensionFromKey,
+      dimensionsFromKeys: dimensionsFromKeys,
 			register: register,
-			add: add
+			add: add,
+      promiseAdd: promiseAdd
 		};
 	}]);
 
