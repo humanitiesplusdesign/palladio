@@ -613,7 +613,6 @@ angular.module('palladioFacetFilter', ['palladio', 'palladio.services'])
 							}
 
 							if(simpleArrayOfKeys.length) {
-								console.log(simpleArrayOfKeys);
 								// Filter the cells to the ones in the saved filter.
 								var cells = d3.select(facetSelection[i]).selectAll('.cell')
 										.filter(function(d) {

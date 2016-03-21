@@ -583,7 +583,16 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 					break;
 				case 'facet':
 					if(!$scope.blurFacet) {
-						$('#filters').prepend($compile('<li><div data-palladio-facet-filter show-controls="true" show-accordion="true" show-drop-area="false" show-settings="true"></div></li>')($scope));
+            var newId = 'palladio-facet-filter-' + Math.floor(Math.random() * 10000);
+						$('#filters').prepend('<li><div id="' + newId + '"></div></li>');
+						componentService.add('facet', "#"+newId, {
+              showControls: true,
+              showSettings: true,
+              showAccordion: true,
+              showDropArea: false,
+              height: "200px"
+            }, $scope);
+						// $('#filters').prepend($compile('<li><div data-palladio-facet-filter show-controls="true" show-accordion="true" show-drop-area="false" show-settings="true"></div></li>')($scope));
 					}
 					break;
 			}
