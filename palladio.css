@@ -7930,114 +7930,6 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	font: 10px Merriweather, Helvetica, Arial, sans-serif;
 }
 
-[data-palladio-list-view] {
-	margin-bottom: 20px;
-	margin-top: 20px;
-}
-
-[data-palladio-list-view] .list-title {
-	font-size: 14px;
-	line-height: normal;
-}
-
-[data-palladio-list-view] .list-image {
-	height: 130px;
-	width: 100px;
-	float: left;
-	background-size: cover;
-	background-position: top center;
-	border: none;
-	margin-right: 10px;
-	background-repeat: no-repeat;
-	background-color: #ddd;
-	color: #bbb;
-	font-size: 12px;
-
-	padding: 20px;
-	text-align: center;
-
-	/* Internet Explorer 10 */
-	display:-ms-flexbox;
-	-ms-flex-pack:center;
-	-ms-flex-align:center;
-
-	/* Firefox */
-	display:-moz-box;
-	-moz-box-pack:center;
-	-moz-box-align:center;
-
-	/* Safari, Opera, and Chrome */
-	display:-webkit-box;
-	-webkit-box-pack:center;
-	-webkit-box-align:center;
-
-	/* W3C */
-	display:box;
-	box-pack:center;
-	box-align:center;
-
-}
-
-
-[data-palladio-list-view] .list-subtitle {
-	color: #888;
-	font-size: 13px;
-	margin-top: 5px;
-}
-
-[data-palladio-list-view] .list-text {
-	font-size: 12px;
-	margin-top: 5px;
-}
-
-[data-palladio-list-view] .list-link {
-	text-decoration: none;
-	color: black;
-}
-
-
-[data-palladio-list-view] .list-box {
-	height: 150px;
-	padding: 10px;
-	background: #e5e5e5;
-	margin-bottom: 15px;
-
-}
-
-[data-palladio-list-view] .list-box:hover {
-	background-color: #ccc;
-}
-
-[data-palladio-palette] .palette-new-dimension-button {
-	width: 100%;
-	margin-top: 10px;
-	display: inline-block;
-	text-align: center;
-}
-
-[data-palladio-palette] .dimension-pill {
-  background-color: #fafafa;
-  width: 135px;
-}
-
-[data-palladio-palette] .palette-property-list .dimension-pill {
-  background-color: #eee;
-  width: 135px;
-}
-
-[data-palladio-palette] .palette-property-list {
-  list-style: none;
-  margin-left: 15px;
-}
-
-[data-palladio-palette] .palette-dimension {
-  background-color: #fafafa;
-  display: inline-block;
-  padding: 2px 5px;
-  margin: 2px;
-  margin-left: 5px;
-  border-radius: 2px;
-}
 [data-palladio-graph-view] {
 	width: 100%;
 	height: 100%;
@@ -8119,6 +8011,84 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 
 [data-palladio-graph-view] .link.hidden {
     display: none;
+}
+
+[data-palladio-list-view] {
+	margin-bottom: 20px;
+	margin-top: 20px;
+}
+
+[data-palladio-list-view] .list-title {
+	font-size: 14px;
+	line-height: normal;
+}
+
+[data-palladio-list-view] .list-image {
+	height: 130px;
+	width: 100px;
+	float: left;
+	background-size: cover;
+	background-position: top center;
+	border: none;
+	margin-right: 10px;
+	background-repeat: no-repeat;
+	background-color: #ddd;
+	color: #bbb;
+	font-size: 12px;
+
+	padding: 20px;
+	text-align: center;
+
+	/* Internet Explorer 10 */
+	display:-ms-flexbox;
+	-ms-flex-pack:center;
+	-ms-flex-align:center;
+
+	/* Firefox */
+	display:-moz-box;
+	-moz-box-pack:center;
+	-moz-box-align:center;
+
+	/* Safari, Opera, and Chrome */
+	display:-webkit-box;
+	-webkit-box-pack:center;
+	-webkit-box-align:center;
+
+	/* W3C */
+	display:box;
+	box-pack:center;
+	box-align:center;
+
+}
+
+
+[data-palladio-list-view] .list-subtitle {
+	color: #888;
+	font-size: 13px;
+	margin-top: 5px;
+}
+
+[data-palladio-list-view] .list-text {
+	font-size: 12px;
+	margin-top: 5px;
+}
+
+[data-palladio-list-view] .list-link {
+	text-decoration: none;
+	color: black;
+}
+
+
+[data-palladio-list-view] .list-box {
+	height: 150px;
+	padding: 10px;
+	background: #e5e5e5;
+	margin-bottom: 15px;
+
+}
+
+[data-palladio-list-view] .list-box:hover {
+	background-color: #ccc;
 }
 
 [data-palladio-map-view] {
@@ -8338,20 +8308,36 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 		margin-bottom: 0px
 }
 
-[data-palladio-partime-filter] path {
-	fill: #dddddd;
+[data-palladio-palette] .palette-new-dimension-button {
+	width: 100%;
+	margin-top: 10px;
+	display: inline-block;
+	text-align: center;
 }
 
-[data-palladio-partime-filter] .axis path, [data-palladio-partime-filter] .axis line {
-	fill: none;
-	stroke: #000;
-	shape-rendering: crispEdges;
+[data-palladio-palette] .dimension-pill {
+  background-color: #fafafa;
+  width: 135px;
 }
 
-[data-palladio-partime-filter] .axis text {
-	font-size: 10px;
+[data-palladio-palette] .palette-property-list .dimension-pill {
+  background-color: #eee;
+  width: 135px;
 }
 
+[data-palladio-palette] .palette-property-list {
+  list-style: none;
+  margin-left: 15px;
+}
+
+[data-palladio-palette] .palette-dimension {
+  background-color: #fafafa;
+  display: inline-block;
+  padding: 2px 5px;
+  margin: 2px;
+  margin-left: 5px;
+  border-radius: 2px;
+}
 [data-palladio-selection-view] {
 	display: inline-block;
 }
