@@ -53,10 +53,7 @@ gulp.task('scripts', function () {
 	merge(files, templates)
 		.pipe(order(['*.js', '*.tmpl']))
         .pipe(concat('palladio.js'))
-        .pipe(gulp.dest('./'))
-        .pipe(gulp.dest('./apps/projectexample/assets/js/'))
-        .pipe(gulp.dest('./apps/timespans/'))
-        .pipe(gulp.dest('./apps/template/'));
+        .pipe(gulp.dest('./'));
 });
 
 gulp.task('css', function () {
@@ -64,18 +61,12 @@ gulp.task('css', function () {
 				.concat(palladioCSS))
 		.pipe(filterByExtension("css"))
 		.pipe(concat('palladio.css'))
-		.pipe(gulp.dest('./'))
-        .pipe(gulp.dest('./apps/projectexample/assets/css/'))
-        .pipe(gulp.dest('./apps/timespans/'))
-        .pipe(gulp.dest('./apps/template/'));
+		.pipe(gulp.dest('./'));
 });
 
 gulp.task('images', function () {
 	gulp.src('./bower_components/mapbox.js/images/*')
-		.pipe(gulp.dest('./images/'))
-        .pipe(gulp.dest('./apps/projectexample/assets/images/'))
-        .pipe(gulp.dest('./apps/timespans/images/'))
-        .pipe(gulp.dest('./apps/template/images/'));
+		.pipe(gulp.dest('./images/'));
 });
 
 // Watch Files For Changes
@@ -86,14 +77,6 @@ gulp.task('watch', function() {
     gulp.watch(palladioTemplate, ['scripts']);
 });
 
-gulp.task('webserver', function() {
-	gulp.src('apps/projectexample')
-		.pipe(webserver({
-			port: 8003,
-			livereload: {enable: true, port: 2348}
-		}));
-});
-
-gulp.task('default', ['scripts', 'css', 'images', 'webserver', 'watch']);
+gulp.task('default', ['scripts', 'css', 'images', 'watch']);
 gulp.task('all', ['scripts', 'css', 'images']);
 gulp.task('serve', ['webserver']);
