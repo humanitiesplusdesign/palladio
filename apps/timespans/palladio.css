@@ -8573,33 +8573,6 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
 	overflow: auto;
 }
 
-/*[data-palladio-timeline-filter] .list-title {
-	height: 1.4em;
-	font-weight: bold;
-	margin-top: 1.5em;
-	margin-left: 1.5em;
-	margin-bottom: 0.25em;
-}*/
-
-[data-palladio-timeline-filter] path {
-	shape-rendering: crispEdges;
-}
-
-[data-palladio-timeline-filter] .axis path, [data-palladio-timeline-filter] .axis line {
-	fill: none;
-	stroke: #000;
-	shape-rendering: crispEdges;
-}
-
-[data-palladio-timeline-filter] .axis text {
-	font-size: 10px;
-}
-
-[data-palladio-timeline-filter] .resize path {
-  fill: #eee;
-  stroke: #666;
-}
-
 [data-palladio-arctime-filter] .list-title {
 	height: 1.4em;
 	font-weight: bold;
@@ -8788,6 +8761,33 @@ table.dataTable{width:100%;margin:0 auto;clear:both;border-collapse:separate;bor
   fill-opacity: .165;
   shape-rendering: crispEdges;
 }
+/*[data-palladio-timeline-filter] .list-title {
+	height: 1.4em;
+	font-weight: bold;
+	margin-top: 1.5em;
+	margin-left: 1.5em;
+	margin-bottom: 0.25em;
+}*/
+
+[data-palladio-timeline-filter] path {
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-timeline-filter] .axis path, [data-palladio-timeline-filter] .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-timeline-filter] .axis text {
+	font-size: 10px;
+}
+
+[data-palladio-timeline-filter] .resize path {
+  fill: #eee;
+  stroke: #666;
+}
+
 [data-palladio-timestep-filter] path {
 	fill: #dddddd;
 }
