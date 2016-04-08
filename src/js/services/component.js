@@ -102,7 +102,6 @@ var startPalladio = function(additionalModules) {
 		'palladioDataDownload',
 
 		// Filters
-		'palladioFacetFilter',
 		'palladioPartimeFilter',
 		// Views
 		'palladioListView',
