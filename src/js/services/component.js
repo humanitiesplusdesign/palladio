@@ -101,8 +101,6 @@ var startPalladio = function(additionalModules) {
 		'palladioDataUpload',
 		'palladioDataDownload',
 
-		// Filters
-		'palladioPartimeFilter',
 		// Views
 		'palladioListView',
 		'palladioMapView',
