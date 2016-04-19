@@ -105,8 +105,7 @@ var startPalladio = function(additionalModules) {
 		'palladioListView',
 		'palladioMapView',
 		'palladioTableView',
-		'palladioSelectionView',
-		'palladioGraphView'
+		'palladioSelectionView'
 	].concat(additionalModules);
 
 	var appId = "palladioApp" + Math.floor(Math.random() * 10000);

@@ -556,6 +556,10 @@ angular.module('palladio.controllers', ['palladio.services', 'palladio'])
 			return $('#filters').children().length;
 		};
 
+    componentService.promiseAdd('graph', "#graph-view-with-settings", {
+      showSettings: true
+    });
+
 		// Compile new filters, add them to the WorkflowCtrl scope (parent)
 		// and then append them to the DOM.
 		$scope.addFilter = function(filter) {
