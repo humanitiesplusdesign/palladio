@@ -103,7 +103,6 @@ var startPalladio = function(additionalModules) {
 
 		// Views
 		'palladioListView',
-		'palladioMapView',
 		'palladioTableView',
 		'palladioSelectionView'
 	].concat(additionalModules);
