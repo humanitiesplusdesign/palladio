@@ -21,6 +21,71 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 			file.loadFromURL = url ? true : false;
 			file.label = label || "Untitled";
 			file.id = files.length;
+			
+			// Build list of existing fields
+			var existingFieldKeys = [];
+			files.forEach(function(d) {
+				d.fields.forEach(function(d) { 
+					existingFieldKeys.push(d.key);
+				})
+			});
+			
+			// For now we assume all records have the same structure so we only need to test the
+			// keys of the first record
+			var currentFieldKeys = [];
+			for(key in data[0]) {
+				currentFieldKeys.push(key);
+			}
+	
+			// Note that this just increments the final digit, so we'll end up wtih some numbers
+			// like 9993.
+			var appendOrIncrementKey = function(currentKey) {
+				if(!isNaN(+currentKey[currentKey.length-1])) {
+					return currentKey.substring(0, currentKey.length-1) + (+currentKey[currentKey.length-1]+1);
+				} else {
+					return currentKey + "_1";
+				}	
+			}
+			
+			while(currentFieldKeys.reduce(function(a,b) { return a || (existingFieldKeys.indexOf(b) !== -1) }, false)) {
+				
+				// Find the problem-key
+				var existingKey = undefined;
+				var currentKey = undefined;
+				for(var i = 0; i < currentFieldKeys.length; i++) {
+					for(var j = 0; j < existingFieldKeys.length; j++) {
+						if(existingFieldKeys[j] === currentFieldKeys[i]) {
+							existingKey =	existingFieldKeys[j];
+							currentKey = currentFieldKeys[i];
+						} 
+					}
+				}
+				
+				if(existingKey && currentKey) {
+					// Check if the last character of the key is already a number. If it is,
+					// increment it. If it isn't, then add '_1'.
+					currentKey = appendOrIncrementKey(currentKey);
+					
+					// Check that we didn't choose a key that is already being used in this table. If we did,
+					// just keep incrementing.
+					while(currentFieldKeys.indexOf(currentKey) !== -1) {
+						currentKey = appendOrIncrementKey(currentKey);
+					}
+					
+					// Then reprocess all the data elements and rename the property
+					for(var i = 0; i < data.length; i++) {
+						data[i][currentKey] = data[i][existingKey];
+						delete data[i][existingKey];
+					}
+				}
+				
+				// Rebuild list of keys
+				currentFieldKeys = [];	
+				for(key in data[0]) {
+					currentFieldKeys.push(key);
+				}				
+			}
+			
 			// Do auto-recognition on load
 			file.autoFields = parseService.getFields(data);
 
