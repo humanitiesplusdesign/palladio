@@ -1,0 +1,9 @@
+
+# Start development with › $ jekyll serve --config _config.yml,_config_dev.yml
+
+url: 'http://localhost:4000'
+urlimg: 'http://localhost:4000/assets/'
+
+
+# Disable when not in production
+google_analytics_tracking_id:

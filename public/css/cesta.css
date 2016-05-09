@@ -1,0 +1,52 @@
+html {
+  font-family: 'karla', 'source sans pro', helvetica, arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.org a {
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0;
+	color: #aa3311;
+}
+
+
+/*
+ * Masthead
+ *
+ * Super small header above the content for site name and short description.
+ */
+
+.masthead {
+	margin-bottom: 3rem;
+	text-align: center;
+	padding-top: .8rem;
+	padding-bottom: .8rem;
+  border-bottom: none;
+}
+
+h3.masthead-title {
+  font-weight: 400;
+  color: #222;
+  font-family: roboto slab, serif;
+  font-size: 1.25rem;
+  letter-spacing: 0;
+}
+
+.masthead-title img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+@media (max-width: 48em) {
+  .masthead-title {
+    text-align: center;
+  }
+  .masthead-title small {
+    display: none;
+  }
+}

@@ -1,47 +1,44 @@
-# Site wide configuration
+# Built with Jekyll 3.2.0
 
-title: Palladio
-description: "Release notes, documentation, and use cases."
-logo: images/palladio_sq.png
-#teaser: # 400x250 px default teaser image used in image archive grid
-locale: en
-url: http://hdlab.stanford.edu/palladio
-#url: http://localhost:4000
+# Setup
+title:               Palladio
+tagline:             'Visualize complex historical data with ease.'
+description:         'Palladio is developed at Humanities + Design, Stanford University.'
+url:                 'http://hdlab.stanford.edu/palladio'
+urlimg: 'http://localhost:4000/assets/'
+baseurl:             ''
 
-# Jekyll configuration
+# Permalinks
+permalink: pretty
+permalink: /:title/
 
-sass:
-  sass_dir: _sass
-  style: compressed
-permalink: /:categories/:title/
+# Set encoding to UTF-8
+encoding: utf-8
+
+# Collections for texts
+collections:
+  tutorials:
+    output: true
+  releasenotes:
+    output: true
+    
+
+# Markdown specs
+markdown: kramdown
+
 kramdown:
-  toc_levels: 1..2
-highlighter: rouge
-gems:
-  - jekyll-sitemap
-  - jekyll-gist
+  auto_ids:       true
+  footnote_nr:    1
+  entity_output:  as_char
+  footnote_backlink: "&#x21a9;&#xfe0e;"
+  toc_levels:     1..6
+  smart_quotes:   lsquo,rsquo,ldquo,rdquo
+  enable_coderay: false
+
+# Custom vars
+version:             1.1.4
+
+# Exclusions from the final site
+exclude: [optional, vendor]
 
 
-# Octopress configuration
-
-# Default extensions
-post_ext: md
-page_ext: md
-
-# Found in _templates/
-post_layout: article
-page_layout: article
-
-# Format titles with titlecase?
-titlecase: true
-
-
-# Site owner
-owner: "Humanities + Design"
-name: "Humanities + Design"
-email: apps@designhumanities.org
-twitter: "@hdstanford"
-#avatar: bio-photo.jpg # 160x160 px image for author byline
-
-
-exclude: ["lib", "config.rb", ".sass-cache", "Capfile", "config", "log", "Rakefile", "Rakefile.rb", "tmp", "*.sublime-project", "*.sublime-workspace", "Gemfile", "Gemfile.lock", "README.md", "LICENSE", "node_modules", "Gruntfile.js", "package.json"]
