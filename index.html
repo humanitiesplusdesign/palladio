@@ -2,38 +2,49 @@
 layout: default
 title: Home
 ---
-<div class="introduction">
-</div>
-
-<hr>
-
-<div class="toc">
-  <h2>Tutorials</h2>
-  <ul class="post">
-  {% for item in site.tutorials do %}
-  
-    <li class="post-title">
-      <a href="{{ site.baseurl }}{{ item.url }}">
-        {{ item.title }}
-      </a>
-    </li>
-  {% endfor %}
-  </ul>  
-  <h2>Release Notes</h2>
-  <ul class="post">
-  {% for item in site.releasenotes do %}
-  
-    <li class="post-title">
-      <a href="{{ site.baseurl }}{{ item.url }}">
-        {{ item.title }}
-      </a>
-    </li>
-  {% endfor %}
-  </ul>  
-  <h2>FAQs</h2>
-{% capture faq %}{% include faq.md %}{% endcapture %}
-{{ faq | markdownify }}
-</div>
 
 
+<section class="first">
+    <h2>What can I do with Palladio?</h2>
+    <div class="wide-container">
+    <img src="{{site.urlimg}}upload.jpg"/>
+    <h3>Create or Open Palladio projects</h3>
+    <p>Copy and paste out of your spreadsheets, drag-and-drop to upload tabular data (e.g. .csv, .tab, .tsv), or link to a file in a public Dropbox folder to create a new Palladio project.</p>
 
+    </div>
+</section>
+
+<section class="second">
+    <div class="wide-container">
+        <img src="{{site.urlimg}}map-view.jpg"/>
+        <h3>Visualize your data</h3>
+
+        <p>In the Map view, you can see any coordinates data as points on a map. Relationships between distinct points can be connected by lines, with the arc of the line representing the flow of the relationship.</p>
+
+        <p>Points on the map can be sized to represent their relative magnitude within your data. With the map’s tooltip function you can select which information will be displayed when hovering over a specific point on the map. Zoom in and out using the + and – buttons. Export the nodes and links of Map visualizations (though not the Map background itself) as .svg files.</p>
+
+    </div>
+</section>
+
+<section class="first">
+    <div class="wide-container">
+        <img src="{{site.urlimg}}graph-view.jpg"/>
+        <p>In the Graph view, you can visualize the relationships between any two dimensions of your data. Graph information will be displayed as nodes connected by lines. Nodes can be scaled to reflect their relative magnitude within your data. The display of links and labels can be toggled on and off. Export Graph visualizations as .svg files.</p>
+
+    </div>
+</section>
+
+<section class="second">
+    <div class="wide-container">
+        <img src="{{site.urlimg}}list-view.jpg"/>
+        <p>In the List view, dimensions of your data can be arranged to make customized lists. Export List visualizations as .csv files.</p>
+
+    <div>
+</section>
+
+<section class="first">
+    <div class="wide-container">
+        <img src="{{site.urlimg}}gallery-view.jpg"/>
+        <p>In the Gallery view, data can be displayed within a grid setting for quick reference. Here dimensions of your data can also be linked to outside web-based information. Sort your data according to different dimensions.</p>
+    </div>
+</section>
