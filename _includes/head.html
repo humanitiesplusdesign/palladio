@@ -23,7 +23,7 @@
   <meta property="og:book:release_date" content="{{ page.publication-date }}"/>
   <meta property="og:type" content="website" />
   <meta property="og:url" content="{{ site.url }}"/>
-  <meta property="og:image" content="http://humanitiesplusdesign.github.io/palladio/public/apple-touch-icon-precomposed.png"/>
+  <meta property="og:image" content="{{ site.baseurl }}/public/apple-touch-icon-precomposed.png"/>
    
   <title>
     {% if page.title == "Home" %}
@@ -45,8 +45,8 @@
  
 
   <!-- Icons -->
-  <link rel="apple-touch-icon-precomposed" sizes="180x180" href="http://humanitiesplusdesign.github.io/palladio/public/apple-touch-icon-precomposed.png"/>
-  <link rel="shortcut icon" href="http://humanitiesplusdesign.github.io/palladio/public/favicon.ico"/>
+  <link rel="apple-touch-icon-precomposed" sizes="180x180" href="{{ site.baseurl }}/public/apple-touch-icon-precomposed.png"/>
+  <link rel="shortcut icon" href="{{ site.baseurl }}/public/favicon.ico"/>
 
   <!-- RSS -->
   <link rel="alternate" type="application/rss+xml" title="RSS" href="{{ site.url }}/atom.xml"/>
