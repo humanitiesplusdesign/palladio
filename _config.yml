@@ -6,7 +6,7 @@ tagline:             'Visualize complex historical data with ease.'
 description:         'Palladio is developed at Humanities + Design, Stanford University.'
 url:                 'http://hdlab.stanford.edu/palladio'
 urlimg:              'http://hdlab.stanford.edu/palladio/assets'
-baseurl:             'http://humanitiesplusdesign.github.io/palladio/public/'
+baseurl:             ''
 
 # Permalinks
 permalink: pretty
