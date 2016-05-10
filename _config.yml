@@ -21,6 +21,8 @@ collections:
     output: true
   releasenotes:
     output: true
+  testimonials:
+    output: true
     
 
 # Markdown specs
