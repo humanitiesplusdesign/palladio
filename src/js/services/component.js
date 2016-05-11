@@ -86,7 +86,6 @@ var startPalladio = function(additionalModules) {
 	var modules = [
 		'palladio',
 		'palladio.components',
-		'palladio.controllers',
 		'palladio.services',
 		'palladio.directives',
 		'palladio.filters',
