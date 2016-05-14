@@ -1,6 +1,6 @@
-angular.module('palladio.components', ['palladio.services.data', 'palladio.services.load'])
-	.factory('componentService', ['$compile', "$rootScope", "$http", "loadService", "dataService",
-		function($compile, $scope, $http, loadService, dataService) {
+angular.module('palladio.components', ['palladio.services.data', 'palladio.services.load', 'palladio'])
+	.factory('componentService', ['$compile', "$rootScope", "$http", "loadService", "dataService", 'palladioService',
+		function($compile, $scope, $http, loadService, dataService, palladioService) {
 
 		var components = {};
 
@@ -40,19 +40,43 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 			components[componentName] = compileStringFunction;
 		};
 
-		var loadData = function(url, successFunction, errorFunction) {
-			if(!errorFunction) { errorFunction = function () {}; }
+		var loadData = function(url, successFunction, errorFunction, progressCallback) {
+			if(!errorFunction) { errorFunction = function() {}; }
+			if(progressCallback) {
+				// Register callbacks on palladioService
+				palladioService.on('file_downloaded', function() {
+					progressCallback(0.3);
+				});
+				palladioService.on('file_loaded', function() {
+					progressCallback(0.6);
+				});
+				// Until we make the data processing properly async, the percentage here is
+				// useless because the browser won't update the DOM.
+				palladioService.on('file_processing_progress', function(percent) {
+					// We give 50% of time to processing
+					progressCallback(0.5+(percent/2));
+				});
+				palladioService.on('file_processed', function() {
+					progressCallback(1);
+				})
+			}
 			$http.get(url)
 				.success(function(data) {
-					loadService.loadJson(data).then(function() {
-						successFunction(data);
-					});
+					palladioService.event('file_downloaded');
+					var next = function() {
+						loadService.loadJson(data).then(function() {
+							palladioService.event('file_loaded');
+							setTimeout(successFunction, 200, data)
+							//successFunction(data);
+						});
+					}
+					setTimeout(next, 200);
 				})
 				.error(errorFunction);
 		};
     
-    var loadJson = function(json) {
-      return loadService.loadJson(json);
+    var loadJson = function(json, progressCallback) {
+      return loadService.loadJson(json, progressCallback);
     }
 
 		var dimensions = function () {

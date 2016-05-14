@@ -238,6 +238,33 @@ angular.module('palladio', [])
 
 			$(selector).append(directive);
 		};
+		
+		var events = d3.map();
+		events.set('file_downloaded', []);
+		events.set('file_loaded', []);
+		events.set('file_processing_progress', []);
+		events.set('file_processed', []);
+		
+		var onHandler = function(eventName, eventFunction) {
+			if(events.has(eventName)) {
+				var ev = events.get(eventName);
+				ev.push(eventFunction);
+				events.set(eventName, ev);
+				return function() {
+					events.set(eventName, events.get(eventName).filter(function(event) {
+						return event !== eventFunction;
+					}));
+				}
+			} else {
+				console.log('"' + eventName + '" is not a supported event type.')
+			}
+		}
+		
+		var eventHandler = function(eventName, obj) {
+			events.get(eventName).forEach(function(eventFunction) {
+				eventFunction(obj);
+			});
+		}
 
 		return {
 			onUpdate: registerUpdateListener,
@@ -257,6 +284,8 @@ angular.module('palladio', [])
 			registerStateFunctions: registerStateFunctions,
 			getStateFunctions: getStateFunctions,
 			preUpdate: registerPreUpdateFunction,
-			postUpdate: registerPostUpdateFunction
+			postUpdate: registerPostUpdateFunction,
+			on: onHandler,
+			event: eventHandler
 		};
 	}]);

@@ -1,6 +1,6 @@
 angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.services.validation',
-		'palladio.services.spinner'])
-	.factory("dataService", function (parseService, validationService, spinnerService, $q) {
+		'palladio.services.spinner', 'palladio'])
+	.factory("dataService", function (parseService, validationService, spinnerService, $q, palladioService) {
 
 		// Set this to "true" if data or links have been added/removed/changed
 
@@ -374,9 +374,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 						file: {
 							uniqueId: l.source.file.uniqueId,
 							label: l.source.file.label,
-							fields: l.source.file.fields.map(function(f) {
-								return copyField(f);
-							}),
+							fields: l.source.file.fields.map(copyField),
 							data: l.source.file.data
 						},
 						field: {
@@ -388,9 +386,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 						file: {
 							uniqueId: l.lookup.file.uniqueId,
 							label: l.lookup.file.label,
-							fields: l.lookup.file.fields.map(function(f) {
-								return copyField(f);
-							}),
+							fields: l.lookup.file.fields.map(copyField),
 							data: l.lookup.file.data
 						},
 						field: {
@@ -593,9 +589,9 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
         // Store existence dimensions.
         var coordToExists = d3.map();
 
-				// Limit to processing 1000 central rows at a time.
-				for(var j = 0; j < centralFile.data.length; j = j + 1000) {
-					console.log("Processed " + j + " records from " + centralFile.label + " table.");
+				// Limit to processing 3000 central rows at a time.
+				for(var j = 0; j < centralFile.data.length; j = j + 3000) {
+					palladioService.event('file_processing_progress', j/centralFile.data.length)
 					newFile = {};
 					newFile.autoFields = centralFile.autoFields.map(copyField);
 					newFile.fields = centralFile.fields;
@@ -603,7 +599,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 					newFile.label = centralFile.label;
 					newFile.sourceFor = centralFile.sourceFor;
 					newFile.uniqueId = centralFile.uniqueId;
-					newFile.data = centralFile.data.slice(j, j + 1000);
+					newFile.data = centralFile.data.slice(j, j + 3000);
 
 					lookedUpFile = performLookups(newFile, internalLinks);
           
@@ -637,7 +633,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 					xfilter.add(lookedUpFile.data);
 				}
 
-				console.log("Processed " + centralFile.data.length + " records from " + centralFile.label + " table.");
+				palladioService.event('file_processed');
 
 				metadata = lookedUpFile.fields;
 
@@ -686,23 +682,22 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 				}
 			});
 
-			data = file.data.map(function (d) {
-
-				newRow = angular.extend({}, d);
+			for(var i=0; i < file.data.length; i++) {
+				newRow = angular.extend({}, file.data[i]);
 
 				// Remove deleted dimensions
-				dimsWithDelete.forEach(function (dim) {
-					delete newRow[dim.key];
-				});
+				for(var j=0; j < dimsWithDelete.length; j++) {
+					delete newRow[dimsWithDelete[j].key];
+				}
 
-				return newRow;
-			});
+				data.push(newRow);
+			}
 
 			newFile = {};
-			newFile.autoFields = file.autoFields.map(function (f) { return copyField(f); });
+			newFile.autoFields = file.autoFields.map(copyField);
 			newFile.data = data;
 			newFile.fields = file.fields
-									.map(function (f) { return copyField(f); })
+									.map(copyField)
 									.filter(function(f) { return !f.delete; });
 			newFile.id = file.id;
 			newFile.label = file.label;
@@ -744,7 +739,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 				return d;
 			});
 
-			fields = file.fields.map(function(f) { return copyField(f); });
+			fields = file.fields.map(copyField);
 
 			// Update metadata with hierarchy dimensions
 			var newField;
@@ -758,7 +753,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 			});
 
 			newFile = {};
-			newFile.autoFields = file.autoFields.map(function (f) { return copyField(f); });
+			newFile.autoFields = file.autoFields.map(copyField);
 			newFile.data = data;
 			newFile.fields = fields;
 			newFile.id = file.id;
@@ -819,9 +814,9 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 			});
 
 			newFile = {};
-			newFile.autoFields = file.autoFields.map(function (f) { return copyField(f); });
+			newFile.autoFields = file.autoFields.map(copyField);
 			newFile.data = data;
-			newFile.fields = file.fields.map(function (f) { return copyField(f); });
+			newFile.fields = file.fields.map(copyField);
 			newFile.id = file.id;
 			newFile.label = file.label;
 			newFile.sourceFor = file.sourceFor;
@@ -902,9 +897,9 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 			}
 
 			newFile = {};
-			newFile.autoFields = file.autoFields.map(function(f) { return copyField(f); });
+			newFile.autoFields = file.autoFields.map(copyField);
 			newFile.data = data;
-			newFile.fields = file.fields.map(function (f) { return copyField(f); });
+			newFile.fields = file.fields.map(copyField);
 			newFile.id = file.id;
 			newFile.label = file.label;
 			newFile.sourceFor = file.sourceFor;
