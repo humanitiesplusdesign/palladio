@@ -181,11 +181,11 @@ angular.module('palladio.services.parse', [])
 
 				d3.keys(objs[0]).forEach(function(d){ keys[d] = []; });
 
-				objs.forEach(function(d){
+				for(var i=0; i < objs.length; i++) {
 					for(var key in keys) {
-						keys[key].push(sniff(d[key]));
+						keys[key].push(sniff(objs[i][key]));
 					}
-				});
+				}
 
 				return d3.keys(objs[0]).map(function(d){
 					
