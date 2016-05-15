@@ -53,8 +53,8 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 				// Until we make the data processing properly async, the percentage here is
 				// useless because the browser won't update the DOM.
 				palladioService.on('file_processing_progress', function(percent) {
-					// We give 50% of time to processing
-					progressCallback(0.5+(percent/2));
+					// We give 40% (100-60) of time to processing
+					progressCallback(0.6+(percent/(1/(1-0.6))));
 				});
 				palladioService.on('file_processed', function() {
 					progressCallback(1);
@@ -62,14 +62,27 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 			}
 			$http.get(url)
 				.success(function(data) {
-					palladioService.event('file_downloaded');
+					// Read this function backwards due to async calls without Promises.
+					
 					var next = function() {
 						loadService.loadJson(data).then(function() {
+							var process = function () {
+								dataService.getData().then(function() {
+									
+									// File is processed, so future dataService.getData and
+									// dataService.getDataSync calls will be cached.
+									setTimeout(successFunction, 200)
+								});
+							}
+							
+							// File is loaded into dataService. Kick off processing.
 							palladioService.event('file_loaded');
-							setTimeout(successFunction, 200, data)
-							//successFunction(data);
+							setTimeout(process, 200);
 						});
 					}
+					
+					// File has downloaded. Kick off loading the file into the dataService
+					palladioService.event('file_downloaded');
 					setTimeout(next, 200);
 				})
 				.error(errorFunction);
