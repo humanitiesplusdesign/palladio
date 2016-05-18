@@ -39,8 +39,6 @@
     "classie": "~1.0.1",
     "Blob": "*",
     "FileSaver": "*",
-    "YASQE": "https://github.com/YASGUI/YASQE.git#~1.4.0",
-    "YASR": "https://github.com/YASGUI/YASR.git#~1.2.0",
     "angular-ui-select": "0.16.1",
     "mapbox.js": "2.1.9",
     "angular-bootstrap-colorpicker": "3.0.25",
@@ -55,18 +53,6 @@
     },
     "crossfilter2": {
       "main": "crossfilter.min.js"
-    },
-    "YASQE": {
-      "main": [
-        "dist/yasqe.min.js",
-        "dist/yasqe.min.css"
-      ]
-    },
-    "YASR": {
-      "main": [
-        "dist/yasr.bundled.min.js",
-        "dist/yasr.min.css"
-      ]
     }
   },
   "resolutions": {

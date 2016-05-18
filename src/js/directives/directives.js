@@ -1,7 +1,6 @@
 angular.module('palladio.directives', [
 //	'mgcrea.ngStrap',
 	'palladio.directives.dimension',
-	'palladio.directives.yasgui',
 	'palladio.directives.group',
 	'palladio.directives.tag',
 	'palladio.directives.specials',
