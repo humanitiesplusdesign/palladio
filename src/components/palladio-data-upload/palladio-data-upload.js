@@ -14,7 +14,7 @@ angular.module('palladioDataUpload', ['palladio.services'])
 
 		componentService.register('upload', compileStringFunction);
 	}])
-	.directive('palladioDataUpload', function (dataService, loadService, spinnerService) {
+	.directive('palladioDataUpload', ['dataService', 'loadService', 'spinnerService', function (dataService, loadService, spinnerService) {
 		var directiveObj = {
 			scope: {
 				'load': '&onLoad',
@@ -48,4 +48,4 @@ angular.module('palladioDataUpload', ['palladio.services'])
 		};
 
 		return directiveObj;
-	});
+	}]);

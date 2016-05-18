@@ -1,7 +1,7 @@
 // Selection view module
 
 angular.module('palladioSelectionView', ['palladio'])
-	.directive('palladioSelectionView', function (palladioService) {
+	.directive('palladioSelectionView', ['palladioService', function (palladioService) {
 
 		var directiveDefObj = {
 			scope: true,
@@ -88,4 +88,4 @@ angular.module('palladioSelectionView', ['palladio'])
 		};
 
 		return directiveDefObj;
-	});
+	}]);

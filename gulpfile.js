@@ -53,7 +53,10 @@ gulp.task('scripts', function () {
 	merge(files, templates)
 		.pipe(order(['*.js', '*.tmpl']))
         .pipe(concat('palladio.js'))
-        .pipe(gulp.dest('./'));
+        .pipe(gulp.dest('./'))
+				.pipe(uglify())
+        .pipe(rename('palladio.min.js'))
+        .pipe(gulp.dest('./'));;
 });
 
 gulp.task('css', function () {

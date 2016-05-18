@@ -1,6 +1,6 @@
 angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.services.validation',
 		'palladio.services.spinner', 'palladio'])
-	.factory("dataService", function (parseService, validationService, spinnerService, $q, palladioService) {
+	.factory("dataService", ['parseService', 'validationService', 'spinnerService', '$q', 'palladioService', function (parseService, validationService, spinnerService, $q, palladioService) {
 
 		// Set this to "true" if data or links have been added/removed/changed
 
@@ -1000,7 +1000,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 			helper([], 0);
 			return r;
 		}
-	})
-	.factory("dataPromise", function (dataService) {
+	}])
+	.factory("dataPromise", ['dataService', function (dataService) {
 		return dataService.getData();
-	});
+	}]);

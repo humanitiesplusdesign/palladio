@@ -69,7 +69,6 @@ angular.module('palladio.services.date', [])
 					}
 				}
 			}
-			return "";
 		}
 
 		var dimFormat = function (t) {

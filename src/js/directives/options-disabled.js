@@ -1,5 +1,5 @@
 angular.module('palladio.directives.optionsDisabled', [])
-	.directive('optionsDisabled', function($parse) {
+	.directive('optionsDisabled', ['$parse', function($parse) {
 	    var disableOptions = function(scope, attr, element, data, fnDisableIfTrue) {
 	        // refresh the disabled options in the select element.
 	        $("option[value!='?']", element).each(function(i, e) {
@@ -28,4 +28,4 @@ angular.module('palladio.directives.optionsDisabled', [])
 	            }, true);
 	        }
 	    };
-	})
+	}])

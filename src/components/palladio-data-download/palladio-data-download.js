@@ -1,7 +1,7 @@
 // Palladio data upload component
 
 angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
-	.directive('palladioDataDownload', function (dataService, version, palladioService) {
+	.directive('palladioDataDownload', ['dataService', 'version', 'palladioService', function (dataService, version, palladioService) {
 		var directiveObj = {
 			// scope: false,
 			transclude: true,
@@ -95,4 +95,4 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 		};
 
 		return directiveObj;
-	});
+	}]);
