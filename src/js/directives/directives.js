@@ -1,9 +1,6 @@
 angular.module('palladio.directives', [
 //	'mgcrea.ngStrap',
 	'palladio.directives.dimension',
-	'palladio.directives.refine',
-	'palladio.directives.files',
-	'palladio.directives.file',
 	'palladio.directives.yasgui',
 	'palladio.directives.group',
 	'palladio.directives.tag',
@@ -13,7 +10,6 @@ angular.module('palladio.directives', [
 	'palladio.directives.modal',
 	'palladio.directives.optionsDisabled',
 	'palladio.directives.resizable',
-	'palladio.directives.filePills',
 	'ui.sortable',
 	'ngSanitize',
 	'palladio'])
