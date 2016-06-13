@@ -82200,9 +82200,9 @@ var tooltip = $.widget( "ui.tooltip", {
     if (!cm.state.focused) { cm.display.input.focus(); onFocus(cm); }
   }
 
-  // This will be set to an array of strings when copying, so that,
-  // when pasting, we know what kind of selections the copied text
-  // was made out of.
+  // This will be set to a {lineWise: bool, text: [string]} object, so
+  // that, when pasting, we know what kind of selections the copied
+  // text was made out of.
   var lastCopied = null;
 
   function applyTextInput(cm, inserted, deleted, sel, origin) {
@@ -82211,14 +82211,14 @@ var tooltip = $.widget( "ui.tooltip", {
     if (!sel) sel = doc.sel;
 
     var paste = cm.state.pasteIncoming || origin == "paste";
-    var textLines = doc.splitLines(inserted), multiPaste = null;
+    var textLines = doc.splitLines(inserted), multiPaste = null
     // When pasing N lines into N selections, insert one line per selection
     if (paste && sel.ranges.length > 1) {
-      if (lastCopied && lastCopied.join("\n") == inserted) {
-        if (sel.ranges.length % lastCopied.length == 0) {
+      if (lastCopied && lastCopied.text.join("\n") == inserted) {
+        if (sel.ranges.length % lastCopied.text.length == 0) {
           multiPaste = [];
-          for (var i = 0; i < lastCopied.length; i++)
-            multiPaste.push(doc.splitLines(lastCopied[i]));
+          for (var i = 0; i < lastCopied.text.length; i++)
+            multiPaste.push(doc.splitLines(lastCopied.text[i]));
         }
       } else if (textLines.length == sel.ranges.length) {
         multiPaste = map(textLines, function(l) { return [l]; });
@@ -82234,6 +82234,8 @@ var tooltip = $.widget( "ui.tooltip", {
           from = Pos(from.line, from.ch - deleted);
         else if (cm.state.overwrite && !paste) // Handle overwrite
           to = Pos(to.line, Math.min(getLine(doc, to.line).text.length, to.ch + lst(textLines).length));
+        else if (lastCopied && lastCopied.lineWise && lastCopied.text.join("\n") == inserted)
+          from = to = Pos(from.line, 0)
       }
       var updateInput = cm.curOp.updateInput;
       var changeEvent = {from: from, to: to, text: multiPaste ? multiPaste[i % multiPaste.length] : textLines,
@@ -82366,18 +82368,18 @@ var tooltip = $.widget( "ui.tooltip", {
       function prepareCopyCut(e) {
         if (signalDOMEvent(cm, e)) return
         if (cm.somethingSelected()) {
-          lastCopied = cm.getSelections();
+          lastCopied = {lineWise: false, text: cm.getSelections()};
           if (input.inaccurateSelection) {
             input.prevInput = "";
             input.inaccurateSelection = false;
-            te.value = lastCopied.join("\n");
+            te.value = lastCopied.text.join("\n");
             selectInput(te);
           }
         } else if (!cm.options.lineWiseCopyCut) {
           return;
         } else {
           var ranges = copyableRanges(cm);
-          lastCopied = ranges.text;
+          lastCopied = {lineWise: true, text: ranges.text};
           if (e.type == "cut") {
             cm.setSelections(ranges.ranges, null, sel_dontScroll);
           } else {
@@ -82725,13 +82727,13 @@ var tooltip = $.widget( "ui.tooltip", {
       function onCopyCut(e) {
         if (signalDOMEvent(cm, e)) return
         if (cm.somethingSelected()) {
-          lastCopied = cm.getSelections();
+          lastCopied = {lineWise: false, text: cm.getSelections()};
           if (e.type == "cut") cm.replaceSelection("", null, "cut");
         } else if (!cm.options.lineWiseCopyCut) {
           return;
         } else {
           var ranges = copyableRanges(cm);
-          lastCopied = ranges.text;
+          lastCopied = {lineWise: true, text: ranges.text};
           if (e.type == "cut") {
             cm.operation(function() {
               cm.setSelections(ranges.ranges, 0, sel_dontScroll);
@@ -82743,12 +82745,12 @@ var tooltip = $.widget( "ui.tooltip", {
         if (e.clipboardData && !ios) {
           e.preventDefault();
           e.clipboardData.clearData();
-          e.clipboardData.setData("text/plain", lastCopied.join("\n"));
+          e.clipboardData.setData("text/plain", lastCopied.text.join("\n"));
         } else {
           // Old-fashioned briefly-focus-a-textarea hack
           var kludge = hiddenTextarea(), te = kludge.firstChild;
           cm.display.lineSpace.insertBefore(kludge, cm.display.lineSpace.firstChild);
-          te.value = lastCopied.join("\n");
+          te.value = lastCopied.text.join("\n");
           var hadFocus = document.activeElement;
           selectInput(te);
           setTimeout(function() {
@@ -82767,9 +82769,9 @@ var tooltip = $.widget( "ui.tooltip", {
       return result;
     },
 
-    showSelection: function(info) {
+    showSelection: function(info, takeFocus) {
       if (!info || !this.cm.display.view.length) return;
-      if (info.focus) this.showPrimarySelection();
+      if (info.focus || takeFocus) this.showPrimarySelection();
       this.showMultipleSelections(info);
     },
 
@@ -84205,7 +84207,7 @@ var tooltip = $.widget( "ui.tooltip", {
     }
 
     if (op.updatedDisplay || op.selectionChanged)
-      op.preparedSelection = display.input.prepareSelection();
+      op.preparedSelection = display.input.prepareSelection(op.focus);
   }
 
   function endOperation_W2(op) {
@@ -84218,8 +84220,9 @@ var tooltip = $.widget( "ui.tooltip", {
       cm.display.maxLineChanged = false;
     }
 
+    var takeFocus = op.focus && op.focus == activeElt() && (!document.hasFocus || document.hasFocus())
     if (op.preparedSelection)
-      cm.display.input.showSelection(op.preparedSelection);
+      cm.display.input.showSelection(op.preparedSelection, takeFocus);
     if (op.updatedDisplay || op.startHeight != cm.doc.height)
       updateScrollbars(cm, op.barMeasure);
     if (op.updatedDisplay)
@@ -84229,8 +84232,7 @@ var tooltip = $.widget( "ui.tooltip", {
 
     if (cm.state.focused && op.updateInput)
       cm.display.input.reset(op.typing);
-    if (op.focus && op.focus == activeElt() && (!document.hasFocus || document.hasFocus()))
-      ensureFocus(op.cm);
+    if (takeFocus) ensureFocus(op.cm);
   }
 
   function endOperation_finish(op) {
@@ -86496,7 +86498,7 @@ var tooltip = $.widget( "ui.tooltip", {
     for (var i = newBreaks.length - 1; i >= 0; i--)
       replaceRange(cm.doc, val, newBreaks[i], Pos(newBreaks[i].line, newBreaks[i].ch + val.length))
   });
-  option("specialChars", /[\t\u0000-\u0019\u00ad\u200b-\u200f\u2028\u2029\ufeff]/g, function(cm, val, old) {
+  option("specialChars", /[\u0000-\u001f\u007f\u00ad\u200b-\u200f\u2028\u2029\ufeff]/g, function(cm, val, old) {
     cm.state.specialChars = new RegExp(val.source + (val.test("\t") ? "" : "|\t"), "g");
     if (old != CodeMirror.Init) cm.refresh();
   });
@@ -86825,7 +86827,7 @@ var tooltip = $.widget( "ui.tooltip", {
       for (var i = 0; i < ranges.length; i++) {
         var pos = ranges[i].from();
         var col = countColumn(cm.getLine(pos.line), pos.ch, tabSize);
-        spaces.push(new Array(tabSize - col % tabSize + 1).join(" "));
+        spaces.push(spaceStr(tabSize - col % tabSize));
       }
       cm.replaceSelections(spaces);
     },
@@ -86868,6 +86870,7 @@ var tooltip = $.widget( "ui.tooltip", {
         ensureCursorVisible(cm);
       });
     },
+    openLine: function(cm) {cm.replaceSelection("\n", "start")},
     toggleOverwrite: function(cm) {cm.toggleOverwrite();}
   };
 
@@ -86902,7 +86905,8 @@ var tooltip = $.widget( "ui.tooltip", {
     "Ctrl-F": "goCharRight", "Ctrl-B": "goCharLeft", "Ctrl-P": "goLineUp", "Ctrl-N": "goLineDown",
     "Alt-F": "goWordRight", "Alt-B": "goWordLeft", "Ctrl-A": "goLineStart", "Ctrl-E": "goLineEnd",
     "Ctrl-V": "goPageDown", "Shift-Ctrl-V": "goPageUp", "Ctrl-D": "delCharAfter", "Ctrl-H": "delCharBefore",
-    "Alt-D": "delWordAfter", "Alt-Backspace": "delWordBefore", "Ctrl-K": "killLine", "Ctrl-T": "transposeChars"
+    "Alt-D": "delWordAfter", "Alt-Backspace": "delWordBefore", "Ctrl-K": "killLine", "Ctrl-T": "transposeChars",
+    "Ctrl-O": "openLine"
   };
   keyMap.macDefault = {
     "Cmd-A": "selectAll", "Cmd-D": "deleteLine", "Cmd-Z": "undo", "Shift-Cmd-Z": "redo", "Cmd-Y": "redo",
@@ -87664,8 +87668,8 @@ var tooltip = $.widget( "ui.tooltip", {
       var fromCmp = cmp(found.from, from) || extraLeft(sp.marker) - extraLeft(marker);
       var toCmp = cmp(found.to, to) || extraRight(sp.marker) - extraRight(marker);
       if (fromCmp >= 0 && toCmp <= 0 || fromCmp <= 0 && toCmp >= 0) continue;
-      if (fromCmp <= 0 && (cmp(found.to, from) > 0 || (sp.marker.inclusiveRight && marker.inclusiveLeft)) ||
-          fromCmp >= 0 && (cmp(found.from, to) < 0 || (sp.marker.inclusiveLeft && marker.inclusiveRight)))
+      if (fromCmp <= 0 && (sp.marker.inclusiveRight && marker.inclusiveLeft ? cmp(found.to, from) >= 0 : cmp(found.to, from) > 0) ||
+          fromCmp >= 0 && (sp.marker.inclusiveRight && marker.inclusiveLeft ? cmp(found.from, to) <= 0 : cmp(found.from, to) < 0))
         return true;
     }
   }
@@ -88067,8 +88071,11 @@ var tooltip = $.widget( "ui.tooltip", {
     }
 
     // See issue #2901
-    if (webkit && /\bcm-tab\b/.test(builder.content.lastChild.className))
-      builder.content.className = "cm-tab-wrap-hack";
+    if (webkit) {
+      var last = builder.content.lastChild
+      if (/\bcm-tab\b/.test(last.className) || (last.querySelector && last.querySelector(".cm-tab")))
+        builder.content.className = "cm-tab-wrap-hack";
+    }
 
     signal(cm, "renderLine", cm, lineView.line, builder.pre);
     if (builder.pre.className)
@@ -88420,13 +88427,16 @@ var tooltip = $.widget( "ui.tooltip", {
         if (at <= sz) {
           child.insertInner(at, lines, height);
           if (child.lines && child.lines.length > 50) {
-            while (child.lines.length > 50) {
-              var spilled = child.lines.splice(child.lines.length - 25, 25);
-              var newleaf = new LeafChunk(spilled);
-              child.height -= newleaf.height;
-              this.children.splice(i + 1, 0, newleaf);
-              newleaf.parent = this;
+            // To avoid memory thrashing when child.lines is huge (e.g. first view of a large file), it's never spliced.
+            // Instead, small slices are taken. They're taken in order because sequential memory accesses are fastest.
+            var remaining = child.lines.length % 25 + 25
+            for (var pos = remaining; pos < child.lines.length;) {
+              var leaf = new LeafChunk(child.lines.slice(pos, pos += 25));
+              child.height -= leaf.height;
+              this.children.splice(++i, 0, leaf);
+              leaf.parent = this;
             }
+            child.lines = child.lines.slice(0, remaining);
             this.maybeSpill();
           }
           break;
@@ -88446,7 +88456,7 @@ var tooltip = $.widget( "ui.tooltip", {
           copy.parent = me;
           me.children = [copy, sibling];
           me = copy;
-        } else {
+       } else {
           me.size -= sibling.size;
           me.height -= sibling.height;
           var myIndex = indexOf(me.parent.children, me);
@@ -89996,7 +90006,7 @@ var tooltip = $.widget( "ui.tooltip", {
 
   // THE END
 
-  CodeMirror.version = "5.14.2";
+  CodeMirror.version = "5.15.2";
 
   return CodeMirror;
 });
@@ -101486,7 +101496,7 @@ if ( typeof define === 'function' && define.amd ) {
 
 /* FileSaver.js
  * A saveAs() FileSaver implementation.
- * 1.1.20160328
+ * 1.3.0
  *
  * By Eli Grey, http://eligrey.com
  * License: MIT
@@ -101501,7 +101511,7 @@ if ( typeof define === 'function' && define.amd ) {
 var saveAs = saveAs || (function(view) {
 	"use strict";
 	// IE <10 is explicitly unsupported
-	if (typeof navigator !== "undefined" && /MSIE [1-9]\./.test(navigator.userAgent)) {
+	if (typeof view === "undefined" || typeof navigator !== "undefined" && /MSIE [1-9]\./.test(navigator.userAgent)) {
 		return;
 	}
 	var
@@ -101516,16 +101526,13 @@ var saveAs = saveAs || (function(view) {
 			var event = new MouseEvent("click");
 			node.dispatchEvent(event);
 		}
-		, is_safari = /Version\/[\d\.]+.*Safari/.test(navigator.userAgent)
-		, webkit_req_fs = view.webkitRequestFileSystem
-		, req_fs = view.requestFileSystem || webkit_req_fs || view.mozRequestFileSystem
+		, is_safari = /constructor/i.test(view.HTMLElement)
 		, throw_outside = function(ex) {
 			(view.setImmediate || view.setTimeout)(function() {
 				throw ex;
 			}, 0);
 		}
 		, force_saveable_type = "application/octet-stream"
-		, fs_min_size = 0
 		// the Blob API is fundamentally broken as there is no "downloadfinished" event to subscribe to
 		, arbitrary_revoke_timeout = 1000 * 40 // in ms
 		, revoke = function(file) {
@@ -101536,22 +101543,6 @@ var saveAs = saveAs || (function(view) {
 					file.remove();
 				}
 			};
-			/* // Take note W3C:
-			var
-			  uri = typeof file === "string" ? file : file.toURL()
-			, revoker = function(evt) {
-				// idealy DownloadFinishedEvent.data would be the URL requested
-				if (evt.data === uri) {
-					if (typeof file === "string") { // file is an object URL
-						get_URL().revokeObjectURL(file);
-					} else { // file is a File
-						file.remove();
-					}
-				}
-			}
-			;
-			view.addEventListener("downloadfinished", revoker);
-			*/
 			setTimeout(revoker, arbitrary_revoke_timeout);
 		}
 		, dispatch = function(filesaver, event_types, event) {
@@ -101570,8 +101561,9 @@ var saveAs = saveAs || (function(view) {
 		}
 		, auto_bom = function(blob) {
 			// prepend BOM for UTF-8 XML and text/* types (including HTML)
+			// note: your browser will automatically convert UTF-16 U+FEFF to EF BB BF
 			if (/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(blob.type)) {
-				return new Blob(["\ufeff", blob], {type: blob.type});
+				return new Blob([String.fromCharCode(0xFEFF), blob], {type: blob.type});
 			}
 			return blob;
 		}
@@ -101583,20 +101575,19 @@ var saveAs = saveAs || (function(view) {
 			var
 				  filesaver = this
 				, type = blob.type
-				, blob_changed = false
+				, force = type === force_saveable_type
 				, object_url
-				, target_view
 				, dispatch_all = function() {
 					dispatch(filesaver, "writestart progress write writeend".split(" "));
 				}
 				// on any filesys errors revert to saving with object URLs
 				, fs_error = function() {
-					if (target_view && is_safari && typeof FileReader !== "undefined") {
+					if (force && is_safari && view.FileReader) {
 						// Safari doesn't allow downloading of blob urls
 						var reader = new FileReader();
 						reader.onloadend = function() {
 							var base64Data = reader.result;
-							target_view.location.href = "data:attachment/file" + base64Data.slice(base64Data.search(/[,;]/));
+							view.location.href = "data:attachment/file" + base64Data.slice(base64Data.search(/[,;]/));
 							filesaver.readyState = filesaver.DONE;
 							dispatch_all();
 						};
@@ -101605,36 +101596,25 @@ var saveAs = saveAs || (function(view) {
 						return;
 					}
 					// don't create more object URLs than needed
-					if (blob_changed || !object_url) {
+					if (!object_url) {
 						object_url = get_URL().createObjectURL(blob);
 					}
-					if (target_view) {
-						target_view.location.href = object_url;
+					if (force) {
+						view.location.href = object_url;
 					} else {
-						var new_tab = view.open(object_url, "_blank");
-						if (new_tab === undefined && is_safari) {
-							//Apple do not allow window.open, see http://bit.ly/1kZffRI
-							view.location.href = object_url
+						var opened = view.open(object_url, "_blank");
+						if (!opened) {
+							// Apple does not allow window.open, see https://developer.apple.com/library/safari/documentation/Tools/Conceptual/SafariExtensionGuide/WorkingwithWindowsandTabs/WorkingwithWindowsandTabs.html
+							view.location.href = object_url;
 						}
 					}
 					filesaver.readyState = filesaver.DONE;
 					dispatch_all();
 					revoke(object_url);
 				}
-				, abortable = function(func) {
-					return function() {
-						if (filesaver.readyState !== filesaver.DONE) {
-							return func.apply(this, arguments);
-						}
-					};
-				}
-				, create_if_not_found = {create: true, exclusive: false}
-				, slice
 			;
 			filesaver.readyState = filesaver.INIT;
-			if (!name) {
-				name = "download";
-			}
+
 			if (can_use_save_link) {
 				object_url = get_URL().createObjectURL(blob);
 				setTimeout(function() {
@@ -101647,93 +101627,27 @@ var saveAs = saveAs || (function(view) {
 				});
 				return;
 			}
-			// Object and web filesystem URLs have a problem saving in Google Chrome when
-			// viewed in a tab, so I force save with application/octet-stream
-			// http://code.google.com/p/chromium/issues/detail?id=91158
-			// Update: Google errantly closed 91158, I submitted it again:
-			// https://code.google.com/p/chromium/issues/detail?id=389642
-			if (view.chrome && type && type !== force_saveable_type) {
-				slice = blob.slice || blob.webkitSlice;
-				blob = slice.call(blob, 0, blob.size, force_saveable_type);
-				blob_changed = true;
-			}
-			// Since I can't be sure that the guessed media type will trigger a download
-			// in WebKit, I append .download to the filename.
-			// https://bugs.webkit.org/show_bug.cgi?id=65440
-			if (webkit_req_fs && name !== "download") {
-				name += ".download";
-			}
-			if (type === force_saveable_type || webkit_req_fs) {
-				target_view = view;
-			}
-			if (!req_fs) {
-				fs_error();
-				return;
-			}
-			fs_min_size += blob.size;
-			req_fs(view.TEMPORARY, fs_min_size, abortable(function(fs) {
-				fs.root.getDirectory("saved", create_if_not_found, abortable(function(dir) {
-					var save = function() {
-						dir.getFile(name, create_if_not_found, abortable(function(file) {
-							file.createWriter(abortable(function(writer) {
-								writer.onwriteend = function(event) {
-									target_view.location.href = file.toURL();
-									filesaver.readyState = filesaver.DONE;
-									dispatch(filesaver, "writeend", event);
-									revoke(file);
-								};
-								writer.onerror = function() {
-									var error = writer.error;
-									if (error.code !== error.ABORT_ERR) {
-										fs_error();
-									}
-								};
-								"writestart progress write abort".split(" ").forEach(function(event) {
-									writer["on" + event] = filesaver["on" + event];
-								});
-								writer.write(blob);
-								filesaver.abort = function() {
-									writer.abort();
-									filesaver.readyState = filesaver.DONE;
-								};
-								filesaver.readyState = filesaver.WRITING;
-							}), fs_error);
-						}), fs_error);
-					};
-					dir.getFile(name, {create: false}, abortable(function(file) {
-						// delete file if it already exists
-						file.remove();
-						save();
-					}), abortable(function(ex) {
-						if (ex.code === ex.NOT_FOUND_ERR) {
-							save();
-						} else {
-							fs_error();
-						}
-					}));
-				}), fs_error);
-			}), fs_error);
+
+			fs_error();
 		}
 		, FS_proto = FileSaver.prototype
 		, saveAs = function(blob, name, no_auto_bom) {
-			return new FileSaver(blob, name, no_auto_bom);
+			return new FileSaver(blob, name || blob.name || "download", no_auto_bom);
 		}
 	;
 	// IE 10+ (native saveAs)
 	if (typeof navigator !== "undefined" && navigator.msSaveOrOpenBlob) {
 		return function(blob, name, no_auto_bom) {
+			name = name || blob.name || "download";
+
 			if (!no_auto_bom) {
 				blob = auto_bom(blob);
 			}
-			return navigator.msSaveOrOpenBlob(blob, name || "download");
+			return navigator.msSaveOrOpenBlob(blob, name);
 		};
 	}
 
-	FS_proto.abort = function() {
-		var filesaver = this;
-		filesaver.readyState = filesaver.DONE;
-		dispatch(filesaver, "abort");
-	};
+	FS_proto.abort = function(){};
 	FS_proto.readyState = FS_proto.INIT = 0;
 	FS_proto.WRITING = 1;
 	FS_proto.DONE = 2;
@@ -106253,7 +106167,7 @@ d3.selection.prototype.tooltip = function(f) {
 // for usage examples.
 
 angular.module('palladio', [])
-	.constant('version', '1.2.0-beta.12')
+	.constant('version', '1.2.0')
 	.factory('palladioService', ['$compile', "$rootScope", '$q', function($compile, $scope, $q) {
 
 		var updateListeners = d3.map();
@@ -112779,287 +112693,6 @@ angular.module('palladioPalette', ['palladio', 'palladio.services']) // Rename t
 	});
 // Palladio template component module
 
-angular.module('palladioPardurationFilter', ['palladio.services.date'])
-	.directive('palladioPardurationFilter', function (dateService) {
-		var directiveObj = {
-			scope: true,
-			templateUrl: 'partials/palladio-parduration-filter/template.html',
-
-			link: { pre: function(scope, element, attrs) {
-
-					// In the pre-linking function we can use scope.data, scope.metadata, and
-					// scope.xfilter to populate any additional scope values required by the
-					// template.
-
-					// The parent scope must include the following:
-					//   scope.xfilter
-					//   scope.metadata
-
-					// If you need to do any configuration before your visualization is set up,
-					// do it here. DO NOT do anything that changes the DOM here, so don't
-					// programatically instantiate your visualization at this point. That happens
-					// in the 'post' function.
-					//
-					// You might need to do things here especially
-					// if your visualization is contained in another directive that is included
-					// in the template of this directive.
-
-					scope.uniqueToggleId = "pardurationFilter" + Math.floor(Math.random() * 10000);
-					scope.uniqueToggleHref = "#" + scope.uniqueToggleId;
-					scope.uniqueModalId = scope.uniqueToggleId + "modal";
-					
-					// Take the first number dimension we find.
-					scope.dateDims = scope.metadata.filter(function (d) { return d.type === 'date'; });
-					scope.dateStartDim = scope.dateDims[0];
-					scope.dateEndDim = scope.dateDims[1];
-
-					scope.title = "Parallel Duration Filter";
-
-					scope.showDateStartModal = function () {
-						$('#' + scope.uniqueModalId).find('#date-start-modal').modal('show');
-					};
-
-					scope.showDateEndModal = function () {
-						$('#' + scope.uniqueModalId).find('#date-end-modal').modal('show');
-					};
-
-				}, post: function(scope, element, attrs) {
-
-					// If you are building a d3.js visualization, you can grab the containing
-					// element with:
-					//
-					// d3.select(element[0]);
-
-					var sel, svg, dim, group, x, y, duration, xAxis, yAxis, area, xAxisTop;
-
-					var format = dateService.format;
-
-					// Constants...
-					var width = 800;
-					var height = 150;
-					var margin = 25;
-
-					setup();
-					update();
-
-					function setup() {
-						sel = d3.select(d3.select(element[0]).select(".main-viz")[0][0].children[0]);
-						svg = sel.append('svg');
-
-						sel.attr('width', width + margin*2);
-						sel.attr('height', height + margin*2);
-
-						svg.attr('width', width + margin*2);
-						svg.attr('height', height + margin*2);
-
-						dim = scope.xfilter.dimension(
-							function(d) {
-								return [ format.reformatExternal(d[scope.dateStartDim.key]),
-										format.reformatExternal(d[scope.dateEndDim.key]) ]; });
-
-						// For now we keep the grouping simple and just do a naive count. To enable
-						// 'countBy' functionality we need to use the Crossfilter helpers.
-						group = dim.group();
-
-						var startValues = dim.top(Infinity).map(function (d) { return format.reformatExternal(d[scope.dateStartDim.key]); })
-								.filter(function (d) { return d !== ""; });
-						var endValues = dim.top(Infinity).map(function (d) { return format.reformatExternal(d[scope.dateEndDim.key]); })
-								.filter(function (d) { return d !== ""; });
-						var maxDuration = d3.max(dim.top(Infinity).map(function (d) {
-							if(d[scope.dateEndDim.key] && d[scope.dateStartDim.key]) {
-								return format.parse(format.reformatExternal(d[scope.dateEndDim.key])) -
-									format.parse(format.reformatExternal(d[scope.dateStartDim.key]));
-							}
-						}));
-
-						// Scales
-						x = d3.time.scale().range([0, width])
-								.domain([ format.parse(d3.min(startValues)), format.parse(d3.max(endValues)) ]);
-						y = d3.scale.linear().range([height, 0])
-								.domain([0, 1]);
-						duration = d3.scale.linear().range([height, 0])
-								.domain([0, maxDuration]);
-
-						xAxis = d3.svg.axis().orient("bottom")
-								.scale(x);
-
-						xAxisTop = d3.svg.axis().orient("top")
-								.scale(x);
-
-						yAxis = d3.svg.axis().orient("left")
-								.scale(duration)
-								.tickFormat(function (d) { return Math.round(d/31536000000); });
-
-						var topBrush = d3.svg.brush().x(x);
-						var bottomBrush = d3.svg.brush().x(x);
-
-						// Build the visualization.
-
-						var g = svg.append('g')
-							.attr("transform", "translate(" + margin + "," + margin + ")");
-
-						var bottom = g.append('g')
-							.attr("class", "axis x-axis")
-							.attr("transform", "translate(" + 0 + "," + (height) + ")")
-							.call(xAxis)
-							.call(bottomBrush);
-						
-						// bottom.select('.background').attr('height', 25);
-						// bottom.select('.extent').attr('height', 25);
-
-						var top = g.append('g')
-							.attr("class", "axis x-axis")
-							.call(xAxisTop)
-							.call(topBrush);
-						
-						// top.select('.background').attr('height', 25);
-						// top.select('.extent').attr('height', 25);
-
-						var left = g.append('g')
-							.attr("class", "axis y-axis")
-							.call(yAxis);
-					}
-
-					function update() {
-						var paths = svg.select('g').selectAll('.path')
-							.data(group.top(Infinity)
-									.filter(function (d) {
-										return d.key[0] !== "" && d.key[1] !== "" && d.value !== 0;
-									}),
-								function (d) { return d.key[0] + " - " + d.key[1]; });
-
-						paths.enter()
-								.append('line')
-									.attr('class', 'path')
-									.attr('stroke-width', 1)
-									.attr('stroke-opacity', 0.7)
-									.attr('stroke', "black");
-
-						paths.exit().remove();
-
-						paths
-							.attr('x1', function (d) { return x(format.parse(d.key[0])); })
-							.attr('y1', duration(0))
-							.attr('x2', function (d) { return x(format.parse(d.key[1])); })
-							.attr('y2', function (d) { return duration(format.parse(d.key[1]) - format.parse(d.key[0])); });
-					}
-
-					function reset() {
-						group.remove();
-						dim.remove();
-						svg.remove();
-					}
-
-					scope.$watchGroup(['dateStartDim', 'dateEndDim'], function () {
-						reset();
-						setup();
-						update();
-					});
-
-					//
-					// If you are going to programatically instantiate your visualization, do it
-					// here. Your visualization should emit the following events if necessary:
-					//
-					// For new/changed filters:
-					//
-					// scope.$emit('updateFilter', [identifier, description, filter, callback]);
-					//
-					// For removing all filters:
-					//
-					// scope.$emit('updateFilter', [identifier, null]);
-					//
-					// If you apply a filter in this component, notify the Palladio framework.
-					//
-					// identifier: A string unique to this instance of this component. Should 
-					//             be randomly generated.
-					//
-					// description: A human-readable description of this component. Should be
-					//              unique to this instance of this component, but not required.
-					//
-					// filter: A human-readable description of the filter that is currently
-					//         applied on this component.
-					//
-					// callback: A function that will remove all filters on this component when
-					//           it is evaluated.
-					//
-					//
-					// Whenever the component needs to trigger an update for all other components
-					// in the application (for example, when a filter is applied or removed):
-					//
-					// scope.$emit('triggerUpdate');
-
-
-					// You should also handle the following externally triggered events:
-
-					scope.$on('filterReset', function(event) {
-						
-						// Reset any filters that have been applied through this visualization.
-						// This means running .filterAll() on any Crossfilter dimensions you have
-						// created and updating your visualization as required.
-
-						update();
-
-					});
-
-					scope.$on('update', function(event) {
-						
-						// Render an update. It is likely that the data in the Crossfilter or the
-						// filter state of the Crossfilter has changed, so you should re-query
-						// any groups or dimensions you have created.
-
-						// Note: This method gets called a *lot* during a filter operation.
-						// Whenever possible you should make updates incremental and very fast.
-
-						update();
-
-					});
-
-					scope.$on('search', function(event, args) {
-						
-						// The global search term has been updated. The current search term is
-						// found in args.
-
-					});
-
-					scope.$on('$destroy', function () {
-
-						// Clean up after yourself. Remove dimensions that we have created. If we
-						// created watches on another scope, destroy those as well.
-
-						group.remove();
-						dim.remove();
-
-					});
-
-
-					// Support save/load. These functions should be able to fully recreate an instance
-					// of this visualization based on the results of the exportState() function. Include
-					// current filters, any type of manipulations the user has done, etc.
-
-					function importState(state) {
-						
-						// Load a state object created by exportState().
-
-					}
-
-					function exportState() {
-
-						// Return a state object that can be consumed by importState().
-						return { };
-					}
-
-					scope.$emit('registerStateFunctions', ['visualizationName', exportState, importState]);
-
-					// Move the modal out of the fixed area.
-					$(element[0]).find('#date-start-modal').parent().appendTo('body');
-				}
-			}
-		};
-
-		return directiveObj;
-	});
-// Palladio template component module
-
 angular.module('palladioTimespanFilter', ['palladio.services.date'])
 	.directive('palladioTimespanFilter', function (dateService) {
 		var directiveObj = {
@@ -113268,6 +112901,287 @@ angular.module('palladioTimespanFilter', ['palladio.services.date'])
 						}
 
 						return lanes;
+					}
+
+					scope.$watchGroup(['dateStartDim', 'dateEndDim'], function () {
+						reset();
+						setup();
+						update();
+					});
+
+					//
+					// If you are going to programatically instantiate your visualization, do it
+					// here. Your visualization should emit the following events if necessary:
+					//
+					// For new/changed filters:
+					//
+					// scope.$emit('updateFilter', [identifier, description, filter, callback]);
+					//
+					// For removing all filters:
+					//
+					// scope.$emit('updateFilter', [identifier, null]);
+					//
+					// If you apply a filter in this component, notify the Palladio framework.
+					//
+					// identifier: A string unique to this instance of this component. Should 
+					//             be randomly generated.
+					//
+					// description: A human-readable description of this component. Should be
+					//              unique to this instance of this component, but not required.
+					//
+					// filter: A human-readable description of the filter that is currently
+					//         applied on this component.
+					//
+					// callback: A function that will remove all filters on this component when
+					//           it is evaluated.
+					//
+					//
+					// Whenever the component needs to trigger an update for all other components
+					// in the application (for example, when a filter is applied or removed):
+					//
+					// scope.$emit('triggerUpdate');
+
+
+					// You should also handle the following externally triggered events:
+
+					scope.$on('filterReset', function(event) {
+						
+						// Reset any filters that have been applied through this visualization.
+						// This means running .filterAll() on any Crossfilter dimensions you have
+						// created and updating your visualization as required.
+
+						update();
+
+					});
+
+					scope.$on('update', function(event) {
+						
+						// Render an update. It is likely that the data in the Crossfilter or the
+						// filter state of the Crossfilter has changed, so you should re-query
+						// any groups or dimensions you have created.
+
+						// Note: This method gets called a *lot* during a filter operation.
+						// Whenever possible you should make updates incremental and very fast.
+
+						update();
+
+					});
+
+					scope.$on('search', function(event, args) {
+						
+						// The global search term has been updated. The current search term is
+						// found in args.
+
+					});
+
+					scope.$on('$destroy', function () {
+
+						// Clean up after yourself. Remove dimensions that we have created. If we
+						// created watches on another scope, destroy those as well.
+
+						group.remove();
+						dim.remove();
+
+					});
+
+
+					// Support save/load. These functions should be able to fully recreate an instance
+					// of this visualization based on the results of the exportState() function. Include
+					// current filters, any type of manipulations the user has done, etc.
+
+					function importState(state) {
+						
+						// Load a state object created by exportState().
+
+					}
+
+					function exportState() {
+
+						// Return a state object that can be consumed by importState().
+						return { };
+					}
+
+					scope.$emit('registerStateFunctions', ['visualizationName', exportState, importState]);
+
+					// Move the modal out of the fixed area.
+					$(element[0]).find('#date-start-modal').parent().appendTo('body');
+				}
+			}
+		};
+
+		return directiveObj;
+	});
+// Palladio template component module
+
+angular.module('palladioPardurationFilter', ['palladio.services.date'])
+	.directive('palladioPardurationFilter', function (dateService) {
+		var directiveObj = {
+			scope: true,
+			templateUrl: 'partials/palladio-parduration-filter/template.html',
+
+			link: { pre: function(scope, element, attrs) {
+
+					// In the pre-linking function we can use scope.data, scope.metadata, and
+					// scope.xfilter to populate any additional scope values required by the
+					// template.
+
+					// The parent scope must include the following:
+					//   scope.xfilter
+					//   scope.metadata
+
+					// If you need to do any configuration before your visualization is set up,
+					// do it here. DO NOT do anything that changes the DOM here, so don't
+					// programatically instantiate your visualization at this point. That happens
+					// in the 'post' function.
+					//
+					// You might need to do things here especially
+					// if your visualization is contained in another directive that is included
+					// in the template of this directive.
+
+					scope.uniqueToggleId = "pardurationFilter" + Math.floor(Math.random() * 10000);
+					scope.uniqueToggleHref = "#" + scope.uniqueToggleId;
+					scope.uniqueModalId = scope.uniqueToggleId + "modal";
+					
+					// Take the first number dimension we find.
+					scope.dateDims = scope.metadata.filter(function (d) { return d.type === 'date'; });
+					scope.dateStartDim = scope.dateDims[0];
+					scope.dateEndDim = scope.dateDims[1];
+
+					scope.title = "Parallel Duration Filter";
+
+					scope.showDateStartModal = function () {
+						$('#' + scope.uniqueModalId).find('#date-start-modal').modal('show');
+					};
+
+					scope.showDateEndModal = function () {
+						$('#' + scope.uniqueModalId).find('#date-end-modal').modal('show');
+					};
+
+				}, post: function(scope, element, attrs) {
+
+					// If you are building a d3.js visualization, you can grab the containing
+					// element with:
+					//
+					// d3.select(element[0]);
+
+					var sel, svg, dim, group, x, y, duration, xAxis, yAxis, area, xAxisTop;
+
+					var format = dateService.format;
+
+					// Constants...
+					var width = 800;
+					var height = 150;
+					var margin = 25;
+
+					setup();
+					update();
+
+					function setup() {
+						sel = d3.select(d3.select(element[0]).select(".main-viz")[0][0].children[0]);
+						svg = sel.append('svg');
+
+						sel.attr('width', width + margin*2);
+						sel.attr('height', height + margin*2);
+
+						svg.attr('width', width + margin*2);
+						svg.attr('height', height + margin*2);
+
+						dim = scope.xfilter.dimension(
+							function(d) {
+								return [ format.reformatExternal(d[scope.dateStartDim.key]),
+										format.reformatExternal(d[scope.dateEndDim.key]) ]; });
+
+						// For now we keep the grouping simple and just do a naive count. To enable
+						// 'countBy' functionality we need to use the Crossfilter helpers.
+						group = dim.group();
+
+						var startValues = dim.top(Infinity).map(function (d) { return format.reformatExternal(d[scope.dateStartDim.key]); })
+								.filter(function (d) { return d !== ""; });
+						var endValues = dim.top(Infinity).map(function (d) { return format.reformatExternal(d[scope.dateEndDim.key]); })
+								.filter(function (d) { return d !== ""; });
+						var maxDuration = d3.max(dim.top(Infinity).map(function (d) {
+							if(d[scope.dateEndDim.key] && d[scope.dateStartDim.key]) {
+								return format.parse(format.reformatExternal(d[scope.dateEndDim.key])) -
+									format.parse(format.reformatExternal(d[scope.dateStartDim.key]));
+							}
+						}));
+
+						// Scales
+						x = d3.time.scale().range([0, width])
+								.domain([ format.parse(d3.min(startValues)), format.parse(d3.max(endValues)) ]);
+						y = d3.scale.linear().range([height, 0])
+								.domain([0, 1]);
+						duration = d3.scale.linear().range([height, 0])
+								.domain([0, maxDuration]);
+
+						xAxis = d3.svg.axis().orient("bottom")
+								.scale(x);
+
+						xAxisTop = d3.svg.axis().orient("top")
+								.scale(x);
+
+						yAxis = d3.svg.axis().orient("left")
+								.scale(duration)
+								.tickFormat(function (d) { return Math.round(d/31536000000); });
+
+						var topBrush = d3.svg.brush().x(x);
+						var bottomBrush = d3.svg.brush().x(x);
+
+						// Build the visualization.
+
+						var g = svg.append('g')
+							.attr("transform", "translate(" + margin + "," + margin + ")");
+
+						var bottom = g.append('g')
+							.attr("class", "axis x-axis")
+							.attr("transform", "translate(" + 0 + "," + (height) + ")")
+							.call(xAxis)
+							.call(bottomBrush);
+						
+						// bottom.select('.background').attr('height', 25);
+						// bottom.select('.extent').attr('height', 25);
+
+						var top = g.append('g')
+							.attr("class", "axis x-axis")
+							.call(xAxisTop)
+							.call(topBrush);
+						
+						// top.select('.background').attr('height', 25);
+						// top.select('.extent').attr('height', 25);
+
+						var left = g.append('g')
+							.attr("class", "axis y-axis")
+							.call(yAxis);
+					}
+
+					function update() {
+						var paths = svg.select('g').selectAll('.path')
+							.data(group.top(Infinity)
+									.filter(function (d) {
+										return d.key[0] !== "" && d.key[1] !== "" && d.value !== 0;
+									}),
+								function (d) { return d.key[0] + " - " + d.key[1]; });
+
+						paths.enter()
+								.append('line')
+									.attr('class', 'path')
+									.attr('stroke-width', 1)
+									.attr('stroke-opacity', 0.7)
+									.attr('stroke', "black");
+
+						paths.exit().remove();
+
+						paths
+							.attr('x1', function (d) { return x(format.parse(d.key[0])); })
+							.attr('y1', duration(0))
+							.attr('x2', function (d) { return x(format.parse(d.key[1])); })
+							.attr('y2', function (d) { return duration(format.parse(d.key[1]) - format.parse(d.key[0])); });
+					}
+
+					function reset() {
+						group.remove();
+						dim.remove();
+						svg.remove();
 					}
 
 					scope.$watchGroup(['dateStartDim', 'dateEndDim'], function () {
