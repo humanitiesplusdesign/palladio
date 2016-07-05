@@ -1,20 +1,17 @@
 ---
 layout: post
-title: Create a Timeline Filter
+title: Create a Timespan Filter
 category: tutorial
 ---
 
 
-A Timeline Filter allows you to filter to a subset of your data.  You may filter by any data elements associated with dates, and can filter by one or more sets of dates.
+A Timespan Filter allows you to filter to a subset of your data.  You may filter by any data elements associated with dates, and can filter by a date range. (For instance, selecting anyone who's lifetime falls within a certain range)
 
-It's possible to label each Timeline filter in the "Description" field (the default is the first "date" element in your dataset.  Choose the date to filter in the "Dates" field.  The "Height" indicates what to count for the height of each bar in the timeline.  (In this case, we are counting the "Number of People".  If we had an associated number data element like the "Number of Letters", we could count those as well)  Data in the timeline can be further grouped by a particular element in the data set, or the grouping can be cleared (the default is to group by the first element in your dataset).
-###Screenshot - Timeline_Parameters
+It's possible to label each Timespan filter in the "Description" field. The layout can be a set of Bars, a Parallel view which shows each timespan as a slope corresponding to the length of the date range, or Grouped Bars. You can also select the date range Start and End Dates, label the Ranges, and group them.  You can also clear the date ranges or delete the entire filter.
+![Timespan Parameters]({{ site.urlimg }}resources/TimeSpanParameters.png)
 
-After selecting the dates to filter by, you can select subsets of the data by clicking & dragging to highlight.  Highlighting and selecting the data will update the map or other visualization dynamically.  After making a selection, you can select additional date ranges or move the subsets around.
-###Screenshot - Timeline_Selections
-
-You can also clear any data selections.
+Select the time period to filter by clicking and dragging to highlight (all date ranges included in the time period will be included). Selecting the data will update the map or other visualization dynamically.
+![Timespan Selections]({{ site.urlimg }}resources/TimeSpanSelections.png)
 
 
 For more information on overlapping filters check tktktktktk.
-
