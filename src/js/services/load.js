@@ -36,6 +36,9 @@ angular.module('palladio.services.load', ['palladio.services.data'])
 						var md = parseService.parseColumn(g.key, f.data, g.mvDelimiter,
 															g.hierDelimiter, [], g.type);
 						g.uniques = md.uniques;
+						if(g.descriptiveField && typeof g.descriptiveField === 'string') {
+							g.descriptiveField = f.fields.filter(function(d) { return d.key === g.descriptiveField; })[0];
+						}
 						g.errors = validationService(g.uniques.map(function(d) { return d.key; }), g.type);
 					});
 

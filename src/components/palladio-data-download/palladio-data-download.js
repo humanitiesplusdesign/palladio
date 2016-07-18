@@ -24,6 +24,7 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 						f.autoFields = [];
 						f.fields = f.fields.concat([]).map(function(g) {
 							g = shallowCopy(g);
+							if(g.descriptiveField && g.descriptiveField.key) g.descriptiveField = g.descriptiveField.key;
 							g.uniques = [];
 							g.errors = [];
 							return g;
