@@ -22,13 +22,14 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 						f = shallowCopy(f);
 
 						f.autoFields = [];
-						f.fields = f.fields.concat([]).map(function(g) {
-							g = shallowCopy(g);
-							if(g.descriptiveField && g.descriptiveField.key) g.descriptiveField = g.descriptiveField.key;
-							g.uniques = [];
-							g.errors = [];
-							return g;
-						});
+						f.fields = f.fields.concat([])
+							.map(function(g) {
+								g = shallowCopy(g);
+								if(g.descriptiveField && g.descriptiveField.key) g.descriptiveField = g.descriptiveField.key;
+								g.uniques = [];
+								g.errors = [];
+								return g;
+							});
 
 						if(f.url && f.loadFromURL) {
 							f.data = [];

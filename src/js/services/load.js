@@ -1,6 +1,6 @@
 angular.module('palladio.services.load', ['palladio.services.data'])
-	.factory("loadService", ['dataService', '$q', 'parseService', 'validationService', '$rootScope',
-			function(dataService, $q, parseService, validationService, $rootScope) {
+	.factory("loadService", ['dataService', '$q', 'parseService', 'validationService', '$rootScope', 'transformService',
+			function(dataService, $q, parseService, validationService, $rootScope, transformService) {
 
 		var visState = {};
 		var layoutState;
@@ -41,6 +41,8 @@ angular.module('palladio.services.load', ['palladio.services.data'])
 						}
 						g.errors = validationService(g.uniques.map(function(d) { return d.key; }), g.type);
 					});
+
+					transformService(f);
 
 					dataService.addFileRaw(f);
 				});
