@@ -602,23 +602,47 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 					newFile.data = centralFile.data.slice(j, j + 3000);
 
 					lookedUpFile = performLookups(newFile, internalLinks);
-          
+
           // Generate boolean reference dimensions for coordinate dimensions
           lookedUpFile.fields.forEach(function(f) {
             if(f.type === 'latlong') {
               var newField;
+							var existDim;
+							var existDimKey;
               if(coordToExists.has(f.key)) {
                 newField = coordToExists.get(f.key);
               } else {
-                newField = {
-                  type: 'text',
-                  key: Math.random().toString(36),
-                  description: f.description + ": Exists",
-                  errors: [],
-                  special: [],
-                  uniques: []
-                };
-                coordToExists.set(f.key, newField);
+								// Check existing fields
+								newField = lookedUpFile.fields.filter(function(g) {
+									return g.existenceDimension === f.key;
+								})[0]
+								if(!newField) {
+									// Check fields on all existing files for key.
+									existDim = files.reduce(function(f1,f2) {
+										return { fields: f1.fields.concat(f2.fields) };
+									},{ fields: [] }).fields.filter(function(g) {
+										return g.key === f.key;
+									})[0];
+									existDimKey = existDim && existDim.existenceDimension ?
+																	existDim.existenceDimension :
+																	f.existenceDimension ?
+																		f.existenceDimension : 
+																		Math.random().toString(36);
+									newField = {
+										type: 'text',
+										key: existDimKey,
+										description: f.description + ": Exists",
+										existenceDimension: f.key,
+										errors: [],
+										special: [],
+										uniques: []
+									};
+
+									// Add it the dimension.
+									f.existenceDimension = newField.key;
+									if(existDim) existDim.existenceDimension = newField.key
+								}
+								coordToExists.set(f.key, newField);
               }
               
               lookedUpFile.fields.push(newField);
