@@ -106167,7 +106167,7 @@ d3.selection.prototype.tooltip = function(f) {
 // for usage examples.
 
 angular.module('palladio', [])
-	.constant('version', '1.2.1')
+	.constant('version', '1.2.2')
 	.factory('palladioService', ['$compile', "$rootScope", '$q', function($compile, $scope, $q) {
 
 		var updateListeners = d3.map();
@@ -106953,6 +106953,36 @@ angular.module('palladio.directives.tag', [])
        }
       };
   	})
+angular.module('palladio.filters', [])
+  .filter('titleCase', function () {
+		return function (str) {
+			return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+		};
+	})
+
+  .filter('confirmed', function () {
+    return function (fields) {
+      return fields.filter(function(d){ return d.confirmed; }).length;
+    };
+  })
+
+  .filter('special', function () {
+    return function (fields) {
+      return fields.filter(function(d){ return d.special.length; }).length;
+    };
+  })
+
+  .filter('unique', function () {
+    return function (fields) {
+        return fields.filter(function(d){ return d.uniqueKey; }).length;
+    };
+  })
+
+  .filter('notSameFile', function () {
+    return function (files, fileId) {
+        return files.filter(function (d){ return d.id !== fileId; });
+    };
+  });
 var crossfilterHelpers = {
 
 	///////////////////////////////////////////////////////////////////////
@@ -108437,36 +108467,6 @@ var d3_svg_brushResizes = [
 	}
 
 })();
-angular.module('palladio.filters', [])
-  .filter('titleCase', function () {
-		return function (str) {
-			return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
-		};
-	})
-
-  .filter('confirmed', function () {
-    return function (fields) {
-      return fields.filter(function(d){ return d.confirmed; }).length;
-    };
-  })
-
-  .filter('special', function () {
-    return function (fields) {
-      return fields.filter(function(d){ return d.special.length; }).length;
-    };
-  })
-
-  .filter('unique', function () {
-    return function (fields) {
-        return fields.filter(function(d){ return d.uniqueKey; }).length;
-    };
-  })
-
-  .filter('notSameFile', function () {
-    return function (files, fileId) {
-        return files.filter(function (d){ return d.id !== fileId; });
-    };
-  });
 angular.module('palladio.components', ['palladio.services.data', 'palladio.services.load', 'palladio'])
 	.factory('componentService', ['$compile', "$rootScope", "$http", "loadService", "dataService", 'palladioService',
 		function($compile, $scope, $http, loadService, dataService, palladioService) {
@@ -109222,23 +109222,47 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 					newFile.data = centralFile.data.slice(j, j + 3000);
 
 					lookedUpFile = performLookups(newFile, internalLinks);
-          
+
           // Generate boolean reference dimensions for coordinate dimensions
           lookedUpFile.fields.forEach(function(f) {
             if(f.type === 'latlong') {
               var newField;
+							var existDim;
+							var existDimKey;
               if(coordToExists.has(f.key)) {
                 newField = coordToExists.get(f.key);
               } else {
-                newField = {
-                  type: 'text',
-                  key: Math.random().toString(36),
-                  description: f.description + ": Exists",
-                  errors: [],
-                  special: [],
-                  uniques: []
-                };
-                coordToExists.set(f.key, newField);
+								// Check existing fields
+								newField = lookedUpFile.fields.filter(function(g) {
+									return g.existenceDimension === f.key;
+								})[0]
+								if(!newField) {
+									// Check fields on all existing files for key.
+									existDim = files.reduce(function(f1,f2) {
+										return { fields: f1.fields.concat(f2.fields) };
+									},{ fields: [] }).fields.filter(function(g) {
+										return g.key === f.key;
+									})[0];
+									existDimKey = existDim && existDim.existenceDimension ?
+																	existDim.existenceDimension :
+																	f.existenceDimension ?
+																		f.existenceDimension : 
+																		Math.random().toString(36);
+									newField = {
+										type: 'text',
+										key: existDimKey,
+										description: f.description + ": Exists",
+										existenceDimension: f.key,
+										errors: [],
+										special: [],
+										uniques: []
+									};
+
+									// Add it the dimension.
+									f.existenceDimension = newField.key;
+									if(existDim) existDim.existenceDimension = newField.key
+								}
+								coordToExists.set(f.key, newField);
               }
               
               lookedUpFile.fields.push(newField);
@@ -110557,6 +110581,7 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 				}
 
 				scope.exportDataModel = function() {
+					console.log(dataService.getFiles());
 					// Strip autoFields, uniques, errors from all files/fields
 					var files = dataService.getFiles().map(function(f) {
 						f = shallowCopy(f);
