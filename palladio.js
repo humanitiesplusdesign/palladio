@@ -106167,7 +106167,7 @@ d3.selection.prototype.tooltip = function(f) {
 // for usage examples.
 
 angular.module('palladio', [])
-	.constant('version', '1.2.2')
+	.constant('version', '1.2.3')
 	.factory('palladioService', ['$compile', "$rootScope", '$q', function($compile, $scope, $q) {
 
 		var updateListeners = d3.map();
@@ -109344,7 +109344,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 			}
 
 			if(numChanges > 0) {
-				console.warn("We removed " + numChanges + " date values that we couldn't process. Look at error reports for Date dimensions in the 'Data' view for more information.");
+				console.warn("Palladio removed " + numChanges + " date values that we couldn't process. Look at error reports for Date dimensions in the 'Data' view for more information.");
 			}
 
 			newFile = {};
