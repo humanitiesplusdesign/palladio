@@ -1,6 +1,6 @@
 angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.services.validation',
-		'palladio.services.spinner', 'palladio'])
-	.factory("dataService", ['parseService', 'validationService', 'spinnerService', '$q', 'palladioService', function (parseService, validationService, spinnerService, $q, palladioService) {
+		'palladio.services.spinner', 'palladio', 'palladio.services.date'])
+	.factory("dataService", ['parseService', 'validationService', 'spinnerService', '$q', 'palladioService', 'dateService', function (parseService, validationService, spinnerService, $q, palladioService, dateService) {
 
 		// Set this to "true" if data or links have been added/removed/changed
 
@@ -685,11 +685,57 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 							removeIgnoredValues(
 								explodeMultiValueFields(
 									removeDeletedDimensions(
-										file
+										cleanDateFields(
+											file
+										)
 									)
 								)
 							)
 						);
+
+			return newFile;
+		}
+
+		function cleanDateFields(file) {
+			var data = [];
+			var newRow = {};
+			var newFile = {};
+			var dateDims = [];
+			var numChanges = 0;
+
+			file.fields.forEach(function (f) {
+				if(f.type === 'date') {
+					dateDims.push(f);
+				}
+			});
+
+			for(var i=0; i < file.data.length; i++) {
+				newRow = angular.extend({}, file.data[i]);
+
+				// Remove invalid dates
+				for(var j=0; j < dateDims.length; j++) {
+					if(newRow[dateDims[j].key] !== "" && dateService.format.parse(dateService.format.reformatExternal(newRow[dateDims[j].key])) === "") {
+						newRow[dateDims[j].key] = ""
+						numChanges++;
+					}
+				}
+
+				data.push(newRow);
+			}
+
+			if(numChanges > 0) {
+				console.warn("Palladio removed " + numChanges + " date values that we couldn't process. Look at error reports for Date dimensions in the 'Data' view for more information.");
+			}
+
+			newFile = {};
+			newFile.autoFields = file.autoFields.map(copyField);
+			newFile.data = data;
+			newFile.fields = file.fields
+									.map(copyField);
+			newFile.id = file.id;
+			newFile.label = file.label;
+			newFile.sourceFor = file.sourceFor;
+			newFile.uniqueId = file.uniqueId;
 
 			return newFile;
 		}
