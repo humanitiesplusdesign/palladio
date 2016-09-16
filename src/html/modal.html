@@ -1,0 +1,18 @@
+<div class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <span style="line-height: normal">Choose the dimensions</span>
+  </div>
+  <div class="modal-body">
+    <ul class="unstyled">
+    	<li ng-repeat="field in dimensions">
+    		<label class="checkbox">
+		    	<input type="checkbox" ng-checked="check(field)" ng-click="change(field)"> {{getDescription(field)}}
+		    </label>
+    	</li>
+    </ul>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Done</button>
+  </div>
+</div>
