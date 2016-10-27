@@ -106167,7 +106167,7 @@ d3.selection.prototype.tooltip = function(f) {
 // for usage examples.
 
 angular.module('palladio', [])
-	.constant('version', '1.2.3')
+	.constant('version', '1.2.4')
 	.factory('palladioService', ['$compile', "$rootScope", '$q', function($compile, $scope, $q) {
 
 		var updateListeners = d3.map();
@@ -106953,36 +106953,6 @@ angular.module('palladio.directives.tag', [])
        }
       };
   	})
-angular.module('palladio.filters', [])
-  .filter('titleCase', function () {
-		return function (str) {
-			return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
-		};
-	})
-
-  .filter('confirmed', function () {
-    return function (fields) {
-      return fields.filter(function(d){ return d.confirmed; }).length;
-    };
-  })
-
-  .filter('special', function () {
-    return function (fields) {
-      return fields.filter(function(d){ return d.special.length; }).length;
-    };
-  })
-
-  .filter('unique', function () {
-    return function (fields) {
-        return fields.filter(function(d){ return d.uniqueKey; }).length;
-    };
-  })
-
-  .filter('notSameFile', function () {
-    return function (files, fileId) {
-        return files.filter(function (d){ return d.id !== fileId; });
-    };
-  });
 var crossfilterHelpers = {
 
 	///////////////////////////////////////////////////////////////////////
@@ -108467,6 +108437,36 @@ var d3_svg_brushResizes = [
 	}
 
 })();
+angular.module('palladio.filters', [])
+  .filter('titleCase', function () {
+		return function (str) {
+			return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+		};
+	})
+
+  .filter('confirmed', function () {
+    return function (fields) {
+      return fields.filter(function(d){ return d.confirmed; }).length;
+    };
+  })
+
+  .filter('special', function () {
+    return function (fields) {
+      return fields.filter(function(d){ return d.special.length; }).length;
+    };
+  })
+
+  .filter('unique', function () {
+    return function (fields) {
+        return fields.filter(function(d){ return d.uniqueKey; }).length;
+    };
+  })
+
+  .filter('notSameFile', function () {
+    return function (files, fileId) {
+        return files.filter(function (d){ return d.id !== fileId; });
+    };
+  });
 angular.module('palladio.components', ['palladio.services.data', 'palladio.services.load', 'palladio'])
 	.factory('componentService', ['$compile', "$rootScope", "$http", "loadService", "dataService", 'palladioService',
 		function($compile, $scope, $http, loadService, dataService, palladioService) {
@@ -110627,7 +110627,6 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 				}
 
 				scope.exportDataModel = function() {
-					console.log(dataService.getFiles());
 					// Strip autoFields, uniques, errors from all files/fields
 					var files = dataService.getFiles().map(function(f) {
 						f = shallowCopy(f);
@@ -110661,6 +110660,8 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 						l.lookup.field.errors = [];
 						l.source.field.uniques = [];
 						l.source.field.errors = [];
+						if(l.lookup.field.descriptiveField && l.lookup.field.descriptiveField.key) l.lookup.field.descriptiveField = l.lookup.field.descriptiveField.key;
+						if(l.source.field.descriptiveField && l.source.field.descriptiveField.key) l.source.field.descriptiveField = l.source.field.descriptiveField.key;
 
 						l.lookup.file = { uniqueId: l.lookup.file.uniqueId };
 						l.source.file = { uniqueId: l.source.file.uniqueId };
