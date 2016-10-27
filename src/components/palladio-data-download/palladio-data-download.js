@@ -17,7 +17,6 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 				}
 
 				scope.exportDataModel = function() {
-					console.log(dataService.getFiles());
 					// Strip autoFields, uniques, errors from all files/fields
 					var files = dataService.getFiles().map(function(f) {
 						f = shallowCopy(f);
@@ -50,6 +49,8 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 						l.lookup.field.errors = [];
 						l.source.field.uniques = [];
 						l.source.field.errors = [];
+						if(l.lookup.field.descriptiveField && l.lookup.field.descriptiveField.key) l.lookup.field.descriptiveField = l.lookup.field.descriptiveField.key;
+						if(l.source.field.descriptiveField && l.source.field.descriptiveField.key) l.source.field.descriptiveField = l.source.field.descriptiveField.key;
 
 						l.lookup.file = { uniqueId: l.lookup.file.uniqueId };
 						l.source.file = { uniqueId: l.source.file.uniqueId };
