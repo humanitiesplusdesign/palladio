@@ -84,7 +84,7 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 					// Guard against Safari (download doesn't work the same in Safari) until we can
 					// revamp the download/share/export UI to explain this.
 					if(navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0) {
-						alert("Unfortunately, because of compatibility issues with Safari, the save file will download as a file with name 'Unknown'.");
+						alert("Unfortunately, because of compatibility issues with Safari, the save file will download as a file with name 'Unknown'.\n\nYou may also be prompted to leave the page. If this happens, click 'Leave'. You will not actually leave the page.");
 						blob = new Blob(
 							[ JSON.stringify(ex) ],
 							{type: 'application/octet-stream' }
