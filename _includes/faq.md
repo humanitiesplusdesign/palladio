@@ -103,7 +103,7 @@ Coordinates information must be rendered as latitude and longitude, separated by
 This Geocoding tool may be of help for those who have a list of place names but no associated coordinates: 
 http://sandbox.idre.ucla.edu/geocoder/
 
-See the Scenario: Creating Data for a Simple Map for more information about creating and entering coordinates information. [Download PDF]({{ site.baseurl }}/doc/scenario-simple-map.pdf)
+See the Scenario: Creating Data for a Simple Map for more information about creating and entering coordinates information. [Download PDF]({{ site.url }}/doc/scenario-simple-map.pdf)
 
 
 ## <a name="7"></a>What do the labels (text, date, URL etc.) and numbers listed directly below my dimension represent?
@@ -156,7 +156,7 @@ Below the 'Type of Map' menu is a second menu, 'Places.' This menu will be popul
 
 See the Scenario: Creating Data for a Simple Map for more information about creating and entering coordinates information.
 
-[Download PDF]({{ site.baseurl }}/doc/scenario-simple-map.pdf)
+[Download PDF]({{ site.url }}/doc/scenario-simple-map.pdf)
 
 
 ####‘Point-to-Point’ map view
@@ -169,7 +169,7 @@ Now you can explore this Map data in various ways by using the Timeline and Face
 
 See the Scenario: Creating Data for a Point to Point Map for more information about creating and entering coordinates information.
 
-[Download PDF]({{ site.baseurl }}/doc/scenario-point-to-point.pdf)
+[Download PDF]({{ site.url }}/doc/scenario-point-to-point.pdf)
 
 ## <a name="12"></a>What are Size Points?
 
