@@ -1,0 +1,57 @@
+<div class="row-fluid">
+	<div class="span3 settings open">
+		<div class="settings-panel" ng-show="!collapse">
+
+			<div class="setting row-fluid">
+				<label class="span4 inline">Layout</label>
+				<span class="span8" style="margin-left:0px">
+					<select bs-select ng-model="mode" ng-options="mode for mode in modes"
+							data-size="3" class="span12 form-control show-tick">
+					</select>
+				</span>
+			</div>
+
+			<div class="setting row-fluid" data-ng-show="mode === 'Actual duration'">
+				<label class="span4 inline">Duration</label>
+				<span class="field span8" ng-click="showDurationModal()">{{durationDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>
+			</div>
+
+			<div class="setting row-fluid">
+				<label class="span4 inline">Tooltip Label</label>
+				<span class="field span8" ng-click="showTooltipLabelModal()">{{tooltipLabelDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>
+			</div>
+
+			<div class="setting row-fluid">
+				<label class="span4 inline">Y-Grouping</label>
+				<span class="field span8" ng-click="showGroupModal()">{{groupDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>
+			</div>
+
+			<div class="setting row-fluid">
+				<label class="span4 inline">X-Grouping</label>
+				<span class="field span8" ng-click="showXGroupModal()">{{xGroupDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>
+			</div>
+
+			<div class="setting row-fluid">
+				<label class="span4 inline">X-Sort</label>
+				<span class="field span8" ng-click="showXSortModal()">{{xSortDim.description || "Choose..."}}<i class="fa fa-bars pull-right"></i></span>
+			</div>
+		</div>
+
+	</div>
+
+	<div class="main-viz" class="view span12">
+		<div id="{{uniqueToggleId}}" class="row-fluid">
+			<!-- SVG inserted here -->
+		</div>
+		<div id="{{uniqueModalId}}">
+			<div id="duration-modal" data-modal dimensions="durationDims" model="durationDim"></div>
+			<div id="tooltip-label-modal" data-modal dimensions="labelDims" model="tooltipLabelDim"></div>
+			<div id="group-modal" data-modal dimensions="labelDims" model="groupDim"></div>
+			<div id="x-group-modal" data-modal dimensions="labelDims" model="xGroupDim"></div>
+			<div id="x-sort-modal" data-modal dimensions="labelDims" model="xSortDim"></div>
+		</div>
+	</div>
+
+	<a data-ng-show="view === 'true'" class="toggle" data-toggle="tooltip" data-original-title="Settings"
+		data-placement="bottom"><i class="fa fa-cog"></i></a>
+</div>
