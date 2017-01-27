@@ -86,9 +86,3 @@ Your .svg file can then be edited in a vector graphics editor like Adobe Illustr
 
 ![downloaded.png]({{ site.baseurl }}/assets/resources/14FA2FEC1C20F7E68E0CB3E6E96DFB38.png)
 
-
-
- 
-//see other tutorials or go home
-
-##[Exit]({{site.baseurl}}/)
