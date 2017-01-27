@@ -18,7 +18,7 @@ Clicking the "Dimensions" field lets us select from the dimensions in the data s
 
 
 Once you have selected the dimensions to filter, you can narrow down your data by selecting specific elements.  In this case, we are filtering down to Aristocrats, Financiers, and Authors.  Note that as soon as an element is selected, the map or other visualization will update dynamically.  Similarly, other facets show only the remaining data elements.  In this case, our subset of Aristocrats, Financiers, and Authors leaves 30/50 Men and 11/23 Women.
-![Facet Filter Applied]({{ site.urlimg }}resources/FacetFilterApplied.png)
+![Facet Filter Applied]({{ site.urlimg }}resources/FacetFilterFilterApplied.png)
 
 
 For each facet, you can also check to select all or deselect all, sort the selected elements, or remove one dimension from the filter.
