@@ -7,7 +7,7 @@ category: tutorial
 
 We’ll start with point data.
 
-![30map options.png]({{ site.baseurl }}/assets/resources/30map options.png)
+![30map options.png]({{ site.baseurl }}/assets/resources/MapOptions.png)
 
 
 
