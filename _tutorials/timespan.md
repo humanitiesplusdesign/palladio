@@ -14,4 +14,4 @@ Select the time period to filter by clicking and dragging to highlight (all date
 ![Timespan Selections]({{ site.urlimg }}resources/TimeSpanSelections.png)
 
 
-For more information on overlapping filters check tktktktktk.
+For more information on overlapping filters check the [impact of overlapping filters](/palladio/tutorials/filteroverlap).
