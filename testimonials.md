@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Testimonials, Use, and Writing
+title: Testimonials
 ---
 
 
