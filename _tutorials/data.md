@@ -102,7 +102,7 @@ Palladio does not store your data, so each project lasts only as long as your br
 
 
 
-###Notes:
+Notes:
 
 The review process can be skipped entirely, but it is important to review your data before beginning your Palladio project. 
 
