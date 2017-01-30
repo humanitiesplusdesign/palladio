@@ -14,7 +14,7 @@ title: Testimonials
     </li>
   {% endfor %}
   </ul>  
-  <h2>Elsewhere Around The Internet</h2>
+  <h1>Elsewhere Around The Internet</h1>
  
   <h2>Tutorials and Resources</h2>
   <ul class="post">
