@@ -15,5 +15,6 @@ After selecting the dates to filter by, you can select subsets of the data by cl
 ![Timeline Selections]({{ site.urlimg }}resources/TimelineSelections.png)
 
 
-For more information on overlapping filters check tktktktktk.
+For more information on overlapping filters check the [impact of overlapping filters](/palladio/tutorials/filteroverlap).
+
 
