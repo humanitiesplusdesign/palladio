@@ -146,7 +146,7 @@ The default map view is a blank map. Note the settings panel to the right. You c
 
 The first step is to specify the type of map you'd like to see. To do so, choose from the menus within the settings panel. You can choose from two types of map views: 'Points' or 'Point to Point'. (Note that access to these functions will depend on the kinds of information you've uploaded. You wouldn't, for example, be able to use the 'Point to Point' function unless Palladio recognizes a dataset with more than one type of coordinates column, ie. 'Source City' and 'Destination City.')
 
-####‘Points’ map view
+**‘Points’ map view**
 
 In the 'Points' map view, Palladio can map out a collection of unique locations, based on any coordinates data (longitude, lattitude) you've entered. For instance, if you uploaded a table listing all of the Popes in the last five hundred years, their individual cities of birth, and coordinates data for each of these cities, you might want to see a worldwide view of where Popes have been born in the last five hundred years.
 
@@ -159,7 +159,7 @@ See the Scenario: Creating Data for a Simple Map for more information about crea
 [Download PDF]({{ site.url }}/doc/scenario-simple-map.pdf)
 
 
-####‘Point-to-Point’ map view
+**‘Point-to-Point’ map view**
 
 The point to point view give us a node-link map. Here you will select two different dimensions (ie. source city and destination city) and see the links between various points.
 
