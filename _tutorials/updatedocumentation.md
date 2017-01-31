@@ -9,12 +9,13 @@ We welcome contributions to Palladio, including fleshing out documentation and t
 Palladio's library and components are publicly available on GitHub.  To make a change, you will need a github account.  All changes can be done from the command line or an app - this tutorial will include links to github's lessons on each step, along with a guide to where files are stored within the Palladio file structure.
 
 To make a change to humanitiesplusdesign/palladio, you will
-*[Fork the repository](https://help.github.com/articles/fork-a-repo/)
-*[Move to the gh-pages branch](https://help.github.com/articles/creating-and-deleting-branches-within-your-repository/)
-*Make your changes (see below for which files to update)</li>
-*[Submit a pull request](https://help.github.com/articles/creating-a-pull-request/)</li>
-*Wait for your changes to be accepted & then see them on the site!
-
+<ul>
+<li>[Fork the repository](https://help.github.com/articles/fork-a-repo/)</li>
+<li>[Move to the gh-pages branch](https://help.github.com/articles/creating-and-deleting-branches-within-your-repository/)</li>
+<li>Make your changes (see below for which files to update)</li>
+<li>[Submit a pull request](https://help.github.com/articles/creating-a-pull-request/)</li>
+<li>Wait for your changes to be accepted & then see them on the site!</li>
+</ul>
 
 All palladio files are stored in a "Palladio" folder, and processed using Jekyll.  Formatting is done via markdown.  The following sections will show where to add or update a tutorial, and how to add a testimonial.
 
@@ -24,14 +25,14 @@ All palladio files are stored in a "Palladio" folder, and processed using Jekyll
 
 To create a new tutorial, begin with the standard header
 
-<code>---</br>
-layout: post</br>
-title: [Your Title Goes Here]</br>
-collection: tutorials</br>
----</code>
+<code>---</code></br>
+<code>layout: post</code></br>
+<code>title: [Your Title Goes Here]</code></br>
+<code>collection: tutorials</code></br>
+<code>---</code></br>
 
-Then create your page and save it in the /_tutorials folder</br>
-You can link an image in the /assets/resources folder, as shown below</br>
+Then create your page and save it in the /_tutorials folder
+You can link an image in the /assets/resources folder, as shown below
 
 ![updateassets.png]({{ site.urlimg }}resources/updateassets.png)
 
