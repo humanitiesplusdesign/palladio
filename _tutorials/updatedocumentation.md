@@ -3,7 +3,7 @@ layout: post
 title: How to update Palladio documentation
 collection: tutorials
 ---
-
+{::options parse_block_html="true" /}
 We welcome contributions to Palladio, including fleshing out documentation and tutorials, and would love to hear how you are using Palladio.  Below is a brief tutorial explaining how to update the tutorials (including this one!) or add your own testimonial.
 
 Palladio's library and components are publicly available on GitHub.  To make a change, you will need a github account.  All changes can be done from the command line or an app - this tutorial will include links to github's lessons on each step, along with a guide to where files are stored within the Palladio file structure.
