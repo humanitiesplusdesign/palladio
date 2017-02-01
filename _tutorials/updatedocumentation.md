@@ -18,24 +18,24 @@ To make a change to humanitiesplusdesign/palladio, you will
 
 All palladio files are stored in a "Palladio" folder, and processed using Jekyll.  Formatting is done via markdown.  The following sections will show where to add or update a tutorial, and how to add a testimonial.
 
-##Add or Update a Tutorial
+## Add or Update a Tutorial
 Tutorial files are stored in /_tutorials in the Palladio folder.  Screenshots and other resources are located under /assets/resources.  So to update this tutorial, you would open /_tutorials/updatedocumentation.md, make any desired changes, then save the file.
 ![updatetutorials.png]({{ site.urlimg }}resources/updatetutorials.png)
 
 To create a new tutorial, begin with the standard header
 
-<code>---</code></br>
-<code>layout: post</code></br>
-<code>title: [Your Title Goes Here]</code></br>
-<code>collection: tutorials</code></br>
-<code>---</code></br>
+    ---
+    layout: post
+    title: [Your Title Goes Here]
+    collection: tutorials
+    ---
 
 Then create your page and save it in the /_tutorials folder
 You can link an image in the /assets/resources folder, as shown below
 
 ![updateassets.png]({{ site.urlimg }}resources/updateassets.png)
 
-<code>![updateassets.png]({{ site.urlimg }}resources/updateassets.png)</code>
+    ![updateassets.png]({{ site.urlimg }}resources/updateassets.png)
 
 
 <h2>Add a testimonial</h2>
