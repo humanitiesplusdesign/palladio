@@ -12,3 +12,5 @@ node_modules
 bower_components
 .sass-cache
 >>>>>>> master
+
+assets/.DS_Store

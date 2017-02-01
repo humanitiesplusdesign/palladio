@@ -3,24 +3,23 @@ layout: post
 title: How to update Palladio documentation
 collection: tutorials
 ---
-{::options parse_block_html="true" /}
 We welcome contributions to Palladio, including fleshing out documentation and tutorials, and would love to hear how you are using Palladio.  Below is a brief tutorial explaining how to update the tutorials (including this one!) or add your own testimonial.
 
 Palladio's library and components are publicly available on GitHub.  To make a change, you will need a github account.  All changes can be done from the command line or an app - this tutorial will include links to github's lessons on each step, along with a guide to where files are stored within the Palladio file structure.
 
 To make a change to humanitiesplusdesign/palladio, you will
-<ul>
-<li>[Fork the repository](https://help.github.com/articles/fork-a-repo/)</li>
-<li>[Move to the gh-pages branch](https://help.github.com/articles/creating-and-deleting-branches-within-your-repository/)</li>
-<li>Make your changes (see below for which files to update)</li>
-<li>[Submit a pull request](https://help.github.com/articles/creating-a-pull-request/)</li>
-<li>Wait for your changes to be accepted & then see them on the site!</li>
-</ul>
+
+*[Fork the repository](https://help.github.com/articles/fork-a-repo/)
+*[Move to the gh-pages branch](https://help.github.com/articles/creating-and-deleting-branches-within-your-repository/)
+*Make your changes (see below for which files to update)
+*[Submit a pull request](https://help.github.com/articles/creating-a-pull-request/)
+*Wait for your changes to be accepted & then see them on the site!
+
 
 All palladio files are stored in a "Palladio" folder, and processed using Jekyll.  Formatting is done via markdown.  The following sections will show where to add or update a tutorial, and how to add a testimonial.
 
-<h2>Add or Update a Tutorial</h2>
-  Tutorial files are stored in /_tutorials in the Palladio folder.  Screenshots and other resources are located under /assets/resources.  So to update this tutorial, you would open /_tutorials/updatedocumentation.md, make any desired changes, then save the file.
+##Add or Update a Tutorial
+Tutorial files are stored in /_tutorials in the Palladio folder.  Screenshots and other resources are located under /assets/resources.  So to update this tutorial, you would open /_tutorials/updatedocumentation.md, make any desired changes, then save the file.
 ![updatetutorials.png]({{ site.urlimg }}resources/updatetutorials.png)
 
 To create a new tutorial, begin with the standard header
