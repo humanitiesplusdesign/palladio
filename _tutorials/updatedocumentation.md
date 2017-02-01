@@ -9,11 +9,11 @@ Palladio's library and components are publicly available on GitHub.  To make a c
 
 To make a change to humanitiesplusdesign/palladio, you will
 
-*[Fork the repository](https://help.github.com/articles/fork-a-repo/)
-*[Move to the gh-pages branch](https://help.github.com/articles/creating-and-deleting-branches-within-your-repository/)
-*Make your changes (see below for which files to update)
-*[Submit a pull request](https://help.github.com/articles/creating-a-pull-request/)
-*Wait for your changes to be accepted & then see them on the site!
+* [Fork the repository](https://help.github.com/articles/fork-a-repo/)
+* [Move to the gh-pages branch](https://help.github.com/articles/creating-and-deleting-branches-within-your-repository/)
+* Make your changes (see below for which files to update)
+* [Submit a pull request](https://help.github.com/articles/creating-a-pull-request/)
+* Wait for your changes to be accepted & then see them on the site!
 
 
 All palladio files are stored in a "Palladio" folder, and processed using Jekyll.  Formatting is done via markdown.  The following sections will show where to add or update a tutorial, and how to add a testimonial.
