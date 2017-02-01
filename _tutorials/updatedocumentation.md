@@ -35,29 +35,29 @@ You can link an image in the /assets/resources folder, as shown below
 
 ![updateassets.png]({{ site.urlimg }}resources/updateassets.png)
 
-    ![updateassets.png]({{ site.urlimg }}resources/updateassets.png)
+    ![updateassets.png](\{\{ site.urlimg \}\}resources/updateassets.png)
 
 
-<h2>Add a testimonial</h2>
+## Add a testimonial
   Testimonials are stored in /_testimonials in the Palladio folder.  So to add a new testimonial, begin with the standard header
-~~~~
----
-layout: post
-title:  [Your Title]
-author: [author information]
-date:   [date in yyyy-mm-dd hh:mm:ss format]
-category: palladio
-published: true
-tags: front
-excerpt: [Brief description]
----
-~~~~  
+
+    ---
+    layout: post
+    title:  [Your Title]
+    author: [author information]
+    date:   [date in yyyy-mm-dd hh:mm:ss format]
+    category: palladio
+    published: true
+    tags: front
+    excerpt: [Brief description]
+    ---
+  
   Then create your page and save it in the /_testimonials folder
   
 ![updatetestimonial.png]({{ site.urlimg }}resources/updatetestimonial.png)
   
 You can link an image in the /assets/resources folder, as shown below
-~~~~
-![updateassets.png]({{ site.urlimg }}resources/updateassets.png)
-~~~~
+
+    ![updateassets.png](\{\{ site.urlimg \}\}resources/updateassets.png)
+
 ![updateassets.png]({{ site.urlimg }}resources/updateassets.png)
