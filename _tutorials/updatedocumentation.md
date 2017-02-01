@@ -35,7 +35,7 @@ You can link an image in the /assets/resources folder, as shown below
 
 ![updateassets.png]({{ site.urlimg }}resources/updateassets.png)
 
-    ![updateassets.png](\{\{ site.urlimg \}\}resources/updateassets.png)
+    ![updateassets.png](\{{ site.urlimg \}}resources/updateassets.png)
 
 
 ## Add a testimonial
@@ -58,6 +58,6 @@ You can link an image in the /assets/resources folder, as shown below
   
 You can link an image in the /assets/resources folder, as shown below
 
-    ![updateassets.png](\{\{ site.urlimg \}\}resources/updateassets.png)
+    ![updateassets.png](\{{ site.urlimg \}}resources/updateassets.png)
 
 ![updateassets.png]({{ site.urlimg }}resources/updateassets.png)
