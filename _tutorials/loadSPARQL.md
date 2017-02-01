@@ -7,6 +7,7 @@ collection: tutorials
 Data can be loaded from a SPARQL endpoint.  The SPARQL language is used to query Linked Open Data (LOD) from various museums and other art collections.  An [excellent tutorial](http://programminghistorian.org/lessons/graph-databases-and-SPARQL) on loading data from a SPARQL endpoint can be found at [The Programming Historian](http://programminghistorian.org/).
 
 To load data from a SPARQL endpoint, first click "Load data from a SPARQL endpoint (beta)".  You will be prompted to identify the path of the endpoint (for instance, the British Museum's public-facing SQPARQL page is at [http://collection.britishmuseum.org/sparql](http://collection.britishmuseum.org/sparql), but the SPARQL endpoint to allow Palladio to connect to the British Museum is: 'http://collection.britishmuseum.org/sparql.json' .
+An incomplete list of SPARQL endpoints is available [here](http://www.w3.org/wiki/SparqlEndpoints)
 
 ![SPARQL.png]({{ site.urlimg }}resources/SPARQL.png)
 
