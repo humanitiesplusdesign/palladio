@@ -14,6 +14,23 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 		// We give files unique numeric identifiers.
 		var uniqueCounter = 0;
 
+		var generateUnique = function(file, data) {
+			// If there is no unique key field, create one and re-parse.
+			if(file.autoFields.filter(function (f) { return f.uniqueKey; }).length === 0) {
+				// Pick a property name that's not taken
+				var genProp = 'generated';
+				while(Object.getOwnPropertyNames(data[0]).indexOf(genProp) !== -1) {
+					genProp = 'generated' + Math.floor(Math.random() * 10000);
+				}
+
+				data.forEach(function (d, i) {
+					d[genProp] = "" + i;
+				});
+
+				file.autoFields = parseService.getFields(data);
+			}
+		}
+
 		var addFile = function (data, label, url) {
 			var file = {};
 
@@ -90,19 +107,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 			file.autoFields = parseService.getFields(data);
 
 			// If there is no unique key field, create one and re-parse.
-			if(file.autoFields.filter(function (f) { return f.uniqueKey; }).length === 0) {
-				// Pick a property name that's not taken
-				var genProp = 'generated';
-				while(Object.getOwnPropertyNames(data[0]).indexOf(genProp) !== -1) {
-					genProp = 'generated' + Math.floor(Math.random() * 10000);
-				}
-
-				data.forEach(function (d, i) {
-					d[genProp] = "" + i;
-				});
-
-				file.autoFields = parseService.getFields(data);
-			}
+			generateUnique(file, data)
 
 			var maxUniques = d3.max(file.autoFields, function (f) { return f.uniques.length; });
 			var descriptiveField = file.autoFields.filter(function (f) { return f.uniques.length === maxUniques; })[0];
@@ -154,6 +159,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 		};
 
 		var addFileRaw = function(file) {
+			generateUnique(file, file.data)
 			files.push(file);
 			uniqueCounter++;
 
