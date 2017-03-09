@@ -109455,6 +109455,1490 @@ angular.module('palladio.filters', [])
         return files.filter(function (d){ return d.id !== fileId; });
     };
   });
+var crossfilterHelpers = {
+
+	///////////////////////////////////////////////////////////////////////
+	//
+	// Reduce functions that don't double-count by using add/reduce based 
+	// on unique dimension if defined.
+	//
+	// Also tracks an initial count value (depends on CrossFilter pull
+	// request https://github.com/square/crossfilter/pull/92 )
+	//
+	// Also records a descriptive string based on a second accessor
+	//
+	///////////////////////////////////////////////////////////////////////
+
+	countByDimensionWithInitialCountAndData: function(accessorFunction, dataAccessor) {
+		var internalCount;
+		return {
+			add: function (p, v) {
+				if(p.unique.has(accessorFunction(v))) {
+					internalCount = p.unique.get(accessorFunction(v));
+					p.unique.set(accessorFunction(v), internalCount + 1);
+				} else {
+					p.unique.set(accessorFunction(v), 1);
+					p.data = dataAccessor(v, p.data, "add");
+					++p.count;
+				}
+				if(p.count > p.initialCount) p.initialCount = p.count;
+				return p;
+			},
+			remove: function (p, v) {
+				if(p.unique.has(accessorFunction(v))) {
+					internalCount = p.unique.get(accessorFunction(v));
+					if(internalCount == 1) {
+						p.unique.remove(accessorFunction(v));
+						p.data = dataAccessor(v, p.data, "remove");
+						--p.count;
+					} else {
+						p.unique.set(accessorFunction(v), internalCount - 1);
+					}
+				}
+				return p;
+			},
+			init: function () {
+				return {data: undefined, unique: d3.map(), count: 0, initialCount: 0};
+			}
+		};
+	},
+
+	///////////////////////////////////////////////////////////////////////
+	//
+	// Reduce functions that don't double-count by using add/reduce based 
+	// on unique dimension if defined.
+	//
+	// Also tracks an initial count value (depends on CrossFilter pull
+	// request https://github.com/square/crossfilter/pull/92 )
+	//
+	///////////////////////////////////////////////////////////////////////
+
+	countByDimensionWithInitialCount: function(accessorFunction) {
+		var internalCount;
+		return {
+			add: function (p, v) {
+				if(p.unique.has(accessorFunction(v))) {
+					internalCount = p.unique.get(accessorFunction(v));
+					p.unique.set(accessorFunction(v), internalCount + 1);
+				} else {
+					p.unique.set(accessorFunction(v), 1);
+					++p.count;
+				}
+				if(p.count > p.initialCount) p.initialCount = p.count;
+				return p;
+			},
+			remove: function (p, v) {
+				if(p.unique.has(accessorFunction(v))) {
+					internalCount = p.unique.get(accessorFunction(v));
+					if(internalCount == 1) {
+						p.unique.remove(accessorFunction(v));
+						--p.count;
+					} else {
+						p.unique.set(accessorFunction(v), internalCount - 1);
+					}
+				}
+				return p;
+			},
+			init: function () {
+				return {unique: d3.map(), count: 0, initialCount: 0};
+			}
+		};
+	},
+
+	///////////////////////////////////////////////////////////////////////
+	//
+	// Reduce functions that don't double-count by using add/reduce based 
+	// on unique dimension if defined.
+	//
+	///////////////////////////////////////////////////////////////////////
+
+	countByDimension: function(accessorFunction) {
+		var internalCount;
+		return {
+			add: function (p, v) {
+				if(p.unique.has(accessorFunction(v))) {
+					internalCount = p.unique.get(accessorFunction(v));
+					p.unique.set(accessorFunction(v), internalCount + 1);
+				} else {
+					p.unique.set(accessorFunction(v), 1);
+					++p.count;
+				}
+				return p;
+			},
+			remove: function (p, v) {
+				if(p.unique.has(accessorFunction(v))) {
+					internalCount = p.unique.get(accessorFunction(v));
+					if(internalCount == 1) {
+						p.unique.remove(accessorFunction(v));
+						--p.count;
+					} else {
+						p.unique.set(accessorFunction(v), internalCount - 1);
+					}
+				}
+				return p;
+			},
+			init: function () {
+				return {unique: d3.map(), count: 0};
+			}
+		};
+	}
+};
+(function(){
+
+	d3.graph = function(){
+
+		var width = 700,
+			height = 600,
+			showLinks = true,
+			showLables = true,
+			searchText = "",
+			circle = false,
+			nodeSize = false,
+			nodeSizeChange = function () {},
+			highlightSource = function () {},
+			highlightTarget = function () {},
+			removeHighlight = function () {};
+
+		var force, forceLabel, drag, line, zoom, overlay, main, nodes, path, paths, node, anchorLink, anchorNode, anchorNodeText, anchorNodeCircle, labelAnchors, labelAnchorLinks, nodeLabel, nodeLabelShadow,
+			nodeLabelText, initialAggs, resetFunc, canvas, links;
+
+		resetFunc = function () { };
+
+		initialAggs = d3.map();
+		nodes = d3.map();
+		links = [];
+		labelAnchors = d3.map();
+		labelAnchorLinks = [];
+
+		var sizeScale = d3.scale.sqrt().range([5,20]);
+
+		/* Chart function */
+
+		function chart(selection){
+			selection.each(function (data) {
+
+				if(!force) initialize();
+
+				// Creating nodes
+
+				nodes.keys().forEach(function (k) {
+					nodes.get(k).current = false;
+					nodes.get(k).agg = 0;
+				});
+
+				data.forEach(function (link) {
+					if(nodes.has(link.data.source)) {
+						nodes.get(link.data.source).current = true;
+						nodes.get(link.data.source).agg += link.data.agg;
+
+						// Apply both classes if necessary.
+						if(nodes.get(link.data.source).dimension === "target") {
+							nodes.get(link.data.source).dimension = "target source";
+						}
+					} else {
+						nodes.set(link.data.source, {
+							name: link.data.source,
+							current: true,
+							agg: link.data.agg,
+							initialAgg: initialAggs.get(link.data.source),
+							dimension: "source",
+							x: (width / 2) + (Math.random() * 10),
+							y: (height / 2) + (Math.random() * 10)
+						});
+
+						labelAnchors.set(link.data.source, { name: link.data.source, node : nodes.get(link.data.source) });
+						labelAnchors.set(link.data.source + "__$", { name: link.data.source + "__$", node: nodes.get(link.data.source), fake:true });
+					}
+					if(nodes.has(link.data.target)) {
+						nodes.get(link.data.target).current = true;
+						nodes.get(link.data.target).agg += link.data.agg;
+
+						// Apply both classes if necessary.
+						if(nodes.get(link.data.target).dimension === "source") {
+							nodes.get(link.data.target).dimension = "source target";
+						}
+					} else {
+						nodes.set(link.data.target, {
+							name: link.data.target,
+							current: true,
+							agg: link.data.agg,
+							initialAgg: initialAggs.get(link.data.target),
+							dimension: "target",
+							x: (width / 2) + (Math.random() * 10),
+							y: (height / 2) + (Math.random() * 10)
+						});
+
+						labelAnchors.set(link.data.target, { name: link.data.target, node : nodes.get(link.data.target) });
+						labelAnchors.set(link.data.target + "__$", { name: link.data.target + "__$", node: nodes.get(link.data.target), fake:true });
+					}
+				});
+
+				nodes.keys().forEach(function (k) {
+					if(!nodes.get(k).current) {
+						nodes.remove(k);
+						labelAnchors.remove(k);
+						labelAnchors.remove(k + "__$");
+					}
+				});
+
+				// Set the domain on the size scale.
+				sizeScale.domain([
+					d3.min(nodes.values(), function (d) { return d.initialAgg; }),
+					d3.max(nodes.values(), function (d) { return d.initialAgg; })
+				]);
+
+				// Build links.
+				links = data.map(function (l) {
+					return {
+						source: nodes.get(l.data.source),
+						target: nodes.get(l.data.target),
+						agg: l.data.agg
+					};
+				});
+				// Labels
+
+				labelAnchorLinks = [];
+
+				labelAnchorLinks = labelAnchors.entries().filter(function(d){ return !d.value.fake; }).map(function (d,i){
+					return {
+						source : labelAnchors.get(d.key),
+						target : labelAnchors.get(d.key + "__$"),
+						weight : 1
+					};
+				});
+
+				force
+					.nodes(nodes.values())
+					.links(links)
+					.start();
+
+				forceLabel
+					.nodes(labelAnchors.values())
+					.links(labelAnchorLinks)
+					.start();
+
+				// SVG
+
+				// Main layers
+				main.selectAll(".layer").remove();
+				// main.append("g").attr("class","layer links");
+				main.append("g").attr("class","layer nodes");
+				main.append("g").attr("class","layer labels");
+
+				// Links
+
+				paths = document.createElement("g");
+
+				path = d3.select(paths)
+						.attr("class", "layer links")
+					.selectAll("path.link")
+						.data(showLinks ? force.links() : [ ], function (d) { return d.source.name + "-" + d.target.name; });
+
+				// Don't remove all paths. Only remove paths that have been exited before updating
+				// the remaining.
+				path.exit().remove();
+
+				path.enter().append("svg:path")
+					.attr("class", "link")
+					.style('fill','none')
+					.style('stroke-opacity','.5')
+					.style('stroke','#666')
+					.style('stroke-width', 1);
+
+				// Nodes
+
+				node = main.select(".nodes").selectAll(".node")
+					.data(force.nodes(), function (d) { return d.name; });
+
+				// Don't remove all nodes. Only remove nodes that have been exited before updating
+				// the remaining.
+				node.exit().remove();
+
+				node.enter().append("circle")
+					.attr("class", function (d) { return "node " + d.dimension; })
+					.classed("fixed", function (d) { return d.fixed; })
+					.attr("r", function (d) { return nodeSize ? sizeScale(d.agg) : 5; })
+					.on("mouseover", mouseover)
+					.on("mouseout", mouseout)
+					.call(drag);
+
+				// Labels
+
+				anchorNode = main.select(".labels")
+					.selectAll("g.anchor-node")
+					.data(
+						(showLabels ? forceLabel.nodes() : [ ]).filter(function (d){ return !d.fake; }),
+						function (d) { return d.name; });
+
+				// Don't remove all nodes. Only remove nodes that have been exited before updating
+				// the remaining.
+				anchorNode.exit().remove();
+
+				anchorNode.enter().append("g")
+					.attr("class", function(d) { return "anchor-node " + d.node.dimension; })
+					.append("svg:text")
+						// .style("fill", "#555")
+						.style("font-family", "karla, Arial, Helvetica")
+						.style("font-size", 11)
+						.text(function(d, i) {
+							return d.fake ? "" : d.node.name;
+						});
+
+			});
+
+
+
+			nodeSizeChange = function () {
+				node = main.selectAll("g.node")
+					.data(force.nodes(), function (d) { return d.name; })
+					.attr("r", function (d) { return nodeSize ? sizeScale(d.agg) : 5; });
+			};
+
+			highlightSource = function () {
+				main.selectAll(".node")
+					.classed("highlighted", false);
+				main.selectAll(".source")
+					.classed("highlighted", true);
+			};
+
+			highlightTarget = function () {
+				main.selectAll(".node")
+					.classed("highlighted", false);
+				main.selectAll(".target")
+					.classed("highlighted", true);
+			};
+
+			removeHighlight = function () {
+				main.selectAll(".node")
+					.classed("highlighted", false);
+			};
+
+			function mouseover (d,i) {
+				anchorNode.classed("strong", function(a,h){ return h == i; });
+			}
+
+			function mouseout (d,i) {
+				anchorNode.classed("strong", false);
+			}
+
+			function initialize() {
+
+				force = d3.layout.force()
+					.size([width, height])
+					.charge(-300)
+					.on("tick", redraw);
+
+				forceLabel = d3.layout.force()
+					.gravity(0)
+					.linkDistance(0)
+					.linkStrength(8)
+					.charge(-70)
+					.size([width, height]);
+
+				drag = force.drag()
+					.on("dragstart", function (d) {
+						d3.event.sourceEvent.stopPropagation();
+						d.fixed = true;
+					//	d3.select(this).classed("fixed", true).style('stroke', "#222");
+					})
+					.on("drag.force", function (d) {
+						d.px = d.x + d3.event.dx / zoom.scale();
+						d.py = d.y + d3.event.dy / zoom.scale();
+						force.resume();
+						forceLabel.resume();
+					});
+
+				line = d3.svg.line().interpolate('bundle');
+
+				zoom = d3.behavior.zoom().scaleExtent([0.1,10]).on("zoom", function () { zoomed = true; redraw();} );
+
+				zoomByFactor(2);
+
+				overlay = selection.selectAll("rect.overlay")
+					.data(function(d){ return [d]; });
+
+				overlay.attr("width", width)
+					.attr("height", height)
+					.attr("fill","none");
+
+				overlay.enter().append("rect")
+					.attr("class", "overlay")
+					.attr("width", width)
+					.attr("height", height)
+					.attr("fill","none");
+
+				overlay.exit().remove();
+
+				selection.call(zoom);
+
+				// main g
+
+				main = selection.selectAll("g.main")
+						.data([{}]);
+
+				main.enter().append("g")
+						.attr("class", "main");
+
+				main.exit().remove();
+
+				// Determine the initialAggs for each node.
+				selection.each(function (data) {
+					data.forEach( function (link) {
+						if(initialAggs.has(link.data.source)) {
+							initialAggs.set(link.data.source, initialAggs.get(link.data.source) + link.data.initialAgg);
+						} else {
+							initialAggs.set(link.data.source, link.data.initialAgg);
+						}
+						if(initialAggs.has(link.data.target)) {
+							initialAggs.set(link.data.target, initialAggs.get(link.data.target) + link.data.initialAgg);
+						} else {
+							initialAggs.set(link.data.target, link.data.initialAgg);
+						}
+					});
+				});
+
+				canvas = d3.select(selection[0][0].parentElement).select('canvas').node().getContext('2d');
+			}
+
+			resetFunc = function () {
+				if(node) node.remove();
+				if(path) path.remove();
+				if(nodeLabel) nodeLabel.remove();
+				if(nodeLabelShadow) nodeLabelShadow.remove();
+				nodes = d3.map();
+				labelAnchors = d3.map();
+				labelAnchorLinks = [];
+				links = [];
+				initialAggs = d3.map();
+				force = null;
+				initialize();
+			};
+		}
+
+		function curve(d) {
+			var source = d.source,
+				target = d.target,
+				sourceX = source.x * zoom.scale() + zoom.translate()[0],
+				sourceY = source.y * zoom.scale() + zoom.translate()[1],
+				targetX = target.x * zoom.scale() + zoom.translate()[0],
+				targetY = target.y * zoom.scale() + zoom.translate()[1];
+				// rad = Math.sqrt( Math.pow(targetX-sourceX,2) + Math.pow(targetY-sourceY, 2) )/4,
+				// sourceP = Math.atan2((targetY-sourceY),(targetX-sourceX)) - Math.PI/8,
+				// targetP = Math.atan2((sourceY-targetY),(sourceX-targetX)) + Math.PI/8;
+
+			return line([
+				[sourceX, sourceY],
+				// [sourceX+rad*Math.cos(sourceP),sourceY+rad*Math.sin(sourceP)],
+				// [targetX+rad*Math.cos(targetP),targetY+rad*Math.sin(targetP)],
+				[targetX,targetY]
+			]);
+		}
+
+		function updateNode() {
+			this.attr("transform", function (d) {
+				return "translate(" +
+					(d.x * zoom.scale() + zoom.translate()[0]) + "," +
+					(d.y * zoom.scale() + zoom.translate()[1]) + ")";
+			});
+		}
+
+		// Flag to indicate that a zoom happened. In this case, we need to recalculate widths
+		// from getBBox()
+		var zoomed = true;
+
+		function redraw() {
+
+			node.classed("hidden", function (d) {
+				return searchText &&
+					d.name.toLowerCase().indexOf(searchText.toLowerCase()) === -1;
+			});
+
+			anchorNode.classed("hidden", function (d) {
+				return searchText &&
+					d.node.name.toLowerCase().indexOf(searchText.toLowerCase()) === -1;
+			});
+
+			// Draw canvas paths
+			canvas.clearRect(0, 0, width, height);
+			canvas.strokeStyle = "#ccc";
+			canvas.beginPath();
+			path.each(function (d) {
+				if(!(searchText &&
+					( d.source.name.toLowerCase().indexOf(searchText.toLowerCase()) === -1 &&
+						d.target.name.toLowerCase().indexOf(searchText.toLowerCase()) === -1 ))) {
+					canvas.moveTo(
+						d.source.x * zoom.scale() + zoom.translate()[0],
+						d.source.y * zoom.scale() + zoom.translate()[1]);
+					canvas.lineTo(
+						d.target.x * zoom.scale() + zoom.translate()[0],
+						d.target.y * zoom.scale() + zoom.translate()[1]);
+				}
+			});
+			canvas.stroke();
+
+			node.call(updateNode);
+
+			forceLabel.nodes().forEach(function(d){
+				if (!d.fake) return;
+				d.x = d.node.x;
+				d.y = d.node.y;
+			});
+
+			var shiftX, shiftY, diffX, diffY, dist;
+			anchorNode.each(function (d) {
+				if(zoomed) {
+					d.width = this.childNodes[0].getBBox().width;
+				}
+				// b = this.childNodes[0].getBBox();
+				diffX = d.x - d.node.x;
+				diffY = d.y - d.node.y;
+				dist = Math.sqrt(diffX * diffX + diffY * diffY);
+
+				shiftX = d.width * (diffX - dist) / (dist * 2);
+				shiftX = Math.max(-d.width, Math.min(0, shiftX));
+				shiftY = 5;
+				if(shiftX && shiftY) {
+					this.childNodes[0].setAttribute("transform", "translate(" + shiftX + "," + shiftY + ")");
+				}
+			});
+
+			anchorNode.call(updateNode);
+
+			zoomed = false;
+		}
+
+		function zoomByFactor(factor) {
+			zoomed = true;
+			var scale = zoom.scale();
+			var extent = zoom.scaleExtent();
+			var newScale = scale * factor;
+			if (extent[0] <= newScale && newScale <= extent[1]) {
+				var t = zoom.translate();
+				var c = [width / 2, height / 2];
+				zoom
+				.scale(newScale)
+				.translate(
+					[c[0] + (t[0] - c[0]) / scale * newScale,
+					c[1] + (t[1] - c[1]) / scale * newScale]);
+			}
+		}
+		
+		function zoomToData() {
+			var y = [0,0];
+			var x = [0,0];
+			var scale = zoom.scale();
+			force.nodes().forEach(function(d) {
+				if(d.y < y[0]) y[0] = d.y;
+				if(d.y > y[1]) y[1] = d.y;
+				if(d.x < x[0]) x[0] = d.x;
+				if(d.x > x[1]) x[1] = d.x;
+			});
+			// First zoom in.
+			while((x[1] - x[0])*scale < width || (y[1] - y[0])*scale < height) {
+				zoomByFactor(1.2);
+				scale = zoom.scale();
+			}
+			// Then zoom out.
+			while((x[1] - x[0])*scale > width || (y[1] - y[0])*scale > height) {
+				zoomByFactor(0.8);
+				scale = zoom.scale();
+			}
+			var xmid = (x[1] + x[0])/2;
+			var ymid = (y[1] + y[0])/2;
+			zoom.translate([width/2 - xmid*scale, height/2 - ymid*scale])
+			redraw();
+		}
+
+		/* Getter/Setter */
+
+		chart.height = function(x) {
+			if (!arguments.length) return height;
+			height = x;
+			return chart;
+		};
+
+		chart.width = function(x) {
+			if (!arguments.length) return width;
+			width = x;
+			return chart;
+		};
+
+		chart.showLinks = function(x) {
+			if (!arguments.length) return showLinks;
+			showLinks = x;
+			return chart;
+		};
+
+		chart.showLabels = function(x) {
+			if (!arguments.length) return showLabels;
+			showLabels = x;
+			return chart;
+		};
+
+		chart.searchText = function(x) {
+			if (!arguments.length) return searchText;
+			searchText = x;
+			return chart;
+		};
+
+		chart.nodeSize = function (x) {
+			if (!arguments.length) return nodeSize;
+			nodeSize = x;
+			nodeSizeChange();
+			return chart;
+		};
+
+		chart.resetNodes = function () {
+			force.nodes().forEach(function (n) {
+				n.fixed = false;
+			});
+			node.classed("fixed", function (d) { return d.fixed; })
+				.style('stroke', '#eee')//function (d) { return d.fixed ? "#222" : "#eee"; } );
+			force.resume();
+			forceLabel.resume();
+			redraw();
+		};
+
+		chart.circle = function (x) {
+			if (!arguments.length) return circle;
+			circle = x;
+			return chart;
+		};
+
+		chart.reset = function () {
+			resetFunc();
+		};
+
+		chart.highlightSource = function () {
+			highlightSource();
+		};
+
+		chart.highlightTarget = function () {
+			highlightTarget();
+		};
+
+		chart.removeHighlight = function () {
+			removeHighlight();
+		};
+
+		chart.zoomIn = function () {
+			zoomByFactor(1.5);
+			redraw();
+		};
+		chart.zoomOut = function () {
+			zoomByFactor(0.8);
+			redraw();
+		};
+		chart.zoomToData = zoomToData;
+		chart.fixedNodes = function (names) {
+			if (!arguments.length) {
+				if(force) {
+					return force.nodes()
+						.filter(function(n) { return n.fixed; })
+						.map(function(n) {
+							return {
+								name: n.name,
+								x: n.x,
+								y: n.y
+							};
+						});
+				} else {
+					return false;
+				}
+			}
+
+			var nameMap = d3.map();
+
+			if(names) {
+				names.forEach(function (n) {
+					nameMap.set(n.name, { x: n.x, y: n.y });
+				});
+
+				force.nodes().forEach(function (n) {
+					if(nameMap.has(n.name)) {
+						n.fixed = true;
+						n.x = nameMap.get(n.name).x;
+						n.y = nameMap.get(n.name).y;
+						n.px = nameMap.get(n.name).x;
+						n.py = nameMap.get(n.name).y;
+					}
+				});
+
+				force.resume();
+			}
+
+			return chart;
+		};
+
+		chart.getSvg = function () {
+
+			// Update unrendered SVG paths.
+			path.attr("d", curve)
+				.attr("href", function (d) {
+					return "#path" + d.source.index + "_" + d.target.index;
+				});
+
+			// Keep SVG paths up to date (not rendered)
+			path.classed("hidden", function (d) {
+				return searchText &&
+					( d.source.name.toLowerCase().indexOf(searchText.toLowerCase()) === -1 &&
+						d.target.name.toLowerCase().indexOf(searchText.toLowerCase()) === -1 );
+			});
+
+			var clone = main[0][0].parentElement.cloneNode(true);
+			clone.children[1].appendChild(paths);
+			return d3.select(clone);
+		};
+
+		return chart;
+	};
+
+})();
+
+d3.svg.multibrush = function() {
+
+  // From d3/scale/scale.js
+  function d3_scaleExtent(domain) {
+    var start = domain[0], stop = domain[domain.length - 1];
+    return start < stop ? [ start, stop ] : [ stop, start ];
+  }
+  function d3_scaleRange(scale) {
+    return scale.rangeExtent ? scale.rangeExtent() : d3_scaleExtent(scale.range());
+  }
+
+  // From d3
+  var d3_event_dragSelect = "onselectstart" in document ? null : d3_vendorSymbol(document.documentElement.style, "userSelect"), d3_event_dragId = 0;
+  function d3_event_dragSuppress() {
+    var name = ".dragsuppress-" + ++d3_event_dragId, click = "click" + name, w = d3.select(window).on("touchmove" + name, d3.event.preventDefault()).on("dragstart" + name, d3.event.preventDefault()).on("selectstart" + name, d3.event.preventDefault());
+    if (d3_event_dragSelect) {
+      var style = d3_documentElement.style, select = style[d3_event_dragSelect];
+      style[d3_event_dragSelect] = "none";
+    }
+    return function(suppressClick) {
+      w.on(name, null);
+      if (d3_event_dragSelect) style[d3_event_dragSelect] = select;
+      if (suppressClick) {
+        function off() {
+          w.on(click, null);
+        }
+        w.on(click, function() {
+          d3.event.preventDefault();
+          off();
+        }, true);
+        setTimeout(off, 0);
+      }
+    };
+  }
+
+  var event = d3.dispatch("brushstart", "brush", "brushend"),
+      brushElement,
+      x = null, // x-scale, optional
+      y = null, // y-scale, optional
+      xExtent = [[0, 0]], // [x0, x1] in integer pixels
+      yExtent = [[0, 0]], // [y0, y1] in integer pixels
+      xExtentDomain = [], // x-extent in data space
+      yExtentDomain = [], // y-extent in data space
+      xClamp = true, // whether to clamp the x-extent to the range
+      yClamp = true, // whether to clamp the y-extent to the range
+      resizes = d3_svg_brushResizes[0],
+      resizeAdaption = function () {}, // Function to 'call' on new resize selection
+      extentAdaption = function () {}; // Function to 'call' on new extent selection
+
+  event.of = function(thiz, argumentz) {
+    return function(e1) {
+      try {
+        var e0 =
+        e1.sourceEvent = d3.event;
+        e1.target = brush;
+        d3.event = e1;
+        event[e1.type].apply(thiz, argumentz);
+      } finally {
+        d3.event = e0;
+      }
+    };
+  };
+
+  function brush(g) {
+    g.each(function() {
+
+      // Prepare the brush container for events.
+      var g = d3.select(this)
+          .style("pointer-events", "all")
+          .style("-webkit-tap-highlight-color", "rgba(0,0,0,0)")
+          .on("mousedown.brush", brushstart)
+          .on("touchstart.brush", brushstart);
+
+      brushElement = g;
+
+      // An invisible, mouseable area for starting a new brush.
+      var background = g.selectAll(".background")
+          .data([0]);
+
+      background.enter().append("rect")
+          .attr("class", "background")
+          .style("visibility", "hidden")
+          .style("cursor", "crosshair");
+
+      drawExtents(g);
+
+      // When called on a transition, use a transition to update.
+      var gUpdate = d3.transition(g),
+          backgroundUpdate = d3.transition(background),
+          range;
+
+      // Initialize the background to fill the defined range.
+      // If the range isn't defined, you can post-process.
+      if (x) {
+        range = d3_scaleRange(x);
+        backgroundUpdate.attr("x", range[0]).attr("width", range[1] - range[0]);
+        redrawX(gUpdate);
+      }
+      if (y) {
+        range = d3_scaleRange(y);
+        backgroundUpdate.attr("y", range[0]).attr("height", range[1] - range[0]);
+        redrawY(gUpdate);
+      }
+      redraw(gUpdate);
+    });
+  }
+
+  function drawExtents(g) {
+    var ex = xExtent.length > yExtent.length ? xExtent : yExtent,
+        i = ex.length
+        extentArr = ex.map(function(d,i) { return i; }),
+        extentResizes = d3.merge(ex.map(function(d,i) { return resizes.map(function(r) { return [r, i]; }); }));
+
+    if(!g) g = brushElement;
+
+    // The visible brush extent; style this as you like!
+    var extent = g.selectAll(".extent")
+        .data(extentArr, function (d) { return d; });
+
+    extent.exit().remove();
+
+    extent.enter().append("rect")
+        .attr("class", "extent")
+        .style("cursor", "move")
+        .call(extentAdaption);
+
+    // More invisible rects for resizing the extent.
+    var resize = g.selectAll(".resize")
+        .data(extentResizes, function (d) { return d[0] + d[1]; });
+
+    // Remove any superfluous resizers.
+    resize.exit().remove();
+
+    var newResize = resize.enter().append("g")
+        .attr("class", function(d) { return "resize " + d[0]; })
+        .style("cursor", function(d) { return d3_svg_brushCursor[d[0]]; });
+    
+    newResize.append("rect")
+        .attr("x", function(d) { return /[ew]$/.test(d[0]) ? -3 : null; })
+        .attr("y", function(d) { return /^[ns]/.test(d[0]) ? -3 : null; })
+        .attr("width", 6)
+        .attr("height", 6)
+        .style("visibility", "hidden");
+
+    newResize.call(resizeAdaption);
+
+    // Show or hide the resizers.
+    resize.style("display", function (d) { return brush.empty(d[1]) ? "none" : null; });
+  }
+
+  brush.event = function(g) {
+    g.each(function() {
+      var event_ = event.of(this, arguments),
+          extent1 = {x: xExtent, y: yExtent, i: xExtentDomain, j: yExtentDomain},
+          extent0 = this.__chart__ || extent1;
+      this.__chart__ = extent1;
+      if (d3_transitionInheritId) {
+        d3.select(this).transition()
+            .each("start.brush", function() {
+              xExtentDomain = extent0.i; // pre-transition state
+              yExtentDomain = extent0.j;
+              xExtent = extent0.x;
+              yExtent = extent0.y;
+              event_({type: "brushstart"});
+            })
+            .tween("brush:brush", function() {
+              // TODO: transitions for all extents
+              var xi = d3_interpolateArray(xExtent[0], extent1.x[0]),
+                  yi = d3_interpolateArray(yExtent[0], extent1.y[0]);
+              xExtentDomain[0] = yExtentDomain[0] = null; // transition state
+              return function(t) {
+                xExtent[0] = extent1.x[0] = xi(t);
+                yExtent[0] = extent1.y[0] = yi(t);
+                event_({type: "brush", mode: "resize"});
+              };
+            })
+            .each("end.brush", function() {
+              xExtentDomain = extent1.i; // post-transition state
+              yExtentDomain = extent1.j;
+              event_({type: "brush", mode: "resize"});
+              event_({type: "brushend"});
+            });
+      } else {
+        event_({type: "brushstart"});
+        event_({type: "brush", mode: "resize"});
+        event_({type: "brushend"});
+      }
+    });
+  };
+
+  function redraw(g) {
+    g.selectAll(".resize").attr("transform", function(d) {
+      return "translate(" + xExtent[d[1]][+/e$/.test(d[0])] + "," + yExtent[d[1]][+/^s/.test(d[0])] + ")";
+    });
+  }
+
+  function redrawX(g) {
+    g.selectAll(".extent").attr("x", function (d) { return xExtent[d][0]; });
+    g.selectAll(".extent,.n>rect,.s>rect").attr("width", function(d) { return xExtent[d][1] - xExtent[d][0]; });
+  }
+
+  function redrawY(g) {
+    g.selectAll(".extent").attr("y", function (d) { return yExtent[d][0]; });
+    g.selectAll(".extent,.e>rect,.w>rect").attr("height", function (d) { return yExtent[d][1] - yExtent[d][0]; });
+  }
+
+  function brushstart() {
+    var target = this,
+        eventTarget = d3.select(d3.event.target),
+        event_ = event.of(target, arguments),
+        g = d3.select(target),
+        resizing = eventTarget.datum()[0],
+        resizingX = !/^(n|s)$/.test(resizing) && x,
+        resizingY = !/^(e|w)$/.test(resizing) && y,
+        dragging = eventTarget.classed("extent"),
+        dragRestore = d3_event_dragSuppress(),
+        center,
+        origin = d3.mouse(target),
+        offset,
+        i;
+
+    var w = d3.select(window)
+        .on("keydown.brush", keydown)
+        .on("keyup.brush", keyup);
+
+    if (d3.event.changedTouches) {
+      w.on("touchmove.brush", brushmove).on("touchend.brush", brushend);
+    } else {
+      w.on("mousemove.brush", brushmove).on("mouseup.brush", brushend);
+    }
+
+    // Interrupt the transition, if any.
+    g.interrupt().selectAll("*").interrupt();
+
+    // If the extent was clicked on, drag rather than brush;
+    // store the point between the mouse and extent origin instead.
+    if (dragging) {
+      i = eventTarget.datum();
+      origin[0] = xExtent[i][0] - origin[0];
+      origin[1] = yExtent[i][0] - origin[1];
+    }
+
+    // If a resizer was clicked on, record which side is to be resized.
+    // Also, set the origin to the opposite side.
+    else if (resizing) {
+      var ex = +/w$/.test(resizing),
+          ey = +/^n/.test(resizing);
+
+      i = eventTarget.datum()[1];
+      offset = [xExtent[i][1 - ex] - origin[0], yExtent[i][1 - ey] - origin[1]];
+      origin[0] = xExtent[i][ex];
+      origin[1] = yExtent[i][ey];
+    }
+
+    else {
+      i = xExtent.length - 1; // Figure out the count of the new extent.
+      xExtent.push([0,0]);
+      yExtent.push([0,0]);
+
+      // If the ALT key is down when starting a brush, the center is at the mouse.
+      if (d3.event.altKey) center = origin.slice();
+    }
+
+    // Propagate the active cursor to the body for the drag duration.
+    g.style("pointer-events", "none");
+    d3.select("body").style("cursor", eventTarget.style("cursor"));
+
+    // Show resizers as long as we're not dragging or resizing.
+    if(!dragging && !resizing) g.selectAll(".resize").style("display", null)
+
+    // Notify listeners.
+    event_({type: "brushstart"});
+    brushmove();
+
+    function keydown() {
+      if (d3.event.keyCode == 32) {
+        if (!dragging) {
+          center = null;
+          origin[0] -= xExtent[i][1];
+          origin[1] -= yExtent[i][1];
+          dragging = 2;
+        }
+        d3.event.preventDefault();
+      }
+    }
+
+    function keyup() {
+      if (d3.event.keyCode == 32 && dragging == 2) {
+        origin[0] += xExtent[i][1];
+        origin[1] += yExtent[i][1];
+        dragging = 0;
+        d3.event.preventDefault();
+      }
+    }
+
+    function brushmove() {
+      var point = d3.mouse(target),
+          moved = false;
+
+      // Preserve the offset for thick resizers.
+      if (offset) {
+        point[0] += offset[0];
+        point[1] += offset[1];
+      }
+
+      if (!dragging) {
+
+        // If needed, determine the center from the current extent.
+        if (d3.event.altKey) {
+          if (!center) center = [(xExtent[i][0] + xExtent[i][1]) / 2, (yExtent[i][0] + yExtent[i][1]) / 2];
+
+          // Update the origin, for when the ALT key is released.
+          origin[0] = xExtent[i][+(point[0] < center[0])];
+          origin[1] = yExtent[i][+(point[1] < center[1])];
+        }
+
+        // When the ALT key is released, we clear the center.
+        else center = null;
+      }
+
+      // Update the brush extent for each dimension.
+      if (resizingX && move1(point, x, 0)) {
+        redrawX(g, i);
+        moved = true;
+      }
+      if (resizingY && move1(point, y, 1)) {
+        redrawY(g, i);
+        moved = true;
+      }
+
+      // Final redraw and notify listeners.
+      if (moved) {
+        redraw(g);
+        event_({type: "brush", mode: dragging ? "move" : "resize"});
+      }
+    }
+
+    function move1(point, scale, j) {
+      var range = d3_scaleRange(scale),
+          r0 = range[0],
+          r1 = range[1],
+          position = origin[j],
+          extent = j ? yExtent[i] : xExtent[i],
+          size = extent[1] - extent[0],
+          min,
+          max;
+
+      // When dragging, reduce the range by the extent size and position.
+      if (dragging) {
+        r0 -= position;
+        r1 -= size + position;
+      }
+
+      // Clamp the point (unless clamp set to false) so that the extent fits within the range extent.
+      min = (j ? yClamp : xClamp) ? Math.max(r0, Math.min(r1, point[j])) : point[j];
+
+      // Compute the new extent bounds.
+      if (dragging) {
+        max = (min += position) + size;
+      } else {
+
+        // If the ALT key is pressed, then preserve the center of the extent.
+        if (center) position = Math.max(r0, Math.min(r1, 2 * center[j] - min));
+
+        // Compute the min and max of the position and point.
+        if (position < min) {
+          max = min;
+          min = position;
+        } else {
+          max = position;
+        }
+      }
+
+      // Update the stored bounds.
+      if (extent[0] != min || extent[1] != max) {
+        if (j) yExtentDomain[i] = null;
+        else xExtentDomain[i] = null;
+        extent[0] = min;
+        extent[1] = max;
+        return true;
+      }
+    }
+
+    function brushend() {
+      brushmove();
+
+      // If the current extent is empty, clear everything.
+      if(x && xExtent[i][0] == xExtent[i][1] ||
+         y && yExtent[i][0] == yExtent[i][1]) {
+        brush.clear();
+      }
+
+      // reset the cursor styles
+      g.style("pointer-events", "all").selectAll(".resize").style("display", function(d) { return brush.empty(d[1]) ? "none" : null; });
+      d3.select("body").style("cursor", null);
+
+      w .on("mousemove.brush", null)
+        .on("mouseup.brush", null)
+        .on("touchmove.brush", null)
+        .on("touchend.brush", null)
+        .on("keydown.brush", null)
+        .on("keyup.brush", null);
+
+      drawExtents();
+
+      dragRestore();
+      event_({type: "brushend"});
+    }
+  }
+
+  brush.x = function(z) {
+    if (!arguments.length) return x;
+    x = z;
+    resizes = d3_svg_brushResizes[!x << 1 | !y]; // fore!
+    return brush;
+  };
+
+  brush.y = function(z) {
+    if (!arguments.length) return y;
+    y = z;
+    resizes = d3_svg_brushResizes[!x << 1 | !y]; // fore!
+    return brush;
+  };
+
+  brush.resizeAdaption = function(z) {
+    if (!arguments.length) return resizeAdaption;
+    resizeAdaption = z;
+    return brush;
+  }
+
+  brush.extentAdaption = function(z) {
+    if (!arguments.length) return extentAdaption;
+    extentAdaption = z;
+    return brush;
+  }  
+
+  brush.clamp = function(z) {
+    if (!arguments.length) return x && y ? [xClamp, yClamp] : x ? xClamp : y ? yClamp : null;
+    if (x && y) xClamp = !!z[0], yClamp = !!z[1];
+    else if (x) xClamp = !!z;
+    else if (y) yClamp = !!z;
+    return brush;
+  };
+
+  brush.extent = function(z) {
+    var x0, x1, y0, y1, t;
+    var xOutput, yOutput, xyOutput = [];
+
+    // Invert the pixel extent to data-space.
+    if (!arguments.length) {
+      if (x) {
+        if (xExtentDomain[0]) {
+          xOutput = xExtentDomain;
+        } else {
+          xOutput = xExtent.map(function (d) {
+            if (x.invert) return [ x.invert(d[0]), x.invert(d[1]) ];
+            return d;
+          }).map(function (d) {
+            if (d[1] < d[0]) return [ d[1], d[0] ];
+            return d;
+          }).filter(function (d) { return d[1] - d[0] != 0; });
+        }
+      }
+      if (y) {
+        if (yExtentDomain[0]) {
+          yOutput = yExtentDomain;
+        } else {
+          yOutput = yExtent.map(function (d) {
+            if(y.invert) return [ y.invert(d[0]), y.invert(d[1]) ];
+            return d;
+          }).map(function (d) {
+            if (d[1] < d[0]) return [ d[1], d[0] ];
+            return d;
+          }).filter(function (d) { return d[1] - d[0] != 0; });
+        }
+      }
+      if(x && y) {
+        xOutput.forEach(function (d, i) {
+          xyOutput.push([[d[0], yOutput[i][0]], [d[1], yOutput[i][1]]]);
+        });
+      }
+      return x && y ? xyOutput : x ? xOutput : y && yOutput;
+    }
+
+    // Scale the data-space extent to pixels.
+    if (x) {
+      xOutput = z;
+      if (y) xOutput = xOutput.map(function (d) {
+        return [d[0][0], d[1][0]];
+      });
+      xExtentDomain = xOutput;
+      xOutput = xOutput.map(function (d) {
+        if (x.invert) return [x(d[0]), x(d[1])];
+        return d;
+      }).map(function (d) {
+        if(d[1] < d[0]) return [d[1], d[0]];
+        return d;
+      });
+      xExtent = xOutput;
+      if(!y) yExtent = xOutput.map(function() { return [0,0]; });
+    }
+    if (y) {
+      yOutput = z;
+      if (x) yOutput = yOutput.map(function (d) {
+        return [d[0][1], d[1][1]];
+      });
+      yExtentDomain = yOutput;
+      yOutput = yOutput.map(function (d) {
+        if (y.invert) return [y(d[0]), y(d[1])];
+        return d;
+      }).map(function (d) {
+        if(d[1] < d[0]) return [d[1], d[0]];
+        return d;
+      });
+      yExtent = yOutput;
+      if(!x) xExtent = yOutput.map(function () { return [0,0]; });
+    }
+
+    // Handle the case where the extents are set to empty arrays.
+    if(xExtent.length === 0) xExtent = [[0,0]];
+    if(yExtent.length === 0) yExtent = [[0,0]];
+
+    return brush;
+  };
+
+  brush.clear = function() {
+    xExtent = [[0, 0]], yExtent = [[0, 0]];
+    xExtentDomain = yExtentDomain = [];
+    drawExtents();
+    if(x) redrawX(brushElement);
+    if(y) redrawY(brushElement);
+    return brush;
+  };
+
+  brush.empty = function(i) {
+    if(xExtent.length == 1 && yExtent.length == 1) i = 0;
+    if(i !== undefined) {
+      return !!x && xExtent[i][0] == xExtent[i][1]
+        || !!y && yExtent[i][0] == yExtent[i][1];
+    } else {
+      return false;
+    }
+  };
+
+  return d3.rebind(brush, event, "on");
+};
+
+var d3_svg_brushCursor = {
+  n: "ns-resize",
+  e: "ew-resize",
+  s: "ns-resize",
+  w: "ew-resize",
+  nw: "nwse-resize",
+  ne: "nesw-resize",
+  se: "nwse-resize",
+  sw: "nesw-resize"
+};
+
+var d3_svg_brushResizes = [
+  ["n", "e", "s", "w", "nw", "ne", "se", "sw"],
+  ["e", "w"],
+  ["n", "s"],
+  []
+];
+
+(function(){
+
+	d3.timeline = function(){
+
+		var itemHeight = 20,
+			height = null,
+			width = 1000;
+
+		function chart(selection){
+			selection.each(function(data){
+
+				var groups = grouping(data),
+					levels = d3.sum(d3.values(groups).map(function(d){ return d.length; })),
+					margin = {top: 20, right: 15, bottom: 50, left: 150},
+
+					x = d3.time.scale().range([margin.left, width]).domain([
+						d3.min(data, start),
+						d3.max(data, end)
+					]),
+
+					xAxis = d3.svg.axis().scale(x).orient('bottom').tickSize(6, 0, 0);
+
+
+				if (!height) {
+					height = itemHeight * levels + margin.top + margin.bottom;
+				} else {
+					itemHeight = (height- margin.top +- margin.bottom)/levels;
+				}
+
+				selection.selectAll('svg').remove();
+				
+				var svg = selection.append('svg:svg')
+				  .attr('width', width)
+				  .attr('height', height);
+
+				svg.append('defs').append('clipPath')
+				  .attr('id', 'clip')
+				  .append('rect')
+				    .attr('width', width-margin.left)
+				    .attr('height', height)
+				    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+				var last = 0,
+					current = 0;
+
+				var items = svg.selectAll('g.itemGroup')
+					.data(d3.entries(groups))
+					.enter().append('g')
+					.attr("class","itemGroup")
+					.attr("transform", function(d,i){
+						current = last;
+						last += d.value.length*itemHeight;
+						return "translate(" + 0 + "," + (margin.top + current) + ")";
+					});
+
+				items.append('line')
+					.attr('x1', margin.left)
+					.attr('y1', 0)
+					.attr('x2', width)
+					.attr('y2', 0)
+					.attr('stroke', 'lightgrey');
+
+				items.append('text')
+					.text(function(d) { return d.key; })
+					.attr('x', margin.left-10)
+			  		.attr('y', 0)
+			  		.attr('dy', function(d) { return (d.value.length * itemHeight)/2; })
+			  		.attr('text-anchor', 'end')
+			  		.attr('class', 'groupText');
+
+				svg.append('g')
+				  	.attr('transform', 'translate(0,' + (itemHeight * (levels+1)) + ')')
+				  	.attr('class', 'focus axis date')
+				  	.call(xAxis);
+				
+				var itemsClip = svg.append('g')
+				    .attr('clip-path', 'url(#clip)')
+
+				update();
+
+				function update(){
+
+					var rects = itemsClip.selectAll('rect')
+						.data(data, function(d){return d.__id;})
+						.attr('x', function(d) { return x(start(d)); })
+					    .attr('width', function(d) { return x(end(d)) - x(start(d)); })
+					
+					rects.enter().append('rect')
+					    .attr('x', function(d) { return x(start(d)); })
+					    .attr('y', function(d,i) { return itemHeight * d.__level + margin.top; })
+					    .attr('width', function(d) { return x(end(d)) - x(start(d)); })
+					    .attr('height', itemHeight)
+					    .attr('class', function(d) { return 'focusItem'; })
+					
+				  	rects.exit().remove();
+				
+				}
+
+
+			})
+		}
+
+		function grouping(data){
+
+			var level = id = 0;
+
+			return d3.nest()
+				.key(group)
+				.rollup(function(g) {
+					
+					var l, levels = [];
+					g.forEach(function(item,i){
+						l=0;
+						while(overlap(item, levels[l])) l++;
+						if (!levels[l]) levels[l] = [];
+						item.__level = l+level;
+						item.__id = id++;
+						levels[l].push(item);
+					})
+					level++;
+					return levels;			
+				})
+				.map(data)
+		}
+
+		function overlap(item, g) {
+			if (!g) return false;
+			for(var i in g) {
+				if(start(item) < end(g[i]) && end(item) > start(g[i])) {
+					return true;
+				}
+			}
+		    return false;
+		};
+
+
+
+		function group(d) {
+			return d.group;
+		}
+
+		function start(d) {
+			return d.start;
+		}
+
+		function end(d) {
+			return d.end;
+		}
+
+		/* Getter/Setter */
+
+		chart.group = function(x) {
+			if (!arguments.length) return x;
+			group = x;
+			return chart;
+		}
+
+		chart.start = function(x) {
+			if (!arguments.length) return start;
+			start = x;
+			return chart;
+		}
+
+		chart.end = function(x) {
+			if (!arguments.length) return end;
+			end = x;
+			return chart;
+		}
+
+		chart.height = function(x) {
+			if (!arguments.length) return height;
+			height = x;
+			return chart;
+		}
+
+		return chart;
+	}
+
+})();
 angular.module('palladio.components', ['palladio.services.data', 'palladio.services.load', 'palladio'])
 	.factory('componentService', ['$compile', "$rootScope", "$http", "loadService", "dataService", 'palladioService',
 		function($compile, $scope, $http, loadService, dataService, palladioService) {
@@ -111523,1490 +113007,6 @@ angular.module('palladio.services.validation', ['palladio.services.date'])
 			return errors;
 		};
 	}]);
-var crossfilterHelpers = {
-
-	///////////////////////////////////////////////////////////////////////
-	//
-	// Reduce functions that don't double-count by using add/reduce based 
-	// on unique dimension if defined.
-	//
-	// Also tracks an initial count value (depends on CrossFilter pull
-	// request https://github.com/square/crossfilter/pull/92 )
-	//
-	// Also records a descriptive string based on a second accessor
-	//
-	///////////////////////////////////////////////////////////////////////
-
-	countByDimensionWithInitialCountAndData: function(accessorFunction, dataAccessor) {
-		var internalCount;
-		return {
-			add: function (p, v) {
-				if(p.unique.has(accessorFunction(v))) {
-					internalCount = p.unique.get(accessorFunction(v));
-					p.unique.set(accessorFunction(v), internalCount + 1);
-				} else {
-					p.unique.set(accessorFunction(v), 1);
-					p.data = dataAccessor(v, p.data, "add");
-					++p.count;
-				}
-				if(p.count > p.initialCount) p.initialCount = p.count;
-				return p;
-			},
-			remove: function (p, v) {
-				if(p.unique.has(accessorFunction(v))) {
-					internalCount = p.unique.get(accessorFunction(v));
-					if(internalCount == 1) {
-						p.unique.remove(accessorFunction(v));
-						p.data = dataAccessor(v, p.data, "remove");
-						--p.count;
-					} else {
-						p.unique.set(accessorFunction(v), internalCount - 1);
-					}
-				}
-				return p;
-			},
-			init: function () {
-				return {data: undefined, unique: d3.map(), count: 0, initialCount: 0};
-			}
-		};
-	},
-
-	///////////////////////////////////////////////////////////////////////
-	//
-	// Reduce functions that don't double-count by using add/reduce based 
-	// on unique dimension if defined.
-	//
-	// Also tracks an initial count value (depends on CrossFilter pull
-	// request https://github.com/square/crossfilter/pull/92 )
-	//
-	///////////////////////////////////////////////////////////////////////
-
-	countByDimensionWithInitialCount: function(accessorFunction) {
-		var internalCount;
-		return {
-			add: function (p, v) {
-				if(p.unique.has(accessorFunction(v))) {
-					internalCount = p.unique.get(accessorFunction(v));
-					p.unique.set(accessorFunction(v), internalCount + 1);
-				} else {
-					p.unique.set(accessorFunction(v), 1);
-					++p.count;
-				}
-				if(p.count > p.initialCount) p.initialCount = p.count;
-				return p;
-			},
-			remove: function (p, v) {
-				if(p.unique.has(accessorFunction(v))) {
-					internalCount = p.unique.get(accessorFunction(v));
-					if(internalCount == 1) {
-						p.unique.remove(accessorFunction(v));
-						--p.count;
-					} else {
-						p.unique.set(accessorFunction(v), internalCount - 1);
-					}
-				}
-				return p;
-			},
-			init: function () {
-				return {unique: d3.map(), count: 0, initialCount: 0};
-			}
-		};
-	},
-
-	///////////////////////////////////////////////////////////////////////
-	//
-	// Reduce functions that don't double-count by using add/reduce based 
-	// on unique dimension if defined.
-	//
-	///////////////////////////////////////////////////////////////////////
-
-	countByDimension: function(accessorFunction) {
-		var internalCount;
-		return {
-			add: function (p, v) {
-				if(p.unique.has(accessorFunction(v))) {
-					internalCount = p.unique.get(accessorFunction(v));
-					p.unique.set(accessorFunction(v), internalCount + 1);
-				} else {
-					p.unique.set(accessorFunction(v), 1);
-					++p.count;
-				}
-				return p;
-			},
-			remove: function (p, v) {
-				if(p.unique.has(accessorFunction(v))) {
-					internalCount = p.unique.get(accessorFunction(v));
-					if(internalCount == 1) {
-						p.unique.remove(accessorFunction(v));
-						--p.count;
-					} else {
-						p.unique.set(accessorFunction(v), internalCount - 1);
-					}
-				}
-				return p;
-			},
-			init: function () {
-				return {unique: d3.map(), count: 0};
-			}
-		};
-	}
-};
-(function(){
-
-	d3.graph = function(){
-
-		var width = 700,
-			height = 600,
-			showLinks = true,
-			showLables = true,
-			searchText = "",
-			circle = false,
-			nodeSize = false,
-			nodeSizeChange = function () {},
-			highlightSource = function () {},
-			highlightTarget = function () {},
-			removeHighlight = function () {};
-
-		var force, forceLabel, drag, line, zoom, overlay, main, nodes, path, paths, node, anchorLink, anchorNode, anchorNodeText, anchorNodeCircle, labelAnchors, labelAnchorLinks, nodeLabel, nodeLabelShadow,
-			nodeLabelText, initialAggs, resetFunc, canvas, links;
-
-		resetFunc = function () { };
-
-		initialAggs = d3.map();
-		nodes = d3.map();
-		links = [];
-		labelAnchors = d3.map();
-		labelAnchorLinks = [];
-
-		var sizeScale = d3.scale.sqrt().range([5,20]);
-
-		/* Chart function */
-
-		function chart(selection){
-			selection.each(function (data) {
-
-				if(!force) initialize();
-
-				// Creating nodes
-
-				nodes.keys().forEach(function (k) {
-					nodes.get(k).current = false;
-					nodes.get(k).agg = 0;
-				});
-
-				data.forEach(function (link) {
-					if(nodes.has(link.data.source)) {
-						nodes.get(link.data.source).current = true;
-						nodes.get(link.data.source).agg += link.data.agg;
-
-						// Apply both classes if necessary.
-						if(nodes.get(link.data.source).dimension === "target") {
-							nodes.get(link.data.source).dimension = "target source";
-						}
-					} else {
-						nodes.set(link.data.source, {
-							name: link.data.source,
-							current: true,
-							agg: link.data.agg,
-							initialAgg: initialAggs.get(link.data.source),
-							dimension: "source",
-							x: (width / 2) + (Math.random() * 10),
-							y: (height / 2) + (Math.random() * 10)
-						});
-
-						labelAnchors.set(link.data.source, { name: link.data.source, node : nodes.get(link.data.source) });
-						labelAnchors.set(link.data.source + "__$", { name: link.data.source + "__$", node: nodes.get(link.data.source), fake:true });
-					}
-					if(nodes.has(link.data.target)) {
-						nodes.get(link.data.target).current = true;
-						nodes.get(link.data.target).agg += link.data.agg;
-
-						// Apply both classes if necessary.
-						if(nodes.get(link.data.target).dimension === "source") {
-							nodes.get(link.data.target).dimension = "source target";
-						}
-					} else {
-						nodes.set(link.data.target, {
-							name: link.data.target,
-							current: true,
-							agg: link.data.agg,
-							initialAgg: initialAggs.get(link.data.target),
-							dimension: "target",
-							x: (width / 2) + (Math.random() * 10),
-							y: (height / 2) + (Math.random() * 10)
-						});
-
-						labelAnchors.set(link.data.target, { name: link.data.target, node : nodes.get(link.data.target) });
-						labelAnchors.set(link.data.target + "__$", { name: link.data.target + "__$", node: nodes.get(link.data.target), fake:true });
-					}
-				});
-
-				nodes.keys().forEach(function (k) {
-					if(!nodes.get(k).current) {
-						nodes.remove(k);
-						labelAnchors.remove(k);
-						labelAnchors.remove(k + "__$");
-					}
-				});
-
-				// Set the domain on the size scale.
-				sizeScale.domain([
-					d3.min(nodes.values(), function (d) { return d.initialAgg; }),
-					d3.max(nodes.values(), function (d) { return d.initialAgg; })
-				]);
-
-				// Build links.
-				links = data.map(function (l) {
-					return {
-						source: nodes.get(l.data.source),
-						target: nodes.get(l.data.target),
-						agg: l.data.agg
-					};
-				});
-				// Labels
-
-				labelAnchorLinks = [];
-
-				labelAnchorLinks = labelAnchors.entries().filter(function(d){ return !d.value.fake; }).map(function (d,i){
-					return {
-						source : labelAnchors.get(d.key),
-						target : labelAnchors.get(d.key + "__$"),
-						weight : 1
-					};
-				});
-
-				force
-					.nodes(nodes.values())
-					.links(links)
-					.start();
-
-				forceLabel
-					.nodes(labelAnchors.values())
-					.links(labelAnchorLinks)
-					.start();
-
-				// SVG
-
-				// Main layers
-				main.selectAll(".layer").remove();
-				// main.append("g").attr("class","layer links");
-				main.append("g").attr("class","layer nodes");
-				main.append("g").attr("class","layer labels");
-
-				// Links
-
-				paths = document.createElement("g");
-
-				path = d3.select(paths)
-						.attr("class", "layer links")
-					.selectAll("path.link")
-						.data(showLinks ? force.links() : [ ], function (d) { return d.source.name + "-" + d.target.name; });
-
-				// Don't remove all paths. Only remove paths that have been exited before updating
-				// the remaining.
-				path.exit().remove();
-
-				path.enter().append("svg:path")
-					.attr("class", "link")
-					.style('fill','none')
-					.style('stroke-opacity','.5')
-					.style('stroke','#666')
-					.style('stroke-width', 1);
-
-				// Nodes
-
-				node = main.select(".nodes").selectAll(".node")
-					.data(force.nodes(), function (d) { return d.name; });
-
-				// Don't remove all nodes. Only remove nodes that have been exited before updating
-				// the remaining.
-				node.exit().remove();
-
-				node.enter().append("circle")
-					.attr("class", function (d) { return "node " + d.dimension; })
-					.classed("fixed", function (d) { return d.fixed; })
-					.attr("r", function (d) { return nodeSize ? sizeScale(d.agg) : 5; })
-					.on("mouseover", mouseover)
-					.on("mouseout", mouseout)
-					.call(drag);
-
-				// Labels
-
-				anchorNode = main.select(".labels")
-					.selectAll("g.anchor-node")
-					.data(
-						(showLabels ? forceLabel.nodes() : [ ]).filter(function (d){ return !d.fake; }),
-						function (d) { return d.name; });
-
-				// Don't remove all nodes. Only remove nodes that have been exited before updating
-				// the remaining.
-				anchorNode.exit().remove();
-
-				anchorNode.enter().append("g")
-					.attr("class", function(d) { return "anchor-node " + d.node.dimension; })
-					.append("svg:text")
-						// .style("fill", "#555")
-						.style("font-family", "karla, Arial, Helvetica")
-						.style("font-size", 11)
-						.text(function(d, i) {
-							return d.fake ? "" : d.node.name;
-						});
-
-			});
-
-
-
-			nodeSizeChange = function () {
-				node = main.selectAll("g.node")
-					.data(force.nodes(), function (d) { return d.name; })
-					.attr("r", function (d) { return nodeSize ? sizeScale(d.agg) : 5; });
-			};
-
-			highlightSource = function () {
-				main.selectAll(".node")
-					.classed("highlighted", false);
-				main.selectAll(".source")
-					.classed("highlighted", true);
-			};
-
-			highlightTarget = function () {
-				main.selectAll(".node")
-					.classed("highlighted", false);
-				main.selectAll(".target")
-					.classed("highlighted", true);
-			};
-
-			removeHighlight = function () {
-				main.selectAll(".node")
-					.classed("highlighted", false);
-			};
-
-			function mouseover (d,i) {
-				anchorNode.classed("strong", function(a,h){ return h == i; });
-			}
-
-			function mouseout (d,i) {
-				anchorNode.classed("strong", false);
-			}
-
-			function initialize() {
-
-				force = d3.layout.force()
-					.size([width, height])
-					.charge(-300)
-					.on("tick", redraw);
-
-				forceLabel = d3.layout.force()
-					.gravity(0)
-					.linkDistance(0)
-					.linkStrength(8)
-					.charge(-70)
-					.size([width, height]);
-
-				drag = force.drag()
-					.on("dragstart", function (d) {
-						d3.event.sourceEvent.stopPropagation();
-						d.fixed = true;
-					//	d3.select(this).classed("fixed", true).style('stroke', "#222");
-					})
-					.on("drag.force", function (d) {
-						d.px = d.x + d3.event.dx / zoom.scale();
-						d.py = d.y + d3.event.dy / zoom.scale();
-						force.resume();
-						forceLabel.resume();
-					});
-
-				line = d3.svg.line().interpolate('bundle');
-
-				zoom = d3.behavior.zoom().scaleExtent([0.1,10]).on("zoom", function () { zoomed = true; redraw();} );
-
-				zoomByFactor(2);
-
-				overlay = selection.selectAll("rect.overlay")
-					.data(function(d){ return [d]; });
-
-				overlay.attr("width", width)
-					.attr("height", height)
-					.attr("fill","none");
-
-				overlay.enter().append("rect")
-					.attr("class", "overlay")
-					.attr("width", width)
-					.attr("height", height)
-					.attr("fill","none");
-
-				overlay.exit().remove();
-
-				selection.call(zoom);
-
-				// main g
-
-				main = selection.selectAll("g.main")
-						.data([{}]);
-
-				main.enter().append("g")
-						.attr("class", "main");
-
-				main.exit().remove();
-
-				// Determine the initialAggs for each node.
-				selection.each(function (data) {
-					data.forEach( function (link) {
-						if(initialAggs.has(link.data.source)) {
-							initialAggs.set(link.data.source, initialAggs.get(link.data.source) + link.data.initialAgg);
-						} else {
-							initialAggs.set(link.data.source, link.data.initialAgg);
-						}
-						if(initialAggs.has(link.data.target)) {
-							initialAggs.set(link.data.target, initialAggs.get(link.data.target) + link.data.initialAgg);
-						} else {
-							initialAggs.set(link.data.target, link.data.initialAgg);
-						}
-					});
-				});
-
-				canvas = d3.select(selection[0][0].parentElement).select('canvas').node().getContext('2d');
-			}
-
-			resetFunc = function () {
-				if(node) node.remove();
-				if(path) path.remove();
-				if(nodeLabel) nodeLabel.remove();
-				if(nodeLabelShadow) nodeLabelShadow.remove();
-				nodes = d3.map();
-				labelAnchors = d3.map();
-				labelAnchorLinks = [];
-				links = [];
-				initialAggs = d3.map();
-				force = null;
-				initialize();
-			};
-		}
-
-		function curve(d) {
-			var source = d.source,
-				target = d.target,
-				sourceX = source.x * zoom.scale() + zoom.translate()[0],
-				sourceY = source.y * zoom.scale() + zoom.translate()[1],
-				targetX = target.x * zoom.scale() + zoom.translate()[0],
-				targetY = target.y * zoom.scale() + zoom.translate()[1];
-				// rad = Math.sqrt( Math.pow(targetX-sourceX,2) + Math.pow(targetY-sourceY, 2) )/4,
-				// sourceP = Math.atan2((targetY-sourceY),(targetX-sourceX)) - Math.PI/8,
-				// targetP = Math.atan2((sourceY-targetY),(sourceX-targetX)) + Math.PI/8;
-
-			return line([
-				[sourceX, sourceY],
-				// [sourceX+rad*Math.cos(sourceP),sourceY+rad*Math.sin(sourceP)],
-				// [targetX+rad*Math.cos(targetP),targetY+rad*Math.sin(targetP)],
-				[targetX,targetY]
-			]);
-		}
-
-		function updateNode() {
-			this.attr("transform", function (d) {
-				return "translate(" +
-					(d.x * zoom.scale() + zoom.translate()[0]) + "," +
-					(d.y * zoom.scale() + zoom.translate()[1]) + ")";
-			});
-		}
-
-		// Flag to indicate that a zoom happened. In this case, we need to recalculate widths
-		// from getBBox()
-		var zoomed = true;
-
-		function redraw() {
-
-			node.classed("hidden", function (d) {
-				return searchText &&
-					d.name.toLowerCase().indexOf(searchText.toLowerCase()) === -1;
-			});
-
-			anchorNode.classed("hidden", function (d) {
-				return searchText &&
-					d.node.name.toLowerCase().indexOf(searchText.toLowerCase()) === -1;
-			});
-
-			// Draw canvas paths
-			canvas.clearRect(0, 0, width, height);
-			canvas.strokeStyle = "#ccc";
-			canvas.beginPath();
-			path.each(function (d) {
-				if(!(searchText &&
-					( d.source.name.toLowerCase().indexOf(searchText.toLowerCase()) === -1 &&
-						d.target.name.toLowerCase().indexOf(searchText.toLowerCase()) === -1 ))) {
-					canvas.moveTo(
-						d.source.x * zoom.scale() + zoom.translate()[0],
-						d.source.y * zoom.scale() + zoom.translate()[1]);
-					canvas.lineTo(
-						d.target.x * zoom.scale() + zoom.translate()[0],
-						d.target.y * zoom.scale() + zoom.translate()[1]);
-				}
-			});
-			canvas.stroke();
-
-			node.call(updateNode);
-
-			forceLabel.nodes().forEach(function(d){
-				if (!d.fake) return;
-				d.x = d.node.x;
-				d.y = d.node.y;
-			});
-
-			var shiftX, shiftY, diffX, diffY, dist;
-			anchorNode.each(function (d) {
-				if(zoomed) {
-					d.width = this.childNodes[0].getBBox().width;
-				}
-				// b = this.childNodes[0].getBBox();
-				diffX = d.x - d.node.x;
-				diffY = d.y - d.node.y;
-				dist = Math.sqrt(diffX * diffX + diffY * diffY);
-
-				shiftX = d.width * (diffX - dist) / (dist * 2);
-				shiftX = Math.max(-d.width, Math.min(0, shiftX));
-				shiftY = 5;
-				if(shiftX && shiftY) {
-					this.childNodes[0].setAttribute("transform", "translate(" + shiftX + "," + shiftY + ")");
-				}
-			});
-
-			anchorNode.call(updateNode);
-
-			zoomed = false;
-		}
-
-		function zoomByFactor(factor) {
-			zoomed = true;
-			var scale = zoom.scale();
-			var extent = zoom.scaleExtent();
-			var newScale = scale * factor;
-			if (extent[0] <= newScale && newScale <= extent[1]) {
-				var t = zoom.translate();
-				var c = [width / 2, height / 2];
-				zoom
-				.scale(newScale)
-				.translate(
-					[c[0] + (t[0] - c[0]) / scale * newScale,
-					c[1] + (t[1] - c[1]) / scale * newScale]);
-			}
-		}
-		
-		function zoomToData() {
-			var y = [0,0];
-			var x = [0,0];
-			var scale = zoom.scale();
-			force.nodes().forEach(function(d) {
-				if(d.y < y[0]) y[0] = d.y;
-				if(d.y > y[1]) y[1] = d.y;
-				if(d.x < x[0]) x[0] = d.x;
-				if(d.x > x[1]) x[1] = d.x;
-			});
-			// First zoom in.
-			while((x[1] - x[0])*scale < width || (y[1] - y[0])*scale < height) {
-				zoomByFactor(1.2);
-				scale = zoom.scale();
-			}
-			// Then zoom out.
-			while((x[1] - x[0])*scale > width || (y[1] - y[0])*scale > height) {
-				zoomByFactor(0.8);
-				scale = zoom.scale();
-			}
-			var xmid = (x[1] + x[0])/2;
-			var ymid = (y[1] + y[0])/2;
-			zoom.translate([width/2 - xmid*scale, height/2 - ymid*scale])
-			redraw();
-		}
-
-		/* Getter/Setter */
-
-		chart.height = function(x) {
-			if (!arguments.length) return height;
-			height = x;
-			return chart;
-		};
-
-		chart.width = function(x) {
-			if (!arguments.length) return width;
-			width = x;
-			return chart;
-		};
-
-		chart.showLinks = function(x) {
-			if (!arguments.length) return showLinks;
-			showLinks = x;
-			return chart;
-		};
-
-		chart.showLabels = function(x) {
-			if (!arguments.length) return showLabels;
-			showLabels = x;
-			return chart;
-		};
-
-		chart.searchText = function(x) {
-			if (!arguments.length) return searchText;
-			searchText = x;
-			return chart;
-		};
-
-		chart.nodeSize = function (x) {
-			if (!arguments.length) return nodeSize;
-			nodeSize = x;
-			nodeSizeChange();
-			return chart;
-		};
-
-		chart.resetNodes = function () {
-			force.nodes().forEach(function (n) {
-				n.fixed = false;
-			});
-			node.classed("fixed", function (d) { return d.fixed; })
-				.style('stroke', '#eee')//function (d) { return d.fixed ? "#222" : "#eee"; } );
-			force.resume();
-			forceLabel.resume();
-			redraw();
-		};
-
-		chart.circle = function (x) {
-			if (!arguments.length) return circle;
-			circle = x;
-			return chart;
-		};
-
-		chart.reset = function () {
-			resetFunc();
-		};
-
-		chart.highlightSource = function () {
-			highlightSource();
-		};
-
-		chart.highlightTarget = function () {
-			highlightTarget();
-		};
-
-		chart.removeHighlight = function () {
-			removeHighlight();
-		};
-
-		chart.zoomIn = function () {
-			zoomByFactor(1.5);
-			redraw();
-		};
-		chart.zoomOut = function () {
-			zoomByFactor(0.8);
-			redraw();
-		};
-		chart.zoomToData = zoomToData;
-		chart.fixedNodes = function (names) {
-			if (!arguments.length) {
-				if(force) {
-					return force.nodes()
-						.filter(function(n) { return n.fixed; })
-						.map(function(n) {
-							return {
-								name: n.name,
-								x: n.x,
-								y: n.y
-							};
-						});
-				} else {
-					return false;
-				}
-			}
-
-			var nameMap = d3.map();
-
-			if(names) {
-				names.forEach(function (n) {
-					nameMap.set(n.name, { x: n.x, y: n.y });
-				});
-
-				force.nodes().forEach(function (n) {
-					if(nameMap.has(n.name)) {
-						n.fixed = true;
-						n.x = nameMap.get(n.name).x;
-						n.y = nameMap.get(n.name).y;
-						n.px = nameMap.get(n.name).x;
-						n.py = nameMap.get(n.name).y;
-					}
-				});
-
-				force.resume();
-			}
-
-			return chart;
-		};
-
-		chart.getSvg = function () {
-
-			// Update unrendered SVG paths.
-			path.attr("d", curve)
-				.attr("href", function (d) {
-					return "#path" + d.source.index + "_" + d.target.index;
-				});
-
-			// Keep SVG paths up to date (not rendered)
-			path.classed("hidden", function (d) {
-				return searchText &&
-					( d.source.name.toLowerCase().indexOf(searchText.toLowerCase()) === -1 &&
-						d.target.name.toLowerCase().indexOf(searchText.toLowerCase()) === -1 );
-			});
-
-			var clone = main[0][0].parentElement.cloneNode(true);
-			clone.children[1].appendChild(paths);
-			return d3.select(clone);
-		};
-
-		return chart;
-	};
-
-})();
-
-d3.svg.multibrush = function() {
-
-  // From d3/scale/scale.js
-  function d3_scaleExtent(domain) {
-    var start = domain[0], stop = domain[domain.length - 1];
-    return start < stop ? [ start, stop ] : [ stop, start ];
-  }
-  function d3_scaleRange(scale) {
-    return scale.rangeExtent ? scale.rangeExtent() : d3_scaleExtent(scale.range());
-  }
-
-  // From d3
-  var d3_event_dragSelect = "onselectstart" in document ? null : d3_vendorSymbol(document.documentElement.style, "userSelect"), d3_event_dragId = 0;
-  function d3_event_dragSuppress() {
-    var name = ".dragsuppress-" + ++d3_event_dragId, click = "click" + name, w = d3.select(window).on("touchmove" + name, d3.event.preventDefault()).on("dragstart" + name, d3.event.preventDefault()).on("selectstart" + name, d3.event.preventDefault());
-    if (d3_event_dragSelect) {
-      var style = d3_documentElement.style, select = style[d3_event_dragSelect];
-      style[d3_event_dragSelect] = "none";
-    }
-    return function(suppressClick) {
-      w.on(name, null);
-      if (d3_event_dragSelect) style[d3_event_dragSelect] = select;
-      if (suppressClick) {
-        function off() {
-          w.on(click, null);
-        }
-        w.on(click, function() {
-          d3.event.preventDefault();
-          off();
-        }, true);
-        setTimeout(off, 0);
-      }
-    };
-  }
-
-  var event = d3.dispatch("brushstart", "brush", "brushend"),
-      brushElement,
-      x = null, // x-scale, optional
-      y = null, // y-scale, optional
-      xExtent = [[0, 0]], // [x0, x1] in integer pixels
-      yExtent = [[0, 0]], // [y0, y1] in integer pixels
-      xExtentDomain = [], // x-extent in data space
-      yExtentDomain = [], // y-extent in data space
-      xClamp = true, // whether to clamp the x-extent to the range
-      yClamp = true, // whether to clamp the y-extent to the range
-      resizes = d3_svg_brushResizes[0],
-      resizeAdaption = function () {}, // Function to 'call' on new resize selection
-      extentAdaption = function () {}; // Function to 'call' on new extent selection
-
-  event.of = function(thiz, argumentz) {
-    return function(e1) {
-      try {
-        var e0 =
-        e1.sourceEvent = d3.event;
-        e1.target = brush;
-        d3.event = e1;
-        event[e1.type].apply(thiz, argumentz);
-      } finally {
-        d3.event = e0;
-      }
-    };
-  };
-
-  function brush(g) {
-    g.each(function() {
-
-      // Prepare the brush container for events.
-      var g = d3.select(this)
-          .style("pointer-events", "all")
-          .style("-webkit-tap-highlight-color", "rgba(0,0,0,0)")
-          .on("mousedown.brush", brushstart)
-          .on("touchstart.brush", brushstart);
-
-      brushElement = g;
-
-      // An invisible, mouseable area for starting a new brush.
-      var background = g.selectAll(".background")
-          .data([0]);
-
-      background.enter().append("rect")
-          .attr("class", "background")
-          .style("visibility", "hidden")
-          .style("cursor", "crosshair");
-
-      drawExtents(g);
-
-      // When called on a transition, use a transition to update.
-      var gUpdate = d3.transition(g),
-          backgroundUpdate = d3.transition(background),
-          range;
-
-      // Initialize the background to fill the defined range.
-      // If the range isn't defined, you can post-process.
-      if (x) {
-        range = d3_scaleRange(x);
-        backgroundUpdate.attr("x", range[0]).attr("width", range[1] - range[0]);
-        redrawX(gUpdate);
-      }
-      if (y) {
-        range = d3_scaleRange(y);
-        backgroundUpdate.attr("y", range[0]).attr("height", range[1] - range[0]);
-        redrawY(gUpdate);
-      }
-      redraw(gUpdate);
-    });
-  }
-
-  function drawExtents(g) {
-    var ex = xExtent.length > yExtent.length ? xExtent : yExtent,
-        i = ex.length
-        extentArr = ex.map(function(d,i) { return i; }),
-        extentResizes = d3.merge(ex.map(function(d,i) { return resizes.map(function(r) { return [r, i]; }); }));
-
-    if(!g) g = brushElement;
-
-    // The visible brush extent; style this as you like!
-    var extent = g.selectAll(".extent")
-        .data(extentArr, function (d) { return d; });
-
-    extent.exit().remove();
-
-    extent.enter().append("rect")
-        .attr("class", "extent")
-        .style("cursor", "move")
-        .call(extentAdaption);
-
-    // More invisible rects for resizing the extent.
-    var resize = g.selectAll(".resize")
-        .data(extentResizes, function (d) { return d[0] + d[1]; });
-
-    // Remove any superfluous resizers.
-    resize.exit().remove();
-
-    var newResize = resize.enter().append("g")
-        .attr("class", function(d) { return "resize " + d[0]; })
-        .style("cursor", function(d) { return d3_svg_brushCursor[d[0]]; });
-    
-    newResize.append("rect")
-        .attr("x", function(d) { return /[ew]$/.test(d[0]) ? -3 : null; })
-        .attr("y", function(d) { return /^[ns]/.test(d[0]) ? -3 : null; })
-        .attr("width", 6)
-        .attr("height", 6)
-        .style("visibility", "hidden");
-
-    newResize.call(resizeAdaption);
-
-    // Show or hide the resizers.
-    resize.style("display", function (d) { return brush.empty(d[1]) ? "none" : null; });
-  }
-
-  brush.event = function(g) {
-    g.each(function() {
-      var event_ = event.of(this, arguments),
-          extent1 = {x: xExtent, y: yExtent, i: xExtentDomain, j: yExtentDomain},
-          extent0 = this.__chart__ || extent1;
-      this.__chart__ = extent1;
-      if (d3_transitionInheritId) {
-        d3.select(this).transition()
-            .each("start.brush", function() {
-              xExtentDomain = extent0.i; // pre-transition state
-              yExtentDomain = extent0.j;
-              xExtent = extent0.x;
-              yExtent = extent0.y;
-              event_({type: "brushstart"});
-            })
-            .tween("brush:brush", function() {
-              // TODO: transitions for all extents
-              var xi = d3_interpolateArray(xExtent[0], extent1.x[0]),
-                  yi = d3_interpolateArray(yExtent[0], extent1.y[0]);
-              xExtentDomain[0] = yExtentDomain[0] = null; // transition state
-              return function(t) {
-                xExtent[0] = extent1.x[0] = xi(t);
-                yExtent[0] = extent1.y[0] = yi(t);
-                event_({type: "brush", mode: "resize"});
-              };
-            })
-            .each("end.brush", function() {
-              xExtentDomain = extent1.i; // post-transition state
-              yExtentDomain = extent1.j;
-              event_({type: "brush", mode: "resize"});
-              event_({type: "brushend"});
-            });
-      } else {
-        event_({type: "brushstart"});
-        event_({type: "brush", mode: "resize"});
-        event_({type: "brushend"});
-      }
-    });
-  };
-
-  function redraw(g) {
-    g.selectAll(".resize").attr("transform", function(d) {
-      return "translate(" + xExtent[d[1]][+/e$/.test(d[0])] + "," + yExtent[d[1]][+/^s/.test(d[0])] + ")";
-    });
-  }
-
-  function redrawX(g) {
-    g.selectAll(".extent").attr("x", function (d) { return xExtent[d][0]; });
-    g.selectAll(".extent,.n>rect,.s>rect").attr("width", function(d) { return xExtent[d][1] - xExtent[d][0]; });
-  }
-
-  function redrawY(g) {
-    g.selectAll(".extent").attr("y", function (d) { return yExtent[d][0]; });
-    g.selectAll(".extent,.e>rect,.w>rect").attr("height", function (d) { return yExtent[d][1] - yExtent[d][0]; });
-  }
-
-  function brushstart() {
-    var target = this,
-        eventTarget = d3.select(d3.event.target),
-        event_ = event.of(target, arguments),
-        g = d3.select(target),
-        resizing = eventTarget.datum()[0],
-        resizingX = !/^(n|s)$/.test(resizing) && x,
-        resizingY = !/^(e|w)$/.test(resizing) && y,
-        dragging = eventTarget.classed("extent"),
-        dragRestore = d3_event_dragSuppress(),
-        center,
-        origin = d3.mouse(target),
-        offset,
-        i;
-
-    var w = d3.select(window)
-        .on("keydown.brush", keydown)
-        .on("keyup.brush", keyup);
-
-    if (d3.event.changedTouches) {
-      w.on("touchmove.brush", brushmove).on("touchend.brush", brushend);
-    } else {
-      w.on("mousemove.brush", brushmove).on("mouseup.brush", brushend);
-    }
-
-    // Interrupt the transition, if any.
-    g.interrupt().selectAll("*").interrupt();
-
-    // If the extent was clicked on, drag rather than brush;
-    // store the point between the mouse and extent origin instead.
-    if (dragging) {
-      i = eventTarget.datum();
-      origin[0] = xExtent[i][0] - origin[0];
-      origin[1] = yExtent[i][0] - origin[1];
-    }
-
-    // If a resizer was clicked on, record which side is to be resized.
-    // Also, set the origin to the opposite side.
-    else if (resizing) {
-      var ex = +/w$/.test(resizing),
-          ey = +/^n/.test(resizing);
-
-      i = eventTarget.datum()[1];
-      offset = [xExtent[i][1 - ex] - origin[0], yExtent[i][1 - ey] - origin[1]];
-      origin[0] = xExtent[i][ex];
-      origin[1] = yExtent[i][ey];
-    }
-
-    else {
-      i = xExtent.length - 1; // Figure out the count of the new extent.
-      xExtent.push([0,0]);
-      yExtent.push([0,0]);
-
-      // If the ALT key is down when starting a brush, the center is at the mouse.
-      if (d3.event.altKey) center = origin.slice();
-    }
-
-    // Propagate the active cursor to the body for the drag duration.
-    g.style("pointer-events", "none");
-    d3.select("body").style("cursor", eventTarget.style("cursor"));
-
-    // Show resizers as long as we're not dragging or resizing.
-    if(!dragging && !resizing) g.selectAll(".resize").style("display", null)
-
-    // Notify listeners.
-    event_({type: "brushstart"});
-    brushmove();
-
-    function keydown() {
-      if (d3.event.keyCode == 32) {
-        if (!dragging) {
-          center = null;
-          origin[0] -= xExtent[i][1];
-          origin[1] -= yExtent[i][1];
-          dragging = 2;
-        }
-        d3.event.preventDefault();
-      }
-    }
-
-    function keyup() {
-      if (d3.event.keyCode == 32 && dragging == 2) {
-        origin[0] += xExtent[i][1];
-        origin[1] += yExtent[i][1];
-        dragging = 0;
-        d3.event.preventDefault();
-      }
-    }
-
-    function brushmove() {
-      var point = d3.mouse(target),
-          moved = false;
-
-      // Preserve the offset for thick resizers.
-      if (offset) {
-        point[0] += offset[0];
-        point[1] += offset[1];
-      }
-
-      if (!dragging) {
-
-        // If needed, determine the center from the current extent.
-        if (d3.event.altKey) {
-          if (!center) center = [(xExtent[i][0] + xExtent[i][1]) / 2, (yExtent[i][0] + yExtent[i][1]) / 2];
-
-          // Update the origin, for when the ALT key is released.
-          origin[0] = xExtent[i][+(point[0] < center[0])];
-          origin[1] = yExtent[i][+(point[1] < center[1])];
-        }
-
-        // When the ALT key is released, we clear the center.
-        else center = null;
-      }
-
-      // Update the brush extent for each dimension.
-      if (resizingX && move1(point, x, 0)) {
-        redrawX(g, i);
-        moved = true;
-      }
-      if (resizingY && move1(point, y, 1)) {
-        redrawY(g, i);
-        moved = true;
-      }
-
-      // Final redraw and notify listeners.
-      if (moved) {
-        redraw(g);
-        event_({type: "brush", mode: dragging ? "move" : "resize"});
-      }
-    }
-
-    function move1(point, scale, j) {
-      var range = d3_scaleRange(scale),
-          r0 = range[0],
-          r1 = range[1],
-          position = origin[j],
-          extent = j ? yExtent[i] : xExtent[i],
-          size = extent[1] - extent[0],
-          min,
-          max;
-
-      // When dragging, reduce the range by the extent size and position.
-      if (dragging) {
-        r0 -= position;
-        r1 -= size + position;
-      }
-
-      // Clamp the point (unless clamp set to false) so that the extent fits within the range extent.
-      min = (j ? yClamp : xClamp) ? Math.max(r0, Math.min(r1, point[j])) : point[j];
-
-      // Compute the new extent bounds.
-      if (dragging) {
-        max = (min += position) + size;
-      } else {
-
-        // If the ALT key is pressed, then preserve the center of the extent.
-        if (center) position = Math.max(r0, Math.min(r1, 2 * center[j] - min));
-
-        // Compute the min and max of the position and point.
-        if (position < min) {
-          max = min;
-          min = position;
-        } else {
-          max = position;
-        }
-      }
-
-      // Update the stored bounds.
-      if (extent[0] != min || extent[1] != max) {
-        if (j) yExtentDomain[i] = null;
-        else xExtentDomain[i] = null;
-        extent[0] = min;
-        extent[1] = max;
-        return true;
-      }
-    }
-
-    function brushend() {
-      brushmove();
-
-      // If the current extent is empty, clear everything.
-      if(x && xExtent[i][0] == xExtent[i][1] ||
-         y && yExtent[i][0] == yExtent[i][1]) {
-        brush.clear();
-      }
-
-      // reset the cursor styles
-      g.style("pointer-events", "all").selectAll(".resize").style("display", function(d) { return brush.empty(d[1]) ? "none" : null; });
-      d3.select("body").style("cursor", null);
-
-      w .on("mousemove.brush", null)
-        .on("mouseup.brush", null)
-        .on("touchmove.brush", null)
-        .on("touchend.brush", null)
-        .on("keydown.brush", null)
-        .on("keyup.brush", null);
-
-      drawExtents();
-
-      dragRestore();
-      event_({type: "brushend"});
-    }
-  }
-
-  brush.x = function(z) {
-    if (!arguments.length) return x;
-    x = z;
-    resizes = d3_svg_brushResizes[!x << 1 | !y]; // fore!
-    return brush;
-  };
-
-  brush.y = function(z) {
-    if (!arguments.length) return y;
-    y = z;
-    resizes = d3_svg_brushResizes[!x << 1 | !y]; // fore!
-    return brush;
-  };
-
-  brush.resizeAdaption = function(z) {
-    if (!arguments.length) return resizeAdaption;
-    resizeAdaption = z;
-    return brush;
-  }
-
-  brush.extentAdaption = function(z) {
-    if (!arguments.length) return extentAdaption;
-    extentAdaption = z;
-    return brush;
-  }  
-
-  brush.clamp = function(z) {
-    if (!arguments.length) return x && y ? [xClamp, yClamp] : x ? xClamp : y ? yClamp : null;
-    if (x && y) xClamp = !!z[0], yClamp = !!z[1];
-    else if (x) xClamp = !!z;
-    else if (y) yClamp = !!z;
-    return brush;
-  };
-
-  brush.extent = function(z) {
-    var x0, x1, y0, y1, t;
-    var xOutput, yOutput, xyOutput = [];
-
-    // Invert the pixel extent to data-space.
-    if (!arguments.length) {
-      if (x) {
-        if (xExtentDomain[0]) {
-          xOutput = xExtentDomain;
-        } else {
-          xOutput = xExtent.map(function (d) {
-            if (x.invert) return [ x.invert(d[0]), x.invert(d[1]) ];
-            return d;
-          }).map(function (d) {
-            if (d[1] < d[0]) return [ d[1], d[0] ];
-            return d;
-          }).filter(function (d) { return d[1] - d[0] != 0; });
-        }
-      }
-      if (y) {
-        if (yExtentDomain[0]) {
-          yOutput = yExtentDomain;
-        } else {
-          yOutput = yExtent.map(function (d) {
-            if(y.invert) return [ y.invert(d[0]), y.invert(d[1]) ];
-            return d;
-          }).map(function (d) {
-            if (d[1] < d[0]) return [ d[1], d[0] ];
-            return d;
-          }).filter(function (d) { return d[1] - d[0] != 0; });
-        }
-      }
-      if(x && y) {
-        xOutput.forEach(function (d, i) {
-          xyOutput.push([[d[0], yOutput[i][0]], [d[1], yOutput[i][1]]]);
-        });
-      }
-      return x && y ? xyOutput : x ? xOutput : y && yOutput;
-    }
-
-    // Scale the data-space extent to pixels.
-    if (x) {
-      xOutput = z;
-      if (y) xOutput = xOutput.map(function (d) {
-        return [d[0][0], d[1][0]];
-      });
-      xExtentDomain = xOutput;
-      xOutput = xOutput.map(function (d) {
-        if (x.invert) return [x(d[0]), x(d[1])];
-        return d;
-      }).map(function (d) {
-        if(d[1] < d[0]) return [d[1], d[0]];
-        return d;
-      });
-      xExtent = xOutput;
-      if(!y) yExtent = xOutput.map(function() { return [0,0]; });
-    }
-    if (y) {
-      yOutput = z;
-      if (x) yOutput = yOutput.map(function (d) {
-        return [d[0][1], d[1][1]];
-      });
-      yExtentDomain = yOutput;
-      yOutput = yOutput.map(function (d) {
-        if (y.invert) return [y(d[0]), y(d[1])];
-        return d;
-      }).map(function (d) {
-        if(d[1] < d[0]) return [d[1], d[0]];
-        return d;
-      });
-      yExtent = yOutput;
-      if(!x) xExtent = yOutput.map(function () { return [0,0]; });
-    }
-
-    // Handle the case where the extents are set to empty arrays.
-    if(xExtent.length === 0) xExtent = [[0,0]];
-    if(yExtent.length === 0) yExtent = [[0,0]];
-
-    return brush;
-  };
-
-  brush.clear = function() {
-    xExtent = [[0, 0]], yExtent = [[0, 0]];
-    xExtentDomain = yExtentDomain = [];
-    drawExtents();
-    if(x) redrawX(brushElement);
-    if(y) redrawY(brushElement);
-    return brush;
-  };
-
-  brush.empty = function(i) {
-    if(xExtent.length == 1 && yExtent.length == 1) i = 0;
-    if(i !== undefined) {
-      return !!x && xExtent[i][0] == xExtent[i][1]
-        || !!y && yExtent[i][0] == yExtent[i][1];
-    } else {
-      return false;
-    }
-  };
-
-  return d3.rebind(brush, event, "on");
-};
-
-var d3_svg_brushCursor = {
-  n: "ns-resize",
-  e: "ew-resize",
-  s: "ns-resize",
-  w: "ew-resize",
-  nw: "nwse-resize",
-  ne: "nesw-resize",
-  se: "nwse-resize",
-  sw: "nesw-resize"
-};
-
-var d3_svg_brushResizes = [
-  ["n", "e", "s", "w", "nw", "ne", "se", "sw"],
-  ["e", "w"],
-  ["n", "s"],
-  []
-];
-
-(function(){
-
-	d3.timeline = function(){
-
-		var itemHeight = 20,
-			height = null,
-			width = 1000;
-
-		function chart(selection){
-			selection.each(function(data){
-
-				var groups = grouping(data),
-					levels = d3.sum(d3.values(groups).map(function(d){ return d.length; })),
-					margin = {top: 20, right: 15, bottom: 50, left: 150},
-
-					x = d3.time.scale().range([margin.left, width]).domain([
-						d3.min(data, start),
-						d3.max(data, end)
-					]),
-
-					xAxis = d3.svg.axis().scale(x).orient('bottom').tickSize(6, 0, 0);
-
-
-				if (!height) {
-					height = itemHeight * levels + margin.top + margin.bottom;
-				} else {
-					itemHeight = (height- margin.top +- margin.bottom)/levels;
-				}
-
-				selection.selectAll('svg').remove();
-				
-				var svg = selection.append('svg:svg')
-				  .attr('width', width)
-				  .attr('height', height);
-
-				svg.append('defs').append('clipPath')
-				  .attr('id', 'clip')
-				  .append('rect')
-				    .attr('width', width-margin.left)
-				    .attr('height', height)
-				    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-				var last = 0,
-					current = 0;
-
-				var items = svg.selectAll('g.itemGroup')
-					.data(d3.entries(groups))
-					.enter().append('g')
-					.attr("class","itemGroup")
-					.attr("transform", function(d,i){
-						current = last;
-						last += d.value.length*itemHeight;
-						return "translate(" + 0 + "," + (margin.top + current) + ")";
-					});
-
-				items.append('line')
-					.attr('x1', margin.left)
-					.attr('y1', 0)
-					.attr('x2', width)
-					.attr('y2', 0)
-					.attr('stroke', 'lightgrey');
-
-				items.append('text')
-					.text(function(d) { return d.key; })
-					.attr('x', margin.left-10)
-			  		.attr('y', 0)
-			  		.attr('dy', function(d) { return (d.value.length * itemHeight)/2; })
-			  		.attr('text-anchor', 'end')
-			  		.attr('class', 'groupText');
-
-				svg.append('g')
-				  	.attr('transform', 'translate(0,' + (itemHeight * (levels+1)) + ')')
-				  	.attr('class', 'focus axis date')
-				  	.call(xAxis);
-				
-				var itemsClip = svg.append('g')
-				    .attr('clip-path', 'url(#clip)')
-
-				update();
-
-				function update(){
-
-					var rects = itemsClip.selectAll('rect')
-						.data(data, function(d){return d.__id;})
-						.attr('x', function(d) { return x(start(d)); })
-					    .attr('width', function(d) { return x(end(d)) - x(start(d)); })
-					
-					rects.enter().append('rect')
-					    .attr('x', function(d) { return x(start(d)); })
-					    .attr('y', function(d,i) { return itemHeight * d.__level + margin.top; })
-					    .attr('width', function(d) { return x(end(d)) - x(start(d)); })
-					    .attr('height', itemHeight)
-					    .attr('class', function(d) { return 'focusItem'; })
-					
-				  	rects.exit().remove();
-				
-				}
-
-
-			})
-		}
-
-		function grouping(data){
-
-			var level = id = 0;
-
-			return d3.nest()
-				.key(group)
-				.rollup(function(g) {
-					
-					var l, levels = [];
-					g.forEach(function(item,i){
-						l=0;
-						while(overlap(item, levels[l])) l++;
-						if (!levels[l]) levels[l] = [];
-						item.__level = l+level;
-						item.__id = id++;
-						levels[l].push(item);
-					})
-					level++;
-					return levels;			
-				})
-				.map(data)
-		}
-
-		function overlap(item, g) {
-			if (!g) return false;
-			for(var i in g) {
-				if(start(item) < end(g[i]) && end(item) > start(g[i])) {
-					return true;
-				}
-			}
-		    return false;
-		};
-
-
-
-		function group(d) {
-			return d.group;
-		}
-
-		function start(d) {
-			return d.start;
-		}
-
-		function end(d) {
-			return d.end;
-		}
-
-		/* Getter/Setter */
-
-		chart.group = function(x) {
-			if (!arguments.length) return x;
-			group = x;
-			return chart;
-		}
-
-		chart.start = function(x) {
-			if (!arguments.length) return start;
-			start = x;
-			return chart;
-		}
-
-		chart.end = function(x) {
-			if (!arguments.length) return end;
-			end = x;
-			return chart;
-		}
-
-		chart.height = function(x) {
-			if (!arguments.length) return height;
-			height = x;
-			return chart;
-		}
-
-		return chart;
-	}
-
-})();
 // Palladio data upload component
 
 angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
@@ -114181,156 +114181,6 @@ angular.module('palladioIdiographView', ['palladio', 'palladio.services'])
 
 // Palladio template component module
 
-angular.module('palladioComponentTemplate', []) // Rename this.
-	.directive('palladioComponentTemplate', function () { // Rename this.
-		var directiveObj = {
-			scope: true,
-			template: '<div class="row-fluid"></div>', // Change this string to update the
-			// template. Don't use a templateUrl, as you won't have control over the relative
-			// URL where this template is deployed.
-
-			link: { pre: function(scope, element, attrs) {
-
-					// In the pre-linking function we can use scope.data, scope.metadata, and
-					// scope.xfilter to populate any additional scope values required by the
-					// template.
-
-					// The parent scope must include the following:
-					//   scope.xfilter
-					//   scope.metadata
-
-
-					// If you need to do any configuration before your visualization is set up,
-					// do it here. DO NOT do anything that changes the DOM here, so don't
-					// programatically instantiate your visualization at this point. That happens
-					// in the 'post' function.
-					//
-					// You might need to do things here especially
-					// if your visualization is contained in another directive that is included
-					// in the template of this directive.
-
-				}, post: function(scope, element, attrs) {
-
-					// If you are building a d3.js visualization, you can grab the containing
-					// element with:
-					//
-					// d3.select(element[0]);
-					//
-					//
-					// If you are going to programatically instantiate your visualization, do it
-					// here. Your visualization should emit the following events if necessary:
-					//
-					// For new/changed filters:
-					//
-					// scope.$emit('updateFilter', [identifier, description, filter, callback]);
-					//
-					// For removing all filters:
-					//
-					// scope.$emit('updateFilter', [identifier, null]);
-					//
-					// If you apply a filter in this component, notify the Palladio framework.
-					//
-					// identifier: A string unique to this instance of this component. Should 
-					//             be randomly generated.
-					//
-					// description: A human-readable description of this component. Should be
-					//              unique to this instance of this component, but not required.
-					//
-					// filter: A human-readable description of the filter that is currently
-					//         applied on this component.
-					//
-					// callback: A function that will remove all filters on this component when
-					//           it is evaluated.
-					//
-					//
-					// Whenever the component needs to trigger an update for all other components
-					// in the application (for example, when a filter is applied or removed):
-					//
-					// scope.$emit('triggerUpdate');
-
-					function setup() {
-
-					}
-
-					function update() {
-						// Make this **snappy**
-					}
-
-					function reset() {
-
-					}
-
-					setup();
-					update();
-
-					// You should also handle the following externally triggered events:
-
-					scope.$on('filterReset', function(event) {
-						
-						// Reset any filters that have been applied through this visualization.
-						// This means running .filterAll() on any Crossfilter dimensions you have
-						// created and updating your visualization as required.
-
-						update();
-
-					});
-
-					scope.$on('update', function(event) {
-						
-						// Render an update. It is likely that the data in the Crossfilter or the
-						// filter state of the Crossfilter has changed, so you should re-query
-						// any groups or dimensions you have created.
-
-						// Note: This method gets called a *lot* during a filter operation.
-						// Whenever possible you should make updates incremental and very fast.
-
-						update();
-
-					});
-
-					scope.$on('search', function(event, args) {
-						
-						// The global search term has been updated. The current search term is
-						// found in args.
-
-					});
-
-					scope.$on('$destroy', function () {
-
-						// Clean up after yourself. Remove dimensions that we have created. If we
-						// created watches on another scope, destroy those as well.
-
-					});
-
-
-					// Support save/load. These functions should be able to fully recreate an instance
-					// of this visualization based on the results of the exportState() function. Include
-					// current filters, any type of manipulations the user has done, etc.
-
-					function importState(state) {
-						
-						// Load a state object created by exportState().
-
-					}
-
-					function exportState() {
-
-						// Return a state object that can be consumed by importState().
-						return { };
-					}
-
-					scope.$emit('registerStateFunctions', ['visualizationName', exportState, importState]);
-
-					// Move the modal out of the fixed area. (necessary if you are using modal selectors)
-					// $(element[0]).find('#date-start-modal').parent().appendTo('body');
-				}
-			}
-		};
-
-		return directiveObj;
-	});
-// Palladio template component module
-
 angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 	.directive('palladioDurationView', function (dateService, palladioService, dataService) {
 		var directiveObj = {
@@ -115045,6 +114895,156 @@ angular.module('palladioHistogramFilter', [])
 					}
 
 					scope.$emit('registerStateFunctions', ['visualizationName', exportState, importState]);
+				}
+			}
+		};
+
+		return directiveObj;
+	});
+// Palladio template component module
+
+angular.module('palladioComponentTemplate', []) // Rename this.
+	.directive('palladioComponentTemplate', function () { // Rename this.
+		var directiveObj = {
+			scope: true,
+			template: '<div class="row-fluid"></div>', // Change this string to update the
+			// template. Don't use a templateUrl, as you won't have control over the relative
+			// URL where this template is deployed.
+
+			link: { pre: function(scope, element, attrs) {
+
+					// In the pre-linking function we can use scope.data, scope.metadata, and
+					// scope.xfilter to populate any additional scope values required by the
+					// template.
+
+					// The parent scope must include the following:
+					//   scope.xfilter
+					//   scope.metadata
+
+
+					// If you need to do any configuration before your visualization is set up,
+					// do it here. DO NOT do anything that changes the DOM here, so don't
+					// programatically instantiate your visualization at this point. That happens
+					// in the 'post' function.
+					//
+					// You might need to do things here especially
+					// if your visualization is contained in another directive that is included
+					// in the template of this directive.
+
+				}, post: function(scope, element, attrs) {
+
+					// If you are building a d3.js visualization, you can grab the containing
+					// element with:
+					//
+					// d3.select(element[0]);
+					//
+					//
+					// If you are going to programatically instantiate your visualization, do it
+					// here. Your visualization should emit the following events if necessary:
+					//
+					// For new/changed filters:
+					//
+					// scope.$emit('updateFilter', [identifier, description, filter, callback]);
+					//
+					// For removing all filters:
+					//
+					// scope.$emit('updateFilter', [identifier, null]);
+					//
+					// If you apply a filter in this component, notify the Palladio framework.
+					//
+					// identifier: A string unique to this instance of this component. Should 
+					//             be randomly generated.
+					//
+					// description: A human-readable description of this component. Should be
+					//              unique to this instance of this component, but not required.
+					//
+					// filter: A human-readable description of the filter that is currently
+					//         applied on this component.
+					//
+					// callback: A function that will remove all filters on this component when
+					//           it is evaluated.
+					//
+					//
+					// Whenever the component needs to trigger an update for all other components
+					// in the application (for example, when a filter is applied or removed):
+					//
+					// scope.$emit('triggerUpdate');
+
+					function setup() {
+
+					}
+
+					function update() {
+						// Make this **snappy**
+					}
+
+					function reset() {
+
+					}
+
+					setup();
+					update();
+
+					// You should also handle the following externally triggered events:
+
+					scope.$on('filterReset', function(event) {
+						
+						// Reset any filters that have been applied through this visualization.
+						// This means running .filterAll() on any Crossfilter dimensions you have
+						// created and updating your visualization as required.
+
+						update();
+
+					});
+
+					scope.$on('update', function(event) {
+						
+						// Render an update. It is likely that the data in the Crossfilter or the
+						// filter state of the Crossfilter has changed, so you should re-query
+						// any groups or dimensions you have created.
+
+						// Note: This method gets called a *lot* during a filter operation.
+						// Whenever possible you should make updates incremental and very fast.
+
+						update();
+
+					});
+
+					scope.$on('search', function(event, args) {
+						
+						// The global search term has been updated. The current search term is
+						// found in args.
+
+					});
+
+					scope.$on('$destroy', function () {
+
+						// Clean up after yourself. Remove dimensions that we have created. If we
+						// created watches on another scope, destroy those as well.
+
+					});
+
+
+					// Support save/load. These functions should be able to fully recreate an instance
+					// of this visualization based on the results of the exportState() function. Include
+					// current filters, any type of manipulations the user has done, etc.
+
+					function importState(state) {
+						
+						// Load a state object created by exportState().
+
+					}
+
+					function exportState() {
+
+						// Return a state object that can be consumed by importState().
+						return { };
+					}
+
+					scope.$emit('registerStateFunctions', ['visualizationName', exportState, importState]);
+
+					// Move the modal out of the fixed area. (necessary if you are using modal selectors)
+					// $(element[0]).find('#date-start-modal').parent().appendTo('body');
 				}
 			}
 		};
