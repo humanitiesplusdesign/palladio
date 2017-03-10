@@ -28,6 +28,11 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 				});
 
 				file.autoFields = parseService.getFields(data);
+
+				// Then change the type of the generated field to 'text'
+				file.autoFields.filter(function(f) {
+					return f.key === 'generated'
+				})[0].type = 'text'
 			}
 		}
 

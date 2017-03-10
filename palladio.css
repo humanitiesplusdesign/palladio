@@ -8051,6 +8051,19 @@ colorpicker-preview {
   shape-rendering: crispEdges;
 }
 
+[data-palladio-histogram-filter] path {
+	fill: #dddddd;
+}
+
+[data-palladio-histogram-filter] .axis path, [data-palladio-histogram-filter] .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-histogram-filter] .axis text {
+	font: 10px Helvetica, Arial, sans-serif;
+}
 [data-palladio-duration-view] path {
 	fill: #dddddd;
 }
@@ -8071,19 +8084,6 @@ colorpicker-preview {
 	font: 10px Merriweather, Helvetica, Arial, sans-serif;
 }
 
-[data-palladio-histogram-filter] path {
-	fill: #dddddd;
-}
-
-[data-palladio-histogram-filter] .axis path, [data-palladio-histogram-filter] .axis line {
-	fill: none;
-	stroke: #000;
-	shape-rendering: crispEdges;
-}
-
-[data-palladio-histogram-filter] .axis text {
-	font: 10px Helvetica, Arial, sans-serif;
-}
 [data-palladio-palette] .palette-new-dimension-button {
 	width: 100%;
 	margin-top: 10px;
