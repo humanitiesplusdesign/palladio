@@ -36,14 +36,17 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 			}
 		}
 
-		var addFile = function (data, label, url) {
-			var file = {};
+		// Note that this just increments the final digit, so we'll end up wtih some numbers
+		// like 9993.
+		var appendOrIncrementKey = function(currentKey) {
+			if(!isNaN(+currentKey[currentKey.length-1])) {
+				return currentKey.substring(0, currentKey.length-1) + (+currentKey[currentKey.length-1]+1);
+			} else {
+				return currentKey + "_1";
+			}	
+		}
 
-			file.url = url;
-			file.loadFromURL = url ? true : false;
-			file.label = label || "Untitled";
-			file.id = files.length;
-			
+		var renameDuplicateFields = function(data, files) {
 			// Build list of existing fields
 			var existingFieldKeys = [];
 			files.forEach(function(d) {
@@ -51,22 +54,12 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 					existingFieldKeys.push(d.key);
 				})
 			});
-			
+
 			// For now we assume all records have the same structure so we only need to test the
 			// keys of the first record
 			var currentFieldKeys = [];
 			for(key in data[0]) {
 				currentFieldKeys.push(key);
-			}
-	
-			// Note that this just increments the final digit, so we'll end up wtih some numbers
-			// like 9993.
-			var appendOrIncrementKey = function(currentKey) {
-				if(!isNaN(+currentKey[currentKey.length-1])) {
-					return currentKey.substring(0, currentKey.length-1) + (+currentKey[currentKey.length-1]+1);
-				} else {
-					return currentKey + "_1";
-				}	
 			}
 			
 			while(currentFieldKeys.reduce(function(a,b) { return a || (existingFieldKeys.indexOf(b) !== -1) }, false)) {
@@ -107,6 +100,17 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 					currentFieldKeys.push(key);
 				}				
 			}
+		}
+
+		var addFile = function (data, label, url) {
+			var file = {};
+
+			file.url = url;
+			file.loadFromURL = url ? true : false;
+			file.label = label || "Untitled";
+			file.id = files.length;
+
+			renameDuplicateFields(data, files);
 			
 			// Do auto-recognition on load
 			file.autoFields = parseService.getFields(data);
@@ -164,6 +168,9 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 		};
 
 		var addFileRaw = function(file) {
+			// This should only kick in if the Palladio file was saved before it was loaded...
+			renameDuplicateFields(file.data, files)
+			
 			generateUnique(file, file.data)
 			files.push(file);
 			uniqueCounter++;
