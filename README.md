@@ -1,4 +1,4 @@
-##Installation
+## Installation
 
 Palladio is a supporting library and set of components. It's best-known use is in the Palladio app, which can be found at https://github.com/humanitiesplusdesign/palladio-app. In order to run Palladio locally, install NPM and Bower if you have not already, and run the following commands:
 
