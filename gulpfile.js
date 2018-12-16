@@ -41,6 +41,7 @@ var filterByExtension = function(extension){
 gulp.task('scripts', function () {
 	var files = gulp.src(
 			mainBowerFiles({includeDev: true})
+				.concat('node_modules/svgsaver/browser.js')
 				.concat(palladioSources)
 		)
 		.pipe(filterByExtension("js"))

@@ -13,9 +13,11 @@
     "karma-jasmine": "2.0.1",
     "karma-phantomjs-launcher": "1.0.4",
     "main-bower-files": "2.13.1",
-    "merge-stream": "1.0.1"
+    "merge-stream": "1.0.1",
+    "svgsaver": "^0.9.0"
   },
   "scripts": {
     "test": "./node_modules/karma/bin/karma start ./test/karma.conf.js --browsers Chrome --single-run=true"
-  }
+  },
+  "dependencies": {}
 }

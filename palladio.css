@@ -6590,6 +6590,7 @@ button.close {
   font-family: monospace;
   height: 300px;
   color: black;
+  direction: ltr;
 }
 
 /* PADDING */
@@ -6643,7 +6644,12 @@ button.close {
 .cm-fat-cursor div.CodeMirror-cursors {
   z-index: 1;
 }
-
+.cm-fat-cursor-mark {
+  background-color: rgba(20, 255, 20, 0.5);
+  -webkit-animation: blink 1.06s steps(1) infinite;
+  -moz-animation: blink 1.06s steps(1) infinite;
+  animation: blink 1.06s steps(1) infinite;
+}
 .cm-animate-fat-cursor {
   width: auto;
   border: 0;
@@ -6704,7 +6710,7 @@ button.close {
 .cm-s-default .cm-property,
 .cm-s-default .cm-operator {}
 .cm-s-default .cm-variable-2 {color: #05a;}
-.cm-s-default .cm-variable-3 {color: #085;}
+.cm-s-default .cm-variable-3, .cm-s-default .cm-type {color: #085;}
 .cm-s-default .cm-comment {color: #a50;}
 .cm-s-default .cm-string {color: #a11;}
 .cm-s-default .cm-string-2 {color: #f50;}
@@ -6724,8 +6730,8 @@ button.close {
 
 /* Default styles for common addons */
 
-div.CodeMirror span.CodeMirror-matchingbracket {color: #0f0;}
-div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
+div.CodeMirror span.CodeMirror-matchingbracket {color: #0b0;}
+div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #a22;}
 .CodeMirror-matchingtag { background: rgba(255, 150, 0, .3); }
 .CodeMirror-activeline-background {background: #e8f2ff;}
 
@@ -6808,11 +6814,8 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
   cursor: default;
   z-index: 4;
 }
-.CodeMirror-gutter-wrapper {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
-}
+.CodeMirror-gutter-wrapper ::selection { background-color: transparent }
+.CodeMirror-gutter-wrapper ::-moz-selection { background-color: transparent }
 
 .CodeMirror-lines {
   cursor: text;
@@ -6852,10 +6855,12 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
 .CodeMirror-linewidget {
   position: relative;
   z-index: 2;
-  overflow: auto;
+  padding: 0.1px; /* Force widget margins to stay inside of the container */
 }
 
 .CodeMirror-widget {}
+
+.CodeMirror-rtl pre { direction: rtl; }
 
 .CodeMirror-code {
   outline: none;
@@ -6905,8 +6910,8 @@ div.CodeMirror-dragcursors {
 .CodeMirror-line::-moz-selection, .CodeMirror-line > span::-moz-selection, .CodeMirror-line > span > span::-moz-selection { background: #d7d4f0; }
 
 .cm-searching {
-  background: #ffa;
-  background: rgba(255, 255, 0, .4);
+  background-color: #ffa;
+  background-color: rgba(255, 255, 0, .4);
 }
 
 /* Used to force a border model for a node */
@@ -8051,19 +8056,6 @@ colorpicker-preview {
   shape-rendering: crispEdges;
 }
 
-[data-palladio-histogram-filter] path {
-	fill: #dddddd;
-}
-
-[data-palladio-histogram-filter] .axis path, [data-palladio-histogram-filter] .axis line {
-	fill: none;
-	stroke: #000;
-	shape-rendering: crispEdges;
-}
-
-[data-palladio-histogram-filter] .axis text {
-	font: 10px Helvetica, Arial, sans-serif;
-}
 [data-palladio-duration-view] path {
 	fill: #dddddd;
 }
@@ -8084,17 +8076,17 @@ colorpicker-preview {
 	font: 10px Merriweather, Helvetica, Arial, sans-serif;
 }
 
-[data-palladio-parduration-filter] path {
+[data-palladio-histogram-filter] path {
 	fill: #dddddd;
 }
 
-[data-palladio-parduration-filter] .axis path, [data-palladio-partime-filter] .axis line {
+[data-palladio-histogram-filter] .axis path, [data-palladio-histogram-filter] .axis line {
 	fill: none;
 	stroke: #000;
 	shape-rendering: crispEdges;
 }
 
-[data-palladio-parduration-filter] .axis text {
+[data-palladio-histogram-filter] .axis text {
 	font: 10px Helvetica, Arial, sans-serif;
 }
 [data-palladio-palette] .palette-new-dimension-button {
@@ -8126,6 +8118,19 @@ colorpicker-preview {
   margin: 2px;
   margin-left: 5px;
   border-radius: 2px;
+}
+[data-palladio-parduration-filter] path {
+	fill: #dddddd;
+}
+
+[data-palladio-parduration-filter] .axis path, [data-palladio-partime-filter] .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+[data-palladio-parduration-filter] .axis text {
+	font: 10px Helvetica, Arial, sans-serif;
 }
 [data-palladio-timespan-filter] path {
 	fill: #dddddd;
