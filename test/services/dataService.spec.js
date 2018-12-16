@@ -24,11 +24,11 @@ describe("Data Service:", function () {
 		module("palladio.services.data");
 	});
 
-	it('service should exist', inject(['dataService', function(ds) {
+	it('service should exist', inject(['dataService', function (ds) {
 		expect(ds).not.toEqual(null);
 	}]));
 
-    it('for a single file should just return that file', inject(['dataService', 'dataPromise', function (ds, dp) {
+	it('for a single file should just return that file', inject(['dataService', 'dataPromise', function (ds, dp) {
 		ds.addFile(peopleData, 'People');
 
 		expect(ds.getFiles().length).toEqual(1);
@@ -37,20 +37,20 @@ describe("Data Service:", function () {
 			expect(dp.data.length).toEqual(3);
 			expect(dp.xfilter.size()).toEqual(3);
 		});
-    }]));
+	}]));
 
-    describe('for two files with a single link', function () {
+	describe('for two files with a single link', function () {
 
 		var ds;
 		var data;
 
-		beforeEach(inject( function (_dataService_) {
+		beforeEach(inject(function (_dataService_) {
 			ds = _dataService_;
 			ds.addFile(peopleData, 'People');
 			ds.addFile(placeData, 'Places');
 
 			// Run auto-recognition
-			ds.getFiles().forEach( function (file) {
+			ds.getFiles().forEach(function (file) {
 				file.fields = file.autoFields;
 			});
 			ds.setDirty();
@@ -72,73 +72,65 @@ describe("Data Service:", function () {
 		}));
 
 		it('should have same length as source', function () {
-			ds.getData().then(function (data) {
-				expect(data.data.length).toEqual(peopleData.length);
-			});
-		});
+			let data = ds.getDataSync()
+			expect(data.data.length).toEqual(peopleData.length)
+		})
 
 		it('should have no "Type" field presented to the user', function () {
-			ds.getData().then(function (data) {
-				data.metadata.forEach(function (d) {
-					expect(d.description).not.toEqual("place type");
-				});
-			});
+			let data = ds.getDataSync()
+			data.metadata.forEach(function (d) {
+				expect(d.description).not.toEqual("place type");
+			})
 		});
 
 		it('should have include a supplemental field', function () {
-			ds.getData().then(function (data) {
-				var descriptions = data.metadata.map(function (d) {
-					return d.description;
-				});
-				expect(descriptions).toContain('country');
+			let data = ds.getDataSync()
+			var descriptions = data.metadata.map(function (d) {
+				return d.description;
 			});
+			expect(descriptions).toContain('country');
 		});
 
 		it('should reference a type field from the "place" field', function () {
-			ds.getData().then(function (data) {
-				var placeField = data.metadata.filter(function (d) { return d.key === 'place'; })[0];
-				expect(placeField.typeField[0]).toEqual('place type');
-			});
+			let data = ds.getDataSync()
+			var placeField = data.metadata.filter(function (d) { return d.key === 'place'; })[0];
+			expect(placeField.typeField[0]).toEqual('place type');
 		});
 
-		it('should have an internal data structure with fields from both source tables, plus a "Place Type" field', function () {
-			ds.getData().then(function (data) {
-				expect(d3.keys(data.data[0]).length).toEqual(d3.keys(peopleData[0]).length + d3.keys(placeData[0]).length + 1);
-				expect(d3.keys(data.data[0])).toContain('place type');
-			});
+		it('should have an internal data structure with fields from both source tables, plus a "Place Type" field and geo-boolean', function () {
+			let data = ds.getDataSync()
+			expect(d3.keys(data.data[0]).length).toEqual(d3.keys(peopleData[0]).length + d3.keys(placeData[0]).length + 2);
+			expect(d3.keys(data.data[0])).toContain('place type');
 		});
 
 		it('has the correct link metadata', function () {
-			ds.getData().then(function (data) {
-				expect(ds.getLinks()[0].metadata.matches).toEqual(3);
-			});
+			let data = ds.getDataSync()
+			expect(ds.getLinks()[0].metadata.matches).toEqual(3);
 		});
 
 		it('should identify a "latlong" data type field', function () {
-			ds.getData().then(function (data) {
-				expect(data.metadata.filter(function (d) { return d.type === 'latlong'; }).length).toEqual(1);
-			});
+			let data = ds.getDataSync()
+			expect(data.metadata.filter(function (d) { return d.type === 'latlong'; }).length).toEqual(1);
 		});
 
 		it('should identify the "place" field as the descriptive field for the coordinates', function () {
-			ds.getData().then(function (data) {
-				expect(data.metadata.filter(function (d) {return d.type === 'latlong'; })[0].descriptiveField.key)
-					.toEqual('place');
-			});
+			let data = ds.getDataSync()
+			expect(data.metadata.filter(function (d) { return d.type === 'latlong'; })[0].descriptiveField.key)
+				.toEqual('place');
 		});
-    });
+	});
 
-    describe('for two files with a single link on a numeric field', function () {
+	describe('for two files with a single link on a numeric field', function () {
 
 		var ds;
 
-		beforeEach(inject( function (_dataService_) {
+		beforeEach(inject(function (_dataService_) {
 			ds = _dataService_;
 			ds.addFile(peopleData, 'People');
 			ds.addFile(placeData, 'Places');
 
 			// Run auto-recognition
-			ds.getFiles().forEach( function (file) {
+			ds.getFiles().forEach(function (file) {
 				file.fields = file.autoFields;
 			});
 			ds.setDirty();
@@ -160,71 +152,65 @@ describe("Data Service:", function () {
 		}));
 
 		it('should have same length as source', function () {
-			ds.getData().then(function (data) {
-				expect(data.data.length).toEqual(peopleData.length);
-			});
+			let data = ds.getDataSync()
+			expect(data.data.length).toEqual(peopleData.length);
 		});
 
 		it('should have no "Type" field presented to the user', function () {
-			ds.getData().then(function (data) {
-				data.metadata.forEach(function (d) {
-					expect(d.description).not.toEqual("place type");
-				});
+			let data = ds.getDataSync()
+			data.metadata.forEach(function (d) {
+				expect(d.description).not.toEqual("place type");
 			});
 		});
 
 		it('should have include a supplemental field', function () {
-			ds.getData().then(function (data) {
-				var descriptions = data.metadata.map(function (d) {
-					return d.description;
-				});
-				expect(descriptions).toContain('country');
+			let data = ds.getDataSync()
+			var descriptions = data.metadata.map(function (d) {
+				return d.description;
 			});
+			expect(descriptions).toContain('country');
 		});
 
 		it('should reference a type field from the "place" field', function () {
-			ds.getData().then(function (data) {
-				var placeField = data.metadata.filter(function (d) { return d.key === 'place'; })[0];
-				expect(placeField.typeField[0]).toEqual('id type');
-			});
+			let data = ds.getDataSync()
+			var placeField = data.metadata.filter(function (d) { return d.key === 'place'; })[0];
+			expect(placeField.typeField[0]).toEqual('id type');
 		});
 
-		it('should have an internal data structure with fields from both source tables, plus a "Place Type" field', function () {
-			ds.getData().then(function (data) {
-				expect(d3.keys(data.data[0]).length).toEqual(d3.keys(peopleData[0]).length + d3.keys(placeData[0]).length + 1);
-				expect(d3.keys(data.data[0])).toContain('id type');
-			});
+		it('should have an internal data structure with fields from both source tables, plus a "Place Type" field and Geo-boolean', function () {
+			let data = ds.getDataSync()
+			expect(d3.keys(data.data[0]).length).toEqual(d3.keys(peopleData[0]).length + d3.keys(placeData[0]).length + 2);
+			expect(d3.keys(data.data[0])).toContain('id type');
 		});
 
 		it('should actually look up the country fields', function () {
-			ds.getData().then(function (data) {
-				var bobCountry, samCountry, eveCountry;
-				bobCountry = data.data.filter(function (d) { return d.name === 'Bob'; })[0].country;
-				samCountry = data.data.filter(function (d) { return d.name === 'Sam'; })[0].country;
-				eveCountry = data.data.filter(function (d) { return d.name === 'Eve'; })[0].country;
+			let data = ds.getDataSync()
+			var bobCountry, samCountry, eveCountry;
+			bobCountry = data.data.filter(function (d) { return d.name === 'Bob'; })[0].country;
+			samCountry = data.data.filter(function (d) { return d.name === 'Sam'; })[0].country;
+			eveCountry = data.data.filter(function (d) { return d.name === 'Eve'; })[0].country;
 
-				expect(bobCountry).toEqual('France');
-				expect(samCountry).toEqual('England');
-				expect(eveCountry).toEqual('Italy');
-			});
+			expect(bobCountry).toEqual('France');
+			expect(samCountry).toEqual('England');
+			expect(eveCountry).toEqual('Italy');
 		});
 
 		it('has the correct link metadata', function () {
 			expect(ds.getLinks()[0].metadata.matches).toEqual(3);
 		});
-    });
+	});
 
 	describe('for two files with a single link on multi-value field', function () {
 
 		var ds;
 
-		beforeEach(inject( function (_dataService_) {
+		beforeEach(inject(function (_dataService_) {
 			ds = _dataService_;
 			ds.addFile(peopleData, 'People');
 			ds.addFile(placeData, 'Places');
 
 			// Run auto-recognition
-			ds.getFiles().forEach( function (file) {
+			ds.getFiles().forEach(function (file) {
 				file.fields = file.autoFields;
 			});
 			ds.setDirty();
@@ -249,18 +235,16 @@ describe("Data Service:", function () {
 		}));
 
 		it('should have triple length of source', function () {
-			ds.getData().then(function (data) {
-				expect(data.data.length).toEqual(peopleData.length * 3);
-			});
+			let data = ds.getDataSync()
+			expect(data.data.length).toEqual(peopleData.length * 3);
 		});
 
 		it('should have include a supplemental field', function () {
-			ds.getData().then(function (data) {
-				var descriptions = data.metadata.map(function (d) {
-					return d.description;
-				});
-				expect(descriptions).toContain('country');
+			let data = ds.getDataSync()
+			var descriptions = data.metadata.map(function (d) {
+				return d.description;
 			});
+			expect(descriptions).toContain('country');
 		});
 	});
 
@@ -268,13 +252,13 @@ describe("Data Service:", function () {
 
 		var ds;
 
-		beforeEach(inject( function (_dataService_) {
+		beforeEach(inject(function (_dataService_) {
 			ds = _dataService_;
 			ds.addFile(peopleData, 'People');
 			ds.addFile(placeData, 'Places');
 
 			// Run auto-recognition
-			ds.getFiles().forEach( function (file) {
+			ds.getFiles().forEach(function (file) {
 				file.fields = file.autoFields;
 			});
 			ds.setDirty();
@@ -305,27 +289,24 @@ describe("Data Service:", function () {
 		}));
 
 		it('should have double length of source', function () {
-			ds.getData().then(function (data) {
-				expect(data.data.length).toEqual(peopleData.length * 2);
-			});
+			let data = ds.getDataSync()
+			expect(data.data.length).toEqual(peopleData.length * 2);
 		});
 
 		it('should have include a full lineage in the description of supplemental fields', function () {
-			ds.getData().then(function (data) {
-				var descriptions = data.metadata.map(function (d) {
-					return d.description;
-				});
-				expect(descriptions).toContain('country');
+			let data = ds.getDataSync()
+			var descriptions = data.metadata.map(function (d) {
+				return d.description;
 			});
+			expect(descriptions).toContain('country');
 		});
 
 		it('should have include a number of "type" field values equal to the size of the source file for each lookup', function () {
-			ds.getData().then(function (data) {
-				expect(data.data.filter(function (d) { return d['place type'] === 'birthPlace'; }).length)
-					.toEqual(peopleData.length);
-				expect(data.data.filter(function (d) { return d['place type'] === 'deathPlace'; }).length)
-					.toEqual(peopleData.length);
-			});
+			let data = ds.getDataSync()
+			expect(data.data.filter(function (d) { return d['place type'] === 'birthPlace'; }).length)
+				.toEqual(peopleData.length);
+			expect(data.data.filter(function (d) { return d['place type'] === 'deathPlace'; }).length)
+				.toEqual(peopleData.length);
 		});
 	});
 
@@ -333,14 +314,14 @@ describe("Data Service:", function () {
 
 		var ds;
 
-		beforeEach(inject( function (_dataService_) {
+		beforeEach(inject(function (_dataService_) {
 			ds = _dataService_;
 			ds.addFile(letterData, 'Letters');
 			ds.addFile(peopleData, 'People');
 			ds.addFile(placeData, 'Places');
 
 			// Run auto-recognition
-			ds.getFiles().forEach( function (file) {
+			ds.getFiles().forEach(function (file) {
 				file.fields = file.autoFields;
 			});
 			ds.setDirty();
@@ -371,19 +352,17 @@ describe("Data Service:", function () {
 		}));
 
 		it('should have the same length as the source', function () {
-			ds.getData().then(function (data) {
-				expect(data.data.length).toEqual(letterData.length);
-			});
+			let data = ds.getDataSync()
+			expect(data.data.length).toEqual(letterData.length);
 		});
 
 		it('should have include supplemental fields', function () {
-			ds.getData().then(function (data) {
-				var descriptions = data.metadata.map(function (d) {
-					return d.description;
-				});
-				expect(descriptions).toContain('sex');
-				expect(descriptions).toContain('country');
+			let data = ds.getDataSync()
+			var descriptions = data.metadata.map(function (d) {
+				return d.description;
 			});
+			expect(descriptions).toContain('sex');
+			expect(descriptions).toContain('country');
 		});
 	});
 
@@ -391,14 +370,14 @@ describe("Data Service:", function () {
 
 		var ds;
 
-		beforeEach(inject( function (_dataService_) {
+		beforeEach(inject(function (_dataService_) {
 			ds = _dataService_;
 			ds.addFile(letterData, 'Letters');
 			ds.addFile(peopleData, 'People');
 			ds.addFile(placeData, 'Places');
 
 			// Run auto-recognition
-			ds.getFiles().forEach( function (file) {
+			ds.getFiles().forEach(function (file) {
 				file.fields = file.autoFields;
 			});
 			ds.setDirty();
@@ -440,30 +419,27 @@ describe("Data Service:", function () {
 		}));
 
 		it('should have double the length as the source', function () {
-			ds.getData().then(function (data) {
-				expect(data.data.length).toEqual(letterData.length * 2);
-			});
+			let data = ds.getDataSync()
+			expect(data.data.length).toEqual(letterData.length * 2);
 		});
 
 		it('should have include supplemental fields', function () {
-			ds.getData().then(function (data) {
-				var descriptions = data.metadata.map(function (d) {
-					return d.description;
-				});
-
-				expect(descriptions).toContain('sex');
-				expect(descriptions).toContain('country');
-				expect(descriptions).toContain('country');
+			let data = ds.getDataSync()
+			var descriptions = data.metadata.map(function (d) {
+				return d.description;
 			});
+
+			expect(descriptions).toContain('sex');
+			expect(descriptions).toContain('country');
+			expect(descriptions).toContain('country');
 		});
 
 		it('should have include a number of "type" field values equal to the size of the source file for each lookup', function () {
-			ds.getData().then(function (data) {
-				expect(data.data.filter(function (d) { return d['place type'] === 'birthPlace' && d['name type'] === 'author'; }).length)
-					.toEqual(letterData.length);
-				expect(data.data.filter(function (d) { return d['place type'] === 'deathPlace' && d['name type'] === 'author'; }).length)
-					.toEqual(letterData.length);
-			});
+			let data = ds.getDataSync()
+			expect(data.data.filter(function (d) { return d['place type'] === 'birthPlace' && d['name type'] === 'author'; }).length)
+				.toEqual(letterData.length);
+			expect(data.data.filter(function (d) { return d['place type'] === 'deathPlace' && d['name type'] === 'author'; }).length)
+				.toEqual(letterData.length);
 		});
 	});
 
@@ -471,14 +447,14 @@ describe("Data Service:", function () {
 
 		var ds;
 
-		beforeEach(inject( function (_dataService_) {
+		beforeEach(inject(function (_dataService_) {
 			ds = _dataService_;
 			ds.addFile(letterData, 'Letters');
 			ds.addFile(peopleData, 'People');
 			ds.addFile(placeData, 'Places');
 
 			// Run auto-recognition
-			ds.getFiles().forEach( function (file) {
+			ds.getFiles().forEach(function (file) {
 				file.fields = file.autoFields;
 			});
 
@@ -535,37 +511,34 @@ describe("Data Service:", function () {
 		}));
 
 		it('should have quadruple the length as the source', function () {
-			ds.getData().then(function (data) {
-				expect(data.data.length).toEqual(72);
-			});
+			let data = ds.getDataSync()
+			expect(data.data.length).toEqual(72);
 		});
 
 		it('should have include a full lineage in the description of supplemental fields', function () {
-			ds.getData().then(function (data) {
-				var descriptions = data.metadata.map(function (d) {
-					return d.description;
-				});
-
-				expect(descriptions).toContain('sex');
-				expect(descriptions).toContain('country');
+			let data = ds.getDataSync()
+			var descriptions = data.metadata.map(function (d) {
+				return d.description;
 			});
+
+			expect(descriptions).toContain('sex');
+			expect(descriptions).toContain('country');
 		});
 
 		it('should have include a number of "type" field values equal to the size of the source file for each lookup', function () {
-			ds.getData().then(function (data) {
-				expect(data.data.filter(function (d) { return d['place type'] === 'birthPlace' && d['name type'] === 'author'; }).length)
-					.toEqual(24);
-				expect(data.data.filter(function (d) { return d['place type'] === 'deathPlace' && d['name type'] === 'author'; }).length)
-					.toEqual(15);
-				expect(data.data.filter(function (d) { return d['place type'] === 'birthPlace' && d['name type'] === 'recipient'; }).length)
-					.toEqual(21);
-				expect(data.data.filter(function (d) { return d['place type'] === 'deathPlace' && d['name type'] === 'recipient'; }).length)
-					.toEqual(12);
-				expect(data.data.filter(function (d) { return d['name type'] === 'author'; }).length)
-					.toEqual(39);
-				expect(data.data.filter(function (d) { return d['name type'] === 'recipient'; }).length)
-					.toEqual(33);
-			});
+			let data = ds.getDataSync()
+			expect(data.data.filter(function (d) { return d['place type'] === 'birthPlace' && d['name type'] === 'author'; }).length)
+				.toEqual(24);
+			expect(data.data.filter(function (d) { return d['place type'] === 'deathPlace' && d['name type'] === 'author'; }).length)
+				.toEqual(15);
+			expect(data.data.filter(function (d) { return d['place type'] === 'birthPlace' && d['name type'] === 'recipient'; }).length)
+				.toEqual(21);
+			expect(data.data.filter(function (d) { return d['place type'] === 'deathPlace' && d['name type'] === 'recipient'; }).length)
+				.toEqual(12);
+			expect(data.data.filter(function (d) { return d['name type'] === 'author'; }).length)
+				.toEqual(39);
+			expect(data.data.filter(function (d) { return d['name type'] === 'recipient'; }).length)
+				.toEqual(33);
 		});
 	});
 });
