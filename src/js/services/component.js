@@ -3,6 +3,7 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 		function($compile, $scope, $http, loadService, dataService, palladioService) {
 
 		var components = {};
+		var postLoadFunctions = []
 
 		var add = function(componentName, selector, options, parentScope) {
 			if(options === undefined) options = {};
@@ -40,6 +41,10 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 			components[componentName] = compileStringFunction;
 		};
 
+		var registerPostDataLoadSetup = function (postLoadFunction) {
+			postLoadFunctions.push(postLoadFunction)
+		}
+
 		var loadData = function(url, successFunction, errorFunction, progressCallback) {
 			if(!errorFunction) { errorFunction = function() {}; }
 			if(progressCallback) {
@@ -67,10 +72,11 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 					var next = function() {
 						loadService.loadJson(data).then(function() {
 							var process = function () {
-								dataService.getData().then(function() {
+								dataService.getData().then(function(data) {
 									
 									// File is processed, so future dataService.getData and
 									// dataService.getDataSync calls will be cached.
+									postLoadFunctions.forEach(function (plf) { plf(data) })
 									setTimeout(successFunction, 200)
 								});
 							}
@@ -113,6 +119,7 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
       dimensionFromKey: dimensionFromKey,
       dimensionsFromKeys: dimensionsFromKeys,
 			register: register,
+			registerPostDataLoadSetup: registerPostDataLoadSetup,
 			add: add,
       promiseAdd: promiseAdd
 		};
