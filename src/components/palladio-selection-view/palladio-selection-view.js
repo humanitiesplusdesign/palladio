@@ -1,5 +1,7 @@
 // Selection view module
 
+require('./palladio-selection-view.css')
+
 angular.module('palladioSelectionView', ['palladio'])
 	.directive('palladioSelectionView', ['palladioService', function (palladioService) {
 

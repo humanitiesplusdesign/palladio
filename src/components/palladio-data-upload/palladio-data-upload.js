@@ -20,7 +20,7 @@ angular.module('palladioDataUpload', ['palladio.services'])
 				'load': '&onLoad',
 			},
 			transclude: true,
-			templateUrl: 'partials/palladio-data-upload/template.html',
+			templateUrl: require('./template.html'),
 
 			link: function(scope) {
 

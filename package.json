@@ -1,5 +1,7 @@
 {
   "devDependencies": {
+    "baggage-loader": "^1.0.0",
+    "css-loader": "^2.1.0",
     "gulp": "^3.6.2",
     "gulp-angular-templates": "0.0.2",
     "gulp-concat": "2.6.1",
@@ -8,16 +10,26 @@
     "gulp-rename": "1.4.0",
     "gulp-uglify": "3.0.1",
     "gulp-webserver": "0.9.1",
+    "html-loader": "^0.5.5",
     "karma": "3.1.3",
     "karma-chrome-launcher": "^2.2.0",
     "karma-jasmine": "2.0.1",
     "karma-phantomjs-launcher": "1.0.4",
     "main-bower-files": "2.13.1",
     "merge-stream": "1.0.1",
-    "svgsaver": "^0.9.0"
+    "ngtemplate-loader": "^2.0.1",
+    "style-loader": "^0.23.1",
+    "svgsaver": "^0.9.0",
+    "webpack": "^4.29.3",
+    "webpack-cli": "^3.2.3"
   },
   "scripts": {
     "test": "./node_modules/karma/bin/karma start ./test/karma.conf.js --browsers Chrome --single-run=true"
   },
-  "dependencies": {}
+  "dependencies": {
+    "angular": "^1.5.5",
+    "crossfilter2": "^1.4.6",
+    "d3": "^3.5.17",
+    "jquery": "^2.1.3"
+  }
 }

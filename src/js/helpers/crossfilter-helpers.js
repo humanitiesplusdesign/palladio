@@ -126,3 +126,5 @@ var crossfilterHelpers = {
 		};
 	}
 };
+
+export { crossfilterHelpers }

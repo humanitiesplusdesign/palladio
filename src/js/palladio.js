@@ -4,6 +4,10 @@
 // https://github.com/humanitiesplusdesign/palladio/wiki/Framework-definition
 // for usage examples.
 
+require('./services/services')
+require('./directives/directives')
+require('./filters/filters')
+
 angular.module('palladio', [])
 	.constant('version', '1.2.9')
 	.factory('palladioService', ['$compile', "$rootScope", '$q', function($compile, $scope, $q) {
