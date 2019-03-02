@@ -1,5 +1,7 @@
 // Palladio template component module
 
+require('./palladio-duration-view.css')
+
 angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 	.directive('palladioDurationView', function (dateService, palladioService, dataService) {
 		var directiveObj = {
@@ -10,7 +12,7 @@ angular.module('palladioDurationView', ['palladio', 'palladio.services'])
 				showAccordion: '@',
 				view: '@'
 			},
-			templateUrl: 'partials/palladio-duration-view/template.html',
+			templateUrl: require('./template.html'),
 
 			link: { pre: function(scope) {
 

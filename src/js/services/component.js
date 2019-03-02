@@ -125,6 +125,15 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 		};
 	}]);
 
+global.CodeMirror = require('codemirror/lib/codemirror')
+require('codemirror/lib/codemirror.css')
+require('angular-ui-codemirror')
+require('angular-ui-bootstrap')
+require('angular-ui-router')
+require('angular-ui-sortable')
+require('ui-select')
+require('angular-bootstrap-colorpicker')
+
 var startPalladio = function(additionalModules) {
 	if(!Array.isArray(additionalModules)) { additionalModules = []; }
 	var modules = [

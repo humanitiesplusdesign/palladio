@@ -1,10 +1,12 @@
 // Palladio template component module
 
+require('./palladio-palette.css')
+
 angular.module('palladioPalette', ['palladio', 'palladio.services']) // Rename this.
 	.directive('palladioPalette', function (palladioService, dataService, $location) { // Rename this.
 		var directiveObj = {
 			scope: true,
-			templateUrl: 'partials/palladio-palette/template.html', // Change this string to update the
+			templateUrl: require('./template.html'), // Change this string to update the
 			// template. Don't use a templateUrl, as you won't have control over the relative
 			// URL where this template is deployed.
 

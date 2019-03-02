@@ -17,12 +17,8 @@ module.exports = {
       {
         test: /\.html$/,
         use: [
-          { loader: 'ngtemplate-loader?relativeTo=' + __dirname + '/' },
-          {
-            loader: 'html-loader', options: {
-              attrs: [':data-src']
-            }
-          }]
+          { loader: 'ngtemplate-loader?relativeTo=components/' },
+          { loader: 'html-loader' }]
       },
       {
         test: /\.css$/,

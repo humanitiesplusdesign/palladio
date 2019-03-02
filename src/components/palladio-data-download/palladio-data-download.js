@@ -5,7 +5,7 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 		var directiveObj = {
 			// scope: false,
 			transclude: true,
-			templateUrl: require('./template.html'),
+			templateUrl: require('../../components/palladio-data-download/template.html'),
 
 			link: function(scope) {
 				function shallowCopy(obj) {
