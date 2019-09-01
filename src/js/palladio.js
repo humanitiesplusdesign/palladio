@@ -4,6 +4,8 @@
 // https://github.com/humanitiesplusdesign/palladio/wiki/Framework-definition
 // for usage examples.
 
+require("angular");
+
 angular.module('palladio', [])
 	.constant('version', '1.2.9')
 	.factory('palladioService', ['$compile', "$rootScope", '$q', function($compile, $scope, $q) {
@@ -238,13 +240,13 @@ angular.module('palladio', [])
 
 			$(selector).append(directive);
 		};
-		
+
 		var events = d3.map();
 		events.set('file_downloaded', []);
 		events.set('file_loaded', []);
 		events.set('file_processing_progress', []);
 		events.set('file_processed', []);
-		
+
 		var onHandler = function(eventName, eventFunction) {
 			if(events.has(eventName)) {
 				var ev = events.get(eventName);
@@ -259,7 +261,7 @@ angular.module('palladio', [])
 				console.log('"' + eventName + '" is not a supported event type.')
 			}
 		}
-		
+
 		var eventHandler = function(eventName, obj) {
 			events.get(eventName).forEach(function(eventFunction) {
 				eventFunction(obj);

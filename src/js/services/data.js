@@ -1,3 +1,5 @@
+var crossfilter = require("crossfilter2");
+
 angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.services.validation',
 		'palladio.services.spinner', 'palladio', 'palladio.services.date'])
 	.factory("dataService", ['parseService', 'validationService', 'spinnerService', '$q', 'palladioService', 'dateService', function (parseService, validationService, spinnerService, $q, palladioService, dateService) {
@@ -43,14 +45,14 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 				return currentKey.substring(0, currentKey.length-1) + (+currentKey[currentKey.length-1]+1);
 			} else {
 				return currentKey + "_1";
-			}	
+			}
 		}
 
 		var renameDuplicateFields = function(data, files) {
 			// Build list of existing fields
 			var existingFieldKeys = [];
 			files.forEach(function(d) {
-				d.fields.forEach(function(d) { 
+				d.fields.forEach(function(d) {
 					existingFieldKeys.push(d.key);
 				})
 			});
@@ -61,9 +63,9 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 			for(key in data[0]) {
 				currentFieldKeys.push(key);
 			}
-			
+
 			while(currentFieldKeys.reduce(function(a,b) { return a || (existingFieldKeys.indexOf(b) !== -1) }, false)) {
-				
+
 				// Find the problem-key
 				var existingKey = undefined;
 				var currentKey = undefined;
@@ -72,33 +74,33 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 						if(existingFieldKeys[j] === currentFieldKeys[i]) {
 							existingKey =	existingFieldKeys[j];
 							currentKey = currentFieldKeys[i];
-						} 
+						}
 					}
 				}
-				
+
 				if(existingKey && currentKey) {
 					// Check if the last character of the key is already a number. If it is,
 					// increment it. If it isn't, then add '_1'.
 					currentKey = appendOrIncrementKey(currentKey);
-					
+
 					// Check that we didn't choose a key that is already being used in this table. If we did,
 					// just keep incrementing.
 					while(currentFieldKeys.indexOf(currentKey) !== -1) {
 						currentKey = appendOrIncrementKey(currentKey);
 					}
-					
+
 					// Then reprocess all the data elements and rename the property
 					for(var i = 0; i < data.length; i++) {
 						data[i][currentKey] = data[i][existingKey];
 						delete data[i][existingKey];
 					}
 				}
-				
+
 				// Rebuild list of keys
-				currentFieldKeys = [];	
+				currentFieldKeys = [];
 				for(key in data[0]) {
 					currentFieldKeys.push(key);
-				}				
+				}
 			}
 		}
 
@@ -111,7 +113,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 			file.id = files.length;
 
 			renameDuplicateFields(data, files);
-			
+
 			// Do auto-recognition on load
 			file.autoFields = parseService.getFields(data);
 
@@ -170,7 +172,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 		var addFileRaw = function(file) {
 			// This should only kick in if the Palladio file was saved before it was loaded...
 			renameDuplicateFields(file.data, files)
-			
+
 			generateUnique(file, file.data)
 			files.push(file);
 			uniqueCounter++;
@@ -281,7 +283,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 		};
 
 		var addLinkRaw = function (link) {
-			
+
 			// Recalculate metadata
 			link.metadata = calcLinkMetadata(link.source, link.lookup);
 
@@ -603,7 +605,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 				newFile.label = centralFile.label;
 				newFile.sourceFor = centralFile.sourceFor;
 				newFile.uniqueId = centralFile.uniqueId;
-        
+
         // Store existence dimensions.
         var coordToExists = d3.map();
 
@@ -644,7 +646,7 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 									existDimKey = existDim && existDim.existenceDimension ?
 																	existDim.existenceDimension :
 																	f.existenceDimension ?
-																		f.existenceDimension : 
+																		f.existenceDimension :
 																		Math.random().toString(36);
 									newField = {
 										type: 'text',
@@ -662,11 +664,11 @@ angular.module('palladio.services.data', ['palladio.services.parse', 'palladio.s
 								}
 								coordToExists.set(f.key, newField);
               }
-              
+
               lookedUpFile.fields.push(newField);
-              
+
               for(var j=0; j<lookedUpFile.data.length; j++) {
-                lookedUpFile.data[j][newField.key] = !!lookedUpFile.data[j][f.key]; 
+                lookedUpFile.data[j][newField.key] = !!lookedUpFile.data[j][f.key];
               }
             }
           });

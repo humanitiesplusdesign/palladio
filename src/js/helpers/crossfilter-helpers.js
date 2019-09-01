@@ -2,7 +2,7 @@ var crossfilterHelpers = {
 
 	///////////////////////////////////////////////////////////////////////
 	//
-	// Reduce functions that don't double-count by using add/reduce based 
+	// Reduce functions that don't double-count by using add/reduce based
 	// on unique dimension if defined.
 	//
 	// Also tracks an initial count value (depends on CrossFilter pull
@@ -48,7 +48,7 @@ var crossfilterHelpers = {
 
 	///////////////////////////////////////////////////////////////////////
 	//
-	// Reduce functions that don't double-count by using add/reduce based 
+	// Reduce functions that don't double-count by using add/reduce based
 	// on unique dimension if defined.
 	//
 	// Also tracks an initial count value (depends on CrossFilter pull
@@ -90,7 +90,7 @@ var crossfilterHelpers = {
 
 	///////////////////////////////////////////////////////////////////////
 	//
-	// Reduce functions that don't double-count by using add/reduce based 
+	// Reduce functions that don't double-count by using add/reduce based
 	// on unique dimension if defined.
 	//
 	///////////////////////////////////////////////////////////////////////
@@ -126,3 +126,5 @@ var crossfilterHelpers = {
 		};
 	}
 };
+
+module.exports = crossfilterHelpers;

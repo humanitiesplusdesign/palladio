@@ -6,3 +6,4 @@ node_modules
 # don't commit built resources to revision control
 palladio.js
 palladio.min.js
+dist/

@@ -1,3 +1,13 @@
+require('./component');
+require('./data');
+require('./date');
+require('./export');
+require('./filter');
+require('./load');
+require('./parse');
+require('./spinner');
+require('./validation');
+
 angular.module('palladio.services',
 	[	'palladio.services.date',
 		'palladio.services.spinner',

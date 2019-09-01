@@ -1,3 +1,12 @@
+global.CodeMirror = require("codemirror/lib/codemirror");
+require("@uirouter/angularjs");
+require("angular-bootstrap-colorpicker");
+require("angular-ui-codemirror");
+require("angular-ui-bootstrap");
+require("angular-ui-sortable");
+require("ui-select");
+
+
 angular.module('palladio.components', ['palladio.services.data', 'palladio.services.load', 'palladio'])
 	.factory('componentService', ['$compile', "$rootScope", "$http", "loadService", "dataService", 'palladioService',
 		function($compile, $scope, $http, loadService, dataService, palladioService) {
@@ -8,7 +17,7 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 		var add = function(componentName, selector, options, parentScope) {
 			if(options === undefined) options = {};
 			if(parentScope === undefined || parentScope === null) parentScope = $scope;
-      
+
 			var newScope = parentScope.$new(false);
 
 			for(var prop in options) {
@@ -24,7 +33,7 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 				getOptions: function() { return newScope.functions; }
 			};
 		};
-    
+
     var promiseAdd = function(componentName, selector, options, parentScope) {
       var obj = add(componentName, selector, options, parentScope);
       var p = new Promise(function(resolve, reject) {
@@ -68,32 +77,32 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 			$http.get(url)
 				.success(function(data) {
 					// Read this function backwards due to async calls without Promises.
-					
+
 					var next = function() {
 						loadService.loadJson(data).then(function() {
 							var process = function () {
 								dataService.getData().then(function(data) {
-									
+
 									// File is processed, so future dataService.getData and
 									// dataService.getDataSync calls will be cached.
 									postLoadFunctions.forEach(function (plf) { plf(data) })
 									setTimeout(successFunction, 200)
 								});
 							}
-							
+
 							// File is loaded into dataService. Kick off processing.
 							palladioService.event('file_loaded');
 							setTimeout(process, 200);
 						});
 					}
-					
+
 					// File has downloaded. Kick off loading the file into the dataService
 					palladioService.event('file_downloaded');
 					setTimeout(next, 200);
 				})
 				.error(errorFunction);
 		};
-    
+
     var loadJson = function(json, progressCallback) {
       return loadService.loadJson(json, progressCallback);
     }
@@ -101,11 +110,11 @@ angular.module('palladio.components', ['palladio.services.data', 'palladio.servi
 		var dimensions = function () {
 			return dataService.getDataSync().metadata;
 		};
-    
+
     var dimensionFromKey = function(key) {
       return dimensions().filter(function(d) { return d.key === key; })[0];
     };
-    
+
     var dimensionsFromKeys = function(keys) {
       return keys.map(function(k) {
         return dimensionFromKey(k);
@@ -149,10 +158,10 @@ var startPalladio = function(additionalModules) {
 	].concat(additionalModules);
 
 	var appId = "palladioApp" + Math.floor(Math.random() * 10000);
-	
+
 	angular.module(appId, modules);
-	
+
 	var app = angular.bootstrap(document.createElement("div"), [appId]);
-	
+
 	return app.get('componentService');
 };
