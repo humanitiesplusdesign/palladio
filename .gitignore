@@ -1,5 +1,10 @@
 .DS_Store 
-_site
 node_modules
 bower_components
 .sass-cache
+
+.ignore
+
+# don't commit built resources to revision control
+palladio.js
+palladio.min.js
