@@ -56,3 +56,10 @@ require("mapbox.js");
 
 // * <palladio-graph-component>
 require("./js/helpers/d3.graph");
+
+
+// CSS
+require("codemirror/lib/codemirror.css");
+require("./css/palladio.css");
+require("./css/animations.css");
+require("../lib/bootstrap-tag/bootstrap-tag.css");

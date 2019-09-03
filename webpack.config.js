@@ -1,3 +1,4 @@
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const path = require("path");
 const webpack = require("webpack");
 
@@ -12,7 +13,7 @@ module.exports = {
     rules: [
       {
         test: /\.css$/,
-        use: [{ loader: "style-loader" }, { loader: "css-loader" }]
+        use: [MiniCssExtractPlugin.loader, "css-loader"]
       },
       { test: /\.(png|jpg)$/, loader: "file-loader" },
       { test: /\.html$/, use: [{ loader: "ngtemplate-loader?relativeTo=components/" }, { loader: "html-loader" }] }
@@ -25,6 +26,7 @@ module.exports = {
       // jQuery: "jquery",
       // "window.jQuery": "jquery",
       // "window.$": "jquery"
-    })
+    }),
+    new MiniCssExtractPlugin({ filename: "palladio.css" })
   ]
 };
