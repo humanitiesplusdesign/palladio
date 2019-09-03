@@ -58,8 +58,23 @@ require("mapbox.js");
 require("./js/helpers/d3.graph");
 
 
-// CSS
+
+// src / unfinished_components / idiograph - view / idiograph - view.css;
+// src / unfinished_components / palladio - duration - view / palladio - duration - view.css;
+// src / unfinished_components / palladio - histogram - filter / palladio - histogram - filter.css;
+// src / unfinished_components / palladio - parduration - filter / palladio - parduration - filter.css;
+// src / unfinished_components / palladio - palette / palladio - palette.css;
+// src / unfinished_components / palladio - timespan - filter / palladio - timespan - filter.css;
+
+
+// CSS -- this should be everything from the old gulpfile.js
+require("bootstrap/dist/css/bootstrap.css");
 require("codemirror/lib/codemirror.css");
-require("./css/palladio.css");
-require("./css/animations.css");
+require("leaflet/dist/leaflet.css");
+require("ui-select/dist/select.css");
+// require("mapbox.js/mapbox.css");
+require("angular-bootstrap-colorpicker/css/colorpicker.css");
 require("../lib/bootstrap-tag/bootstrap-tag.css");
+
+require("./css/animations.css");
+require("./css/palladio.css");
