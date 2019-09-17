@@ -7,7 +7,7 @@
   resolved "https://registry.yarnpkg.com/@types/q/-/q-1.5.2.tgz#690a1475b84f2a884fd07cd797c00f5f31356ea8"
   integrity sha512-ce5d3q03Ex0sy4R14722Rmt6MT07Ua+k4FwDfdcToYJcMKNtRVQvJ6JCAPdAmAnbRb6CsX6aYb9m96NGod9uTw==
 
-"@uirouter/angularjs@^0.3.2":
+"@uirouter/angularjs@0.3.x":
   version "0.3.2"
   resolved "https://registry.yarnpkg.com/@uirouter/angularjs/-/angularjs-0.3.2.tgz#9957d222077d6b93bfca11d03b0a63b4770b0c67"
   integrity sha512-Z2Q9uIqlGaRuOsaQFG6ygPSKFerBu2dfr77xPBZcByuNrqaP4s6hQB3rf7jxCG8emCmxlqTOD0TTymqBvKbyeA==
@@ -262,10 +262,10 @@ angular-bootstrap-colorpicker@^3.0.25:
   resolved "https://registry.yarnpkg.com/angular-bootstrap-colorpicker/-/angular-bootstrap-colorpicker-3.0.32.tgz#1080b1ab9802c1bae1919badb26417de6758ef3d"
   integrity sha512-5BRShlkKStFxnEz/hgvY9edlmRY2KJiIfDTt+nNT0jkM5PMe4qmDuARtaw73TjIKZyjUvjXv9yzheWvqDYcfEQ==
 
-angular-sanitize@^1.5.5:
-  version "1.7.8"
-  resolved "https://registry.yarnpkg.com/angular-sanitize/-/angular-sanitize-1.7.8.tgz#87d59f754bb18d286dfd9d6ce867299c094c6719"
-  integrity sha512-sVq51is1cVNiPytH4JIEd7iRW0OBIRQGNETWkz1c/jnLv2sBf9oDxEd8enwDz/W2ULBIpqJPK/3AsIxmZyh9pA==
+angular-sanitize@1.5.x:
+  version "1.5.11"
+  resolved "https://registry.yarnpkg.com/angular-sanitize/-/angular-sanitize-1.5.11.tgz#ebfb3f343e543f9b2ef050fb4c2e9ee048d1772f"
+  integrity sha1-6/s/ND5UP5su8FD7TC6e4EjRdy8=
 
 angular-ui-bootstrap@^1.3.3:
   version "1.3.3"
@@ -281,10 +281,10 @@ angular-ui-sortable@^0.14.4:
   resolved "https://registry.yarnpkg.com/angular-ui-sortable/-/angular-ui-sortable-0.14.4.tgz#6cbdd8b9781eeebac5e74633286d254e9edb9624"
   integrity sha1-bL3YuXge7rrF50YzKG0lTp7bliQ=
 
-angular@^1.0.8, angular@^1.5.5:
-  version "1.7.8"
-  resolved "https://registry.yarnpkg.com/angular/-/angular-1.7.8.tgz#b77ede272ce1b261e3be30c1451a0b346905a3c9"
-  integrity sha512-wtef/y4COxM7ZVhddd7JtAAhyYObq9YXKar9tsW7558BImeVYteJiTxCKeJOL45lJ/+7B4wrAC49j8gTFYEthg==
+angular@1.5.x, angular@^1.0.8:
+  version "1.5.11"
+  resolved "https://registry.yarnpkg.com/angular/-/angular-1.5.11.tgz#8c5ba7386f15965c9acf3429f6881553aada30d6"
+  integrity sha1-jFunOG8VllyazzQp9ogVU6raMNY=
 
 ansi-regex@^2.0.0:
   version "2.1.1"
