@@ -1,9 +1,4 @@
-.DS_Store 
+.DS_Store
 node_modules
 
 .ignore
-
-# don't commit built resources to revision control
-palladio.js
-palladio.min.js
-dist/
