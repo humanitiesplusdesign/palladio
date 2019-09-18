@@ -26,6 +26,15 @@ require("webpack-jquery-ui/tooltip");
 
 
 // needed by:
+// * src/components/palladio-data-download
+// * src/js/services/export.js
+// * <palladio-table-component>/palladio-table-view.js
+// * <palladio-app>/js/directives/files.js
+// * <palladio-app>/js/controllers.js
+global.saveAs = require("file-saver").saveAs;
+
+
+// needed by:
 // * src/js/directives/tag.js
 // * <palladio-app>/js/directives/refine.js
 require("../lib/bootstrap-tag/bootstrap-tag.js");
