@@ -1,11 +1,13 @@
 // Palladio data upload component
 
+var templateUrl = require('./template.html');
+
 angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 	.directive('palladioDataDownload', ['dataService', 'version', 'palladioService', function (dataService, version, palladioService) {
 		var directiveObj = {
 			// scope: false,
 			transclude: true,
-			template: require('./template.html'),
+			templateURL: templateUrl,
 
 			link: function(scope) {
 				function shallowCopy(obj) {

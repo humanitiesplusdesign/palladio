@@ -1,5 +1,7 @@
 // Palladio data upload component
 
+var templateUrl = require("./template.html");
+
 angular.module('palladioDataUpload', ['palladio.services'])
 	.run(['componentService', function(componentService) {
 		var compileStringFunction = function (options, newScope) {
@@ -20,7 +22,7 @@ angular.module('palladioDataUpload', ['palladio.services'])
         load: "&onLoad"
       },
       transclude: true,
-      template: require('./template.html'),
+      templateUrl: templateUrl,
 
       link: function(scope) {
         scope.loadDataModel = function(input) {
