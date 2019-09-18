@@ -21,6 +21,7 @@ d3.tip = require("d3-tip");
 require("bootstrap");
 
 // require("webpack-jquery-ui");
+require("webpack-jquery-ui/droppable");
 require("webpack-jquery-ui/sortable");
 require("webpack-jquery-ui/tooltip");
 
@@ -66,6 +67,9 @@ require("mapbox.js");
 // * <palladio-graph-component>
 require("./js/helpers/d3.graph");
 
+// * <palladio-timeline-component>
+require("./js/helpers/d3.svg.multibrush.js");
+require("../lib/d3-bootstrap/d3-bootstrap-plugins.js");
 
 
 // src / unfinished_components / idiograph - view / idiograph - view.css;
