@@ -1,13 +1,11 @@
 // Palladio data upload component
 
-var templateUrl = require('./template.html');
-
 angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 	.directive('palladioDataDownload', ['dataService', 'version', 'palladioService', function (dataService, version, palladioService) {
 		var directiveObj = {
 			// scope: false,
 			transclude: true,
-			templateURL: templateUrl,
+			template: "<div data-ng-click=\"exportDataModel()\"><button class=\"btn btn-default\" ng-transclude></button></div>",
 
 			link: function(scope) {
 				function shallowCopy(obj) {
