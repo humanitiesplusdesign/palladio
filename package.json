@@ -46,7 +46,7 @@
     "svgsaver": "^0.9.0",
     "ui-select": "^0.16.1",
     "webpack-cli": "^3.3.7",
-    "webpack-jquery-ui": "^1.0.0",
+    "webpack-jquery-ui": "^2.0.1",
     "webpack": "^4.39.3"
   },
   "resolutions": {
