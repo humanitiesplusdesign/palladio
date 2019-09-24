@@ -1,3 +1,4 @@
+var Spinner = require("spin.js");
 angular.module('palladio.services.spinner', [])
 	.factory("spinnerService", function () {
 
@@ -51,7 +52,7 @@ angular.module('palladio.services.spinner', [])
 				}
 
 				if(target) $(target).show();
-				
+
 			},
 			hide: function () {
 				if(target) $(target).hide();
@@ -68,7 +69,7 @@ angular.module('palladio.services.spinner', [])
 				}
 
 				if(pTarget) $(pTarget).show();
-				
+
 			},
 			pHide: function () {
 				if(pTarget) $(pTarget).hide();

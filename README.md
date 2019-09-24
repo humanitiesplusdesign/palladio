@@ -1,28 +1,24 @@
 ## Installation
 
-Palladio is a supporting library and set of components. It's best-known use is in the Palladio app, which can be found at https://github.com/humanitiesplusdesign/palladio-app. In order to run Palladio locally, install NPM and Bower if you have not already, and run the following commands:
+Palladio is a supporting library and set of components. It's best-known use is in the Palladio app, which can be found at https://github.com/humanitiesplusdesign/palladio-app. In order to run Palladio locally, first [make sure you have yarn installed](https://yarnpkg.com/en/docs/install) and then use yarn to install the dependencies and build the assets:
 
-```sh
+```
 git clone https://github.com/humanitiesplusdesign/palladio-app.git
 cd palladio-app
-bower install
+yarn install
+yarn build
+```
+
+Then simply run a local web server from this directory -- if you have python installed, you can just use:
+```
+python -m http.server
+```
+or on python 2.x:
+```
 python -m SimpleHTTPServer
 ```
 
 ## Development
 
-Generally, update files in the /src directory, not the palladio.js/palladio.css files in the root directory or in the apps directories. When running, Gulp will automatically detect changes in the /src directory and update the compiled Palladio files as required. If you want to rebuild the entire application and not leave gulp running, you can run
+The servable files in the `assets/` folder are built by webpack.  Running `yarn develop` will set webpack to automatically detect changes in the `src/` directory and update the compiled Palladio files as required.  In this state, webpack will update `palladio.js` and `palladio.css` and their related assets only (not the minified versions).  To create new assets suitable for distibution, use `yarn build`, which creates all the needed assets (minified and unminified).
 
-``` sh
-gulp all
-```
-
-### Running tests
-
-Test coverage in Palladio is not great at the moment, but there are tests covering much of the functionality in the various services that Palladio defines. We're working on improving coverage to the rest of the framework.
-
-From the command line at the root directory run:
-
-``` sh
-npm test
-```

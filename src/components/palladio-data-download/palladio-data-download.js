@@ -5,7 +5,7 @@ angular.module('palladioDataDownload', ['palladio.services', 'palladio'])
 		var directiveObj = {
 			// scope: false,
 			transclude: true,
-			templateUrl: 'partials/palladio-data-download/template.html',
+			template: "<div data-ng-click=\"exportDataModel()\"><button class=\"btn btn-default\" ng-transclude></button></div>",
 
 			link: function(scope) {
 				function shallowCopy(obj) {

@@ -1,3 +1,15 @@
+require('angular-ui-sortable');
+require('angular-sanitize');
+require('./dimension');
+require('./draggable');
+require('./droppable');
+require('./group');
+require('./modal');
+require('./options-disabled');
+require('./resizable');
+require('./specials');
+require('./tag');
+
 angular.module('palladio.directives', [
 //	'mgcrea.ngStrap',
 	'palladio.directives.dimension',

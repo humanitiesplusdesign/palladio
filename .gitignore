@@ -1,5 +1,4 @@
-.DS_Store 
-_site
+.DS_Store
 node_modules
-bower_components
-.sass-cache
+
+.ignore

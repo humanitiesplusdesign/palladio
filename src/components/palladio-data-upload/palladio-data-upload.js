@@ -1,5 +1,7 @@
 // Palladio data upload component
 
+var templateUrl = require("./template.html");
+
 angular.module('palladioDataUpload', ['palladio.services'])
 	.run(['componentService', function(componentService) {
 		var compileStringFunction = function (options, newScope) {
@@ -16,36 +18,35 @@ angular.module('palladioDataUpload', ['palladio.services'])
 	}])
 	.directive('palladioDataUpload', ['dataService', 'loadService', 'spinnerService', function (dataService, loadService, spinnerService) {
 		var directiveObj = {
-			scope: {
-				'load': '&onLoad',
-			},
-			transclude: true,
-			templateUrl: 'partials/palladio-data-upload/template.html',
+      scope: {
+        load: "&onLoad"
+      },
+      transclude: true,
+      templateUrl: templateUrl,
 
-			link: function(scope) {
+      link: function(scope) {
+        scope.loadDataModel = function(input) {
+          spinnerService.spin();
+          var reader = new FileReader();
+          reader.onload = function() {
+            var json = JSON.parse(reader.result);
+            loadService.loadJson(json).then(function() {
+              scope.$apply(function(s) {
+                s.load(json);
+              });
+            });
+          };
+          reader.readAsText(input.files[0]);
+          // We need to clear the input so that we pick up future uploads. This is *not*
+          // cross-browser-compatible.
+          input.value = null;
+        };
 
-				scope.loadDataModel = function(input) {
-					spinnerService.spin();
-					var reader = new FileReader();
-					reader.onload = function() {
-						var json = JSON.parse(reader.result);
-						loadService.loadJson(json).then(function() {
-							scope.$apply(function(s) {
-								s.load(json);
-							});
-						});
-					};
-					reader.readAsText(input.files[0]);
-					// We need to clear the input so that we pick up future uploads. This is *not*
-					// cross-browser-compatible.
-					input.value = null;
-				};
-
-				scope.triggerDataModelSelector = function () {
-					$('#dataModelSelector').click();
-				};
-			}
-		};
+        scope.triggerDataModelSelector = function() {
+          $("#dataModelSelector").click();
+        };
+      }
+    };
 
 		return directiveObj;
 	}]);
